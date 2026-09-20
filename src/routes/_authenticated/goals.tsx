@@ -89,6 +89,7 @@ function GoalsPage() {
   const [stepDrafts, setStepDrafts] = useState<Record<string, string>>({});
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState("");
+  const [focusOpen, setFocusOpen] = useState(false);
 
   const invalidate = () =>
     queryClient.invalidateQueries({ queryKey: ["goals"] });
@@ -310,15 +311,39 @@ function GoalsPage() {
 
         {/* Fixed bottom add bar — thumb reach */}
         <div className="fixed inset-x-0 bottom-0 z-10 bg-gradient-to-t from-background via-background/95 to-transparent px-5 pb-5 pt-8">
-          <div className="mx-auto max-w-md">
+          <div className="mx-auto flex max-w-md gap-2.5">
             <button
               onClick={() => setShowNewGoal(true)}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground shadow-lg transition-colors hover:bg-primary/90"
+              className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground shadow-lg transition-colors hover:bg-primary/90"
             >
               <span className="text-base leading-none">+</span> New goal
             </button>
+            <button
+              onClick={() => setFocusOpen(true)}
+              aria-label="Open focus mode"
+              className="flex items-center justify-center gap-2 rounded-2xl bg-foreground px-5 py-3.5 text-sm font-semibold text-background shadow-lg transition-colors hover:bg-foreground/90"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="size-4"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <circle cx="12" cy="12" r="6" />
+                <circle cx="12" cy="12" r="2" />
+              </svg>
+              Focus
+            </button>
           </div>
         </div>
+
+        {focusOpen && (
+          <FocusMode goals={goals} onClose={() => setFocusOpen(false)} />
+        )}
       </div>
     </div>
   );
