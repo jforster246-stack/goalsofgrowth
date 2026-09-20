@@ -132,13 +132,50 @@
   --sidebar-ring: oklch(0.551 0.027 264.364);
 }
 
+/* ============= Hatch design tokens ============= */
+
+@theme {
+  --color-cream: #fbf7f0;
+  --color-ink: #4a5a52;
+  --color-soft: #7c8b81;
+  --color-clay: #e8a075;
+  --color-mint: #a8cbb7;
+  --color-sand: #efdfc4;
+  --color-sea: #93b8c9;
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0);
+  }
+  70% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 @layer base {
   * {
     border-color: var(--color-border);
   }
 
   body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
+    background-color: var(--color-cream);
+    color: var(--color-ink);
   }
 }
