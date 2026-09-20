@@ -168,7 +168,7 @@ function AuthPage() {
           </form>
 
           {error && (
-            <p className="mt-3 text-sm text-clay-foreground/90 text-destructive">
+            <p className="mt-3 text-sm font-medium text-destructive">
               {error}
             </p>
           )}
