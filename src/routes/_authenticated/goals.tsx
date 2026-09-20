@@ -493,13 +493,24 @@ function GoalCard({
                   ? `Reopen step: ${step.title}`
                   : `Complete step: ${step.title}`
               }
-              className={`grid size-6 shrink-0 place-items-center rounded-full text-xs font-bold text-white ring-1 transition-colors ${
-                step.done
-                  ? `${accent.check} ring-transparent`
-                  : "bg-transparent ring-border hover:ring-foreground/40"
-              }`}
+              className="grid size-6 shrink-0 place-items-center transition-transform active:scale-90"
             >
-              {step.done ? "✓" : ""}
+              <svg
+                viewBox="0 0 24 24"
+                className={`size-5 transition-colors duration-200 ${
+                  step.done
+                    ? accent.check
+                    : "stroke-muted-foreground/50 hover:stroke-foreground"
+                }`}
+              >
+                <path
+                  d={DIAMOND_PATH}
+                  fill={step.done ? "currentColor" : "none"}
+                  stroke={step.done ? "none" : "currentColor"}
+                  strokeWidth="1.5"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </button>
             <EditableStepTitle
               title={step.title}
