@@ -200,60 +200,19 @@ function GoalsPage() {
   return (
     <div className="min-h-dvh bg-background font-body text-foreground antialiased">
       <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 pb-28 pt-6">
-        <header className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="grid size-8 place-items-center rounded-xl bg-primary text-sm font-bold text-primary-foreground">
-              h
-            </div>
-            <span className="text-lg font-semibold tracking-tight">hatch</span>
-          </div>
+        <header className="flex items-center justify-between gap-3">
           <button
-            onClick={handleSignOut}
-            className="rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            onClick={() => setProfileOpen(true)}
+            aria-label="Open profile"
+            className="grid size-10 shrink-0 place-items-center rounded-full bg-muted text-sm font-semibold text-foreground transition-colors hover:bg-muted/70"
           >
-            Sign out
+            {(profile?.display_name?.trim()?.[0] ?? "?").toUpperCase()}
           </button>
-        </header>
-
-        <div className="mt-8 flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            {editingName ? (
-              <input
-                autoFocus
-                value={nameDraft}
-                onChange={(e) => setNameDraft(e.target.value)}
-                onBlur={saveName}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") saveName();
-                  if (e.key === "Escape") setEditingName(false);
-                }}
-                maxLength={60}
-                aria-label="Edit your name"
-                className="w-full rounded-lg bg-muted/60 px-2 py-1 font-display text-[34px] font-normal leading-tight tracking-tight focus:outline-none focus:ring-1 focus:ring-ring"
-              />
-            ) : (
-              <h1 className="font-display text-[34px] font-normal leading-tight tracking-tight">
-                {profile?.display_name
-                  ? `${profile.display_name}'s goals`
-                  : "Your goals"}
-                <button
-                  onClick={() => {
-                    setNameDraft(profile?.display_name ?? "");
-                    setEditingName(true);
-                  }}
-                  aria-label="Edit your name"
-                  className="ml-2 align-middle text-xs font-medium text-muted-foreground underline underline-offset-4"
-                >
-                  edit name
-                </button>
-              </h1>
-            )}
-            <p className="mt-1 text-sm text-muted-foreground">
-              {totalSteps === 0
-                ? "Break big things into small, doable steps."
-                : `${doneSteps} of ${totalSteps} steps done`}
-            </p>
-          </div>
+          <h1 className="min-w-0 flex-1 truncate text-center font-display text-[27px] font-normal leading-tight tracking-tight">
+            {profile?.display_name
+              ? `${profile.display_name}'s goals`
+              : "Your goals"}
+          </h1>
           <button
             onClick={() => setShowNewGoal(true)}
             aria-label="New goal"
@@ -272,7 +231,13 @@ function GoalsPage() {
               <path d="M5 12h14" />
             </svg>
           </button>
-        </div>
+        </header>
+
+        <p className="mt-2 text-center text-sm text-muted-foreground">
+          {totalSteps === 0
+            ? "Break big things into small, doable steps."
+            : `${doneSteps} of ${totalSteps} steps done`}
+        </p>
 
         {showNewGoal && (
           <form
