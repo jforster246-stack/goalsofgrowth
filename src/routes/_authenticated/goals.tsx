@@ -342,6 +342,24 @@ function GoalsPage() {
             }
           />
         )}
+
+        {profileOpen && (
+          <ProfileSheet
+            profile={profile ?? null}
+            email={email}
+            editingName={editingName}
+            nameDraft={nameDraft}
+            onNameDraftChange={setNameDraft}
+            onStartEdit={() => {
+              setNameDraft(profile?.display_name ?? "");
+              setEditingName(true);
+            }}
+            onEndEdit={() => setEditingName(false)}
+            onSaveName={saveName}
+            onSignOut={handleSignOut}
+            onClose={() => setProfileOpen(false)}
+          />
+        )}
       </div>
     </div>
   );
