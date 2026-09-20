@@ -13,6 +13,8 @@ import {
   deleteStep,
   listGoals,
   toggleStep,
+  updateGoal,
+  updateStep,
 } from "@/lib/goals.functions";
 
 const goalsQueryOptions = queryOptions({
@@ -91,6 +93,11 @@ function GoalsPage() {
       invalidate();
     },
   });
+  const updateGoalMutation = useMutation({
+    mutationFn: (input: { id: string; title: string }) =>
+      updateGoal({ data: input }),
+    onSuccess: invalidate,
+  });
   const deleteGoalMutation = useMutation({
     mutationFn: (input: { id: string }) => deleteGoal({ data: input }),
     onSuccess: invalidate,
@@ -98,6 +105,11 @@ function GoalsPage() {
   const addStepMutation = useMutation({
     mutationFn: (input: { goalId: string; title: string }) =>
       addStep({ data: input }),
+    onSuccess: invalidate,
+  });
+  const updateStepMutation = useMutation({
+    mutationFn: (input: { id: string; title: string }) =>
+      updateStep({ data: input }),
     onSuccess: invalidate,
   });
   const toggleStepMutation = useMutation({
