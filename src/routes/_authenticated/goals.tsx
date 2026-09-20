@@ -71,7 +71,7 @@ function StarField() {
         <svg
           key={i}
           viewBox="0 0 24 24"
-          className={`absolute ${s.tint}`}
+          className="absolute fill-star"
           style={{
             top: s.top,
             left: s.left,
@@ -82,7 +82,7 @@ function StarField() {
             animation: `twinkle 3.6s ease-in-out ${s.delay} infinite`,
           }}
         >
-          <path d={STAR_PATH} />
+          <path d={STAR_PATH} fillRule="evenodd" />
         </svg>
       ))}
     </div>
