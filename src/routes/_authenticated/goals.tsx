@@ -235,9 +235,6 @@ function GoalsPage() {
     setEditingName(false);
   };
 
-    (sum, g) => sum + g.steps.filter((s) => s.done).length,
-    0,
-  );
 
   return (
     <div className="relative min-h-dvh bg-background font-body text-foreground antialiased">
