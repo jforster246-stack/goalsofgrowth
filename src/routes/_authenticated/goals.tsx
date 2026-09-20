@@ -590,6 +590,102 @@ function EditableStepTitle({
   );
 }
 
+type ProfileInfo = { id: string; display_name: string | null } | null;
+
+function ProfileSheet({
+  profile,
+  email,
+  editingName,
+  nameDraft,
+  onNameDraftChange,
+  onStartEdit,
+  onEndEdit,
+  onSaveName,
+  onSignOut,
+  onClose,
+}: {
+  profile: ProfileInfo;
+  email: string | null;
+  editingName: boolean;
+  nameDraft: string;
+  onNameDraftChange: (value: string) => void;
+  onStartEdit: () => void;
+  onEndEdit: () => void;
+  onSaveName: () => void;
+  onSignOut: () => void;
+  onClose: () => void;
+}) {
+  const initial = (profile?.display_name?.trim()?.[0] ?? "?").toUpperCase();
+
+  return (
+    <div className="fixed inset-0 z-20 flex flex-col bg-background [animation:rise_0.25s_both]">
+      <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-5 pb-8 pt-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold tracking-tight">Profile</h2>
+          <button
+            onClick={onClose}
+            aria-label="Close profile"
+            className="grid size-9 place-items-center rounded-full text-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="mt-10 flex flex-col items-center text-center">
+          <div className="grid size-20 place-items-center rounded-full bg-primary text-2xl font-semibold text-primary-foreground">
+            {initial}
+          </div>
+
+          {editingName ? (
+            <input
+              autoFocus
+              value={nameDraft}
+              onChange={(e) => onNameDraftChange(e.target.value)}
+              onBlur={onSaveName}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") onSaveName();
+                if (e.key === "Escape") onEndEdit();
+              }}
+              maxLength={60}
+              aria-label="Edit your name"
+              className="mt-4 w-full rounded-lg bg-muted/60 px-2 py-1 text-center font-display text-[28px] font-normal tracking-tight focus:outline-none focus:ring-1 focus:ring-ring"
+            />
+          ) : (
+            <button
+              onClick={onStartEdit}
+              aria-label="Edit your name"
+              className="mt-4 font-display text-[28px] font-normal tracking-tight"
+            >
+              {profile?.display_name || "Set your name"}
+            </button>
+          )}
+
+          {email && (
+            <p className="mt-1 text-sm text-muted-foreground">{email}</p>
+          )}
+          {!editingName && (
+            <button
+              onClick={onStartEdit}
+              className="mt-2 text-xs font-medium text-muted-foreground underline underline-offset-4"
+            >
+              edit name
+            </button>
+          )}
+        </div>
+
+        <div className="mt-auto pt-8">
+          <button
+            onClick={onSignOut}
+            className="w-full rounded-2xl bg-muted py-3.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted/70"
+          >
+            Sign out
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 type FocusTarget = {
   goalTitle: string;
   stepTitle: string;
