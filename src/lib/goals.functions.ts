@@ -50,7 +50,7 @@ export const createGoal = createServerFn({ method: "POST" })
       .select("accent");
     if (accentError) throw new Error(accentError.message);
 
-    const accent = ACCENTS[(existing?.length ?? 0) % ACCENTS.length];
+    const accent = ACCENTS[(existing?.length ?? 0) % ACCENTS.length] ?? "mint";
     const position = (last?.[0]?.position ?? 0) + 1;
 
     const { data: goal, error } = await supabase
