@@ -202,43 +202,63 @@ function GoalsPage() {
           </button>
         </header>
 
-        <div className="mt-8">
-          {editingName ? (
-            <input
-              autoFocus
-              value={nameDraft}
-              onChange={(e) => setNameDraft(e.target.value)}
-              onBlur={saveName}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") saveName();
-                if (e.key === "Escape") setEditingName(false);
-              }}
-              maxLength={60}
-              aria-label="Edit your name"
-              className="w-full rounded-lg bg-muted/60 px-2 py-1 text-[26px] font-semibold leading-tight tracking-tight focus:outline-none focus:ring-1 focus:ring-ring"
-            />
-          ) : (
-            <h1 className="text-[26px] font-semibold leading-tight tracking-tight">
-              {profile?.display_name
-                ? `${profile.display_name}'s goals`
-                : "Your goals"}
-              <button
-                onClick={() => {
-                  setNameDraft(profile?.display_name ?? "");
-                  setEditingName(true);
+        <div className="mt-8 flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            {editingName ? (
+              <input
+                autoFocus
+                value={nameDraft}
+                onChange={(e) => setNameDraft(e.target.value)}
+                onBlur={saveName}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") saveName();
+                  if (e.key === "Escape") setEditingName(false);
                 }}
+                maxLength={60}
                 aria-label="Edit your name"
-                className="ml-2 align-middle text-xs font-medium text-muted-foreground underline underline-offset-4"
-              >
-                edit name
-              </button>
-            </h1>
-          )}
-          <p className="mt-1 text-sm text-muted-foreground">
-            {totalSteps === 0
-              ? "Break big things into small, doable steps."
-              : `${doneSteps} of ${totalSteps} steps done`}
-          </p>
+                className="w-full rounded-lg bg-muted/60 px-2 py-1 text-[26px] font-semibold leading-tight tracking-tight focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+            ) : (
+              <h1 className="text-[26px] font-semibold leading-tight tracking-tight">
+                {profile?.display_name
+                  ? `${profile.display_name}'s goals`
+                  : "Your goals"}
+                <button
+                  onClick={() => {
+                    setNameDraft(profile?.display_name ?? "");
+                    setEditingName(true);
+                  }}
+                  aria-label="Edit your name"
+                  className="ml-2 align-middle text-xs font-medium text-muted-foreground underline underline-offset-4"
+                >
+                  edit name
+                </button>
+              </h1>
+            )}
+            <p className="mt-1 text-sm text-muted-foreground">
+              {totalSteps === 0
+                ? "Break big things into small, doable steps."
+                : `${doneSteps} of ${totalSteps} steps done`}
+            </p>
+          </div>
+          <button
+            onClick={() => setShowNewGoal(true)}
+            aria-label="New goal"
+            className="grid size-10 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground shadow-md transition-colors hover:bg-primary/90"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="size-5"
+            >
+              <path d="M12 5v14" />
+              <path d="M5 12h14" />
+            </svg>
+          </button>
         </div>
 
         {showNewGoal && (
@@ -309,19 +329,13 @@ function GoalsPage() {
           </div>
         )}
 
-        {/* Fixed bottom add bar — thumb reach */}
+        {/* Fixed bottom focus bar — thumb reach */}
         <div className="fixed inset-x-0 bottom-0 z-10 bg-gradient-to-t from-background via-background/95 to-transparent px-5 pb-5 pt-8">
-          <div className="mx-auto flex max-w-md gap-2.5">
-            <button
-              onClick={() => setShowNewGoal(true)}
-              className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground shadow-lg transition-colors hover:bg-primary/90"
-            >
-              <span className="text-base leading-none">+</span> New goal
-            </button>
+          <div className="mx-auto flex max-w-md">
             <button
               onClick={() => setFocusOpen(true)}
               aria-label="Open focus mode"
-              className="flex items-center justify-center gap-2 rounded-2xl bg-foreground px-5 py-3.5 text-sm font-semibold text-background shadow-lg transition-colors hover:bg-foreground/90"
+              className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-foreground py-3.5 text-sm font-semibold text-background shadow-lg transition-colors hover:bg-foreground/90"
             >
               <svg
                 viewBox="0 0 24 24"
