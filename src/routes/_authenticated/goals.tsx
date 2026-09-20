@@ -497,19 +497,15 @@ function GoalCard({
             >
               <svg
                 viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                strokeLinejoin="round"
                 className={`size-5 transition-colors duration-200 ${
                   step.done
                     ? accent.check
-                    : "stroke-muted-foreground/50 hover:stroke-foreground"
+                    : "fill-none stroke-muted-foreground/50 hover:stroke-foreground"
                 }`}
               >
-                <path
-                  d={DIAMOND_PATH}
-                  fill={step.done ? "currentColor" : "none"}
-                  stroke={step.done ? "none" : "currentColor"}
-                  strokeWidth="1.5"
-                  strokeLinejoin="round"
-                />
+                <path d={DIAMOND_PATH} />
               </svg>
             </button>
             <EditableStepTitle
