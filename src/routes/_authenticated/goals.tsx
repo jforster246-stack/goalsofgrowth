@@ -352,7 +352,7 @@ function GoalsPage() {
             <button
               onClick={() => setFocusOpen(true)}
               aria-label="Open focus mode"
-              className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-foreground py-3.5 text-sm font-semibold text-background shadow-lg transition-colors hover:bg-foreground/90"
+              className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-focus py-3.5 text-sm font-semibold text-white shadow-lg transition-colors hover:bg-focus/90"
             >
               <svg
                 viewBox="0 0 24 24"
