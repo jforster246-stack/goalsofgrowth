@@ -94,6 +94,15 @@ function GoalsPage() {
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState("");
   const [focusOpen, setFocusOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [email, setEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth
+      .getUser()
+      .then(({ data }) => setEmail(data.user?.email ?? null))
+      .catch(() => {});
+  }, []);
 
   const invalidate = () =>
     queryClient.invalidateQueries({ queryKey: ["goals"] });
@@ -191,60 +200,19 @@ function GoalsPage() {
   return (
     <div className="min-h-dvh bg-background font-body text-foreground antialiased">
       <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 pb-28 pt-6">
-        <header className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="grid size-8 place-items-center rounded-xl bg-primary text-sm font-bold text-primary-foreground">
-              h
-            </div>
-            <span className="text-lg font-semibold tracking-tight">hatch</span>
-          </div>
+        <header className="flex items-center justify-between gap-3">
           <button
-            onClick={handleSignOut}
-            className="rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            onClick={() => setProfileOpen(true)}
+            aria-label="Open profile"
+            className="grid size-10 shrink-0 place-items-center rounded-full bg-muted text-sm font-semibold text-foreground transition-colors hover:bg-muted/70"
           >
-            Sign out
+            {(profile?.display_name?.trim()?.[0] ?? "?").toUpperCase()}
           </button>
-        </header>
-
-        <div className="mt-8 flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            {editingName ? (
-              <input
-                autoFocus
-                value={nameDraft}
-                onChange={(e) => setNameDraft(e.target.value)}
-                onBlur={saveName}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") saveName();
-                  if (e.key === "Escape") setEditingName(false);
-                }}
-                maxLength={60}
-                aria-label="Edit your name"
-                className="w-full rounded-lg bg-muted/60 px-2 py-1 font-display text-[34px] font-normal leading-tight tracking-tight focus:outline-none focus:ring-1 focus:ring-ring"
-              />
-            ) : (
-              <h1 className="font-display text-[34px] font-normal leading-tight tracking-tight">
-                {profile?.display_name
-                  ? `${profile.display_name}'s goals`
-                  : "Your goals"}
-                <button
-                  onClick={() => {
-                    setNameDraft(profile?.display_name ?? "");
-                    setEditingName(true);
-                  }}
-                  aria-label="Edit your name"
-                  className="ml-2 align-middle text-xs font-medium text-muted-foreground underline underline-offset-4"
-                >
-                  edit name
-                </button>
-              </h1>
-            )}
-            <p className="mt-1 text-sm text-muted-foreground">
-              {totalSteps === 0
-                ? "Break big things into small, doable steps."
-                : `${doneSteps} of ${totalSteps} steps done`}
-            </p>
-          </div>
+          <h1 className="min-w-0 flex-1 truncate text-center font-display text-[30px] font-normal leading-tight tracking-tight">
+            {profile?.display_name
+              ? `${profile.display_name}'s goals`
+              : "Your goals"}
+          </h1>
           <button
             onClick={() => setShowNewGoal(true)}
             aria-label="New goal"
@@ -263,7 +231,13 @@ function GoalsPage() {
               <path d="M5 12h14" />
             </svg>
           </button>
-        </div>
+        </header>
+
+        <p className="mt-2 text-center text-sm text-muted-foreground">
+          {totalSteps === 0
+            ? "Break big things into small, doable steps."
+            : `${doneSteps} of ${totalSteps} steps done`}
+        </p>
 
         {showNewGoal && (
           <form
@@ -366,6 +340,24 @@ function GoalsPage() {
             onCompleteStep={(stepId) =>
               toggleStepMutation.mutate({ id: stepId, done: true })
             }
+          />
+        )}
+
+        {profileOpen && (
+          <ProfileSheet
+            profile={profile ?? null}
+            email={email}
+            editingName={editingName}
+            nameDraft={nameDraft}
+            onNameDraftChange={setNameDraft}
+            onStartEdit={() => {
+              setNameDraft(profile?.display_name ?? "");
+              setEditingName(true);
+            }}
+            onEndEdit={() => setEditingName(false)}
+            onSaveName={saveName}
+            onSignOut={handleSignOut}
+            onClose={() => setProfileOpen(false)}
           />
         )}
       </div>
@@ -595,6 +587,102 @@ function EditableStepTitle({
       aria-label={`Edit step: ${title}`}
       className="min-w-0 flex-1 rounded-lg bg-muted/60 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
     />
+  );
+}
+
+type ProfileInfo = { id: string; display_name: string | null } | null;
+
+function ProfileSheet({
+  profile,
+  email,
+  editingName,
+  nameDraft,
+  onNameDraftChange,
+  onStartEdit,
+  onEndEdit,
+  onSaveName,
+  onSignOut,
+  onClose,
+}: {
+  profile: ProfileInfo;
+  email: string | null;
+  editingName: boolean;
+  nameDraft: string;
+  onNameDraftChange: (value: string) => void;
+  onStartEdit: () => void;
+  onEndEdit: () => void;
+  onSaveName: () => void;
+  onSignOut: () => void;
+  onClose: () => void;
+}) {
+  const initial = (profile?.display_name?.trim()?.[0] ?? "?").toUpperCase();
+
+  return (
+    <div className="fixed inset-0 z-20 flex flex-col bg-background [animation:rise_0.25s_both]">
+      <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-5 pb-8 pt-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold tracking-tight">Profile</h2>
+          <button
+            onClick={onClose}
+            aria-label="Close profile"
+            className="grid size-9 place-items-center rounded-full text-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="mt-10 flex flex-col items-center text-center">
+          <div className="grid size-20 place-items-center rounded-full bg-primary text-2xl font-semibold text-primary-foreground">
+            {initial}
+          </div>
+
+          {editingName ? (
+            <input
+              autoFocus
+              value={nameDraft}
+              onChange={(e) => onNameDraftChange(e.target.value)}
+              onBlur={onSaveName}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") onSaveName();
+                if (e.key === "Escape") onEndEdit();
+              }}
+              maxLength={60}
+              aria-label="Edit your name"
+              className="mt-4 w-full rounded-lg bg-muted/60 px-2 py-1 text-center font-display text-[28px] font-normal tracking-tight focus:outline-none focus:ring-1 focus:ring-ring"
+            />
+          ) : (
+            <button
+              onClick={onStartEdit}
+              aria-label="Edit your name"
+              className="mt-4 font-display text-[28px] font-normal tracking-tight"
+            >
+              {profile?.display_name || "Set your name"}
+            </button>
+          )}
+
+          {email && (
+            <p className="mt-1 text-sm text-muted-foreground">{email}</p>
+          )}
+          {!editingName && (
+            <button
+              onClick={onStartEdit}
+              className="mt-2 text-xs font-medium text-muted-foreground underline underline-offset-4"
+            >
+              edit name
+            </button>
+          )}
+        </div>
+
+        <div className="mt-auto pt-8">
+          <button
+            onClick={onSignOut}
+            className="w-full rounded-2xl bg-muted py-3.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted/70"
+          >
+            Sign out
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
