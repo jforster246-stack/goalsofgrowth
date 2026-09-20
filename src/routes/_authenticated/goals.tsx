@@ -675,9 +675,11 @@ function FocusMode({
 function FocusSession({
   target,
   onEnd,
+  onComplete,
 }: {
   target: FocusTarget;
   onEnd: () => void;
+  onComplete: () => void;
 }) {
   const [secondsLeft, setSecondsLeft] = useState(FOCUS_MINUTES * 60);
   const [running, setRunning] = useState(true);
@@ -760,10 +762,10 @@ function FocusSession({
           {running ? "Pause" : "Resume"}
         </button>
         <button
-          onClick={onEnd}
-          className="w-full rounded-2xl py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted"
+          onClick={onComplete}
+          className="w-full rounded-2xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground shadow-lg transition-colors hover:bg-primary/90"
         >
-          End session
+          ✓ I finished this
         </button>
       </div>
     </div>
