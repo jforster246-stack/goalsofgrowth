@@ -363,7 +363,7 @@ function GoalCard({
           />
           <button
             type="submit"
-            disabled={!draft.trim() || addStepPendingSafe(onSubmitStep)}
+            disabled={!draft.trim()}
             className="text-xs font-semibold text-clay hover:text-clay/80 disabled:opacity-40"
           >
             Add
@@ -372,8 +372,4 @@ function GoalCard({
       </div>
     </article>
   );
-}
-
-function addStepPendingSafe(_fn: unknown) {
-  return false;
 }
