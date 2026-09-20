@@ -242,8 +242,9 @@ function GoalsPage() {
   );
 
   return (
-    <div className="min-h-dvh bg-background font-body text-foreground antialiased">
-      <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 pb-28 pt-6">
+    <div className="relative min-h-dvh bg-background font-body text-foreground antialiased">
+      <StarField />
+      <div className="relative z-[1] mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 pb-28 pt-6">
         <header className="flex items-center justify-between gap-3">
           <button
             onClick={() => setProfileOpen(true)}
