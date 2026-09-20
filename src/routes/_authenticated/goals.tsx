@@ -278,10 +278,8 @@ function GoalsPage() {
           </button>
         </header>
 
-        <p className="mt-2 text-center text-sm text-muted-foreground">
-          {totalSteps === 0
-            ? "Break big things into small, doable steps."
-            : `${doneSteps} of ${totalSteps} steps done`}
+        <p className="mt-2 text-center text-sm italic text-muted-foreground">
+          “I am a vibrational match to all that I desire”
         </p>
 
         {showNewGoal && (
