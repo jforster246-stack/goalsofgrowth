@@ -235,8 +235,6 @@ function GoalsPage() {
     setEditingName(false);
   };
 
-  const totalSteps = goals.reduce((sum, g) => sum + g.steps.length, 0);
-  const doneSteps = goals.reduce(
     (sum, g) => sum + g.steps.filter((s) => s.done).length,
     0,
   );
