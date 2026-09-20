@@ -235,11 +235,6 @@ function GoalsPage() {
     setEditingName(false);
   };
 
-  const totalSteps = goals.reduce((sum, g) => sum + g.steps.length, 0);
-  const doneSteps = goals.reduce(
-    (sum, g) => sum + g.steps.filter((s) => s.done).length,
-    0,
-  );
 
   return (
     <div className="relative min-h-dvh bg-background font-body text-foreground antialiased">
@@ -278,10 +273,8 @@ function GoalsPage() {
           </button>
         </header>
 
-        <p className="mt-2 text-center text-sm text-muted-foreground">
-          {totalSteps === 0
-            ? "Break big things into small, doable steps."
-            : `${doneSteps} of ${totalSteps} steps done`}
+        <p className="mt-2 text-center text-sm italic text-muted-foreground">
+          “I am a vibrational match to all that I desire”
         </p>
 
         {showNewGoal && (
