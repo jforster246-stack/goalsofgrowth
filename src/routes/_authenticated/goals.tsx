@@ -245,14 +245,15 @@ function GoalsPage() {
           <button
             onClick={() => setProfileOpen(true)}
             aria-label="Open profile"
-            className="grid size-10 shrink-0 place-items-center rounded-full bg-muted text-sm font-semibold text-foreground transition-colors hover:bg-muted/70"
+            className="grid size-10 shrink-0 place-items-center rounded-full bg-focus text-sm font-semibold text-white shadow-md transition-colors hover:bg-focus/90"
           >
             {(profile?.display_name?.trim()?.[0] ?? "?").toUpperCase()}
           </button>
-          <h1 className="min-w-0 flex-1 truncate text-center font-display text-[30px] font-normal leading-tight tracking-tight">
-            {profile?.display_name
-              ? `${profile.display_name}'s goals`
-              : "Your goals"}
+          <h1 className="min-w-0 flex-1 text-center font-display text-[30px] font-normal leading-[1.15] tracking-tight">
+            <span className="block truncate">
+              {profile?.display_name ? `${profile.display_name}'s` : "Your"}
+            </span>
+            <span className="block truncate">Goals of Growth</span>
           </h1>
           <button
             onClick={() => setShowNewGoal(true)}
