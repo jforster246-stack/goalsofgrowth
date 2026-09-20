@@ -216,10 +216,10 @@ function GoalsPage() {
                 }}
                 maxLength={60}
                 aria-label="Edit your name"
-                className="w-full rounded-lg bg-muted/60 px-2 py-1 text-[26px] font-semibold leading-tight tracking-tight focus:outline-none focus:ring-1 focus:ring-ring"
+                className="w-full rounded-lg bg-muted/60 px-2 py-1 font-display text-[30px] font-normal leading-tight tracking-tight focus:outline-none focus:ring-1 focus:ring-ring"
               />
             ) : (
-              <h1 className="text-[26px] font-semibold leading-tight tracking-tight">
+              <h1 className="font-display text-[30px] font-normal leading-tight tracking-tight">
                 {profile?.display_name
                   ? `${profile.display_name}'s goals`
                   : "Your goals"}
