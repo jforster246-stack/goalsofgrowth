@@ -14,7 +14,6 @@ import {
   listGoals,
   toggleStep,
 } from "@/lib/goals.functions";
-import goalHero from "@/assets/goals-hero.jpg";
 
 const goalsQueryOptions = queryOptions({
   queryKey: ["goals"],
@@ -24,13 +23,9 @@ const goalsQueryOptions = queryOptions({
 type GoalWithSteps = Awaited<ReturnType<typeof listGoals>>[number];
 
 const ACCENT_STYLES = {
-  mint: { avatar: "bg-mint text-ink", bar: "bg-mint", check: "bg-mint" },
-  sea: { avatar: "bg-sea text-ink/80", bar: "bg-sea", check: "bg-sea" },
-  clay: {
-    avatar: "bg-clay text-cream",
-    bar: "bg-clay",
-    check: "bg-clay",
-  },
+  mint: { dot: "bg-mint", bar: "bg-mint", check: "bg-mint" },
+  sea: { dot: "bg-sea", bar: "bg-sea", check: "bg-sea" },
+  clay: { dot: "bg-clay", bar: "bg-clay", check: "bg-clay" },
 } as const;
 
 type Accent = keyof typeof ACCENT_STYLES;
@@ -46,29 +41,32 @@ export const Route = createFileRoute("/")({
         content:
           "Hatch is a gentle goal tracker: create goals, break them into small steps, and check them off one calm step at a time.",
       },
-      { property: "og:title", content: "Hatch — a quiet place to finish small things" },
+      {
+        property: "og:title",
+        content: "Hatch — a quiet place to finish small things",
+      },
       {
         property: "og:description",
         content:
           "Create goals, break them into small steps, and check them off one calm step at a time.",
       },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   errorComponent: ({ error }) => (
-    <div className="flex min-h-screen items-center justify-center bg-cream px-4">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="font-display text-2xl font-bold text-ink">
-          Something went quiet
+        <h1 className="text-xl font-semibold text-foreground">
+          Something went wrong
         </h1>
-        <p className="mt-2 text-sm text-soft">{String(error)}</p>
+        <p className="mt-2 text-sm text-muted-foreground">{String(error)}</p>
       </div>
     </div>
   ),
   notFoundComponent: () => (
-    <div className="flex min-h-screen items-center justify-center bg-cream px-4">
-      <p className="font-display text-lg text-ink">Nothing here.</p>
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <p className="text-base text-muted-foreground">Nothing here.</p>
     </div>
   ),
   component: GoalsPage,
@@ -128,67 +126,41 @@ function GoalsPage() {
   };
 
   const totalSteps = goals.reduce((sum, g) => sum + g.steps.length, 0);
+  const doneSteps = goals.reduce(
+    (sum, g) => sum + g.steps.filter((s) => s.done).length,
+    0,
+  );
 
   return (
-    <div className="min-h-screen bg-cream font-body text-ink antialiased">
-      <div className="mx-auto max-w-5xl px-5 py-7 sm:px-8">
+    <div className="min-h-dvh bg-background font-body text-foreground antialiased">
+      <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 pb-28 pt-6">
         <header className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="grid size-9 place-items-center rounded-2xl bg-clay font-display text-lg font-bold text-cream">
+          <div className="flex items-center gap-2">
+            <div className="grid size-8 place-items-center rounded-xl bg-primary text-sm font-bold text-primary-foreground">
               h
             </div>
-            <span className="font-display text-[22px] font-bold tracking-tight">
-              hatch
-            </span>
+            <span className="text-lg font-semibold tracking-tight">hatch</span>
           </div>
-          <p className="hidden text-sm text-soft sm:block">
-            {goals.length === 0
-              ? "A calm place to begin"
-              : `${goals.length} ${goals.length === 1 ? "goal" : "goals"} in motion`}
+          <p className="text-xs font-medium text-muted-foreground">
+            {totalSteps === 0
+              ? "Start small"
+              : `${doneSteps} of ${totalSteps} steps done`}
           </p>
         </header>
 
-        <section className="mt-8 grid items-stretch gap-5 md:grid-cols-12">
-          <div className="flex min-h-[240px] flex-col justify-between rounded-[28px] bg-mint/40 p-6 [animation:rise_0.5s_both] md:col-span-5">
-            <p className="font-display text-[15px] font-medium italic text-ink/70">
-              A calm note
-            </p>
-            <div>
-              <h1 className="font-display text-[40px] font-bold leading-[1.05] tracking-tight text-balance">
-                Slow is steady.
-              </h1>
-              <p className="mt-2 max-w-[34ch] text-sm text-pretty text-ink/70">
-                One small step today keeps the whole thing moving.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center justify-center rounded-[28px] bg-sand/60 p-6 [animation:rise_0.55s_both] md:col-span-7">
-            <img
-              src={goalHero}
-              alt="Illustration of a person calmly watering a small plant on a windowsill"
-              width={1024}
-              height={640}
-              className="aspect-[16/10] w-full rounded-2xl object-cover outline-1 -outline-offset-1 outline-black/5"
-            />
-          </div>
-        </section>
-
-        <div className="mt-10 flex items-center justify-between">
-          <h2 className="font-display text-[19px] font-bold tracking-tight">
+        <div className="mt-8">
+          <h1 className="text-[26px] font-semibold leading-tight tracking-tight">
             Your goals
-          </h2>
-          <button
-            onClick={() => setShowNewGoal(true)}
-            className="inline-flex items-center gap-2 rounded-full bg-clay px-4 py-2.5 text-sm font-semibold text-cream ring-1 ring-black/5 transition-colors hover:bg-clay/90"
-          >
-            <span className="text-base leading-none">+</span> New goal
-          </button>
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Break big things into small, doable steps.
+          </p>
         </div>
 
         {showNewGoal && (
           <form
             onSubmit={submitNewGoal}
-            className="mt-4 flex items-center gap-3 rounded-[24px] bg-white/70 p-5 ring-1 ring-black/5 [animation:rise_0.4s_both]"
+            className="mt-5 rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border [animation:rise_0.3s_both]"
           >
             <input
               autoFocus
@@ -196,39 +168,39 @@ function GoalsPage() {
               onChange={(e) => setNewGoalTitle(e.target.value)}
               placeholder="What do you want to achieve?"
               maxLength={140}
-              className="flex-1 bg-transparent font-display text-lg placeholder:text-soft/60 focus:outline-none"
+              className="w-full bg-transparent text-base placeholder:text-muted-foreground/60 focus:outline-none"
             />
-            <button
-              type="submit"
-              disabled={!newGoalTitle.trim() || createGoalMutation.isPending}
-              className="rounded-full bg-clay px-4 py-2 text-sm font-semibold text-cream ring-1 ring-black/5 hover:bg-clay/90 disabled:opacity-40"
-            >
-              Add goal
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setShowNewGoal(false);
-                setNewGoalTitle("");
-              }}
-              className="text-xs text-soft hover:text-ink"
-            >
-              Cancel
-            </button>
+            <div className="mt-3 flex items-center gap-2">
+              <button
+                type="submit"
+                disabled={!newGoalTitle.trim() || createGoalMutation.isPending}
+                className="flex-1 rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-40"
+              >
+                Add goal
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowNewGoal(false);
+                  setNewGoalTitle("");
+                }}
+                className="rounded-xl px-4 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted"
+              >
+                Cancel
+              </button>
+            </div>
           </form>
         )}
 
         {goals.length === 0 && !showNewGoal ? (
-          <div className="mt-4 rounded-[24px] bg-white/70 p-10 text-center ring-1 ring-black/5 [animation:rise_0.5s_both]">
-            <p className="font-display text-lg font-semibold text-ink">
-              No goals yet
-            </p>
-            <p className="mt-1 text-sm text-soft">
-              Start with one small thing you'd like to finish.
+          <div className="mt-5 rounded-2xl bg-card p-8 text-center shadow-sm ring-1 ring-border [animation:rise_0.4s_both]">
+            <p className="text-base font-semibold">No goals yet</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Tap the button below to add your first one.
             </p>
           </div>
         ) : (
-          <div className="mt-4 space-y-4">
+          <div className="mt-5 space-y-3">
             {goals.map((goal, index) => (
               <GoalCard
                 key={goal.id}
@@ -247,14 +219,17 @@ function GoalsPage() {
           </div>
         )}
 
-        <footer className="mt-10 flex items-center justify-between border-t border-ink/10 pt-6 text-xs text-soft">
-          <span>hatch — a quiet place to finish small things</span>
-          <span>
-            {totalSteps === 0
-              ? "made slowly"
-              : `${totalSteps} ${totalSteps === 1 ? "step" : "steps"} so far`}
-          </span>
-        </footer>
+        {/* Fixed bottom add bar — thumb reach */}
+        <div className="fixed inset-x-0 bottom-0 z-10 bg-gradient-to-t from-background via-background/95 to-transparent px-5 pb-5 pt-8">
+          <div className="mx-auto max-w-md">
+            <button
+              onClick={() => setShowNewGoal(true)}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground shadow-lg transition-colors hover:bg-primary/90"
+            >
+              <span className="text-base leading-none">+</span> New goal
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -279,66 +254,67 @@ function GoalCard({
   onDeleteGoal: () => void;
   index: number;
 }) {
-  const accent = ACCENT_STYLES[(goal.accent as Accent) ?? "mint"] ?? ACCENT_STYLES.mint;
+  const accent =
+    ACCENT_STYLES[(goal.accent as Accent) ?? "mint"] ?? ACCENT_STYLES.mint;
   const total = goal.steps.length;
   const done = goal.steps.filter((s) => s.done).length;
   const pct = total === 0 ? 0 : Math.round((done / total) * 100);
 
   return (
     <article
-      className="rounded-[24px] bg-white/70 p-5 ring-1 ring-black/5"
-      style={{ animation: `rise 0.5s ${index * 0.05}s both` }}
+      className="rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border"
+      style={{ animation: `rise 0.35s ${index * 0.05}s both` }}
     >
-      <div className="flex items-start gap-4">
-        <div
-          className={`grid size-11 shrink-0 place-items-center rounded-2xl font-display font-bold ${accent.avatar}`}
+      <div className="flex items-center gap-3">
+        <span className={`size-2.5 shrink-0 rounded-full ${accent.dot}`} />
+        <h3 className="min-w-0 flex-1 truncate text-[15px] font-semibold tracking-tight">
+          {goal.title}
+        </h3>
+        <span className="shrink-0 text-xs font-medium text-muted-foreground">
+          {done}/{total}
+        </span>
+        <button
+          onClick={onDeleteGoal}
+          aria-label={`Delete goal: ${goal.title}`}
+          className="grid size-7 shrink-0 place-items-center rounded-full text-sm text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground"
         >
-          {(goal.title.trim()[0] ?? "?").toUpperCase()}
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center justify-between gap-3">
-            <h3 className="truncate font-display text-[17px] font-semibold tracking-tight">
-              {goal.title}
-            </h3>
-            <div className="flex shrink-0 items-center gap-2">
-              <span className="text-xs font-semibold text-soft">
-                {done} / {total}
-              </span>
-              <button
-                onClick={onDeleteGoal}
-                aria-label={`Delete goal: ${goal.title}`}
-                className="text-sm leading-none text-soft/50 transition-colors hover:text-clay"
-              >
-                ×
-              </button>
-            </div>
-          </div>
-          <div className="mt-2.5 h-2 overflow-hidden rounded-full bg-ink/10">
-            <div
-              className={`h-full rounded-full ${accent.bar} transition-[width] duration-500`}
-              style={{ width: `${pct}%` }}
-            />
-          </div>
-        </div>
+          ×
+        </button>
       </div>
 
-      <div className="ml-1 mt-4 space-y-2.5 pl-15">
+      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
+        <div
+          className={`h-full rounded-full ${accent.bar} transition-[width] duration-500`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+
+      <div className="mt-3 space-y-1">
         {goal.steps.map((step) => (
-          <div key={step.id} className="group flex items-center gap-3">
+          <div
+            key={step.id}
+            className="group flex items-center gap-3 rounded-xl px-1 py-1.5"
+          >
             <button
               onClick={() => onToggle(step.id, !step.done)}
-              aria-label={step.done ? `Reopen step: ${step.title}` : `Complete step: ${step.title}`}
-              className={`grid size-5 shrink-0 place-items-center rounded-md text-xs font-bold text-cream ring-1 transition-colors ${
+              aria-label={
+                step.done
+                  ? `Reopen step: ${step.title}`
+                  : `Complete step: ${step.title}`
+              }
+              className={`grid size-6 shrink-0 place-items-center rounded-full text-xs font-bold text-white ring-1 transition-colors ${
                 step.done
                   ? `${accent.check} ring-transparent`
-                  : "bg-cream ring-ink/20 hover:ring-ink/40"
+                  : "bg-transparent ring-border hover:ring-foreground/40"
               }`}
             >
               {step.done ? "✓" : ""}
             </button>
             <span
-              className={`flex-1 text-sm ${
-                step.done ? "text-ink/50 line-through decoration-ink/30" : ""
+              className={`min-w-0 flex-1 text-sm ${
+                step.done
+                  ? "text-muted-foreground line-through decoration-muted-foreground/40"
+                  : ""
               }`}
             >
               {step.title}
@@ -346,25 +322,25 @@ function GoalCard({
             <button
               onClick={() => onDeleteStep(step.id)}
               aria-label={`Delete step: ${step.title}`}
-              className="text-xs text-soft opacity-0 transition-opacity hover:text-ink group-hover:opacity-100"
+              className="grid size-7 shrink-0 place-items-center rounded-full text-sm text-muted-foreground/50 transition-colors hover:bg-muted hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
             >
               ×
             </button>
           </div>
         ))}
 
-        <form onSubmit={onSubmitStep} className="flex items-center gap-3">
+        <form onSubmit={onSubmitStep} className="flex items-center gap-2 pt-1">
           <input
             value={draft}
             onChange={(e) => onDraftChange(e.target.value)}
             placeholder="Add a step…"
             maxLength={240}
-            className="flex-1 bg-transparent py-1 text-sm placeholder:text-soft/70 focus:outline-none"
+            className="min-w-0 flex-1 rounded-xl bg-muted/60 px-3 py-2.5 text-sm placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-ring"
           />
           <button
             type="submit"
             disabled={!draft.trim()}
-            className="text-xs font-semibold text-clay hover:text-clay/80 disabled:opacity-40"
+            className="shrink-0 rounded-xl bg-muted px-4 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted/70 disabled:opacity-40"
           >
             Add
           </button>
