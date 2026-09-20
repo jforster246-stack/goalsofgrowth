@@ -162,7 +162,7 @@ function GoalsPage() {
               </p>
             </div>
           </div>
-          <div className="flex items-center justify-center rounded-[28px] bg-sand/60 p-6 [animation:rise_0.55s_both]">
+          <div className="flex items-center justify-center rounded-[28px] bg-sand/60 p-6 [animation:rise_0.55s_both] md:col-span-7">
             <img
               src={goalHero}
               alt="Illustration of a person calmly watering a small plant on a windowsill"
