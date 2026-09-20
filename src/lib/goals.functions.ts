@@ -62,6 +62,22 @@ export const createGoal = createServerFn({ method: "POST" })
     return { ...goal, steps: [] };
   });
 
+export const updateGoal = createServerFn({ method: "POST" })
+  .inputValidator((data) =>
+    z
+      .object({ id: z.string().uuid(), title: z.string().trim().min(1).max(140) })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    const supabase = getPublicSupabase();
+    const { error } = await supabase
+      .from("goals")
+      .update({ title: data.title })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const deleteGoal = createServerFn({ method: "POST" })
   .inputValidator((data) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data }) => {
@@ -102,6 +118,22 @@ export const addStep = createServerFn({ method: "POST" })
       .single();
     if (error) throw new Error(error.message);
     return step;
+  });
+
+export const updateStep = createServerFn({ method: "POST" })
+  .inputValidator((data) =>
+    z
+      .object({ id: z.string().uuid(), title: z.string().trim().min(1).max(240) })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    const supabase = getPublicSupabase();
+    const { error } = await supabase
+      .from("steps")
+      .update({ title: data.title })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
 
 export const toggleStep = createServerFn({ method: "POST" })
