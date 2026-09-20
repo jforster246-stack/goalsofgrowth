@@ -666,10 +666,13 @@ function FocusSession({
   const [running, setRunning] = useState(true);
 
   useEffect(() => {
-    if (!running || secondsLeft <= 0) return;
-    const id = setInterval(() => setSecondsLeft((s) => Math.max(0, s - 1)), 1000);
+    if (!running) return;
+    const id = setInterval(
+      () => setSecondsLeft((s) => Math.max(0, s - 1)),
+      1000,
+    );
     return () => clearInterval(id);
-  }, [running, secondsLeft > 0]);
+  }, [running]);
 
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;
