@@ -300,7 +300,7 @@ function GoalsPage() {
           <div className="mt-5 rounded-2xl bg-card p-8 text-center shadow-sm ring-1 ring-border [animation:rise_0.4s_both]">
             <p className="text-base font-semibold">No goals yet</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Tap the button below to add your first one.
+              Tap the + button up top to add your first one.
             </p>
           </div>
         ) : (
