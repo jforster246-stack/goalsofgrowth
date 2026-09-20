@@ -342,7 +342,13 @@ function GoalsPage() {
         </div>
 
         {focusOpen && (
-          <FocusMode goals={goals} onClose={() => setFocusOpen(false)} />
+          <FocusMode
+            goals={goals}
+            onClose={() => setFocusOpen(false)}
+            onCompleteStep={(stepId) =>
+              toggleStepMutation.mutate({ id: stepId, done: true })
+            }
+          />
         )}
       </div>
     </div>
@@ -570,6 +576,7 @@ function EditableStepTitle({
 type FocusTarget = {
   goalTitle: string;
   stepTitle: string;
+  stepId: string;
 };
 
 const FOCUS_MINUTES = 25;
@@ -577,9 +584,11 @@ const FOCUS_MINUTES = 25;
 function FocusMode({
   goals,
   onClose,
+  onCompleteStep,
 }: {
   goals: GoalWithSteps[];
   onClose: () => void;
+  onCompleteStep: (stepId: string) => void;
 }) {
   const [target, setTarget] = useState<FocusTarget | null>(null);
 
@@ -588,7 +597,11 @@ function FocusMode({
     .map((goal) => {
       const step = goal.steps.find((s) => !s.done);
       return step
-        ? { goalTitle: goal.title, stepTitle: step.title }
+        ? {
+            goalTitle: goal.title,
+            stepTitle: step.title,
+            stepId: step.id,
+          }
         : null;
     })
     .filter((t): t is FocusTarget => t !== null);
@@ -600,6 +613,10 @@ function FocusMode({
           <FocusSession
             key={target.stepTitle}
             target={target}
+            onComplete={() => {
+              onCompleteStep(target.stepId);
+              setTarget(null);
+            }}
             onEnd={() => setTarget(null)}
           />
         ) : (
@@ -658,9 +675,11 @@ function FocusMode({
 function FocusSession({
   target,
   onEnd,
+  onComplete,
 }: {
   target: FocusTarget;
   onEnd: () => void;
+  onComplete: () => void;
 }) {
   const [secondsLeft, setSecondsLeft] = useState(FOCUS_MINUTES * 60);
   const [running, setRunning] = useState(true);
@@ -743,10 +762,10 @@ function FocusSession({
           {running ? "Pause" : "Resume"}
         </button>
         <button
-          onClick={onEnd}
-          className="w-full rounded-2xl py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted"
+          onClick={onComplete}
+          className="w-full rounded-2xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground shadow-lg transition-colors hover:bg-primary/90"
         >
-          End session
+          ✓ I finished this
         </button>
       </div>
     </div>
