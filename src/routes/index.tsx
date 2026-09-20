@@ -377,15 +377,11 @@ function GoalCard({
             >
               {step.done ? "✓" : ""}
             </button>
-            <span
-              className={`min-w-0 flex-1 text-sm ${
-                step.done
-                  ? "text-muted-foreground line-through decoration-muted-foreground/40"
-                  : ""
-              }`}
-            >
-              {step.title}
-            </span>
+            <EditableStepTitle
+              title={step.title}
+              done={step.done}
+              onSave={(title) => onEditStep(step.id, title)}
+            />
             <button
               onClick={() => onDeleteStep(step.id)}
               aria-label={`Delete step: ${step.title}`}
