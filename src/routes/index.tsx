@@ -5,15 +5,15 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Hatch — a quiet place to finish small things" },
+      { title: "Goals of Growth — a quiet place to finish small things" },
       {
         name: "description",
         content:
-          "Hatch is a gentle goal tracker: create goals, break them into small steps, and check them off one calm step at a time.",
+          "Goals of Growth is a gentle goal tracker: create goals, break them into small steps, and check them off one calm step at a time.",
       },
       {
         property: "og:title",
-        content: "Hatch — a quiet place to finish small things",
+        content: "Goals of Growth — a quiet place to finish small things",
       },
       {
         property: "og:description",
@@ -39,15 +39,8 @@ function Landing() {
   return (
     <div className="min-h-dvh bg-background font-body text-foreground antialiased">
       <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-5 py-10">
-        <div className="flex items-center gap-2">
-          <div className="grid size-8 place-items-center rounded-xl bg-primary text-sm font-bold text-primary-foreground">
-            h
-          </div>
-          <span className="text-lg font-semibold tracking-tight">hatch</span>
-        </div>
-
-        <h1 className="mt-8 text-[32px] font-semibold leading-tight tracking-tight">
-          A quiet place to finish small things.
+        <h1 className="font-display text-[44px] leading-tight text-focus">
+          Goals of Growth
         </h1>
         <p className="mt-3 text-base text-muted-foreground">
           Add a goal, break it into small steps, and tick them off. Private to

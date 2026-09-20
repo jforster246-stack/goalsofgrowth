@@ -96,13 +96,13 @@ export const Route = createFileRoute("/_authenticated/goals")({
     context.queryClient.ensureQueryData(goalsQueryOptions),
   head: () => ({
     meta: [
-      { title: "Your goals — Hatch" },
+      { title: "Your goals — Goals of Growth" },
       {
         name: "description",
         content:
-          "Your private goals in Hatch: create goals, break them into small steps, and check them off.",
+          "Your private goals in Goals of Growth: create goals, break them into small steps, and check them off.",
       },
-      { property: "og:title", content: "Your goals — Hatch" },
+      { property: "og:title", content: "Your goals — Goals of Growth" },
       {
         property: "og:description",
         content: "Your private goals, one small step at a time.",
