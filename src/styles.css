@@ -169,6 +169,18 @@
   }
 }
 
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: var(--tw-base, 0.5);
+    transform: scale(1);
+  }
+  50% {
+    opacity: calc(var(--tw-base, 0.5) * 0.25);
+    transform: scale(0.82);
+  }
+}
+
 @layer base {
   * {
     border-color: var(--color-border);
