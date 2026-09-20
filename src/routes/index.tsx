@@ -223,7 +223,9 @@ function GoalsPage() {
                 }
                 onSubmitStep={submitStep(goal.id)}
                 onToggle={(id, done) => toggleStepMutation.mutate({ id, done })}
+                onEditStep={(id, title) => updateStepMutation.mutate({ id, title })}
                 onDeleteStep={(id) => deleteStepMutation.mutate({ id })}
+                onEditGoal={(title) => updateGoalMutation.mutate({ id: goal.id, title })}
                 onDeleteGoal={() => deleteGoalMutation.mutate({ id: goal.id })}
                 index={index}
               />
