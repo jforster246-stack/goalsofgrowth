@@ -342,7 +342,13 @@ function GoalsPage() {
         </div>
 
         {focusOpen && (
-          <FocusMode goals={goals} onClose={() => setFocusOpen(false)} />
+          <FocusMode
+            goals={goals}
+            onClose={() => setFocusOpen(false)}
+            onCompleteStep={(stepId) =>
+              toggleStepMutation.mutate({ id: stepId, done: true })
+            }
+          />
         )}
       </div>
     </div>
@@ -570,6 +576,7 @@ function EditableStepTitle({
 type FocusTarget = {
   goalTitle: string;
   stepTitle: string;
+  stepId: string;
 };
 
 const FOCUS_MINUTES = 25;
