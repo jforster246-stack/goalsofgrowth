@@ -94,6 +94,15 @@ function GoalsPage() {
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState("");
   const [focusOpen, setFocusOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [email, setEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth
+      .getUser()
+      .then(({ data }) => setEmail(data.user?.email ?? null))
+      .catch(() => {});
+  }, []);
 
   const invalidate = () =>
     queryClient.invalidateQueries({ queryKey: ["goals"] });
