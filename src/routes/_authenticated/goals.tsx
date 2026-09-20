@@ -89,6 +89,7 @@ function GoalsPage() {
   const [stepDrafts, setStepDrafts] = useState<Record<string, string>>({});
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState("");
+  const [focusOpen, setFocusOpen] = useState(false);
 
   const invalidate = () =>
     queryClient.invalidateQueries({ queryKey: ["goals"] });
@@ -310,15 +311,39 @@ function GoalsPage() {
 
         {/* Fixed bottom add bar — thumb reach */}
         <div className="fixed inset-x-0 bottom-0 z-10 bg-gradient-to-t from-background via-background/95 to-transparent px-5 pb-5 pt-8">
-          <div className="mx-auto max-w-md">
+          <div className="mx-auto flex max-w-md gap-2.5">
             <button
               onClick={() => setShowNewGoal(true)}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground shadow-lg transition-colors hover:bg-primary/90"
+              className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground shadow-lg transition-colors hover:bg-primary/90"
             >
               <span className="text-base leading-none">+</span> New goal
             </button>
+            <button
+              onClick={() => setFocusOpen(true)}
+              aria-label="Open focus mode"
+              className="flex items-center justify-center gap-2 rounded-2xl bg-foreground px-5 py-3.5 text-sm font-semibold text-background shadow-lg transition-colors hover:bg-foreground/90"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="size-4"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <circle cx="12" cy="12" r="6" />
+                <circle cx="12" cy="12" r="2" />
+              </svg>
+              Focus
+            </button>
           </div>
         </div>
+
+        {focusOpen && (
+          <FocusMode goals={goals} onClose={() => setFocusOpen(false)} />
+        )}
       </div>
     </div>
   );
@@ -539,5 +564,191 @@ function EditableStepTitle({
       aria-label={`Edit step: ${title}`}
       className="min-w-0 flex-1 rounded-lg bg-muted/60 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
     />
+  );
+}
+
+type FocusTarget = {
+  goalTitle: string;
+  stepTitle: string;
+};
+
+const FOCUS_MINUTES = 25;
+
+function FocusMode({
+  goals,
+  onClose,
+}: {
+  goals: GoalWithSteps[];
+  onClose: () => void;
+}) {
+  const [target, setTarget] = useState<FocusTarget | null>(null);
+
+  // Next undone step for each goal
+  const nextSteps = goals
+    .map((goal) => {
+      const step = goal.steps.find((s) => !s.done);
+      return step
+        ? { goalTitle: goal.title, stepTitle: step.title }
+        : null;
+    })
+    .filter((t): t is FocusTarget => t !== null);
+
+  return (
+    <div className="fixed inset-0 z-20 flex flex-col bg-background [animation:rise_0.25s_both]">
+      <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-5 pb-8 pt-6">
+        {target ? (
+          <FocusSession
+            key={target.stepTitle}
+            target={target}
+            onEnd={() => setTarget(null)}
+          />
+        ) : (
+          <>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold tracking-tight">
+                Focus mode
+              </h2>
+              <button
+                onClick={onClose}
+                aria-label="Close focus mode"
+                className="grid size-9 place-items-center rounded-full text-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                ×
+              </button>
+            </div>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Pick one small step to work on.
+            </p>
+
+            <div className="mt-6 flex-1 space-y-3 overflow-y-auto">
+              {nextSteps.length === 0 ? (
+                <div className="rounded-2xl bg-card p-8 text-center shadow-sm ring-1 ring-border">
+                  <p className="text-base font-semibold">All caught up</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Add a goal with some steps to focus on.
+                  </p>
+                </div>
+              ) : (
+                nextSteps.map((t) => (
+                  <button
+                    key={`${t.goalTitle}-${t.stepTitle}`}
+                    onClick={() => setTarget(t)}
+                    className="w-full rounded-2xl bg-card p-4 text-left shadow-sm ring-1 ring-border transition-colors hover:bg-muted/40"
+                  >
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      {t.goalTitle}
+                    </p>
+                    <p className="mt-1 text-[15px] font-semibold tracking-tight">
+                      {t.stepTitle}
+                    </p>
+                    <p className="mt-2 text-xs font-medium text-muted-foreground">
+                      Tap to start a {FOCUS_MINUTES}-minute focus
+                    </p>
+                  </button>
+                ))
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function FocusSession({
+  target,
+  onEnd,
+}: {
+  target: FocusTarget;
+  onEnd: () => void;
+}) {
+  const [secondsLeft, setSecondsLeft] = useState(FOCUS_MINUTES * 60);
+  const [running, setRunning] = useState(true);
+
+  useEffect(() => {
+    if (!running) return;
+    const id = setInterval(
+      () => setSecondsLeft((s) => Math.max(0, s - 1)),
+      1000,
+    );
+    return () => clearInterval(id);
+  }, [running]);
+
+  const minutes = Math.floor(secondsLeft / 60);
+  const seconds = secondsLeft % 60;
+  const display = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  const finished = secondsLeft === 0;
+  const pct = 1 - secondsLeft / (FOCUS_MINUTES * 60);
+
+  return (
+    <div className="flex flex-1 flex-col">
+      <div className="flex justify-end">
+        <button
+          onClick={onEnd}
+          aria-label="End focus session"
+          className="grid size-9 place-items-center rounded-full text-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        >
+          ×
+        </button>
+      </div>
+
+      <div className="flex flex-1 flex-col items-center justify-center text-center">
+        <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+          {target.goalTitle}
+        </p>
+        <h2 className="mt-3 max-w-xs text-2xl font-semibold leading-snug tracking-tight">
+          {target.stepTitle}
+        </h2>
+
+        <div className="relative mt-10 grid size-56 place-items-center">
+          <svg viewBox="0 0 100 100" className="absolute inset-0 -rotate-90">
+            <circle
+              cx="50"
+              cy="50"
+              r="46"
+              fill="none"
+              strokeWidth="4"
+              className="stroke-muted"
+            />
+            <circle
+              cx="50"
+              cy="50"
+              r="46"
+              fill="none"
+              strokeWidth="4"
+              strokeLinecap="round"
+              strokeDasharray={`${2 * Math.PI * 46}`}
+              strokeDashoffset={`${2 * Math.PI * 46 * (1 - pct)}`}
+              className="stroke-primary transition-[stroke-dashoffset] duration-1000 ease-linear"
+            />
+          </svg>
+          <p className="text-5xl font-semibold tabular-nums tracking-tight">
+            {display}
+          </p>
+        </div>
+
+        {finished && (
+          <p className="mt-6 text-sm font-medium text-primary [animation:rise_0.3s_both]">
+            Time's up — nice work.
+          </p>
+        )}
+      </div>
+
+      <div className="space-y-2.5">
+        <button
+          onClick={() => setRunning((r) => !r)}
+          disabled={finished}
+          className="w-full rounded-2xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground shadow-lg transition-colors hover:bg-primary/90 disabled:opacity-40"
+        >
+          {running ? "Pause" : "Resume"}
+        </button>
+        <button
+          onClick={onEnd}
+          className="w-full rounded-2xl py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted"
+        >
+          End session
+        </button>
+      </div>
+    </div>
   );
 }
