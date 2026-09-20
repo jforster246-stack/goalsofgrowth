@@ -50,18 +50,18 @@ const STAR_PATH =
   "M12 0.5 14.1 8.36 21.96 6.25 16.2 12 21.96 17.75 14.1 15.64 12 23.5 9.9 15.64 2.04 17.75 7.8 12 2.04 6.25 9.9 8.36Z M12 9.7a2.3 2.3 0 1 0 0 4.6 2.3 2.3 0 0 0 0-4.6Z";
 
 const SCATTERED_STARS = [
-  { top: "6%", left: "8%", size: 14, delay: "0s", base: 0.55 },
-  { top: "12%", left: "84%", size: 18, delay: "0.8s", base: 0.5 },
-  { top: "22%", left: "58%", size: 11, delay: "1.6s", base: 0.45 },
-  { top: "31%", left: "12%", size: 16, delay: "2.2s", base: 0.4 },
-  { top: "44%", left: "90%", size: 12, delay: "0.4s", base: 0.5 },
-  { top: "52%", left: "4%", size: 15, delay: "1.2s", base: 0.45 },
-  { top: "63%", left: "76%", size: 17, delay: "2.8s", base: 0.4 },
-  { top: "71%", left: "18%", size: 11, delay: "1.9s", base: 0.45 },
-  { top: "82%", left: "66%", size: 14, delay: "0.6s", base: 0.5 },
-  { top: "88%", left: "38%", size: 12, delay: "2.5s", base: 0.4 },
-  { top: "16%", left: "32%", size: 9, delay: "3.1s", base: 0.45 },
-  { top: "68%", left: "45%", size: 10, delay: "1.4s", base: 0.4 },
+  { top: "6%", left: "8%", size: 28, delay: "0s", base: 0.55 },
+  { top: "12%", left: "84%", size: 36, delay: "0.8s", base: 0.5 },
+  { top: "22%", left: "58%", size: 22, delay: "1.6s", base: 0.45 },
+  { top: "31%", left: "12%", size: 32, delay: "2.2s", base: 0.4 },
+  { top: "44%", left: "90%", size: 24, delay: "0.4s", base: 0.5 },
+  { top: "52%", left: "4%", size: 30, delay: "1.2s", base: 0.45 },
+  { top: "63%", left: "76%", size: 34, delay: "2.8s", base: 0.4 },
+  { top: "71%", left: "18%", size: 22, delay: "1.9s", base: 0.45 },
+  { top: "82%", left: "66%", size: 28, delay: "0.6s", base: 0.5 },
+  { top: "88%", left: "38%", size: 24, delay: "2.5s", base: 0.4 },
+  { top: "16%", left: "32%", size: 18, delay: "3.1s", base: 0.45 },
+  { top: "68%", left: "45%", size: 20, delay: "1.4s", base: 0.4 },
 ] as const;
 
 function StarField() {
