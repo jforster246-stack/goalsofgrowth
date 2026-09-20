@@ -35,10 +35,14 @@ const profileQueryOptions = queryOptions({
 type GoalWithSteps = Awaited<ReturnType<typeof listGoals>>[number];
 
 const ACCENT_STYLES = {
-  mint: { dot: "bg-mint", bar: "bg-mint", check: "bg-mint" },
-  sea: { dot: "bg-sea", bar: "bg-sea", check: "bg-sea" },
-  clay: { dot: "bg-clay", bar: "bg-clay", check: "bg-clay" },
+  mint: { dot: "bg-mint", bar: "bg-mint", check: "fill-mint" },
+  sea: { dot: "bg-sea", bar: "bg-sea", check: "fill-sea" },
+  clay: { dot: "bg-clay", bar: "bg-clay", check: "fill-clay" },
 } as const;
+
+// Four-pointed diamond (sparkle) used for step checkboxes.
+const DIAMOND_PATH =
+  "M12 2.5c.55 4.35 3.1 6.9 7.5 7.5-4.4.6-6.95 3.15-7.5 7.5-.55-4.35-3.1-6.9-7.5-7.5 4.4-.6 6.95-3.15 7.5-7.5Z";
 
 type Accent = keyof typeof ACCENT_STYLES;
 
