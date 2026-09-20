@@ -149,7 +149,7 @@ function GoalsPage() {
         </header>
 
         <section className="mt-8 grid items-stretch gap-5 md:grid-cols-12">
-          <div className="flex min-h-[240px] flex-col justify-between rounded-[28px] bg-mint/40 p-6 [animation:rise_0.5s_both]">
+          <div className="flex min-h-[240px] flex-col justify-between rounded-[28px] bg-mint/40 p-6 [animation:rise_0.5s_both] md:col-span-5">
             <p className="font-display text-[15px] font-medium italic text-ink/70">
               A calm note
             </p>
