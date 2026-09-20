@@ -44,23 +44,24 @@ const ACCENT_STYLES = {
 const DIAMOND_PATH =
   "M12 2.5c.55 4.35 3.1 6.9 7.5 7.5-4.4.6-6.95 3.15-7.5 7.5-.55-4.35-3.1-6.9-7.5-7.5 4.4-.6 6.95-3.15 7.5-7.5Z";
 
-// Six-pointed twinkle star used for the scattered background.
+// Six-pointed star with a hollow centre, used for the scattered background.
+// Even-odd fill punches the donut hole out of the middle.
 const STAR_PATH =
-  "M12 1c.5 5.2 1.6 7.8 4.4 8.6L21 5.7l-2.6 4.5c3.6 1.3 4.9 1.6 4.6 1.8s-1 .5-4.6 1.8l2.6 4.5-4.6-3.9C13.6 15.2 12.5 17.8 12 23c-.5-5.2-1.6-7.8-4.4-8.6L3 18.3l2.6-4.5C2 12.5.7 12.2 1 12s1-.5 4.6-1.8L3 5.7l4.6 3.9C10.4 8.8 11.5 6.2 12 1Z";
+  "M12 0.5 14.1 8.36 21.96 6.25 16.2 12 21.96 17.75 14.1 15.64 12 23.5 9.9 15.64 2.04 17.75 7.8 12 2.04 6.25 9.9 8.36Z M12 9.7a2.3 2.3 0 1 0 0 4.6 2.3 2.3 0 0 0 0-4.6Z";
 
 const SCATTERED_STARS = [
-  { top: "6%", left: "8%", size: 14, tint: "fill-mint", delay: "0s", base: 0.45 },
-  { top: "12%", left: "84%", size: 18, tint: "fill-sea", delay: "0.8s", base: 0.4 },
-  { top: "22%", left: "58%", size: 11, tint: "fill-clay", delay: "1.6s", base: 0.35 },
-  { top: "31%", left: "12%", size: 16, tint: "fill-primary", delay: "2.2s", base: 0.3 },
-  { top: "44%", left: "90%", size: 12, tint: "fill-mint", delay: "0.4s", base: 0.4 },
-  { top: "52%", left: "4%", size: 15, tint: "fill-sea", delay: "1.2s", base: 0.35 },
-  { top: "63%", left: "76%", size: 17, tint: "fill-clay", delay: "2.8s", base: 0.3 },
-  { top: "71%", left: "18%", size: 11, tint: "fill-primary", delay: "1.9s", base: 0.35 },
-  { top: "82%", left: "66%", size: 14, tint: "fill-mint", delay: "0.6s", base: 0.4 },
-  { top: "88%", left: "38%", size: 12, tint: "fill-sea", delay: "2.5s", base: 0.3 },
-  { top: "16%", left: "32%", size: 9, tint: "fill-clay", delay: "3.1s", base: 0.35 },
-  { top: "68%", left: "45%", size: 10, tint: "fill-mint", delay: "1.4s", base: 0.3 },
+  { top: "6%", left: "8%", size: 14, delay: "0s", base: 0.55 },
+  { top: "12%", left: "84%", size: 18, delay: "0.8s", base: 0.5 },
+  { top: "22%", left: "58%", size: 11, delay: "1.6s", base: 0.45 },
+  { top: "31%", left: "12%", size: 16, delay: "2.2s", base: 0.4 },
+  { top: "44%", left: "90%", size: 12, delay: "0.4s", base: 0.5 },
+  { top: "52%", left: "4%", size: 15, delay: "1.2s", base: 0.45 },
+  { top: "63%", left: "76%", size: 17, delay: "2.8s", base: 0.4 },
+  { top: "71%", left: "18%", size: 11, delay: "1.9s", base: 0.45 },
+  { top: "82%", left: "66%", size: 14, delay: "0.6s", base: 0.5 },
+  { top: "88%", left: "38%", size: 12, delay: "2.5s", base: 0.4 },
+  { top: "16%", left: "32%", size: 9, delay: "3.1s", base: 0.45 },
+  { top: "68%", left: "45%", size: 10, delay: "1.4s", base: 0.4 },
 ] as const;
 
 function StarField() {
