@@ -208,7 +208,7 @@ function GoalsPage() {
           >
             {(profile?.display_name?.trim()?.[0] ?? "?").toUpperCase()}
           </button>
-          <h1 className="min-w-0 flex-1 truncate text-center font-display text-[27px] font-normal leading-tight tracking-tight">
+          <h1 className="min-w-0 flex-1 truncate text-center font-display text-[30px] font-normal leading-tight tracking-tight">
             {profile?.display_name
               ? `${profile.display_name}'s goals`
               : "Your goals"}
