@@ -255,7 +255,9 @@ function GoalCard({
   onDraftChange,
   onSubmitStep,
   onToggle,
+  onEditStep,
   onDeleteStep,
+  onEditGoal,
   onDeleteGoal,
   index,
 }: {
@@ -264,7 +266,9 @@ function GoalCard({
   onDraftChange: (value: string) => void;
   onSubmitStep: (e: React.FormEvent) => void;
   onToggle: (id: string, done: boolean) => void;
+  onEditStep: (id: string, title: string) => void;
   onDeleteStep: (id: string) => void;
+  onEditGoal: (title: string) => void;
   onDeleteGoal: () => void;
   index: number;
 }) {
@@ -274,6 +278,16 @@ function GoalCard({
   const done = goal.steps.filter((s) => s.done).length;
   const pct = total === 0 ? 0 : Math.round((done / total) * 100);
 
+  const [editingGoal, setEditingGoal] = useState(false);
+  const [goalDraft, setGoalDraft] = useState(goal.title);
+
+  const saveGoalTitle = () => {
+    const title = goalDraft.trim();
+    if (title && title !== goal.title) onEditGoal(title);
+    else setGoalDraft(goal.title);
+    setEditingGoal(false);
+  };
+
   return (
     <article
       className="rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border"
@@ -281,12 +295,51 @@ function GoalCard({
     >
       <div className="flex items-center gap-3">
         <span className={`size-2.5 shrink-0 rounded-full ${accent.dot}`} />
-        <h3 className="min-w-0 flex-1 truncate text-[15px] font-semibold tracking-tight">
-          {goal.title}
-        </h3>
+        {editingGoal ? (
+          <input
+            autoFocus
+            value={goalDraft}
+            onChange={(e) => setGoalDraft(e.target.value)}
+            onBlur={saveGoalTitle}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") saveGoalTitle();
+              if (e.key === "Escape") {
+                setGoalDraft(goal.title);
+                setEditingGoal(false);
+              }
+            }}
+            maxLength={140}
+            aria-label={`Edit goal: ${goal.title}`}
+            className="min-w-0 flex-1 rounded-lg bg-muted/60 px-2 py-1 text-[15px] font-semibold tracking-tight focus:outline-none focus:ring-1 focus:ring-ring"
+          />
+        ) : (
+          <h3 className="min-w-0 flex-1 truncate text-[15px] font-semibold tracking-tight">
+            {goal.title}
+          </h3>
+        )}
         <span className="shrink-0 text-xs font-medium text-muted-foreground">
           {done}/{total}
         </span>
+        <button
+          onClick={() => {
+            setGoalDraft(goal.title);
+            setEditingGoal((v) => !v);
+          }}
+          aria-label={`Edit goal: ${goal.title}`}
+          className="grid size-7 shrink-0 place-items-center rounded-full text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="size-3.5"
+          >
+            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+          </svg>
+        </button>
         <button
           onClick={onDeleteGoal}
           aria-label={`Delete goal: ${goal.title}`}
