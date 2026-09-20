@@ -584,9 +584,11 @@ const FOCUS_MINUTES = 25;
 function FocusMode({
   goals,
   onClose,
+  onCompleteStep,
 }: {
   goals: GoalWithSteps[];
   onClose: () => void;
+  onCompleteStep: (stepId: string) => void;
 }) {
   const [target, setTarget] = useState<FocusTarget | null>(null);
 
@@ -595,7 +597,11 @@ function FocusMode({
     .map((goal) => {
       const step = goal.steps.find((s) => !s.done);
       return step
-        ? { goalTitle: goal.title, stepTitle: step.title }
+        ? {
+            goalTitle: goal.title,
+            stepTitle: step.title,
+            stepId: step.id,
+          }
         : null;
     })
     .filter((t): t is FocusTarget => t !== null);
@@ -607,6 +613,10 @@ function FocusMode({
           <FocusSession
             key={target.stepTitle}
             target={target}
+            onComplete={() => {
+              onCompleteStep(target.stepId);
+              setTarget(null);
+            }}
             onEnd={() => setTarget(null)}
           />
         ) : (
