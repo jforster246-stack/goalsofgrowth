@@ -412,3 +412,57 @@ function GoalCard({
     </article>
   );
 }
+
+function EditableStepTitle({
+  title,
+  done,
+  onSave,
+}: {
+  title: string;
+  done: boolean;
+  onSave: (title: string) => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(title);
+
+  if (!editing) {
+    return (
+      <button
+        onClick={() => {
+          setValue(title);
+          setEditing(true);
+        }}
+        aria-label={`Edit step: ${title}`}
+        className={`min-w-0 flex-1 text-left text-sm ${
+          done
+            ? "text-muted-foreground line-through decoration-muted-foreground/40"
+            : ""
+        }`}
+      >
+        {title}
+      </button>
+    );
+  }
+
+  const save = () => {
+    const next = value.trim();
+    if (next && next !== title) onSave(next);
+    setEditing(false);
+  };
+
+  return (
+    <input
+      autoFocus
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      onBlur={save}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") save();
+        if (e.key === "Escape") setEditing(false);
+      }}
+      maxLength={240}
+      aria-label={`Edit step: ${title}`}
+      className="min-w-0 flex-1 rounded-lg bg-muted/60 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+    />
+  );
+}
