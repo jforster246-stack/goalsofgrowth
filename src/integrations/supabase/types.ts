@@ -21,6 +21,7 @@ export type Database = {
           id: string
           position: number
           title: string
+          user_id: string | null
         }
         Insert: {
           accent?: string
@@ -28,6 +29,7 @@ export type Database = {
           id?: string
           position?: number
           title: string
+          user_id?: string | null
         }
         Update: {
           accent?: string
@@ -35,6 +37,25 @@ export type Database = {
           id?: string
           position?: number
           title?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
         }
         Relationships: []
       }
@@ -78,7 +99,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      claim_unowned_goals: { Args: never; Returns: number }
     }
     Enums: {
       [_ in never]: never
