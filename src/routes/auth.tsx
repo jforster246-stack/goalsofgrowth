@@ -7,16 +7,16 @@ export const Route = createFileRoute("/auth")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Sign in — Hatch" },
+      { title: "Sign in — Goals of Growth" },
       {
         name: "description",
         content:
-          "Sign in to Hatch to keep your goals and steps private to your account.",
+          "Sign in to Goals of Growth to keep your goals and steps private to your account.",
       },
-      { property: "og:title", content: "Sign in — Hatch" },
+      { property: "og:title", content: "Sign in — Goals of Growth" },
       {
         property: "og:description",
-        content: "Sign in to Hatch to keep your goals private.",
+        content: "Sign in to Goals of Growth to keep your goals private.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -95,16 +95,13 @@ function AuthPage() {
   return (
     <div className="min-h-dvh bg-background font-body text-foreground antialiased">
       <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-5 py-10">
-        <div className="flex items-center gap-2">
-          <div className="grid size-8 place-items-center rounded-xl bg-primary text-sm font-bold text-primary-foreground">
-            h
-          </div>
-          <span className="text-lg font-semibold tracking-tight">hatch</span>
-        </div>
-
-        <h1 className="mt-8 text-[26px] font-semibold leading-tight tracking-tight">
-          {mode === "signin" ? "Welcome back" : "Create your account"}
+        <h1 className="font-display text-[40px] leading-tight text-focus">
+          Goals of Growth
         </h1>
+
+        <h2 className="mt-6 text-[26px] font-semibold leading-tight tracking-tight">
+          {mode === "signin" ? "Welcome back" : "Create your account"}
+        </h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Your goals and steps stay private to you.
         </p>
