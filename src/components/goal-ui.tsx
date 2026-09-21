@@ -3,9 +3,9 @@ import type { listGoals } from "@/lib/goals.functions";
 export type GoalWithSteps = Awaited<ReturnType<typeof listGoals>>[number];
 
 export const ACCENT_STYLES = {
-  mint: { dot: "bg-mint", bar: "bg-mint", check: "fill-mint" },
-  sea: { dot: "bg-sea", bar: "bg-sea", check: "fill-sea" },
-  clay: { dot: "bg-clay", bar: "bg-clay", check: "fill-clay" },
+  mint: { dot: "bg-mint", bar: "bg-mint", check: "fill-mint", text: "text-mint" },
+  sea: { dot: "bg-sea", bar: "bg-sea", check: "fill-sea", text: "text-sea" },
+  clay: { dot: "bg-clay", bar: "bg-clay", check: "fill-clay", text: "text-clay" },
 } as const;
 
 export type Accent = keyof typeof ACCENT_STYLES;

@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
+import { AccentStar, accentOf } from "@/components/goal-ui";
 import type { GoalWithSteps } from "@/components/goal-ui";
 
 type FocusTarget = {
   goalTitle: string;
+  accentClass: string;
+  accentTextClass: string;
   stepTitle: string;
   stepId: string;
 };
@@ -21,10 +24,16 @@ export function FocusMode({
   const [target, setTarget] = useState<FocusTarget | null>(null);
 
   const nextSteps = goals
-    .map((goal) => {
+    .map((goal): FocusTarget | null => {
       const step = goal.steps.find((s) => !s.done);
       return step
-        ? { goalTitle: goal.title, stepTitle: step.title, stepId: step.id }
+        ? {
+            goalTitle: goal.title,
+            accentClass: accentOf(goal).check,
+            accentTextClass: accentOf(goal).text,
+            stepTitle: step.title,
+            stepId: step.id,
+          }
         : null;
     })
     .filter((t): t is FocusTarget => t !== null);
@@ -75,10 +84,15 @@ export function FocusMode({
                     onClick={() => setTarget(t)}
                     className="w-full rounded-2xl bg-card p-4 text-left shadow-sm ring-1 ring-border transition-colors hover:bg-muted/40"
                   >
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      {t.goalTitle}
-                    </p>
-                    <p className="mt-1 text-[15px] font-semibold tracking-tight">
+                    <div className="flex items-center gap-1.5">
+                      <AccentStar fillClass={t.accentClass} />
+                      <p
+                        className={`text-xs font-semibold uppercase tracking-wide ${t.accentTextClass}`}
+                      >
+                        {t.goalTitle}
+                      </p>
+                    </div>
+                    <p className="mt-1.5 text-[15px] font-semibold tracking-tight">
                       {t.stepTitle}
                     </p>
                     <p className="mt-2 text-xs font-medium text-muted-foreground">
