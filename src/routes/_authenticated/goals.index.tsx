@@ -6,9 +6,18 @@ import {
 } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/app-shell";
-import { accentOf, goalProgress, type GoalWithSteps } from "@/components/goal-ui";
+import {
+  accentOf,
+  DIAMOND_PATH,
+  goalProgress,
+  type GoalWithSteps,
+} from "@/components/goal-ui";
 import { goalsQueryOptions } from "@/lib/goal-queries";
-import { claimUnownedGoals, createGoal } from "@/lib/goals.functions";
+import {
+  claimUnownedGoals,
+  createGoal,
+  toggleStep,
+} from "@/lib/goals.functions";
 
 export const Route = createFileRoute("/_authenticated/goals/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(goalsQueryOptions),
