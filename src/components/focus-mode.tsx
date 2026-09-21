@@ -5,6 +5,7 @@ import type { GoalWithSteps } from "@/components/goal-ui";
 type FocusTarget = {
   goalTitle: string;
   accentClass: string;
+  accentTextClass: string;
   stepTitle: string;
   stepId: string;
 };
@@ -29,6 +30,7 @@ export function FocusMode({
         ? {
             goalTitle: goal.title,
             accentClass: accentOf(goal).check,
+            accentTextClass: accentOf(goal).text,
             stepTitle: step.title,
             stepId: step.id,
           }
