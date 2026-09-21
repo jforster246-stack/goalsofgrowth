@@ -19,7 +19,7 @@ export const DIAMOND_PATH =
   "M12 2.5c.55 4.35 3.1 6.9 7.5 7.5-4.4.6-6.95 3.15-7.5 7.5-.55-4.35-3.1-6.9-7.5-7.5 4.4-.6 6.95-3.15 7.5-7.5Z";
 
 /** Six-pointed star with a hollow centre, used for the scattered background. */
-const STAR_PATH =
+export const STAR_PATH =
   "M12 0.5 14.1 8.36 21.96 6.25 16.2 12 21.96 17.75 14.1 15.64 12 23.5 9.9 15.64 2.04 17.75 7.8 12 2.04 6.25 9.9 8.36Z M12 9.7a2.3 2.3 0 1 0 0 4.6 2.3 2.3 0 0 0 0-4.6Z";
 
 const SCATTERED_STARS = [
@@ -36,6 +36,15 @@ const SCATTERED_STARS = [
   { top: "16%", left: "32%", size: 36, delay: "3.1s", base: 0.45 },
   { top: "68%", left: "45%", size: 40, delay: "1.4s", base: 0.4 },
 ] as const;
+
+/** Hollow six-pointed star badge shown next to a goal, tinted by its accent. */
+export function AccentStar({ fillClass }: { fillClass: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={`size-4 shrink-0 ${fillClass}`} aria-hidden>
+      <path d={STAR_PATH} fillRule="evenodd" />
+    </svg>
+  );
+}
 
 export function StarField() {
   return (

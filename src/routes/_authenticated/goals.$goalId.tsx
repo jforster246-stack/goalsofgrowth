@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/app-shell";
-import { accentOf, DIAMOND_PATH, goalProgress } from "@/components/goal-ui";
+import { AccentStar, accentOf, DIAMOND_PATH, goalProgress } from "@/components/goal-ui";
 import { goalQueryOptions } from "@/lib/goal-queries";
 import {
   addStep,
@@ -149,7 +149,7 @@ function GoalDetailPage() {
           />
 
           <div className="mt-4 flex items-center gap-3">
-            <span className={`size-2.5 shrink-0 rounded-full ${accent.dot}`} />
+            <AccentStar fillClass={accent.check} />
             <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
               <div
                 className={`h-full rounded-full ${accent.bar} transition-[width] duration-500`}
