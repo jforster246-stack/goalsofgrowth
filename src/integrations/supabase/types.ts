@@ -22,6 +22,8 @@ export type Database = {
           position: number
           title: string
           user_id: string | null
+          vision: string | null
+          why: string | null
         }
         Insert: {
           accent?: string
@@ -30,6 +32,8 @@ export type Database = {
           position?: number
           title: string
           user_id?: string | null
+          vision?: string | null
+          why?: string | null
         }
         Update: {
           accent?: string
@@ -38,6 +42,8 @@ export type Database = {
           position?: number
           title?: string
           user_id?: string | null
+          vision?: string | null
+          why?: string | null
         }
         Relationships: []
       }
@@ -45,17 +51,32 @@ export type Database = {
         Row: {
           created_at: string
           display_name: string | null
+          goal_of_day_date: string | null
+          goal_of_day_id: string | null
           id: string
+          last_active_date: string | null
+          longest_streak: number
+          streak_count: number
         }
         Insert: {
           created_at?: string
           display_name?: string | null
+          goal_of_day_date?: string | null
+          goal_of_day_id?: string | null
           id: string
+          last_active_date?: string | null
+          longest_streak?: number
+          streak_count?: number
         }
         Update: {
           created_at?: string
           display_name?: string | null
+          goal_of_day_date?: string | null
+          goal_of_day_id?: string | null
           id?: string
+          last_active_date?: string | null
+          longest_streak?: number
+          streak_count?: number
         }
         Relationships: []
       }

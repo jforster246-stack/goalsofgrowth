@@ -15,6 +15,13 @@
       "when": 1789883982473,
       "tag": "0001_add_auth_ownership",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789951023345,
+      "tag": "0002_add_goal_details_streak_goal_of_day",
+      "breakpoints": true
     }
   ]
 }
