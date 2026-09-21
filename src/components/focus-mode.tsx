@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { AccentStar, accentOf } from "@/components/goal-ui";
 import type { GoalWithSteps } from "@/components/goal-ui";
 
 type FocusTarget = {
   goalTitle: string;
+  accentClass: string;
   stepTitle: string;
   stepId: string;
 };
