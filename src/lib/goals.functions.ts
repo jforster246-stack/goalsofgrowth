@@ -310,11 +310,14 @@ export const updateGoalDetails = createServerFn({ method: "POST" })
       .parse(data),
   )
   .handler(async ({ data, context }) => {
-    const { id, ...fields } = data;
+    const fields: { title?: string; why?: string; vision?: string } = {};
+    if (data.title !== undefined) fields.title = data.title;
+    if (data.why !== undefined) fields.why = data.why;
+    if (data.vision !== undefined) fields.vision = data.vision;
     const { error } = await context.supabase
       .from("goals")
       .update(fields)
-      .eq("id", id);
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
