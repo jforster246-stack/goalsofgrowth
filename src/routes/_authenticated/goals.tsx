@@ -240,7 +240,7 @@ function GoalsPage() {
   return (
     <div className="relative min-h-dvh bg-background font-body text-foreground antialiased">
       <StarField />
-      <div className="relative z-[1] mx-auto flex min-h-dvh w-full max-w-3xl flex-col px-5 pb-28 pt-6">
+      <div className="relative z-[1] mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 pb-28 pt-6">
         <header className="flex items-center justify-between gap-3">
           <button
             onClick={() => setProfileOpen(true)}
@@ -322,7 +322,7 @@ function GoalsPage() {
             </p>
           </div>
         ) : (
-          <div className="mt-5 grid grid-cols-2 items-start gap-3">
+          <div className="mt-5 space-y-3">
             {goals.map((goal, index) => (
               <GoalCard
                 key={goal.id}
@@ -349,7 +349,7 @@ function GoalsPage() {
 
         {/* Fixed bottom focus bar — thumb reach */}
         <div className="fixed inset-x-0 bottom-0 z-10 bg-gradient-to-t from-background via-background/95 to-transparent px-5 pb-5 pt-8">
-          <div className="mx-auto flex max-w-3xl">
+          <div className="mx-auto flex max-w-md">
             <button
               onClick={() => setFocusOpen(true)}
               aria-label="Open focus mode"
