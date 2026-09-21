@@ -6,9 +6,18 @@ import {
 } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/app-shell";
-import { accentOf, goalProgress, type GoalWithSteps } from "@/components/goal-ui";
+import {
+  accentOf,
+  DIAMOND_PATH,
+  goalProgress,
+  type GoalWithSteps,
+} from "@/components/goal-ui";
 import { goalsQueryOptions } from "@/lib/goal-queries";
-import { claimUnownedGoals, createGoal } from "@/lib/goals.functions";
+import {
+  claimUnownedGoals,
+  createGoal,
+  toggleStep,
+} from "@/lib/goals.functions";
 
 export const Route = createFileRoute("/_authenticated/goals/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(goalsQueryOptions),
@@ -167,8 +176,22 @@ function GoalSummaryCard({
   goal: GoalWithSteps;
   index: number;
 }) {
+  const queryClient = useQueryClient();
   const accent = accentOf(goal);
   const { done, total, pct, complete, nextStep } = goalProgress(goal);
+
+  const toggleStepMutation = useMutation({
+    mutationFn: (input: { id: string; done: boolean }) =>
+      toggleStep({ data: input }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["goals"] }),
+  });
+
+  const tickNextStep = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!nextStep || toggleStepMutation.isPending) return;
+    toggleStepMutation.mutate({ id: nextStep.id, done: true });
+  };
 
   return (
     <Link
@@ -197,11 +220,33 @@ function GoalSummaryCard({
       <p className="mt-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
         {complete ? "Completed" : "Next step"}
       </p>
-      <p className="mt-0.5 text-sm">
-        {complete
-          ? "Every step is done — nice work."
-          : (nextStep?.title ?? "No steps yet — tap to add one.")}
-      </p>
+      {complete ? (
+        <p className="mt-0.5 text-sm">Every step is done — nice work.</p>
+      ) : nextStep ? (
+        <div className="mt-1 flex items-center gap-2.5">
+          <button
+            onClick={tickNextStep}
+            disabled={toggleStepMutation.isPending}
+            aria-label={`Tick off "${nextStep.title}"`}
+            className="grid size-8 shrink-0 place-items-center disabled:opacity-40"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              className={`size-5 transition-colors ${
+                toggleStepMutation.isPending
+                  ? accent.check
+                  : "fill-none stroke-muted-foreground/50 hover:stroke-foreground"
+              }`}
+              strokeWidth="1.8"
+            >
+              <path d={DIAMOND_PATH} />
+            </svg>
+          </button>
+          <span className="min-w-0 flex-1 text-sm">{nextStep.title}</span>
+        </div>
+      ) : (
+        <p className="mt-0.5 text-sm">No steps yet — tap to add one.</p>
+      )}
     </Link>
   );
 }
