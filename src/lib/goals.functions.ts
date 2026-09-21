@@ -276,3 +276,45 @@ export const deleteStep = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const getGoal = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) => z.object({ id: z.string().uuid() }).parse(data))
+  .handler(async ({ data, context }) => {
+    const supabase = context.supabase;
+    const [goalResult, stepsResult] = await Promise.all([
+      supabase.from("goals").select("*").eq("id", data.id).maybeSingle(),
+      supabase
+        .from("steps")
+        .select("*")
+        .eq("goal_id", data.id)
+        .order("position", { ascending: true })
+        .order("created_at", { ascending: true }),
+    ]);
+    if (goalResult.error) throw new Error(goalResult.error.message);
+    if (stepsResult.error) throw new Error(stepsResult.error.message);
+    if (!goalResult.data) throw new Error("Goal not found");
+    return { ...goalResult.data, steps: stepsResult.data ?? [] };
+  });
+
+export const updateGoalDetails = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        title: z.string().trim().min(1).max(140).optional(),
+        why: z.string().max(2000).optional(),
+        vision: z.string().max(2000).optional(),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { id, ...fields } = data;
+    const { error } = await context.supabase
+      .from("goals")
+      .update(fields)
+      .eq("id", id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
