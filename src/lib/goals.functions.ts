@@ -4,17 +4,94 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const ACCENTS = ["mint", "sea", "clay"] as const;
 
+const PROFILE_FIELDS =
+  "id, display_name, streak_count, longest_streak, last_active_date, goal_of_day_id, goal_of_day_date";
+
+const emptyProfile = (id: string) => ({
+  id,
+  display_name: null as string | null,
+  streak_count: 0,
+  longest_streak: 0,
+  last_active_date: null as string | null,
+  goal_of_day_id: null as string | null,
+  goal_of_day_date: null as string | null,
+});
+
 export const getProfile = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("profiles")
-      .select("id, display_name")
+      .select(PROFILE_FIELDS)
       .eq("id", context.userId)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    return data ?? { id: context.userId, display_name: null };
+    return data ?? emptyProfile(context.userId);
   });
+
+const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+
+/** Records a sign-in for the given local day and rolls the streak forward. */
+export const touchStreak = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) => z.object({ today: dateSchema }).parse(data))
+  .handler(async ({ data, context }) => {
+    const { data: profile, error } = await context.supabase
+      .from("profiles")
+      .select(PROFILE_FIELDS)
+      .eq("id", context.userId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+
+    const current = profile ?? emptyProfile(context.userId);
+    if (current.last_active_date === data.today) return current;
+
+    const yesterday = new Date(`${data.today}T00:00:00Z`);
+    yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+    const yesterdayKey = yesterday.toISOString().slice(0, 10);
+
+    const streak =
+      current.last_active_date === yesterdayKey
+        ? (current.streak_count ?? 0) + 1
+        : 1;
+
+    const next = {
+      ...current,
+      streak_count: streak,
+      longest_streak: Math.max(current.longest_streak ?? 0, streak),
+      last_active_date: data.today,
+    };
+
+    const { error: upsertError } = await context.supabase
+      .from("profiles")
+      .upsert({
+        id: context.userId,
+        streak_count: next.streak_count,
+        longest_streak: next.longest_streak,
+        last_active_date: next.last_active_date,
+      });
+    if (upsertError) throw new Error(upsertError.message);
+    return next;
+  });
+
+/** Picks the goal to focus on for the given local day. */
+export const setGoalOfDay = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) =>
+    z
+      .object({ goalId: z.string().uuid().nullable(), today: dateSchema })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("profiles").upsert({
+      id: context.userId,
+      goal_of_day_id: data.goalId,
+      goal_of_day_date: data.goalId ? data.today : null,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 
 export const updateDisplayName = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
