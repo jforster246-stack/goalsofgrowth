@@ -163,52 +163,6 @@ function GoalDetailPage() {
         </section>
 
         <section className="rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border">
-          <label
-            htmlFor="goal-why"
-            className="text-xs font-medium uppercase tracking-wide text-muted-foreground"
-          >
-            Why I'm doing this
-          </label>
-          <textarea
-            id="goal-why"
-            value={why}
-            onChange={(e) => setWhy(e.target.value)}
-            rows={4}
-            maxLength={2000}
-            placeholder="What's pulling you towards this?"
-            className="mt-2 w-full resize-y rounded-xl bg-muted/60 px-3 py-2.5 text-sm leading-relaxed placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-ring"
-          />
-        </section>
-
-        <section className="rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border">
-          <label
-            htmlFor="goal-vision"
-            className="text-xs font-medium uppercase tracking-wide text-muted-foreground"
-          >
-            What it looks and feels like when it's done
-          </label>
-          <textarea
-            id="goal-vision"
-            value={vision}
-            onChange={(e) => setVision(e.target.value)}
-            rows={5}
-            maxLength={2000}
-            placeholder="Picture the finished version of this. Where are you? How does it feel?"
-            className="mt-2 w-full resize-y rounded-xl bg-muted/60 px-3 py-2.5 text-sm leading-relaxed placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-ring"
-          />
-        </section>
-
-        <button
-          onClick={() =>
-            saveMutation.mutate({ title: title.trim() || goal.title, why, vision })
-          }
-          disabled={!dirty || saveMutation.isPending}
-          className="w-full rounded-2xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground shadow-md transition-colors hover:bg-primary/90 disabled:opacity-40"
-        >
-          {saved ? "Saved" : saveMutation.isPending ? "Saving…" : "Save changes"}
-        </button>
-
-        <section className="rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Small steps
           </p>
@@ -283,6 +237,52 @@ function GoalDetailPage() {
             </form>
           </div>
         </section>
+
+        <section className="rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border">
+          <label
+            htmlFor="goal-why"
+            className="text-xs font-medium uppercase tracking-wide text-muted-foreground"
+          >
+            Why I'm doing this
+          </label>
+          <textarea
+            id="goal-why"
+            value={why}
+            onChange={(e) => setWhy(e.target.value)}
+            rows={4}
+            maxLength={2000}
+            placeholder="What's pulling you towards this?"
+            className="mt-2 w-full resize-y rounded-xl bg-muted/60 px-3 py-2.5 text-sm leading-relaxed placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-ring"
+          />
+        </section>
+
+        <section className="rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border">
+          <label
+            htmlFor="goal-vision"
+            className="text-xs font-medium uppercase tracking-wide text-muted-foreground"
+          >
+            What it looks and feels like when it's done
+          </label>
+          <textarea
+            id="goal-vision"
+            value={vision}
+            onChange={(e) => setVision(e.target.value)}
+            rows={5}
+            maxLength={2000}
+            placeholder="Picture the finished version of this. Where are you? How does it feel?"
+            className="mt-2 w-full resize-y rounded-xl bg-muted/60 px-3 py-2.5 text-sm leading-relaxed placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-ring"
+          />
+        </section>
+
+        <button
+          onClick={() =>
+            saveMutation.mutate({ title: title.trim() || goal.title, why, vision })
+          }
+          disabled={!dirty || saveMutation.isPending}
+          className="w-full rounded-2xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground shadow-md transition-colors hover:bg-primary/90 disabled:opacity-40"
+        >
+          {saved ? "Saved" : saveMutation.isPending ? "Saving…" : "Save changes"}
+        </button>
 
         <button
           onClick={() => deleteGoalMutation.mutate()}
