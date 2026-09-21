@@ -220,11 +220,33 @@ function GoalSummaryCard({
       <p className="mt-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
         {complete ? "Completed" : "Next step"}
       </p>
-      <p className="mt-0.5 text-sm">
-        {complete
-          ? "Every step is done — nice work."
-          : (nextStep?.title ?? "No steps yet — tap to add one.")}
-      </p>
+      {complete ? (
+        <p className="mt-0.5 text-sm">Every step is done — nice work.</p>
+      ) : nextStep ? (
+        <div className="mt-1 flex items-center gap-2.5">
+          <button
+            onClick={tickNextStep}
+            disabled={toggleStepMutation.isPending}
+            aria-label={`Tick off "${nextStep.title}"`}
+            className="grid size-8 shrink-0 place-items-center disabled:opacity-40"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              className={`size-5 transition-colors ${
+                toggleStepMutation.isPending
+                  ? accent.check
+                  : "fill-none stroke-muted-foreground/50 hover:stroke-foreground"
+              }`}
+              strokeWidth="1.8"
+            >
+              <path d={DIAMOND_PATH} />
+            </svg>
+          </button>
+          <span className="min-w-0 flex-1 text-sm">{nextStep.title}</span>
+        </div>
+      ) : (
+        <p className="mt-0.5 text-sm">No steps yet — tap to add one.</p>
+      )}
     </Link>
   );
 }
