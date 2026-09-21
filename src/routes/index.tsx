@@ -32,7 +32,7 @@ function Landing() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/goals", replace: true });
+      if (data.session) navigate({ to: "/overview", replace: true });
     });
   }, [navigate]);
 
