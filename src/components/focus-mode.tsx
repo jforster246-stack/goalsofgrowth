@@ -87,7 +87,7 @@ export function FocusMode({
                     <div className="flex items-center gap-1.5">
                       <AccentStar fillClass={t.accentClass} />
                       <p
-                        className={`text-xs font-semibold uppercase tracking-wide ${t.accentClass}`}
+                        className={`text-xs font-semibold uppercase tracking-wide ${t.accentTextClass}`}
                       >
                         {t.goalTitle}
                       </p>
