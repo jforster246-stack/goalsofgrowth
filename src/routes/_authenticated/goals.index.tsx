@@ -7,6 +7,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import {
+  AccentStar,
   accentOf,
   DIAMOND_PATH,
   goalProgress,
@@ -201,7 +202,7 @@ function GoalSummaryCard({
       style={{ animation: `rise 0.35s ${index * 0.05}s both` }}
     >
       <div className="flex items-center gap-3">
-        <span className={`size-2.5 shrink-0 rounded-full ${accent.dot}`} />
+        <AccentStar fillClass={accent.check} />
         <h3 className="min-w-0 flex-1 truncate text-[15px] font-semibold tracking-tight">
           {goal.title}
         </h3>
