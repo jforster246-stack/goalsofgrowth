@@ -26,7 +26,12 @@ export function FocusMode({
     .map((goal) => {
       const step = goal.steps.find((s) => !s.done);
       return step
-        ? { goalTitle: goal.title, stepTitle: step.title, stepId: step.id }
+        ? {
+            goalTitle: goal.title,
+            accentClass: accentOf(goal).check,
+            stepTitle: step.title,
+            stepId: step.id,
+          }
         : null;
     })
     .filter((t): t is FocusTarget => t !== null);
