@@ -24,7 +24,7 @@ export function FocusMode({
   const [target, setTarget] = useState<FocusTarget | null>(null);
 
   const nextSteps = goals
-    .map((goal) => {
+    .map((goal): FocusTarget | null => {
       const step = goal.steps.find((s) => !s.done);
       return step
         ? {
