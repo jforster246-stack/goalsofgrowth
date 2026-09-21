@@ -82,10 +82,15 @@ export function FocusMode({
                     onClick={() => setTarget(t)}
                     className="w-full rounded-2xl bg-card p-4 text-left shadow-sm ring-1 ring-border transition-colors hover:bg-muted/40"
                   >
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      {t.goalTitle}
-                    </p>
-                    <p className="mt-1 text-[15px] font-semibold tracking-tight">
+                    <div className="flex items-center gap-1.5">
+                      <AccentStar fillClass={t.accentClass} />
+                      <p
+                        className={`text-xs font-semibold uppercase tracking-wide ${t.accentClass}`}
+                      >
+                        {t.goalTitle}
+                      </p>
+                    </div>
+                    <p className="mt-1.5 text-[15px] font-semibold tracking-tight">
                       {t.stepTitle}
                     </p>
                     <p className="mt-2 text-xs font-medium text-muted-foreground">
