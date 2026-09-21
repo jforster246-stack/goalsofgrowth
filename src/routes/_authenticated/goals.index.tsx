@@ -176,8 +176,22 @@ function GoalSummaryCard({
   goal: GoalWithSteps;
   index: number;
 }) {
+  const queryClient = useQueryClient();
   const accent = accentOf(goal);
   const { done, total, pct, complete, nextStep } = goalProgress(goal);
+
+  const toggleStepMutation = useMutation({
+    mutationFn: (input: { id: string; done: boolean }) =>
+      toggleStep({ data: input }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["goals"] }),
+  });
+
+  const tickNextStep = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!nextStep || toggleStepMutation.isPending) return;
+    toggleStepMutation.mutate({ id: nextStep.id, done: true });
+  };
 
   return (
     <Link
