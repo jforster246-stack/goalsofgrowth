@@ -113,7 +113,7 @@ function OverviewPage() {
 
   return (
     <AppShell left={<WinsButton />}>
-      <div className="relative mx-auto max-w-md pb-24 pt-2">
+      <div className="relative w-full pb-24 pt-2">
         <div className="mt-6 border-t border-dashed border-black/15" />
 
         {/* Next steps */}
