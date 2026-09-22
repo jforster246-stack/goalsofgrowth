@@ -117,7 +117,7 @@ function OverviewPage() {
         </button>
       }
     >
-      <div className="relative mx-auto max-w-md pb-24 pt-2">
+      <div className="relative mx-auto min-w-0 max-w-md pb-24 pt-2">
         <div className="mt-5 border-t border-dashed border-border" />
 
         {/* Next steps */}
@@ -151,69 +151,71 @@ function OverviewPage() {
           All goals
         </p>
 
-        <div className="mt-3 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2">
-          {goals.map((goal) => {
-            const progress = goalProgress(goal);
-            const isGoalOfDay = goal.id === goalOfDay?.id;
-            return (
-              <div
-                key={goal.id}
-                className={`w-[78%] shrink-0 snap-center overflow-hidden rounded-2xl shadow-sm ring-1 ring-border ${accentOf(goal).bar}`}
-              >
-                <Link
-                  to="/goals/$goalId"
-                  params={{ goalId: goal.id }}
-                  className="flex flex-col items-center px-4 pb-5 pt-4 text-primary-foreground"
+        <div className="mt-3 min-w-0 max-w-full overflow-x-auto">
+          <div className="flex w-max snap-x snap-mandatory gap-3 pb-2">
+            {goals.map((goal) => {
+              const progress = goalProgress(goal);
+              const isGoalOfDay = goal.id === goalOfDay?.id;
+              return (
+                <div
+                  key={goal.id}
+                  className={`w-64 shrink-0 snap-center overflow-hidden rounded-2xl shadow-sm ring-1 ring-border ${accentOf(goal).bar}`}
                 >
-                  {isGoalOfDay && (
-                    <span className="mb-2 rounded-full bg-black/20 px-3 py-0.5 text-[10px] font-semibold uppercase tracking-wide">
-                      Goal of the day
-                    </span>
-                  )}
-                  <Sparkle className="size-8" strokeWidth={1.25} />
-                  <p className="mt-3 text-center text-lg font-semibold leading-snug">
-                    {goal.title}
-                  </p>
-                  <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-black/20">
-                    <div
-                      className="h-full rounded-full bg-primary-foreground/90 transition-[width] duration-500"
-                      style={{ width: `${progress.pct}%` }}
-                    />
-                  </div>
-                  <p className="mt-1 self-end text-[11px] text-primary-foreground/80">
-                    {progress.pct}%
-                  </p>
-                </Link>
+                  <Link
+                    to="/goals/$goalId"
+                    params={{ goalId: goal.id }}
+                    className="flex flex-col items-center px-4 pb-5 pt-4 text-primary-foreground"
+                  >
+                    {isGoalOfDay && (
+                      <span className="mb-2 rounded-full bg-black/20 px-3 py-0.5 text-[10px] font-semibold uppercase tracking-wide">
+                        Goal of the day
+                      </span>
+                    )}
+                    <Sparkle className="size-8" strokeWidth={1.25} />
+                    <p className="mt-3 text-center text-lg font-semibold leading-snug">
+                      {goal.title}
+                    </p>
+                    <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-black/20">
+                      <div
+                        className="h-full rounded-full bg-primary-foreground/90 transition-[width] duration-500"
+                        style={{ width: `${progress.pct}%` }}
+                      />
+                    </div>
+                    <p className="mt-1 self-end text-[11px] text-primary-foreground/80">
+                      {progress.pct}%
+                    </p>
+                  </Link>
 
-                <div className="bg-card px-4 py-4 text-center">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Next step
-                  </p>
-                  <p className="mt-1 text-sm">
-                    {progress.nextStep?.title ?? "Every step is done — nice work."}
-                  </p>
+                  <div className="bg-card px-4 py-4 text-center">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      Next step
+                    </p>
+                    <p className="mt-1 text-sm">
+                      {progress.nextStep?.title ?? "Every step is done — nice work."}
+                    </p>
 
-                  <div className="mt-3 flex items-center gap-2">
-                    <button
-                      onClick={() => chooseMutation.mutate(goal.id)}
-                      className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-semibold text-primary-foreground ${accentOf(goal).bar}`}
-                    >
-                      Focus on this
-                      <Timer className="size-3.5" strokeWidth={2} />
-                    </button>
-                    <Link
-                      to="/goals/$goalId"
-                      params={{ goalId: goal.id }}
-                      className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground"
-                      aria-label="Open goal"
-                    >
-                      <Check className="size-4" strokeWidth={2} />
-                    </Link>
+                    <div className="mt-3 flex items-center gap-2">
+                      <button
+                        onClick={() => chooseMutation.mutate(goal.id)}
+                        className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-semibold text-primary-foreground ${accentOf(goal).bar}`}
+                      >
+                        Focus on this
+                        <Timer className="size-3.5" strokeWidth={2} />
+                      </button>
+                      <Link
+                        to="/goals/$goalId"
+                        params={{ goalId: goal.id }}
+                        className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground"
+                        aria-label="Open goal"
+                      >
+                        <Check className="size-4" strokeWidth={2} />
+                      </Link>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
 
         <Link
@@ -279,7 +281,7 @@ function NextStepCard({
   const { openFocus } = useAppShell();
 
   return (
-    <div className="flex items-center gap-3 rounded-xl bg-card px-3 py-2.5 shadow-sm ring-1 ring-border">
+    <div className="flex min-w-0 items-center gap-3 rounded-xl bg-card px-3 py-2.5 shadow-sm ring-1 ring-border">
       <span
         className={`flex size-9 shrink-0 items-center justify-center rounded-full ${accentOf(goal).dot}`}
       >
