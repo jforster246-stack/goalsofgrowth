@@ -1,20 +1,16 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   useMutation,
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { AppShell, useAppShell } from "@/components/app-shell";
-import { GoalCardDeck } from "@/components/GoalCardDeck";
-import type { GoalWithSteps } from "@/components/goal-ui";
+import { Plus, Sparkle } from "lucide-react";
+import { AppShell } from "@/components/app-shell";
+import { accentOf, goalProgress, type GoalWithSteps } from "@/components/goal-ui";
 import { Button } from "@/components/ui/button";
 import { goalsQueryOptions } from "@/lib/goal-queries";
-import {
-  claimUnownedGoals,
-  createGoal,
-  toggleStep,
-} from "@/lib/goals.functions";
+import { claimUnownedGoals, createGoal } from "@/lib/goals.functions";
 
 export const Route = createFileRoute("/_authenticated/goals/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(goalsQueryOptions),
@@ -92,28 +88,23 @@ function GoalsListPage() {
 
   return (
     <AppShell
+      title="All goals"
       right={
-        <Button
+        <button
           onClick={() => setShowNewGoal(true)}
           aria-label="New goal"
-          size="icon"
-          className="size-10 shrink-0 rounded-full shadow-md"
+          className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-card text-foreground shadow-sm ring-1 ring-border"
         >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="size-5"
-          >
-            <path d="M12 5v14" />
-            <path d="M5 12h14" />
-          </svg>
-        </Button>
+          <Plus className="size-5" strokeWidth={2} />
+        </button>
       }
     >
+      {!showNewGoal && goals.length > 0 && (
+        <p className="mt-3 text-xs text-muted-foreground">
+          Tap to see next step
+        </p>
+      )}
+
       {showNewGoal && (
         <form
           onSubmit={submitNewGoal}
@@ -158,29 +149,37 @@ function GoalsListPage() {
           </p>
         </div>
       ) : (
-        <GoalsDeck goals={goals} />
+        <GoalsGrid goals={goals} />
       )}
     </AppShell>
   );
 }
 
-function GoalsDeck({ goals }: { goals: GoalWithSteps[] }) {
-  const queryClient = useQueryClient();
-  const { openFocus } = useAppShell();
-
-  const toggleStepMutation = useMutation({
-    mutationFn: (input: { id: string; done: boolean }) =>
-      toggleStep({ data: input }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["goals"] }),
-  });
-
+function GoalsGrid({ goals }: { goals: GoalWithSteps[] }) {
   return (
-    <GoalCardDeck
-      goals={goals}
-      onFocus={openFocus}
-      onCompleteStep={(stepId) =>
-        toggleStepMutation.mutateAsync({ id: stepId, done: true })
-      }
-    />
+    <div className="mt-3 grid grid-cols-2 gap-3">
+      {goals.map((goal) => {
+        const progress = goalProgress(goal);
+        return (
+          <Link
+            key={goal.id}
+            to="/goals/$goalId"
+            params={{ goalId: goal.id }}
+            className={`flex flex-col rounded-2xl px-4 py-5 text-primary-foreground shadow-sm ring-1 ring-border ${accentOf(goal).bar}`}
+          >
+            <Sparkle className="size-7" strokeWidth={1.25} />
+            <p className="mt-3 flex-1 text-base font-semibold leading-snug">
+              {goal.title}
+            </p>
+            <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-black/20">
+              <div
+                className="h-full rounded-full bg-primary-foreground/90 transition-[width] duration-500"
+                style={{ width: `${progress.pct}%` }}
+              />
+            </div>
+          </Link>
+        );
+      })}
+    </div>
   );
 }
