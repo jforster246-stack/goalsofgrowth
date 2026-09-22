@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Check, Plus, Timer } from "lucide-react";
 import { accentOf, goalProgress, STAR_PATH } from "@/components/goal-ui";
 import { cn } from "@/lib/utils";
@@ -198,6 +199,87 @@ export function GoalCard({
             <Plus className="size-6" strokeWidth={2} />
           </button>
         )}
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Goal hero — the standalone coloured card on the Goal Detail screen  */
+/* ------------------------------------------------------------------ */
+
+export function GoalHero({
+  goal,
+  children,
+}: {
+  goal: HomeGoal;
+  children: ReactNode;
+}) {
+  const accent = accentOf(goal);
+  const { pct } = goalProgress(goal);
+
+  return (
+    <div
+      className={cn(
+        "flex w-full flex-col items-center gap-7 rounded-3xl px-8 pb-7 pt-9 text-center",
+        accent.surface,
+      )}
+    >
+      <Star className="size-[86px] text-white" />
+      {children}
+      <div className="h-3 w-full overflow-hidden rounded-full bg-black/15">
+        <div
+          className="h-full rounded-full bg-white/85 transition-[width] duration-500"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Step row — a goal's step as a white card with timer + check         */
+/* ------------------------------------------------------------------ */
+
+export function StepRow({
+  accent,
+  done,
+  titleNode,
+  onTimer,
+  onToggle,
+}: {
+  accent: { deep: string; surface: string };
+  done: boolean;
+  titleNode: ReactNode;
+  onTimer?: () => void;
+  onToggle?: () => void;
+}) {
+  return (
+    <div className="flex w-full items-center justify-between gap-2 rounded-2xl bg-white py-2 pl-3.5 pr-2 shadow-sm">
+      <div className="min-w-0 flex-1">{titleNode}</div>
+      <div className="flex shrink-0 items-center gap-2">
+        <button
+          type="button"
+          onClick={onTimer}
+          aria-label="Start a focus timer for this step"
+          className={cn(
+            "flex items-center justify-center rounded-lg p-2 text-white",
+            accent.deep,
+          )}
+        >
+          <Timer className="size-6" strokeWidth={1.75} />
+        </button>
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-label={done ? "Mark step not done" : "Mark step done"}
+          className={cn(
+            "flex items-center justify-center rounded-lg p-2 text-white transition-colors",
+            done ? accent.deep : accent.surface,
+          )}
+        >
+          <Check className="size-6" strokeWidth={2} />
+        </button>
       </div>
     </div>
   );

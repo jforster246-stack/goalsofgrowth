@@ -1,8 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { AppShell } from "@/components/app-shell";
-import { AccentStar, accentOf, DIAMOND_PATH, goalProgress } from "@/components/goal-ui";
+import { AppShell, useAppShell } from "@/components/app-shell";
+import { accentOf } from "@/components/goal-ui";
+import { GoalHero, StepRow, type HomeGoal } from "@/components/home-cards";
 import { goalQueryOptions } from "@/lib/goal-queries";
 import {
   addStep,
@@ -49,22 +50,42 @@ export const Route = createFileRoute("/_authenticated/goals/$goalId")({
 
 function GoalDetailPage() {
   const { goalId } = Route.useParams();
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
   const { data: goal, isPending } = useQuery(goalQueryOptions(goalId));
 
-  const [title, setTitle] = useState("");
-  const [why, setWhy] = useState("");
-  const [vision, setVision] = useState("");
+  return (
+    <AppShell backTo="/overview">
+      {isPending || !goal ? (
+        <p className="mt-10 text-center font-serif text-sm text-muted-foreground">
+          Loading…
+        </p>
+      ) : (
+        <GoalDetailBody goal={goal} goalId={goalId} />
+      )}
+    </AppShell>
+  );
+}
+
+/**
+ * The editable body. Rendered inside <AppShell> so it can read the
+ * focus-timer context (useAppShell) for the per-step timer buttons.
+ */
+function GoalDetailBody({ goal, goalId }: { goal: HomeGoal & { why?: string | null; vision?: string | null }; goalId: string }) {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const { openFocus } = useAppShell();
+  const accent = accentOf(goal);
+
+  const [title, setTitle] = useState(goal.title);
+  const [why, setWhy] = useState(goal.why ?? "");
+  const [vision, setVision] = useState(goal.vision ?? "");
   const [stepDraft, setStepDraft] = useState("");
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    if (!goal) return;
     setTitle(goal.title);
     setWhy(goal.why ?? "");
     setVision(goal.vision ?? "");
-  }, [goal?.id, goal?.title, goal?.why, goal?.vision]);
+  }, [goal.id, goal.title, goal.why, goal.vision]);
 
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ["goal", goalId] });
@@ -86,13 +107,11 @@ function GoalDetailPage() {
     onSuccess: refresh,
   });
   const updateStepMutation = useMutation({
-    mutationFn: (input: { id: string; title: string }) =>
-      updateStep({ data: input }),
+    mutationFn: (input: { id: string; title: string }) => updateStep({ data: input }),
     onSuccess: refresh,
   });
   const toggleStepMutation = useMutation({
-    mutationFn: (input: { id: string; done: boolean }) =>
-      toggleStep({ data: input }),
+    mutationFn: (input: { id: string; done: boolean }) => toggleStep({ data: input }),
     onSuccess: refresh,
   });
   const deleteStepMutation = useMutation({
@@ -106,19 +125,6 @@ function GoalDetailPage() {
       navigate({ to: "/overview", replace: true });
     },
   });
-
-  if (isPending || !goal) {
-    return (
-      <AppShell backTo="/overview" title="Goal">
-        <p className="mt-10 text-center text-sm text-muted-foreground">
-          Loading…
-        </p>
-      </AppShell>
-    );
-  }
-
-  const accent = accentOf(goal);
-  const { done, total, pct } = goalProgress(goal);
 
   const dirty =
     title.trim() !== goal.title ||
@@ -134,164 +140,114 @@ function GoalDetailPage() {
   };
 
   return (
-    <AppShell backTo="/overview" title="Goal">
-      <div className="mt-5 space-y-3">
-        <section className="rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border">
-          <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Goal
-          </label>
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            maxLength={140}
-            aria-label="Goal title"
-            className="mt-2 w-full rounded-xl bg-muted/60 px-3 py-2.5 text-[15px] font-semibold tracking-tight focus:outline-none focus:ring-1 focus:ring-ring"
-          />
+    <div className="mt-4 space-y-6 pb-4">
+      {/* Hero */}
+      <GoalHero goal={goal}>
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          maxLength={140}
+          aria-label="Goal title"
+          placeholder="Name this goal"
+          className="w-full bg-transparent text-center font-heading text-2xl leading-tight text-white placeholder:text-white/60 focus:outline-none"
+        />
+      </GoalHero>
 
-          <div className="mt-4 flex items-center gap-3">
-            <AccentStar fillClass={accent.check} />
-            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-              <div
-                className={`h-full rounded-full ${accent.bar} transition-[width] duration-500`}
-                style={{ width: `${pct}%` }}
-              />
-            </div>
-            <span className="shrink-0 text-xs font-medium text-muted-foreground">
-              {done}/{total}
-            </span>
-          </div>
-        </section>
+      {/* Steps */}
+      <section>
+        <p className="font-heading text-sm uppercase text-olive">Next steps:</p>
 
-        <section className="rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Small steps
-          </p>
-
-          <div className="mt-3 space-y-1">
-            {goal.steps.length === 0 && (
-              <p className="py-2 text-sm text-muted-foreground">
-                No steps yet — add the smallest first one below.
-              </p>
-            )}
-            {goal.steps.map((step) => (
-              <div
-                key={step.id}
-                className="group flex items-center gap-3 rounded-xl px-1 py-1.5"
-              >
-                <button
-                  onClick={() =>
-                    toggleStepMutation.mutate({ id: step.id, done: !step.done })
-                  }
-                  aria-label={
-                    step.done
-                      ? `Reopen step: ${step.title}`
-                      : `Complete step: ${step.title}`
-                  }
-                  className="grid size-6 shrink-0 place-items-center transition-transform active:scale-90"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    strokeLinejoin="round"
-                    className={`size-5 transition-colors duration-200 ${
-                      step.done
-                        ? accent.check
-                        : "fill-none stroke-muted-foreground/50 hover:stroke-foreground"
-                    }`}
-                  >
-                    <path d={DIAMOND_PATH} />
-                  </svg>
-                </button>
+        <div className="mt-4 space-y-2">
+          {goal.steps.map((step) => (
+            <StepRow
+              key={step.id}
+              accent={accent}
+              done={step.done}
+              onTimer={() => openFocus(step.id)}
+              onToggle={() =>
+                toggleStepMutation.mutate({ id: step.id, done: !step.done })
+              }
+              titleNode={
                 <EditableStepTitle
                   title={step.title}
                   done={step.done}
                   onSave={(next) =>
                     updateStepMutation.mutate({ id: step.id, title: next })
                   }
+                  onDelete={() => deleteStepMutation.mutate({ id: step.id })}
                 />
-                <button
-                  onClick={() => deleteStepMutation.mutate({ id: step.id })}
-                  aria-label={`Delete step: ${step.title}`}
-                  className="grid size-7 shrink-0 place-items-center rounded-full text-sm text-muted-foreground/50 transition-colors hover:bg-muted hover:text-foreground"
-                >
-                  ×
-                </button>
-              </div>
-            ))}
+              }
+            />
+          ))}
 
-            <form onSubmit={submitStep} className="flex items-center gap-2 pt-2">
-              <input
-                value={stepDraft}
-                onChange={(e) => setStepDraft(e.target.value)}
-                placeholder="Add a step…"
-                maxLength={240}
-                className="min-w-0 flex-1 rounded-xl bg-muted/60 px-3 py-2.5 text-sm placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-ring"
-              />
-              <button
-                type="submit"
-                disabled={!stepDraft.trim()}
-                className="shrink-0 rounded-xl bg-muted px-4 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted/70 disabled:opacity-40"
-              >
-                Add
-              </button>
-            </form>
-          </div>
-        </section>
+          <form onSubmit={submitStep} className="flex items-center gap-2 pt-1">
+            <input
+              value={stepDraft}
+              onChange={(e) => setStepDraft(e.target.value)}
+              placeholder="Add a step…"
+              maxLength={240}
+              className="min-w-0 flex-1 rounded-2xl bg-black/5 px-4 py-3 font-serif text-sm placeholder:text-black/40 focus:outline-none focus:ring-1 focus:ring-olive/40"
+            />
+            <button
+              type="submit"
+              disabled={!stepDraft.trim()}
+              className="shrink-0 rounded-2xl bg-sage/60 px-6 py-3 font-heading text-sm uppercase text-white transition-colors hover:bg-sage/80 disabled:opacity-40"
+            >
+              Add
+            </button>
+          </form>
+        </div>
+      </section>
 
-        <section className="rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border">
-          <label
-            htmlFor="goal-why"
-            className="text-xs font-medium uppercase tracking-wide text-muted-foreground"
-          >
-            Why I'm doing this
-          </label>
-          <textarea
-            id="goal-why"
-            value={why}
-            onChange={(e) => setWhy(e.target.value)}
-            rows={4}
-            maxLength={2000}
-            placeholder="What's pulling you towards this?"
-            className="mt-2 w-full resize-y rounded-xl bg-muted/60 px-3 py-2.5 text-sm leading-relaxed placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-ring"
-          />
-        </section>
+      {/* Why */}
+      <section className="rounded-2xl bg-white p-5 shadow-sm">
+        <label htmlFor="goal-why" className="font-heading text-sm uppercase text-olive">
+          Why I'm doing this
+        </label>
+        <textarea
+          id="goal-why"
+          value={why}
+          onChange={(e) => setWhy(e.target.value)}
+          rows={4}
+          maxLength={2000}
+          placeholder="What's pulling you towards this?"
+          className="mt-3 w-full resize-y bg-transparent font-serif text-sm leading-relaxed text-black placeholder:text-black/40 focus:outline-none"
+        />
+      </section>
 
-        <section className="rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border">
-          <label
-            htmlFor="goal-vision"
-            className="text-xs font-medium uppercase tracking-wide text-muted-foreground"
-          >
-            What it looks and feels like when it's done
-          </label>
-          <textarea
-            id="goal-vision"
-            value={vision}
-            onChange={(e) => setVision(e.target.value)}
-            rows={5}
-            maxLength={2000}
-            placeholder="Picture the finished version of this. Where are you? How does it feel?"
-            className="mt-2 w-full resize-y rounded-xl bg-muted/60 px-3 py-2.5 text-sm leading-relaxed placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-ring"
-          />
-        </section>
+      {/* Vision */}
+      <section className="rounded-2xl bg-white p-5 shadow-sm">
+        <label htmlFor="goal-vision" className="font-heading text-sm uppercase text-olive">
+          What it looks like and feels like when its done
+        </label>
+        <textarea
+          id="goal-vision"
+          value={vision}
+          onChange={(e) => setVision(e.target.value)}
+          rows={5}
+          maxLength={2000}
+          placeholder="Picture the finished version of this. Where are you? How does it feel?"
+          className="mt-3 w-full resize-y bg-transparent font-serif text-sm leading-relaxed text-black placeholder:text-black/40 focus:outline-none"
+        />
+      </section>
 
-        <button
-          onClick={() =>
-            saveMutation.mutate({ title: title.trim() || goal.title, why, vision })
-          }
-          disabled={!dirty || saveMutation.isPending}
-          className="w-full rounded-2xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground shadow-md transition-colors hover:bg-primary/90 disabled:opacity-40"
-        >
-          {saved ? "Saved" : saveMutation.isPending ? "Saving…" : "Save changes"}
-        </button>
+      <button
+        onClick={() =>
+          saveMutation.mutate({ title: title.trim() || goal.title, why, vision })
+        }
+        disabled={!dirty || saveMutation.isPending}
+        className="w-full rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
+      >
+        {saved ? "Saved" : saveMutation.isPending ? "Saving…" : "Save changes"}
+      </button>
 
-        <button
-          onClick={() => deleteGoalMutation.mutate()}
-          className="w-full rounded-2xl py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted"
-        >
-          Delete this goal
-        </button>
-      </div>
-    </AppShell>
+      <button
+        onClick={() => deleteGoalMutation.mutate()}
+        className="w-full py-2 font-heading text-sm uppercase text-black/40 transition-colors hover:text-black/70"
+      >
+        Delete this goal
+      </button>
+    </div>
   );
 }
 
@@ -299,10 +255,12 @@ function EditableStepTitle({
   title,
   done,
   onSave,
+  onDelete,
 }: {
   title: string;
   done: boolean;
   onSave: (title: string) => void;
+  onDelete: () => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(title);
@@ -310,15 +268,14 @@ function EditableStepTitle({
   if (!editing) {
     return (
       <button
+        type="button"
         onClick={() => {
           setValue(title);
           setEditing(true);
         }}
         aria-label={`Edit step: ${title}`}
-        className={`min-w-0 flex-1 text-left text-sm ${
-          done
-            ? "text-muted-foreground line-through decoration-muted-foreground/40"
-            : ""
+        className={`block w-full truncate text-left font-serif text-sm ${
+          done ? "text-black/40 line-through decoration-black/30" : "text-black"
         }`}
       >
         {title}
@@ -333,18 +290,31 @@ function EditableStepTitle({
   };
 
   return (
-    <input
-      autoFocus
-      value={value}
-      onChange={(e) => setValue(e.target.value)}
-      onBlur={save}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") save();
-        if (e.key === "Escape") setEditing(false);
-      }}
-      maxLength={240}
-      aria-label={`Edit step: ${title}`}
-      className="min-w-0 flex-1 rounded-lg bg-muted/60 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-    />
+    <div className="flex items-center gap-1">
+      <input
+        autoFocus
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={save}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") save();
+          if (e.key === "Escape") setEditing(false);
+        }}
+        maxLength={240}
+        aria-label={`Edit step: ${title}`}
+        className="min-w-0 flex-1 rounded-lg bg-black/5 px-2 py-1 font-serif text-sm focus:outline-none focus:ring-1 focus:ring-olive/40"
+      />
+      <button
+        type="button"
+        onMouseDown={(e) => {
+          e.preventDefault();
+          onDelete();
+        }}
+        aria-label={`Delete step: ${title}`}
+        className="grid size-7 shrink-0 place-items-center rounded-full text-black/40 transition-colors hover:bg-black/5 hover:text-black/70"
+      >
+        ×
+      </button>
+    </div>
   );
 }

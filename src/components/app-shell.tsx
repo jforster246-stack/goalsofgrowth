@@ -106,7 +106,7 @@ export function AppShell({
             <Link
               to={backTo}
               aria-label="Back"
-              className="grid size-10 shrink-0 place-items-center rounded-full bg-focus text-white shadow-md transition-colors hover:bg-focus/90"
+              className="grid size-11 shrink-0 place-items-center rounded-xl bg-white text-olive shadow-sm ring-1 ring-black/10 transition-colors hover:bg-muted"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -130,6 +130,8 @@ export function AppShell({
             <h1 className="min-w-0 flex-1 truncate text-center font-heading text-lg tracking-tight">
               {title}
             </h1>
+          ) : backTo ? (
+            <div className="flex-1" />
           ) : (
             <h1 className="min-w-0 flex-1 text-center font-display text-[36px] font-normal leading-[1.15] tracking-tight text-black">
               <span className="block truncate">
@@ -151,7 +153,7 @@ export function AppShell({
           </div>
         </header>
 
-        {!title && (
+        {!title && !backTo && (
           <p className="mt-2 text-center font-heading text-[13px] text-black">
             I am a vibrational match to all that I desire
           </p>
