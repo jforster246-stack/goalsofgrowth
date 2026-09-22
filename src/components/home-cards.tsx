@@ -1,0 +1,204 @@
+import { Check, Plus, Timer } from "lucide-react";
+import { accentOf, goalProgress, STAR_PATH } from "@/components/goal-ui";
+import { cn } from "@/lib/utils";
+
+/** Minimal goal shape the Home cards need (kept loose so mock + real data both fit). */
+export type HomeGoal = {
+  id: string;
+  title: string;
+  accent: string;
+  steps: { id: string; title: string; done: boolean }[];
+};
+
+/** Hollow six-pointed star, tinted via `text-*` + currentColor. */
+function Star({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={cn("fill-current", className)} aria-hidden>
+      <path d={STAR_PATH} fillRule="evenodd" />
+    </svg>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Next-step row — "What next step will you take today?"               */
+/* ------------------------------------------------------------------ */
+
+export function NextStepRow({
+  goal,
+  step,
+  onOpen,
+  onStartTimer,
+  onComplete,
+}: {
+  goal: HomeGoal;
+  step: { id: string; title: string };
+  onOpen?: () => void;
+  onStartTimer?: () => void;
+  onComplete?: () => void;
+}) {
+  const accent = accentOf(goal);
+
+  return (
+    <div className="flex w-full items-center justify-between gap-2 rounded-2xl bg-white py-2 pl-2.5 pr-2 shadow-sm">
+      <button
+        type="button"
+        onClick={onOpen}
+        className="flex min-w-0 flex-1 items-center gap-2 text-left"
+      >
+        <Star className={cn("size-10 shrink-0", accent.text)} />
+        <span className="flex min-w-0 flex-col">
+          <span className="truncate font-serif text-sm text-black">
+            {step.title}
+          </span>
+          <span className={cn("truncate font-serif text-[10px] italic", accent.text)}>
+            {goal.title}
+          </span>
+        </span>
+      </button>
+
+      <div className="flex shrink-0 items-center gap-2">
+        <button
+          type="button"
+          onClick={onStartTimer}
+          aria-label="Start a focus timer for this step"
+          className={cn(
+            "flex items-center justify-center rounded-lg p-2 text-white",
+            accent.deep,
+          )}
+        >
+          <Timer className="size-6" strokeWidth={1.75} />
+        </button>
+        <button
+          type="button"
+          onClick={onComplete}
+          aria-label="Mark this step complete"
+          className={cn(
+            "flex items-center justify-center rounded-lg p-2 text-white",
+            accent.surface,
+          )}
+        >
+          <Check className="size-6" strokeWidth={2} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Goal card — the horizontally-scrolling "All goals" cards            */
+/* ------------------------------------------------------------------ */
+
+export function GoalCard({
+  goal,
+  isGoalOfDay = false,
+  onOpen,
+  onFocus,
+  onComplete,
+  onAdd,
+}: {
+  goal: HomeGoal;
+  isGoalOfDay?: boolean;
+  onOpen?: () => void;
+  onFocus?: () => void;
+  onComplete?: () => void;
+  onAdd?: () => void;
+}) {
+  const accent = accentOf(goal);
+  const progress = goalProgress(goal);
+  const hasSteps = goal.steps.length > 0;
+
+  return (
+    <div
+      className={cn(
+        "relative w-[297px] shrink-0 snap-center rounded-2xl border border-black bg-white",
+        isGoalOfDay ? "overflow-visible" : "overflow-hidden",
+      )}
+    >
+      {isGoalOfDay && (
+        <span className="absolute left-1/2 top-0 z-10 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-olive px-5 py-2 font-heading text-[13.9px] uppercase leading-none text-white">
+          Goal of the day
+        </span>
+      )}
+
+      {/* Coloured header */}
+      <button
+        type="button"
+        onClick={onOpen}
+        className={cn(
+          "flex w-full flex-col items-center gap-7 rounded-t-2xl border-b border-black px-8 pb-6 pt-8 text-center",
+          accent.surface,
+        )}
+      >
+        <div className="flex w-full flex-col items-center gap-4">
+          <Star className="size-[86px] text-white" />
+          <p className="w-full font-heading text-2xl leading-tight text-white">
+            {goal.title}
+          </p>
+        </div>
+
+        <div className="flex w-full flex-col items-end gap-1.5">
+          <div className="h-3 w-full overflow-hidden rounded-full bg-black/15">
+            <div
+              className="h-full rounded-full bg-white/85 transition-[width] duration-500"
+              style={{ width: `${progress.pct}%` }}
+            />
+          </div>
+          <p className="font-mono text-[11.8px] uppercase text-white/60">
+            {progress.pct}%
+          </p>
+        </div>
+      </button>
+
+      {/* Next-step panel */}
+      <div className="flex flex-col items-center gap-6 px-3 py-4">
+        <p className="w-full text-center font-heading text-[14.75px] uppercase text-olive">
+          Next Step:
+        </p>
+        <p className="w-full text-center font-serif text-sm text-black">
+          {hasSteps
+            ? (progress.nextStep?.title ?? "Every step is done — nice work.")
+            : "Break down this goal into manageable tasks"}
+        </p>
+
+        {hasSteps ? (
+          <div className="flex w-full items-center gap-2">
+            <button
+              type="button"
+              onClick={onFocus}
+              className={cn(
+                "flex flex-1 items-center justify-center gap-2 rounded-lg p-2 font-heading text-[12.7px] uppercase text-white",
+                accent.deep,
+              )}
+            >
+              Focus on this
+              <Timer className="size-6" strokeWidth={1.75} />
+            </button>
+            <button
+              type="button"
+              onClick={onComplete}
+              aria-label="Mark next step complete"
+              className={cn(
+                "flex items-center justify-center rounded-lg p-2 text-white",
+                accent.surface,
+              )}
+            >
+              <Check className="size-6" strokeWidth={2} />
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={onAdd}
+            className={cn(
+              "flex w-full items-center justify-center gap-2 rounded p-2 font-heading text-[12.7px] uppercase text-white",
+              accent.surface,
+            )}
+          >
+            Add
+            <Plus className="size-6" strokeWidth={2} />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}

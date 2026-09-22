@@ -2,10 +2,41 @@ import type { listGoals } from "@/lib/goals.functions";
 
 export type GoalWithSteps = Awaited<ReturnType<typeof listGoals>>[number];
 
+/**
+ * Each goal accent is two-tone, matching the Figma design:
+ *  - `surface` = the soft card-header background
+ *  - `deep`    = the darker button / focus background
+ * The legacy `dot` / `bar` / `check` / `text` keys are kept so the goal deck,
+ * goal-detail and focus-mode screens keep working.
+ */
 export const ACCENT_STYLES = {
-  mint: { dot: "bg-mint", bar: "bg-mint", check: "fill-mint", text: "text-mint" },
-  sea: { dot: "bg-sea", bar: "bg-sea", check: "fill-sea", text: "text-sea" },
-  clay: { dot: "bg-clay", bar: "bg-clay", check: "fill-clay", text: "text-clay" },
+  // Sage green (stored as "mint")
+  mint: {
+    surface: "bg-sage",
+    deep: "bg-olive",
+    dot: "bg-olive",
+    bar: "bg-sage",
+    check: "fill-sage",
+    text: "text-olive",
+  },
+  // Warm gold / brown (stored as "sea")
+  sea: {
+    surface: "bg-gold",
+    deep: "bg-gold-deep",
+    dot: "bg-gold-deep",
+    bar: "bg-gold",
+    check: "fill-gold",
+    text: "text-gold-deep",
+  },
+  // Terracotta clay (stored as "clay")
+  clay: {
+    surface: "bg-clay",
+    deep: "bg-clay-deep",
+    dot: "bg-clay-deep",
+    bar: "bg-clay",
+    check: "fill-clay",
+    text: "text-clay-deep",
+  },
 } as const;
 
 export type Accent = keyof typeof ACCENT_STYLES;
@@ -74,7 +105,7 @@ export function StarField() {
   );
 }
 
-export function goalProgress(goal: GoalWithSteps) {
+export function goalProgress<S extends { done: boolean }>(goal: { steps: S[] }) {
   const total = goal.steps.length;
   const done = goal.steps.filter((s) => s.done).length;
   return {

@@ -10,7 +10,7 @@ import {
 } from "react";
 import { Settings } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { StarField, localToday } from "@/components/goal-ui";
+import { StarField, STAR_PATH, localToday } from "@/components/goal-ui";
 import { FocusMode } from "@/components/focus-mode";
 import { goalsQueryOptions, profileQueryOptions } from "@/lib/goal-queries";
 import {
@@ -29,11 +29,13 @@ export function useAppShell() {
 
 export function AppShell({
   right,
+  left,
   backTo,
   title,
   children,
 }: {
   right?: ReactNode;
+  left?: ReactNode;
   backTo?: "/overview" | "/goals";
   title?: string;
   children: ReactNode;
@@ -118,8 +120,10 @@ export function AppShell({
                 <path d="M15 18l-6-6 6-6" />
               </svg>
             </Link>
+          ) : left ? (
+            <div className="shrink-0">{left}</div>
           ) : (
-            <div className="size-10 shrink-0" />
+            <div className="size-[50px] shrink-0" />
           )}
 
           {title ? (
@@ -127,7 +131,7 @@ export function AppShell({
               {title}
             </h1>
           ) : (
-            <h1 className="min-w-0 flex-1 text-center font-display text-[30px] font-normal leading-[1.15] tracking-tight">
+            <h1 className="min-w-0 flex-1 text-center font-display text-[36px] font-normal leading-[1.15] tracking-tight text-black">
               <span className="block truncate">
                 {profile?.display_name ? `${profile.display_name}'s` : "Your"}
               </span>
@@ -148,8 +152,8 @@ export function AppShell({
         </header>
 
         {!title && (
-          <p className="mt-2 text-center text-sm italic text-muted-foreground">
-            “I am a vibrational match to all that I desire”
+          <p className="mt-2 text-center font-heading text-[13px] text-black">
+            I am a vibrational match to all that I desire
           </p>
         )}
 
@@ -205,34 +209,51 @@ export function AppShell({
 
 function BottomNav() {
   const itemClass =
-    "flex flex-1 items-center justify-center py-3 text-xs font-semibold uppercase tracking-wide transition-colors";
+    "flex flex-1 items-center justify-center font-heading text-[13.9px] uppercase text-black transition-colors";
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-10 bg-gradient-to-t from-background via-background/95 to-transparent px-5 pb-4 pt-8">
-      <nav className="mx-auto flex max-w-md items-stretch rounded-2xl bg-card shadow-lg ring-1 ring-border">
-        <Link
-          to="/overview"
-          className={`${itemClass} text-muted-foreground`}
-          activeProps={{ className: `${itemClass} text-foreground` }}
-        >
-          Goals
-        </Link>
-        <Link
-          to="/habits"
-          className={`${itemClass} text-muted-foreground`}
-          activeProps={{ className: `${itemClass} text-foreground` }}
-        >
-          Habits
-        </Link>
-        <Link
-          to="/routines"
-          className={`${itemClass} text-muted-foreground`}
-          activeProps={{ className: `${itemClass} text-foreground` }}
-        >
-          Routines
-        </Link>
-      </nav>
-    </div>
+    <nav className="fixed inset-x-0 bottom-0 z-10 mx-auto flex w-full max-w-md items-center justify-between border-t border-black/30 bg-white px-8 pb-6 pt-3">
+      <Link
+        to="/overview"
+        className={itemClass}
+        activeProps={{ className: `${itemClass} !text-olive` }}
+      >
+        Goals
+      </Link>
+      <Link
+        to="/habits"
+        className={itemClass}
+        activeProps={{ className: `${itemClass} !text-olive` }}
+      >
+        Habits
+      </Link>
+      <Link
+        to="/routines"
+        className={itemClass}
+        activeProps={{ className: `${itemClass} !text-olive` }}
+      >
+        Routines
+      </Link>
+    </nav>
+  );
+}
+
+/** WINS button — white rounded square with a star over a tiny label (top-left). */
+export function WinsButton({ onClick }: { onClick?: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Wins"
+      className="flex size-[50px] flex-col items-center justify-center gap-1 rounded-lg bg-white shadow-sm"
+    >
+      <svg viewBox="0 0 24 24" className="size-5 fill-olive" aria-hidden>
+        <path d={STAR_PATH} fillRule="evenodd" />
+      </svg>
+      <span className="font-heading text-[8px] uppercase leading-none text-black">
+        Wins
+      </span>
+    </button>
   );
 }
 

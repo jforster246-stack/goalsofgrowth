@@ -63,7 +63,7 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(0.939 0.028 86.6);
+  --background: oklch(0.966 0.004 90); /* #f5f4f0 — warm off-white */
   --foreground: oklch(0.24 0.01 264);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.24 0.01 264);
@@ -135,18 +135,26 @@
 /* ============= Design tokens ============= */
 
 @theme {
-  --color-cream: #fbf7f0;
+  --color-cream: #f5f4f0;
   --color-ink: #4a5a52;
   --color-soft: #7c8b81;
-  --color-clay: #e8a075;
-  --color-mint: #a8cbb7;
   --color-sand: #efdfc4;
-  --color-sea: #93b8c9;
   --color-star: #dfd0c3;
-  --color-focus: #2f2349;
+
+  /* Goals of Growth brand palette (from Figma) */
+  --color-olive: #49552d; /* deep olive — primary text/buttons */
+  --color-sage: #88936b; /* sage — green card surface */
+  --color-clay: #b97d69; /* terracotta — clay card surface */
+  --color-clay-deep: #863d2b; /* deep terracotta — clay buttons */
+  --color-gold: #bb996b; /* tan — gold card check */
+  --color-gold-deep: #895c2d; /* brown — gold buttons */
+  --color-focus: #49552d; /* focus accent now maps to olive */
+
   --font-body: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-display: "Pinyon Script", "Inter", cursive;
   --font-heading: "Faculty Glyphic", "Inter", sans-serif;
+  --font-serif: "Fanwood Text", ui-serif, Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
 @layer base {
