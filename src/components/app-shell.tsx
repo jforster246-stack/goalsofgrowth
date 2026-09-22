@@ -164,12 +164,7 @@ export function AppShell({
           {children}
         </AppShellContext.Provider>
 
-        <BottomNav
-          onFocus={() => {
-            setFocusStepId(null);
-            setFocusOpen(true);
-          }}
-        />
+        <BottomNav />
 
         {focusOpen && (
           <FocusMode
@@ -208,7 +203,7 @@ export function AppShell({
   );
 }
 
-function BottomNav({ onFocus }: { onFocus: () => void }) {
+function BottomNav() {
   const itemClass =
     "flex flex-1 items-center justify-center py-3 text-xs font-semibold uppercase tracking-wide transition-colors";
 
@@ -220,22 +215,22 @@ function BottomNav({ onFocus }: { onFocus: () => void }) {
           className={`${itemClass} text-muted-foreground`}
           activeProps={{ className: `${itemClass} text-foreground` }}
         >
-          Overview
+          Goals
         </Link>
         <Link
-          to="/goals"
+          to="/habits"
           className={`${itemClass} text-muted-foreground`}
           activeProps={{ className: `${itemClass} text-foreground` }}
         >
-          Goals
+          Habits
         </Link>
-        <button
-          onClick={onFocus}
-          aria-label="Open focus mode"
+        <Link
+          to="/routines"
           className={`${itemClass} text-muted-foreground`}
+          activeProps={{ className: `${itemClass} text-foreground` }}
         >
-          Focus
-        </button>
+          Routines
+        </Link>
       </nav>
     </div>
   );
