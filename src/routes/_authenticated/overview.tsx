@@ -295,12 +295,16 @@ function NextStepCard({
         <Sparkle className="size-4 text-primary-foreground" strokeWidth={1.5} />
       </span>
 
-      <div className="min-w-0 flex-1">
+      <Link
+        to="/goals/$goalId"
+        params={{ goalId: goal.id }}
+        className="min-w-0 flex-1"
+      >
         <p className="truncate text-sm font-medium">{step.title}</p>
         <p className="truncate text-xs italic text-muted-foreground">
           {goal.title}
         </p>
-      </div>
+      </Link>
 
       <button
         onClick={() => openFocus(step.id)}
