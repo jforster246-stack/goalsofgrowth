@@ -9,7 +9,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { AppShell, useAppShell, WinsButton } from "@/components/app-shell";
 import { goalProgress, localToday } from "@/components/goal-ui";
-import { GoalCard, NextStepRow } from "@/components/home-cards";
+import { GoalCard, NextStepRow, type HomeGoal } from "@/components/home-cards";
 import { goalsQueryOptions, profileQueryOptions } from "@/lib/goal-queries";
 import { setGoalOfDay, toggleStep } from "@/lib/goals.functions";
 
@@ -51,7 +51,6 @@ export const Route = createFileRoute("/_authenticated/overview")({
 function OverviewPage() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { openFocus } = useAppShell();
   const { data: goals } = useSuspenseQuery(goalsQueryOptions);
   const { data: profile } = useQuery(profileQueryOptions);
 
@@ -122,26 +121,12 @@ function OverviewPage() {
           What next step will you take today?
         </p>
 
-        <div className="mt-6 space-y-2">
-          {upcoming.length === 0 && (
-            <p className="rounded-2xl bg-white px-3 py-3 font-serif text-sm text-black shadow-sm">
-              {goals.length === 0
-                ? "Add a goal to see your next steps here."
-                : "You're all caught up — nice work."}
-            </p>
-          )}
-
-          {upcoming.map(({ goal, next }) => (
-            <NextStepRow
-              key={goal.id}
-              goal={goal}
-              step={next!}
-              onOpen={() => openGoal(goal.id)}
-              onStartTimer={() => openFocus(next!.id)}
-              onComplete={() => handleComplete(goal.id, next!.title, next!.id)}
-            />
-          ))}
-        </div>
+        <NextSteps
+          upcoming={upcoming}
+          isEmpty={goals.length === 0}
+          onOpen={openGoal}
+          onComplete={handleComplete}
+        />
 
         <div className="mt-7 border-t border-dashed border-black/15" />
 
@@ -219,5 +204,46 @@ function OverviewPage() {
         </div>
       )}
     </AppShell>
+  );
+}
+
+/**
+ * Rendered inside <AppShell> so it can read the focus-timer context.
+ * (Calling useAppShell() in OverviewPage itself would be outside the provider.)
+ */
+function NextSteps({
+  upcoming,
+  isEmpty,
+  onOpen,
+  onComplete,
+}: {
+  upcoming: { goal: HomeGoal; next: { id: string; title: string } | null }[];
+  isEmpty: boolean;
+  onOpen: (goalId: string) => void;
+  onComplete: (goalId: string, title: string, stepId: string) => void;
+}) {
+  const { openFocus } = useAppShell();
+
+  return (
+    <div className="mt-6 space-y-2">
+      {upcoming.length === 0 && (
+        <p className="rounded-2xl bg-white px-3 py-3 font-serif text-sm text-black shadow-sm">
+          {isEmpty
+            ? "Add a goal to see your next steps here."
+            : "You're all caught up — nice work."}
+        </p>
+      )}
+
+      {upcoming.map(({ goal, next }) => (
+        <NextStepRow
+          key={goal.id}
+          goal={goal}
+          step={next!}
+          onOpen={() => onOpen(goal.id)}
+          onStartTimer={() => openFocus(next!.id)}
+          onComplete={() => onComplete(goal.id, next!.title, next!.id)}
+        />
+      ))}
+    </div>
   );
 }
