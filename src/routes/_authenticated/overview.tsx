@@ -118,7 +118,7 @@ function OverviewPage() {
         </button>
       }
     >
-      <div className="relative mx-auto max-w-md px-5 pb-24 pt-2">
+      <div className="relative mx-auto max-w-md pb-24 pt-2">
         <div className="mt-5 border-t border-dashed border-border" />
 
         {/* Next steps */}
@@ -152,7 +152,7 @@ function OverviewPage() {
           All goals
         </p>
 
-        <div className="-mx-5 mt-3 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-2">
+        <div className="mt-3 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2">
           {goals.map((goal) => {
             const progress = goalProgress(goal);
             const isGoalOfDay = goal.id === goalOfDay?.id;
@@ -217,11 +217,9 @@ function OverviewPage() {
           })}
         </div>
 
-        {/* Floating add button */}
         <Link
           to="/goals"
-          className="fixed bottom-24 right-1/2 z-10 flex size-12 translate-x-[calc(50%-1px)] translate-y-0 items-center justify-center rounded-full bg-card text-foreground shadow-lg ring-1 ring-border"
-          style={{ marginRight: "-9.5rem" }}
+          className="fixed bottom-24 right-5 z-10 flex size-12 items-center justify-center rounded-full bg-card text-foreground shadow-lg ring-1 ring-border"
           aria-label="Add a goal"
         >
           <Plus className="size-5" strokeWidth={2} />
