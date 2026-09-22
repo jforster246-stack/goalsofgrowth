@@ -6,6 +6,7 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { useState } from "react";
+import { Check, Plus, Sparkle, Timer } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { accentOf, goalProgress, localToday } from "@/components/goal-ui";
 import { goalsQueryOptions, profileQueryOptions } from "@/lib/goal-queries";
@@ -53,13 +54,21 @@ function OverviewPage() {
   const [picking, setPicking] = useState(false);
 
   const today = localToday();
-  const completed = goals.filter((g) => goalProgress(g).complete).length;
-  const streak = profile?.streak_count ?? 0;
 
   const goalOfDay =
     profile?.goal_of_day_date === today
       ? (goals.find((g) => g.id === profile?.goal_of_day_id) ?? null)
       : null;
+
+  // Up to 3 "next steps" pulled from goals that aren't finished yet,
+  // goal-of-day first if it has one.
+  const upcoming = [...goals]
+    .sort((a, b) =>
+      a.id === goalOfDay?.id ? -1 : b.id === goalOfDay?.id ? 1 : 0,
+    )
+    .map((goal) => ({ goal, next: goalProgress(goal).nextStep }))
+    .filter((row) => row.next)
+    .slice(0, 3);
 
   const chooseMutation = useMutation({
     mutationFn: (goalId: string | null) =>
@@ -72,107 +81,164 @@ function OverviewPage() {
 
   return (
     <AppShell>
-      <div className="mt-5 space-y-3">
-        <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-2xl bg-card p-4 text-center shadow-sm ring-1 ring-border [animation:rise_0.3s_both]">
-            <p className="text-3xl font-semibold tabular-nums tracking-tight text-focus">
-              {completed}
-            </p>
-            <p className="mt-1 text-xs font-medium text-muted-foreground">
-              {completed === 1 ? "goal completed" : "goals completed"}
-            </p>
-            <p className="mt-0.5 text-[11px] text-muted-foreground/80">
-              of {goals.length} {goals.length === 1 ? "goal" : "goals"}
-            </p>
+      <div className="relative mx-auto max-w-md px-1 pb-24 pt-2">
+        {/* Header */}
+        <div className="flex items-start justify-between">
+          <div className="flex size-11 flex-col items-center justify-center gap-0.5 rounded-xl bg-card shadow-sm ring-1 ring-border">
+            <Sparkle className="size-4 text-focus" strokeWidth={1.5} />
+            <span className="text-[9px] font-semibold tracking-wide text-muted-foreground">
+              WINS
+            </span>
           </div>
-          <div className="rounded-2xl bg-card p-4 text-center shadow-sm ring-1 ring-border [animation:rise_0.35s_both]">
-            <p className="text-3xl font-semibold tabular-nums tracking-tight text-focus">
-              {streak}
-            </p>
-            <p className="mt-1 text-xs font-medium text-muted-foreground">
-              {streak === 1 ? "day streak" : "day streak"}
-            </p>
-            <p className="mt-0.5 text-[11px] text-muted-foreground/80">
-              best {profile?.longest_streak ?? 0}
-            </p>
+          <div className="flex-1 px-2 text-center">
+            <h1 className="font-display text-3xl italic leading-tight text-focus">
+              Goals of Growth
+            </h1>
           </div>
+          <div className="size-11 shrink-0" />
         </div>
 
-        <section className="rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border [animation:rise_0.4s_both]">
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Goal of the day
-            </p>
-            {goals.length > 0 && (
-              <button
-                onClick={() => setPicking((v) => !v)}
-                className="text-xs font-semibold text-primary underline underline-offset-4"
-              >
-                {picking ? "Close" : goalOfDay ? "Change" : "Choose"}
-              </button>
-            )}
-          </div>
+        <p className="mt-3 text-center text-xs text-muted-foreground">
+          I am a vibrational match to all that I desire
+        </p>
 
-          {picking ? (
-            <div className="mt-3 space-y-2">
-              {goals.map((goal) => (
-                <button
-                  key={goal.id}
-                  onClick={() => chooseMutation.mutate(goal.id)}
-                  className="flex w-full items-center gap-3 rounded-xl bg-muted/60 px-3 py-2.5 text-left text-sm transition-colors hover:bg-muted"
-                >
-                  <span
-                    className={`size-2.5 shrink-0 rounded-full ${accentOf(goal).dot}`}
-                  />
-                  <span className="min-w-0 flex-1 truncate">{goal.title}</span>
-                </button>
-              ))}
-              {goalOfDay && (
-                <button
-                  onClick={() => chooseMutation.mutate(null)}
-                  className="w-full rounded-xl px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted"
-                >
-                  Clear goal of the day
-                </button>
-              )}
-            </div>
-          ) : goalOfDay ? (
-            <Link
-              to="/goals/$goalId"
-              params={{ goalId: goalOfDay.id }}
-              className="mt-3 block"
-            >
-              <p className="text-lg font-semibold leading-snug tracking-tight">
-                {goalOfDay.title}
-              </p>
-              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
-                <div
-                  className={`h-full rounded-full ${accentOf(goalOfDay).bar} transition-[width] duration-500`}
-                  style={{ width: `${goalProgress(goalOfDay).pct}%` }}
-                />
-              </div>
-              <p className="mt-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Next step
-              </p>
-              <p className="mt-0.5 text-sm">
-                {goalProgress(goalOfDay).nextStep?.title ??
-                  "Every step is done — nice work."}
-              </p>
-            </Link>
-          ) : (
-            <p className="mt-3 text-sm text-muted-foreground">
+        <div className="mt-5 border-t border-dashed border-border" />
+
+        {/* Next steps */}
+        <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          What next step will you take today?
+        </p>
+
+        <div className="mt-3 space-y-2.5">
+          {upcoming.length === 0 && (
+            <p className="rounded-xl bg-card px-3 py-3 text-sm text-muted-foreground shadow-sm ring-1 ring-border">
               {goals.length === 0
-                ? "Add a goal first, then pick one to focus on today."
-                : "Pick one goal to give your attention to today."}
+                ? "Add a goal to see your next steps here."
+                : "You're all caught up — nice work."}
             </p>
           )}
-        </section>
+
+          {upcoming.map(({ goal, next }) => (
+            <div
+              key={goal.id}
+              className="flex items-center gap-3 rounded-xl bg-card px-3 py-2.5 shadow-sm ring-1 ring-border"
+            >
+              <span
+                className={`flex size-9 shrink-0 items-center justify-center rounded-full ${accentOf(goal).dot}`}
+              >
+                <Sparkle className="size-4 text-primary-foreground" strokeWidth={1.5} />
+              </span>
+
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium">{next?.title}</p>
+                <p className="truncate text-xs italic text-muted-foreground">
+                  {goal.title}
+                </p>
+              </div>
+
+              <Link
+                to="/goals/$goalId"
+                params={{ goalId: goal.id }}
+                className={`flex size-8 shrink-0 items-center justify-center rounded-full ${accentOf(goal).dot} text-primary-foreground`}
+                aria-label="Open goal"
+              >
+                <Timer className="size-4" strokeWidth={1.5} />
+              </Link>
+              <Link
+                to="/goals/$goalId"
+                params={{ goalId: goal.id }}
+                className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-foreground"
+                aria-label="Open goal to mark step done"
+              >
+                <Check className="size-4" strokeWidth={2} />
+              </Link>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-6 border-t border-dashed border-border" />
+
+        {/* All goals carousel */}
+        <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          All goals
+        </p>
+
+        <div className="-mx-1 mt-3 flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 pb-2">
+          {goals.map((goal) => {
+            const progress = goalProgress(goal);
+            const isGoalOfDay = goal.id === goalOfDay?.id;
+            return (
+              <div
+                key={goal.id}
+                className={`w-[78%] shrink-0 snap-center overflow-hidden rounded-2xl shadow-sm ring-1 ring-border ${accentOf(goal).bar}`}
+              >
+                <div className="flex flex-col items-center px-4 pb-5 pt-4 text-primary-foreground">
+                  {isGoalOfDay && (
+                    <span className="mb-2 rounded-full bg-black/20 px-3 py-0.5 text-[10px] font-semibold uppercase tracking-wide">
+                      Goal of the day
+                    </span>
+                  )}
+                  <Sparkle className="size-8" strokeWidth={1.25} />
+                  <p className="mt-3 text-center text-lg font-semibold leading-snug">
+                    {goal.title}
+                  </p>
+                  <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-black/20">
+                    <div
+                      className="h-full rounded-full bg-primary-foreground/90 transition-[width] duration-500"
+                      style={{ width: `${progress.pct}%` }}
+                    />
+                  </div>
+                  <p className="mt-1 self-end text-[11px] text-primary-foreground/80">
+                    {progress.pct}%
+                  </p>
+                </div>
+
+                <div className="bg-card px-4 py-4 text-center">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Next step
+                  </p>
+                  <p className="mt-1 text-sm">
+                    {progress.nextStep?.title ?? "Every step is done — nice work."}
+                  </p>
+
+                  <div className="mt-3 flex items-center gap-2">
+                    <button
+                      onClick={() => chooseMutation.mutate(goal.id)}
+                      className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-semibold text-primary-foreground ${accentOf(goal).bar}`}
+                    >
+                      Focus on this
+                      <Timer className="size-3.5" strokeWidth={2} />
+                    </button>
+                    <Link
+                      to="/goals/$goalId"
+                      params={{ goalId: goal.id }}
+                      className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground"
+                      aria-label="Open goal"
+                    >
+                      <Check className="size-4" strokeWidth={2} />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Floating add button */}
+        <Link
+          to="/goals"
+          className="fixed bottom-24 right-1/2 z-10 flex size-12 translate-x-[calc(50%-1px)] translate-y-0 items-center justify-center rounded-full bg-card text-foreground shadow-lg ring-1 ring-border"
+          style={{ marginRight: "-9.5rem" }}
+          aria-label="Add a goal"
+        >
+          <Plus className="size-5" strokeWidth={2} />
+        </Link>
 
         <Link
           to="/goals"
-          className="block rounded-2xl bg-card p-4 text-center text-sm font-semibold shadow-sm ring-1 ring-border transition-colors hover:bg-muted/40 [animation:rise_0.45s_both]"
+          className="mt-4 block text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground"
         >
-          See all {goals.length} {goals.length === 1 ? "goal" : "goals"}
+          See goals grid
         </Link>
       </div>
     </AppShell>
