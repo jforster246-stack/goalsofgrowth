@@ -7,10 +7,10 @@ import {
 } from "@tanstack/react-query";
 import { useState } from "react";
 import { Check, Plus, Sparkle, Timer } from "lucide-react";
-import { AppShell } from "@/components/app-shell";
+import { AppShell, useAppShell } from "@/components/app-shell";
 import { accentOf, goalProgress, localToday } from "@/components/goal-ui";
 import { goalsQueryOptions, profileQueryOptions } from "@/lib/goal-queries";
-import { setGoalOfDay } from "@/lib/goals.functions";
+import { setGoalOfDay, toggleStep } from "@/lib/goals.functions";
 
 export const Route = createFileRoute("/_authenticated/overview")({
   loader: ({ context }) => context.queryClient.ensureQueryData(goalsQueryOptions),
@@ -51,7 +51,6 @@ function OverviewPage() {
   const queryClient = useQueryClient();
   const { data: goals } = useSuspenseQuery(goalsQueryOptions);
   const { data: profile } = useQuery(profileQueryOptions);
-  const [picking, setPicking] = useState(false);
 
   const today = localToday();
 
@@ -74,10 +73,38 @@ function OverviewPage() {
     mutationFn: (goalId: string | null) =>
       setGoalOfDay({ data: { goalId, today } }),
     onSuccess: () => {
-      setPicking(false);
       queryClient.invalidateQueries({ queryKey: ["profile"] });
     },
   });
+
+  // Marks a step as done, then shows the "nice work" popup.
+  const [celebrating, setCelebrating] = useState<{
+    goalId: string;
+    completedTitle: string;
+  } | null>(null);
+
+  const completeStepMutation = useMutation({
+    mutationFn: (stepId: string) => toggleStep({ data: { id: stepId, done: true } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["goals"] });
+      queryClient.invalidateQueries({ queryKey: ["goal"] });
+    },
+  });
+
+  const handleComplete = (goalId: string, stepTitle: string, stepId: string) => {
+    completeStepMutation.mutate(stepId, {
+      onSuccess: () => setCelebrating({ goalId, completedTitle: stepTitle }),
+    });
+  };
+
+  // Once the "nice work" popup is showing, look up the freshest data
+  // for that goal so we can show what's next.
+  const celebratingGoal = celebrating
+    ? goals.find((g) => g.id === celebrating.goalId)
+    : null;
+  const celebratingNext = celebratingGoal
+    ? goalProgress(celebratingGoal).nextStep
+    : null;
 
   return (
     <AppShell>
@@ -119,40 +146,12 @@ function OverviewPage() {
           )}
 
           {upcoming.map(({ goal, next }) => (
-            <div
+            <NextStepCard
               key={goal.id}
-              className="flex items-center gap-3 rounded-xl bg-card px-3 py-2.5 shadow-sm ring-1 ring-border"
-            >
-              <span
-                className={`flex size-9 shrink-0 items-center justify-center rounded-full ${accentOf(goal).dot}`}
-              >
-                <Sparkle className="size-4 text-primary-foreground" strokeWidth={1.5} />
-              </span>
-
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">{next?.title}</p>
-                <p className="truncate text-xs italic text-muted-foreground">
-                  {goal.title}
-                </p>
-              </div>
-
-              <Link
-                to="/goals/$goalId"
-                params={{ goalId: goal.id }}
-                className={`flex size-8 shrink-0 items-center justify-center rounded-full ${accentOf(goal).dot} text-primary-foreground`}
-                aria-label="Open goal"
-              >
-                <Timer className="size-4" strokeWidth={1.5} />
-              </Link>
-              <Link
-                to="/goals/$goalId"
-                params={{ goalId: goal.id }}
-                className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-foreground"
-                aria-label="Open goal to mark step done"
-              >
-                <Check className="size-4" strokeWidth={2} />
-              </Link>
-            </div>
+              goal={goal}
+              step={next!}
+              onComplete={() => handleComplete(goal.id, next!.title, next!.id)}
+            />
           ))}
         </div>
 
@@ -241,6 +240,82 @@ function OverviewPage() {
           See goals grid
         </Link>
       </div>
+
+      {/* "Nice work" popup after completing a step */}
+      {celebrating && (
+        <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/40 sm:items-center">
+          <div className="w-full max-w-sm rounded-t-3xl bg-card p-6 text-center shadow-xl sm:rounded-3xl">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Nice work
+            </p>
+            <p className="mt-2 text-lg font-semibold">
+              You completed: {celebrating.completedTitle}
+            </p>
+            {celebratingNext ? (
+              <>
+                <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Next up for this goal
+                </p>
+                <p className="mt-1 text-base">{celebratingNext.title}</p>
+              </>
+            ) : (
+              <p className="mt-4 text-sm text-muted-foreground">
+                That was the last step — this goal is complete!
+              </p>
+            )}
+            <button
+              onClick={() => setCelebrating(null)}
+              className="mt-6 w-full rounded-2xl bg-primary py-3 text-sm font-semibold text-primary-foreground"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
     </AppShell>
+  );
+}
+
+function NextStepCard({
+  goal,
+  step,
+  onComplete,
+}: {
+  goal: ReturnType<typeof goalProgress> extends never ? never : any;
+  step: { id: string; title: string };
+  onComplete: () => void;
+}) {
+  const { openFocus } = useAppShell();
+
+  return (
+    <div className="flex items-center gap-3 rounded-xl bg-card px-3 py-2.5 shadow-sm ring-1 ring-border">
+      <span
+        className={`flex size-9 shrink-0 items-center justify-center rounded-full ${accentOf(goal).dot}`}
+      >
+        <Sparkle className="size-4 text-primary-foreground" strokeWidth={1.5} />
+      </span>
+
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium">{step.title}</p>
+        <p className="truncate text-xs italic text-muted-foreground">
+          {goal.title}
+        </p>
+      </div>
+
+      <button
+        onClick={() => openFocus(step.id)}
+        className={`flex size-8 shrink-0 items-center justify-center rounded-full ${accentOf(goal).dot} text-primary-foreground`}
+        aria-label="Start a 20-minute focus timer for this step"
+      >
+        <Timer className="size-4" strokeWidth={1.5} />
+      </button>
+      <button
+        onClick={onComplete}
+        className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-foreground"
+        aria-label="Mark this step complete"
+      >
+        <Check className="size-4" strokeWidth={2} />
+      </button>
+    </div>
   );
 }
