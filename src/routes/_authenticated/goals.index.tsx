@@ -128,23 +128,24 @@ function GoalsListPage() {
             className="w-full bg-transparent text-base placeholder:text-muted-foreground/60 focus:outline-none"
           />
           <div className="mt-3 flex items-center gap-2">
-            <button
+            <Button
               type="submit"
               disabled={!newGoalTitle.trim() || createGoalMutation.isPending}
-              className="flex-1 rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-40"
+              className="h-10 flex-1 rounded-xl"
             >
               Add goal
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="ghost"
               onClick={() => {
                 setShowNewGoal(false);
                 setNewGoalTitle("");
               }}
-              className="rounded-xl px-4 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted"
+              className="h-10 rounded-xl px-4 text-muted-foreground"
             >
               Cancel
-            </button>
+            </Button>
           </div>
         </form>
       )}

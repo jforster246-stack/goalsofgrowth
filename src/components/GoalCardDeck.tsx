@@ -193,7 +193,7 @@ function DeckCard({
   const { done, total, pct, complete, nextStep } = goalProgress(goal);
 
   return (
-    <article className="flex h-[410px] flex-col overflow-hidden rounded-2xl bg-card shadow-lg ring-1 ring-border">
+    <article className="relative flex h-[410px] flex-col overflow-hidden rounded-2xl bg-card shadow-lg ring-1 ring-border">
       <AnimatePresence>
         {celebrating && (
           <motion.div
