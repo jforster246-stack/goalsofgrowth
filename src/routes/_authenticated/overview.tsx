@@ -171,7 +171,11 @@ function OverviewPage() {
                 key={goal.id}
                 className={`w-[78%] shrink-0 snap-center overflow-hidden rounded-2xl shadow-sm ring-1 ring-border ${accentOf(goal).bar}`}
               >
-                <div className="flex flex-col items-center px-4 pb-5 pt-4 text-primary-foreground">
+                <Link
+                  to="/goals/$goalId"
+                  params={{ goalId: goal.id }}
+                  className="flex flex-col items-center px-4 pb-5 pt-4 text-primary-foreground"
+                >
                   {isGoalOfDay && (
                     <span className="mb-2 rounded-full bg-black/20 px-3 py-0.5 text-[10px] font-semibold uppercase tracking-wide">
                       Goal of the day
