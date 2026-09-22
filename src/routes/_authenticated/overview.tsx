@@ -194,7 +194,7 @@ function OverviewPage() {
                   <p className="mt-1 self-end text-[11px] text-primary-foreground/80">
                     {progress.pct}%
                   </p>
-                </div>
+                </Link>
 
                 <div className="bg-card px-4 py-4 text-center">
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
