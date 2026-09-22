@@ -103,13 +103,13 @@ function GoalDetailPage() {
     mutationFn: () => deleteGoal({ data: { id: goalId } }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["goals"] });
-      navigate({ to: "/goals", replace: true });
+      navigate({ to: "/overview", replace: true });
     },
   });
 
   if (isPending || !goal) {
     return (
-      <AppShell backTo="/goals" title="Goal">
+      <AppShell backTo="/overview" title="Goal">
         <p className="mt-10 text-center text-sm text-muted-foreground">
           Loading…
         </p>
@@ -134,7 +134,7 @@ function GoalDetailPage() {
   };
 
   return (
-    <AppShell backTo="/goals" title="Goal">
+    <AppShell backTo="/overview" title="Goal">
       <div className="mt-5 space-y-3">
         <section className="rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border">
           <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
