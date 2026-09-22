@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { Settings } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { StarField, localToday } from "@/components/goal-ui";
 import { FocusMode } from "@/components/focus-mode";
@@ -94,8 +95,6 @@ export function AppShell({
     navigate({ to: "/auth", replace: true });
   };
 
-  const initial = (profile?.display_name?.trim()?.[0] ?? "?").toUpperCase();
-
   return (
     <div className="relative min-h-dvh bg-background font-body text-foreground antialiased">
       <StarField />
@@ -120,13 +119,7 @@ export function AppShell({
               </svg>
             </Link>
           ) : (
-            <button
-              onClick={() => setProfileOpen(true)}
-              aria-label="Open profile"
-              className="grid size-10 shrink-0 place-items-center rounded-full bg-focus text-sm font-semibold text-white shadow-md transition-colors hover:bg-focus/90"
-            >
-              {initial}
-            </button>
+            <div className="size-10 shrink-0" />
           )}
 
           {title ? (
@@ -142,7 +135,14 @@ export function AppShell({
             </h1>
           )}
 
-          <div className="flex size-10 shrink-0 items-center justify-center">
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              onClick={() => setProfileOpen(true)}
+              aria-label="Open settings"
+              className="grid size-10 place-items-center rounded-full bg-card text-muted-foreground shadow-sm ring-1 ring-border transition-colors hover:bg-muted"
+            >
+              <Settings className="size-4" strokeWidth={2} />
+            </button>
             {right}
           </div>
         </header>
