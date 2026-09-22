@@ -126,13 +126,15 @@ export function GoalCardDeck({
               </Button>
               <div className="flex items-center gap-1.5" aria-label={`Goal ${activeIndex + 1} of ${visibleGoals.length}`}>
                 {visibleGoals.map((goal, index) => (
-                  <button
+                  <Button
                     key={goal.id}
                     type="button"
+                    variant="ghost"
+                    size="icon"
                     onClick={() => moveTo(index)}
                     aria-label={`Show ${goal.title}`}
                     aria-current={index === activeIndex ? "true" : undefined}
-                    className={`size-2 rounded-full transition-all ${index === activeIndex ? "w-5 bg-focus" : "bg-star"}`}
+                    className={`h-2 min-h-0 rounded-full p-0 transition-all ${index === activeIndex ? "w-5 bg-focus hover:bg-focus" : "w-2 bg-star hover:bg-star"}`}
                   />
                 ))}
               </div>
@@ -192,6 +194,20 @@ function DeckCard({
 
   return (
     <article className="flex h-[410px] flex-col overflow-hidden rounded-2xl bg-card shadow-lg ring-1 ring-border">
+      <AnimatePresence>
+        {celebrating && (
+          <motion.div
+            aria-hidden
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: [0, 1, 1, 0], scale: [0.5, 1.1, 1, 1.2] }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.65 }}
+            className="pointer-events-none absolute inset-0 z-10 grid place-items-center rounded-2xl bg-card/70"
+          >
+            <div className={`grid size-20 place-items-center rounded-full bg-background text-4xl ${accent.text}`}>✓</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <div className="flex min-h-0 flex-[1.05] flex-col bg-sand/45 p-6">
         <div className="flex items-start gap-3">
           <AccentStar fillClass={accent.check} />

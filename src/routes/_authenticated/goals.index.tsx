@@ -7,6 +7,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { AppShell, useAppShell } from "@/components/app-shell";
 import { GoalCardDeck } from "@/components/GoalCardDeck";
+import type { GoalWithSteps } from "@/components/goal-ui";
 import { Button } from "@/components/ui/button";
 import { goalsQueryOptions } from "@/lib/goal-queries";
 import {
@@ -162,7 +163,7 @@ function GoalsListPage() {
   );
 }
 
-function GoalsDeck({ goals }: { goals: Awaited<ReturnType<typeof createGoal>>[] extends never[] ? never : typeof goalsQueryOptions extends never ? never : any[] }) {
+function GoalsDeck({ goals }: { goals: GoalWithSteps[] }) {
   const queryClient = useQueryClient();
   const { openFocus } = useAppShell();
 
