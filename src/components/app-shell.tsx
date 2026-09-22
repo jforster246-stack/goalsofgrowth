@@ -1,6 +1,13 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { StarField, localToday } from "@/components/goal-ui";
 import { FocusMode } from "@/components/focus-mode";
@@ -10,6 +17,14 @@ import {
   touchStreak,
   updateDisplayName,
 } from "@/lib/goals.functions";
+
+const AppShellContext = createContext<{ openFocus: (stepId?: string) => void } | null>(null);
+
+export function useAppShell() {
+  const context = useContext(AppShellContext);
+  if (!context) throw new Error("useAppShell must be used inside AppShell");
+  return context;
+}
 
 export function AppShell({
   right,
@@ -29,6 +44,7 @@ export function AppShell({
 
   const [profileOpen, setProfileOpen] = useState(false);
   const [focusOpen, setFocusOpen] = useState(false);
+  const [focusStepId, setFocusStepId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState("");
   const [email, setEmail] = useState<string | null>(null);
@@ -138,14 +154,32 @@ export function AppShell({
           </p>
         )}
 
-        {children}
+        <AppShellContext.Provider
+          value={{
+            openFocus: (stepId) => {
+              setFocusStepId(stepId ?? null);
+              setFocusOpen(true);
+            },
+          }}
+        >
+          {children}
+        </AppShellContext.Provider>
 
-        <BottomNav onFocus={() => setFocusOpen(true)} />
+        <BottomNav
+          onFocus={() => {
+            setFocusStepId(null);
+            setFocusOpen(true);
+          }}
+        />
 
         {focusOpen && (
           <FocusMode
             goals={goals ?? []}
-            onClose={() => setFocusOpen(false)}
+            initialStepId={focusStepId}
+            onClose={() => {
+              setFocusOpen(false);
+              setFocusStepId(null);
+            }}
             onCompleteStep={(stepId) =>
               toggleStepMutation.mutate({ id: stepId, done: true })
             }

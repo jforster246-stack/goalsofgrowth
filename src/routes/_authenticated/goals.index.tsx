@@ -1,18 +1,13 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import {
   useMutation,
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { AppShell } from "@/components/app-shell";
-import {
-  AccentStar,
-  accentOf,
-  DIAMOND_PATH,
-  goalProgress,
-  type GoalWithSteps,
-} from "@/components/goal-ui";
+import { AppShell, useAppShell } from "@/components/app-shell";
+import { GoalCardDeck } from "@/components/GoalCardDeck";
+import { Button } from "@/components/ui/button";
 import { goalsQueryOptions } from "@/lib/goal-queries";
 import {
   claimUnownedGoals,
@@ -97,10 +92,11 @@ function GoalsListPage() {
   return (
     <AppShell
       right={
-        <button
+        <Button
           onClick={() => setShowNewGoal(true)}
           aria-label="New goal"
-          className="grid size-10 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground shadow-md transition-colors hover:bg-primary/90"
+          size="icon"
+          className="size-10 shrink-0 rounded-full shadow-md"
         >
           <svg
             viewBox="0 0 24 24"
@@ -114,7 +110,7 @@ function GoalsListPage() {
             <path d="M12 5v14" />
             <path d="M5 12h14" />
           </svg>
-        </button>
+        </Button>
       }
     >
       {showNewGoal && (
@@ -160,26 +156,15 @@ function GoalsListPage() {
           </p>
         </div>
       ) : (
-        <div className="mt-5 space-y-3">
-          {goals.map((goal, index) => (
-            <GoalSummaryCard key={goal.id} goal={goal} index={index} />
-          ))}
-        </div>
+        <GoalsDeck goals={goals} />
       )}
     </AppShell>
   );
 }
 
-function GoalSummaryCard({
-  goal,
-  index,
-}: {
-  goal: GoalWithSteps;
-  index: number;
-}) {
+function GoalsDeck({ goals }: { goals: Awaited<ReturnType<typeof createGoal>>[] extends never[] ? never : typeof goalsQueryOptions extends never ? never : any[] }) {
   const queryClient = useQueryClient();
-  const accent = accentOf(goal);
-  const { done, total, pct, complete, nextStep } = goalProgress(goal);
+  const { openFocus } = useAppShell();
 
   const toggleStepMutation = useMutation({
     mutationFn: (input: { id: string; done: boolean }) =>
@@ -187,67 +172,13 @@ function GoalSummaryCard({
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["goals"] }),
   });
 
-  const tickNextStep = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!nextStep || toggleStepMutation.isPending) return;
-    toggleStepMutation.mutate({ id: nextStep.id, done: true });
-  };
-
   return (
-    <Link
-      to="/goals/$goalId"
-      params={{ goalId: goal.id }}
-      className="block rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border transition-colors hover:bg-muted/30"
-      style={{ animation: `rise 0.35s ${index * 0.05}s both` }}
-    >
-      <div className="flex items-center gap-3">
-        <AccentStar fillClass={accent.check} />
-        <h3 className="min-w-0 flex-1 truncate text-[15px] font-semibold tracking-tight">
-          {goal.title}
-        </h3>
-        <span className="shrink-0 text-xs font-medium text-muted-foreground">
-          {done}/{total}
-        </span>
-      </div>
-
-      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
-        <div
-          className={`h-full rounded-full ${accent.bar} transition-[width] duration-500`}
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-
-      <p className="mt-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        {complete ? "Completed" : "Next step"}
-      </p>
-      {complete ? (
-        <p className="mt-0.5 text-sm">Every step is done — nice work.</p>
-      ) : nextStep ? (
-        <div className="mt-1 flex items-center gap-2.5">
-          <button
-            onClick={tickNextStep}
-            disabled={toggleStepMutation.isPending}
-            aria-label={`Tick off "${nextStep.title}"`}
-            className="grid size-8 shrink-0 place-items-center disabled:opacity-40"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              className={`size-5 transition-colors ${
-                toggleStepMutation.isPending
-                  ? accent.check
-                  : "fill-none stroke-muted-foreground/50 hover:stroke-foreground"
-              }`}
-              strokeWidth="1.8"
-            >
-              <path d={DIAMOND_PATH} />
-            </svg>
-          </button>
-          <span className="min-w-0 flex-1 text-sm">{nextStep.title}</span>
-        </div>
-      ) : (
-        <p className="mt-0.5 text-sm">No steps yet — tap to add one.</p>
-      )}
-    </Link>
+    <GoalCardDeck
+      goals={goals}
+      onFocus={openFocus}
+      onCompleteStep={(stepId) =>
+        toggleStepMutation.mutateAsync({ id: stepId, done: true })
+      }
+    />
   );
 }
