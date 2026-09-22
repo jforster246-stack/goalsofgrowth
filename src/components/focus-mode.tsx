@@ -16,13 +16,13 @@ export function FocusMode({
   goals,
   onClose,
   onCompleteStep,
+  initialStepId,
 }: {
   goals: GoalWithSteps[];
   onClose: () => void;
   onCompleteStep: (stepId: string) => void;
+  initialStepId?: string | null;
 }) {
-  const [target, setTarget] = useState<FocusTarget | null>(null);
-
   const nextSteps = goals
     .map((goal): FocusTarget | null => {
       const step = goal.steps.find((s) => !s.done);
@@ -37,6 +37,9 @@ export function FocusMode({
         : null;
     })
     .filter((t): t is FocusTarget => t !== null);
+  const [target, setTarget] = useState<FocusTarget | null>(
+    () => nextSteps.find((item) => item.stepId === initialStepId) ?? null,
+  );
 
   return (
     <div className="fixed inset-0 z-30 flex flex-col bg-background [animation:rise_0.25s_both]">
