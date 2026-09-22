@@ -56,7 +56,6 @@ export function AppShell({
       .catch(() => {});
   }, []);
 
-  // Record today's sign-in once per page session so the streak stays current.
   const touched = useRef(false);
   useEffect(() => {
     if (touched.current) return;
@@ -211,68 +210,30 @@ export function AppShell({
 
 function BottomNav({ onFocus }: { onFocus: () => void }) {
   const itemClass =
-    "flex flex-1 flex-col items-center gap-1 rounded-2xl py-2 text-[11px] font-semibold transition-colors";
+    "flex flex-1 items-center justify-center py-3 text-xs font-semibold uppercase tracking-wide transition-colors";
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-10 bg-gradient-to-t from-background via-background/95 to-transparent px-5 pb-4 pt-8">
-      <nav className="mx-auto flex max-w-md items-stretch gap-1 rounded-3xl bg-card p-1.5 shadow-lg ring-1 ring-border">
+      <nav className="mx-auto flex max-w-md items-stretch rounded-2xl bg-card shadow-lg ring-1 ring-border">
         <Link
           to="/overview"
-          className={`${itemClass} text-muted-foreground hover:bg-muted/60`}
-          activeProps={{ className: `${itemClass} bg-muted text-foreground` }}
+          className={`${itemClass} text-muted-foreground`}
+          activeProps={{ className: `${itemClass} text-foreground` }}
         >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="size-5"
-          >
-            <path d="M3 12l9-8 9 8" />
-            <path d="M5 10v10h14V10" />
-          </svg>
           Overview
         </Link>
         <Link
           to="/goals"
-          className={`${itemClass} text-muted-foreground hover:bg-muted/60`}
-          activeProps={{ className: `${itemClass} bg-muted text-foreground` }}
+          className={`${itemClass} text-muted-foreground`}
+          activeProps={{ className: `${itemClass} text-foreground` }}
         >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="size-5"
-          >
-            <path d="M4 6h16" />
-            <path d="M4 12h16" />
-            <path d="M4 18h10" />
-          </svg>
           Goals
         </Link>
         <button
           onClick={onFocus}
           aria-label="Open focus mode"
-          className={`${itemClass} bg-focus text-white hover:bg-focus/90`}
+          className={`${itemClass} text-muted-foreground`}
         >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="size-5"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <circle cx="12" cy="12" r="6" />
-            <circle cx="12" cy="12" r="2" />
-          </svg>
           Focus
         </button>
       </nav>
