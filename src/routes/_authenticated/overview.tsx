@@ -108,7 +108,7 @@ function OverviewPage() {
 
   return (
     <AppShell>
-      <div className="relative mx-auto max-w-md px-1 pb-24 pt-2">
+      <div className="relative mx-auto max-w-md px-5 pb-24 pt-2">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex size-11 flex-col items-center justify-center gap-0.5 rounded-xl bg-card shadow-sm ring-1 ring-border">
@@ -162,7 +162,7 @@ function OverviewPage() {
           All goals
         </p>
 
-        <div className="-mx-1 mt-3 flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 pb-2">
+        <div className="-mx-5 mt-3 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-2">
           {goals.map((goal) => {
             const progress = goalProgress(goal);
             const isGoalOfDay = goal.id === goalOfDay?.id;
