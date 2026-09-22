@@ -107,28 +107,18 @@ function OverviewPage() {
     : null;
 
   return (
-    <AppShell>
+    <AppShell
+      right={
+        <button
+          type="button"
+          className="flex items-center gap-1.5 rounded-full bg-card px-3 py-2 text-xs font-semibold text-focus shadow-sm ring-1 ring-border"
+        >
+          <Sparkle className="size-3.5" strokeWidth={1.75} />
+          WINS
+        </button>
+      }
+    >
       <div className="relative mx-auto max-w-md px-5 pb-24 pt-2">
-        {/* Header */}
-        <div className="flex items-start justify-between">
-          <div className="flex size-11 flex-col items-center justify-center gap-0.5 rounded-xl bg-card shadow-sm ring-1 ring-border">
-            <Sparkle className="size-4 text-focus" strokeWidth={1.5} />
-            <span className="text-[9px] font-semibold tracking-wide text-muted-foreground">
-              WINS
-            </span>
-          </div>
-          <div className="flex-1 px-2 text-center">
-            <h1 className="font-display text-3xl italic leading-tight text-focus">
-              Goals of Growth
-            </h1>
-          </div>
-          <div className="size-11 shrink-0" />
-        </div>
-
-        <p className="mt-3 text-center text-xs text-muted-foreground">
-          I am a vibrational match to all that I desire
-        </p>
-
         <div className="mt-5 border-t border-dashed border-border" />
 
         {/* Next steps */}
