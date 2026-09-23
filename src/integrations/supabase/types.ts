@@ -79,25 +79,31 @@ export type Database = {
       habits: {
         Row: {
           created_at: string
+          frequency: string
           id: string
           name: string
           position: number
+          reason: string | null
           time_of_day: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          frequency?: string
           id?: string
           name: string
           position?: number
+          reason?: string | null
           time_of_day?: string
           user_id: string
         }
         Update: {
           created_at?: string
+          frequency?: string
           id?: string
           name?: string
           position?: number
+          reason?: string | null
           time_of_day?: string
           user_id?: string
         }
