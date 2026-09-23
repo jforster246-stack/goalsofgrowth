@@ -3,6 +3,10 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
+  GoalCompletePrompt,
+  type CompletedGoal,
+} from "@/components/goal-complete-prompt";
+import {
   AccentStar,
   accentOf,
   DIAMOND_PATH,
@@ -58,8 +62,17 @@ export function GoalCardDeck({
     setActiveIndex(bounded);
   };
 
+  const [promptGoal, setPromptGoal] = useState<CompletedGoal | null>(null);
+
   const completeStep = async (stepId: string) => {
     if (locallyDone.has(stepId)) return;
+    // This tick finishes the goal when every other step is already done.
+    const goal = visibleGoals.find((g) =>
+      g.steps.some((s) => s.id === stepId),
+    );
+    if (goal && goal.steps.every((s) => s.done || s.id === stepId)) {
+      setPromptGoal({ id: goal.id, title: goal.title });
+    }
     setLocallyDone((current) => new Set(current).add(stepId));
     setCelebrating(stepId);
     window.setTimeout(() => setCelebrating(null), 650);
@@ -71,6 +84,7 @@ export function GoalCardDeck({
         next.delete(stepId);
         return next;
       });
+      setPromptGoal(null);
     }
   };
 
