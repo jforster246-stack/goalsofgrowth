@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Check, Moon, Plus, Sun, Sunset, Timer } from "lucide-react";
+import { Archive, Check, Moon, Plus, Sun, Sunset, Timer, Trophy } from "lucide-react";
 import { accentOf, goalProgress, STAR_PATH } from "@/components/goal-ui";
 import { cn } from "@/lib/utils";
 
@@ -96,6 +96,8 @@ export function GoalCard({
   onFocus,
   onComplete,
   onAdd,
+  onAddWin,
+  onArchive,
 }: {
   goal: HomeGoal;
   isGoalOfDay?: boolean;
@@ -103,10 +105,13 @@ export function GoalCard({
   onFocus?: () => void;
   onComplete?: () => void;
   onAdd?: () => void;
+  onAddWin?: () => void;
+  onArchive?: () => void;
 }) {
   const accent = accentOf(goal);
   const progress = goalProgress(goal);
   const hasSteps = goal.steps.length > 0;
+  const complete = progress.complete;
 
   return (
     <div
@@ -153,15 +158,39 @@ export function GoalCard({
       {/* Next-step panel */}
       <div className="flex flex-col items-center gap-6 px-3 py-4">
         <p className="w-full text-center font-heading text-[14.75px] uppercase text-olive">
-          Next Step:
+          {complete ? "Complete" : "Next Step:"}
         </p>
         <p className="w-full text-center font-serif text-sm text-black">
-          {hasSteps
-            ? (progress.nextStep?.title ?? "Every step is done — nice work.")
-            : "Break down this goal into manageable tasks"}
+          {complete
+            ? "Every step is done — nice work."
+            : hasSteps
+              ? (progress.nextStep?.title ?? "Every step is done — nice work.")
+              : "Break down this goal into manageable tasks"}
         </p>
 
-        {hasSteps ? (
+        {complete ? (
+          <div className="flex w-full flex-col gap-2">
+            <button
+              type="button"
+              onClick={onAddWin}
+              className={cn(
+                "flex w-full items-center justify-center gap-2 rounded-lg p-2 font-heading text-[12.7px] uppercase text-white",
+                accent.deep,
+              )}
+            >
+              Add to wins log
+              <Trophy className="size-5" strokeWidth={2} />
+            </button>
+            <button
+              type="button"
+              onClick={onArchive}
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-black/5 p-2 font-heading text-[12.7px] uppercase text-black/60 transition-colors hover:bg-black/10"
+            >
+              Archive
+              <Archive className="size-5" strokeWidth={2} />
+            </button>
+          </div>
+        ) : hasSteps ? (
           <div className="flex w-full items-center gap-2">
             <button
               type="button"

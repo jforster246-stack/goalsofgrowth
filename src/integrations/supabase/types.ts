@@ -17,6 +17,7 @@ export type Database = {
       goals: {
         Row: {
           accent: string
+          archived_at: string | null
           created_at: string
           id: string
           position: number
@@ -27,6 +28,7 @@ export type Database = {
         }
         Insert: {
           accent?: string
+          archived_at?: string | null
           created_at?: string
           id?: string
           position?: number
@@ -37,6 +39,7 @@ export type Database = {
         }
         Update: {
           accent?: string
+          archived_at?: string | null
           created_at?: string
           id?: string
           position?: number
