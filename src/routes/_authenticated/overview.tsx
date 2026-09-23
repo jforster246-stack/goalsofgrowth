@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   useMutation,
   useQuery,
@@ -8,7 +8,8 @@ import {
 import { useState } from "react";
 import { Check, Sparkle, Timer } from "lucide-react";
 import { AppShell, useAppShell } from "@/components/app-shell";
-import { accentOf, goalProgress, localToday } from "@/components/goal-ui";
+import { accentOf, goalProgress, localToday, STAR_PATH } from "@/components/goal-ui";
+import { NextStepRow } from "@/components/home-cards";
 import { goalsQueryOptions, profileQueryOptions } from "@/lib/goal-queries";
 import { setGoalOfDay, toggleStep } from "@/lib/goals.functions";
 
@@ -110,14 +111,19 @@ function OverviewPage() {
       right={
         <Link
           to="/wins"
-          className="flex items-center gap-1.5 rounded-full bg-card px-3 py-2 text-xs font-semibold text-focus shadow-sm ring-1 ring-border"
+          aria-label="Wins"
+          className="flex size-[50px] shrink-0 flex-col items-center justify-center gap-1 rounded-xl bg-white shadow-sm"
         >
-          <Sparkle className="size-3.5" strokeWidth={1.75} />
-          WINS
+          <svg viewBox="0 0 24 24" className="size-5 fill-gold-deep" aria-hidden>
+            <path d={STAR_PATH} fillRule="evenodd" />
+          </svg>
+          <span className="font-heading text-[8px] uppercase leading-none text-black">
+            Wins
+          </span>
         </Link>
       }
     >
-      <div className="relative mx-auto min-w-0 max-w-md pb-24 pt-2">
+      <div className="relative w-full pb-24 pt-2">
         <div className="mt-5 border-t border-dashed border-border" />
 
         {/* Next steps */}
@@ -266,48 +272,23 @@ function NextStepCard({
   step,
   onComplete,
 }: {
-  goal: ReturnType<typeof goalProgress> extends never ? never : any;
+  goal: { id: string; title: string; accent: string; steps: { id: string; title: string; done: boolean }[] };
   step: { id: string; title: string };
   onComplete: () => void;
 }) {
+  const navigate = useNavigate();
   const { openFocus, celebrate } = useAppShell();
 
   return (
-    <div className="flex min-w-0 items-center gap-3 rounded-xl bg-card px-3 py-2.5 shadow-sm ring-1 ring-border">
-      <span
-        className={`flex size-9 shrink-0 items-center justify-center rounded-full ${accentOf(goal).dot}`}
-      >
-        <Sparkle className="size-4 text-primary-foreground" strokeWidth={1.5} />
-      </span>
-
-      <Link
-        to="/goals/$goalId"
-        params={{ goalId: goal.id }}
-        className="min-w-0 flex-1"
-      >
-        <p className="text-sm font-medium">{step.title}</p>
-        <p className="truncate text-xs italic text-muted-foreground">
-          {goal.title}
-        </p>
-      </Link>
-
-      <button
-        onClick={() => openFocus(step.id)}
-        className={`flex size-8 shrink-0 items-center justify-center rounded-full ${accentOf(goal).dot} text-primary-foreground`}
-        aria-label="Start a 20-minute focus timer for this step"
-      >
-        <Timer className="size-4" strokeWidth={1.5} />
-      </button>
-      <button
-        onClick={() => {
-          celebrate();
-          onComplete();
-        }}
-        className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-foreground"
-        aria-label="Mark this step complete"
-      >
-        <Check className="size-4" strokeWidth={2} />
-      </button>
-    </div>
+    <NextStepRow
+      goal={goal}
+      step={step}
+      onOpen={() => navigate({ to: "/goals/$goalId", params: { goalId: goal.id } })}
+      onStartTimer={() => openFocus(step.id)}
+      onComplete={() => {
+        celebrate();
+        onComplete();
+      }}
+    />
   );
 }
