@@ -1,7 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AppShell, useAppShell } from "@/components/app-shell";
+import {
+  FOCUS_ADD_STEP_KEY,
+  GoalCompletePrompt,
+  type CompletedGoal,
+} from "@/components/goal-complete-prompt";
 import { accentOf } from "@/components/goal-ui";
 import { GoalHero, StepRow, type HomeGoal } from "@/components/home-cards";
 import { goalQueryOptions } from "@/lib/goal-queries";
@@ -80,6 +85,16 @@ function GoalDetailBody({ goal, goalId }: { goal: HomeGoal & { why?: string | nu
   const [vision, setVision] = useState(goal.vision ?? "");
   const [stepDraft, setStepDraft] = useState("");
   const [saved, setSaved] = useState(false);
+  const [promptGoal, setPromptGoal] = useState<CompletedGoal | null>(null);
+  const addStepRef = useRef<HTMLInputElement>(null);
+
+  // "Not yet — add more steps" sets this flag so the add-step box focuses on arrival.
+  useEffect(() => {
+    if (sessionStorage.getItem(FOCUS_ADD_STEP_KEY) === goal.id) {
+      sessionStorage.removeItem(FOCUS_ADD_STEP_KEY);
+      addStepRef.current?.focus();
+    }
+  }, [goal.id]);
 
   useEffect(() => {
     setTitle(goal.title);
@@ -165,7 +180,15 @@ function GoalDetailBody({ goal, goalId }: { goal: HomeGoal & { why?: string | nu
               done={step.done}
               onTimer={() => openFocus(step.id)}
               onToggle={() => {
-                if (!step.done) celebrate();
+                if (!step.done) {
+                  celebrate();
+                  // This tick finishes the goal when every other step is done.
+                  if (
+                    goal.steps.every((s) => s.done || s.id === step.id)
+                  ) {
+                    setPromptGoal({ id: goal.id, title: goal.title });
+                  }
+                }
                 toggleStepMutation.mutate({ id: step.id, done: !step.done });
               }}
               titleNode={
@@ -183,6 +206,7 @@ function GoalDetailBody({ goal, goalId }: { goal: HomeGoal & { why?: string | nu
 
           <form onSubmit={submitStep} className="flex items-center gap-2 pt-1">
             <input
+              ref={addStepRef}
               value={stepDraft}
               onChange={(e) => setStepDraft(e.target.value)}
               placeholder="Add a step…"
@@ -248,6 +272,11 @@ function GoalDetailBody({ goal, goalId }: { goal: HomeGoal & { why?: string | nu
       >
         Delete this goal
       </button>
+
+      <GoalCompletePrompt
+        goal={promptGoal}
+        onClose={() => setPromptGoal(null)}
+      />
     </div>
   );
 }

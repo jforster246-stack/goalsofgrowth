@@ -4,10 +4,14 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Plus } from "lucide-react";
 import { AppShell, useAppShell } from "@/components/app-shell";
 import { GoalCard } from "@/components/home-cards";
+import {
+  GoalCompletePrompt,
+  type CompletedGoal,
+} from "@/components/goal-complete-prompt";
 import { goalProgress, type GoalWithSteps } from "@/components/goal-ui";
 import { goalsQueryOptions } from "@/lib/goal-queries";
 import { claimUnownedGoals, toggleStep } from "@/lib/goals.functions";
@@ -86,6 +90,7 @@ function GoalCardItem({ goal }: { goal: GoalWithSteps }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { openFocus, celebrate } = useAppShell();
+  const [promptGoal, setPromptGoal] = useState<CompletedGoal | null>(null);
 
   const next = goalProgress(goal).nextStep;
 
@@ -102,16 +107,26 @@ function GoalCardItem({ goal }: { goal: GoalWithSteps }) {
     navigate({ to: "/goals/$goalId", params: { goalId: goal.id } });
 
   return (
-    <GoalCard
-      goal={goal}
-      onOpen={open}
-      onAdd={open}
-      onFocus={() => next && openFocus(next.id)}
-      onComplete={() => {
-        if (!next) return;
-        celebrate();
-        completeMutation.mutate(next.id);
-      }}
-    />
+    <>
+      <GoalCard
+        goal={goal}
+        onOpen={open}
+        onAdd={open}
+        onFocus={() => next && openFocus(next.id)}
+        onComplete={() => {
+          if (!next) return;
+          celebrate();
+          // This tick finishes the goal when every other step is already done.
+          if (goal.steps.every((s) => s.done || s.id === next.id)) {
+            setPromptGoal({ id: goal.id, title: goal.title });
+          }
+          completeMutation.mutate(next.id);
+        }}
+      />
+      <GoalCompletePrompt
+        goal={promptGoal}
+        onClose={() => setPromptGoal(null)}
+      />
+    </>
   );
 }
