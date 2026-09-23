@@ -2,6 +2,10 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { AppShell, useAppShell } from "@/components/app-shell";
+import {
+  GoalCompletePrompt,
+  type CompletedGoal,
+} from "@/components/goal-complete-prompt";
 import { accentOf } from "@/components/goal-ui";
 import { GoalHero, StepRow, type HomeGoal } from "@/components/home-cards";
 import { goalQueryOptions } from "@/lib/goal-queries";
@@ -15,6 +19,9 @@ import {
 } from "@/lib/goals.functions";
 
 export const Route = createFileRoute("/_authenticated/goals/$goalId")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    add: search.add === true,
+  }),
   head: () => ({
     meta: [
       { title: "Goal — Goals of Growth" },
@@ -74,12 +81,14 @@ function GoalDetailBody({ goal, goalId }: { goal: HomeGoal & { why?: string | nu
   const navigate = useNavigate();
   const { openFocus, celebrate } = useAppShell();
   const accent = accentOf(goal);
+  const { add } = Route.useSearch();
 
   const [title, setTitle] = useState(goal.title);
   const [why, setWhy] = useState(goal.why ?? "");
   const [vision, setVision] = useState(goal.vision ?? "");
   const [stepDraft, setStepDraft] = useState("");
   const [saved, setSaved] = useState(false);
+  const [promptGoal, setPromptGoal] = useState<CompletedGoal | null>(null);
 
   useEffect(() => {
     setTitle(goal.title);
