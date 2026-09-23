@@ -134,6 +134,25 @@ function GoalCardItem({ goal }: { goal: Goal }) {
     queryClient.invalidateQueries({ queryKey: ["goal"] });
   };
 
+  // Move the goal into (or out of) the "Completed goals" section right away,
+  // before the server round-trip. Returns the previous list so we can roll
+  // back if the save fails.
+  const optimisticArchive = async (archived: boolean) => {
+    await queryClient.cancelQueries({ queryKey: ["goals"] });
+    const prev = queryClient.getQueryData<Goal[]>(["goals"]);
+    queryClient.setQueryData<Goal[]>(["goals"], (old) =>
+      (old ?? []).map((g) =>
+        g.id === goal.id
+          ? { ...g, archived_at: archived ? new Date().toISOString() : null }
+          : g,
+      ),
+    );
+    return { prev };
+  };
+  const rollback = (ctx: { prev: Goal[] | undefined } | undefined) => {
+    if (ctx?.prev) queryClient.setQueryData(["goals"], ctx.prev);
+  };
+
   const completeMutation = useMutation({
     mutationFn: (stepId: string) => toggleStep({ data: { id: stepId, done: true } }),
     onSuccess: refresh,
@@ -145,14 +164,18 @@ function GoalCardItem({ goal }: { goal: Goal }) {
       await createWin({ data: { title: goal.title, kind: "achievement" } });
       await setGoalArchived({ data: { id: goal.id, archived: true } });
     },
-    onSuccess: () => {
+    onMutate: () => optimisticArchive(true),
+    onError: (_e, _v, ctx) => rollback(ctx),
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["wins"] });
       refresh();
     },
   });
   const archiveMutation = useMutation({
     mutationFn: () => setGoalArchived({ data: { id: goal.id, archived: true } }),
-    onSuccess: refresh,
+    onMutate: () => optimisticArchive(true),
+    onError: (_e, _v, ctx) => rollback(ctx),
+    onSettled: refresh,
   });
 
   const open = () =>
