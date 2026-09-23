@@ -84,7 +84,7 @@ function GoalsListPage() {
         </div>
       ) : (
         <div className="mt-4 pb-4">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {active.map((goal) => (
               <GoalCardItem key={goal.id} goal={goal} />
             ))}
