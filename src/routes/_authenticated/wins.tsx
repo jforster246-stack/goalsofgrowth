@@ -130,7 +130,7 @@ function WinsPage() {
                 Tick off a habit two days running to start a streak.
               </p>
             ) : (
-              streaks.map((h) => (
+              streaks.slice(0, 3).map((h) => (
                 <div
                   key={h.id}
                   className="flex items-center gap-3 rounded-2xl bg-white py-3 pl-3 pr-4 shadow-sm"
@@ -138,7 +138,7 @@ function WinsPage() {
                   <span className="grid size-8 shrink-0 place-items-center rounded-full bg-clay/15 text-clay-deep">
                     <Flame className="size-4" strokeWidth={2} />
                   </span>
-                  <span className="min-w-0 flex-1 truncate font-serif text-sm text-black">
+                  <span className="min-w-0 flex-1 font-serif text-sm text-black">
                     {h.name}
                   </span>
                   <span className="shrink-0 font-mono text-xs text-clay-deep">

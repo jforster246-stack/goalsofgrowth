@@ -275,7 +275,7 @@ function EditableStepTitle({
           setEditing(true);
         }}
         aria-label={`Edit step: ${title}`}
-        className={`block w-full truncate text-left font-serif text-sm ${
+        className={`block w-full text-left font-serif text-sm ${
           done ? "text-black/40 line-through decoration-black/30" : "text-black"
         }`}
       >

@@ -5,12 +5,12 @@ import {
 } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Moon, Plus, Sun, Sunset } from "lucide-react";
+import { Gem, Moon, Plus, Sun, Sunset } from "lucide-react";
 import { AppShell, useAppShell } from "@/components/app-shell";
 import { HabitRow, type HabitTime } from "@/components/home-cards";
 import { HabitFormModal, type EditableHabit } from "@/components/habit-form-modal";
 import { localToday } from "@/components/goal-ui";
-import { habitsQueryOptions } from "@/lib/goal-queries";
+import { crystalsQueryOptions, habitsQueryOptions } from "@/lib/goal-queries";
 import { toggleHabit } from "@/lib/habits.functions";
 import { cn } from "@/lib/utils";
 
@@ -57,6 +57,7 @@ function HabitsPage() {
   const { new: openNew } = Route.useSearch();
   const navigate = useNavigate();
   const { data: habits, isPending } = useQuery(habitsQueryOptions(today));
+  const { data: crystalData } = useQuery(crystalsQueryOptions);
 
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<EditableHabit | null>(null);
@@ -70,7 +71,21 @@ function HabitsPage() {
   };
 
   return (
-    <AppShell title="Habits">
+    <AppShell
+      title="Habits"
+      right={
+        <span
+          className="flex items-center gap-1 rounded-full bg-white px-3 py-1.5 shadow-sm"
+          title="Crystals earned from habits"
+          aria-label={`${crystalData?.crystals ?? 0} crystals`}
+        >
+          <Gem className="size-4 text-clay-deep" strokeWidth={2} />
+          <span className="font-mono text-sm text-olive">
+            {crystalData?.crystals ?? 0}
+          </span>
+        </span>
+      }
+    >
       {isPending || !habits ? (
         <p className="mt-10 text-center font-serif text-sm text-muted-foreground">
           Loading…
@@ -111,7 +126,11 @@ function HabitsBody({
   const queryClient = useQueryClient();
   const { openTimer, celebrate } = useAppShell();
 
-  const refresh = () => queryClient.invalidateQueries({ queryKey: ["habits"] });
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: ["habits"] });
+    queryClient.invalidateQueries({ queryKey: ["crystals"] });
+    queryClient.invalidateQueries({ queryKey: ["habit-streaks"] });
+  };
 
   const toggleMutation = useMutation({
     mutationFn: (input: { id: string; done: boolean }) =>

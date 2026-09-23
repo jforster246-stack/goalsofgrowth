@@ -48,7 +48,7 @@ export function NextStepRow({
       >
         <Star className={cn("size-10 shrink-0", accent.text)} />
         <span className="flex min-w-0 flex-col">
-          <span className="truncate font-serif text-sm text-black">
+          <span className="font-serif text-sm text-black">
             {step.title}
           </span>
           <span className={cn("truncate font-serif text-[10px] italic", accent.text)}>
@@ -335,14 +335,14 @@ export function HabitRow({
         <span className="flex min-w-0 flex-col">
           <span
             className={cn(
-              "truncate font-serif text-sm",
+              "font-serif text-sm",
               done ? "text-black/40 line-through decoration-black/30" : "text-black",
             )}
           >
             {name}
           </span>
           {showFrequency && (
-            <span className="truncate font-heading text-[10px] uppercase text-black/40">
+            <span className="font-heading text-[10px] uppercase text-black/40">
               {frequency}
             </span>
           )}

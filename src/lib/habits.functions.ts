@@ -93,6 +93,17 @@ export const listHabitStreaks = createServerFn({ method: "GET" })
       .sort((a, b) => b.streak - a.streak);
   });
 
+/** Crystals = the habit-completion reward currency: 2 per completion, ever. */
+export const getCrystals = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { count, error } = await context.supabase
+      .from("habit_completions")
+      .select("*", { count: "exact", head: true });
+    if (error) throw new Error(error.message);
+    return { crystals: (count ?? 0) * 2 };
+  });
+
 export const createHabit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) =>
