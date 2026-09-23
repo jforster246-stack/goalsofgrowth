@@ -80,7 +80,7 @@ export function NewGoalForm() {
   };
 
   return (
-    <div className="mt-4 flex min-h-[70dvh] flex-col pb-4">
+    <div className="mt-4 flex min-h-[70dvh] flex-col pb-4 md:mx-auto md:max-w-xl">
         {/* Progress */}
         <div className="flex items-center gap-1.5">
           {STEPS.map((s, i) => (

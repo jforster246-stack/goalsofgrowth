@@ -208,18 +208,20 @@ function HabitsBody({
 
   return (
     <div className="mt-4 space-y-8 pb-4">
-      {TIMES.map((time) => {
-        const inBucket = habits.filter((h) => h.time_of_day === time.key);
-        if (inBucket.length === 0) return null;
-        return (
-          <HabitSection
-            key={time.key}
-            time={time}
-            habits={inBucket}
-            renderHabit={(h) => renderHabit(h, time.label)}
-          />
-        );
-      })}
+      <div className="grid gap-8 md:grid-cols-2 md:items-start lg:grid-cols-3">
+        {TIMES.map((time) => {
+          const inBucket = habits.filter((h) => h.time_of_day === time.key);
+          if (inBucket.length === 0) return null;
+          return (
+            <HabitSection
+              key={time.key}
+              time={time}
+              habits={inBucket}
+              renderHabit={(h) => renderHabit(h, time.label)}
+            />
+          );
+        })}
+      </div>
 
       {scheduled.length > 0 && (
         <section>

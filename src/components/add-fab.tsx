@@ -42,7 +42,7 @@ export function AddFab() {
         />
       )}
 
-      <div className="fixed bottom-24 right-5 z-30 flex flex-col items-end gap-3">
+      <div className="fixed bottom-24 right-5 z-30 flex flex-col items-end gap-3 lg:bottom-8 lg:right-8">
         {open && (
           <div className="flex flex-col-reverse items-end gap-3">
             {items.map(({ label, Icon, onClick }) => (

@@ -151,51 +151,59 @@ function OverviewPage() {
       }
     >
       <div className="relative w-full pb-24 pt-2">
-        {profile && (
-          <StreakCard
-            streak={profile.streak_count ?? 0}
-            lastActive={profile.last_active_date ?? null}
-            name={profile.display_name ?? null}
-          />
-        )}
+        <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-8">
+          {/* Column 1 — streak + today's next steps */}
+          <div>
+            {profile && (
+              <StreakCard
+                streak={profile.streak_count ?? 0}
+                lastActive={profile.last_active_date ?? null}
+                name={profile.display_name ?? null}
+              />
+            )}
 
-        <div className="mt-5 border-t border-dashed border-border" />
+            <div className="mt-5 border-t border-dashed border-border lg:hidden" />
 
-        {/* Next steps */}
-        <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          What next step will you take today?
-        </p>
-
-        <div className="mt-3 space-y-2.5">
-          {upcoming.length === 0 && (
-            <p className="rounded-xl bg-card px-3 py-3 text-sm text-muted-foreground shadow-sm ring-1 ring-border">
-              {goals.length === 0
-                ? "Add a goal to see your next steps here."
-                : "You're all caught up — nice work."}
+            {/* Next steps */}
+            <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              What next step will you take today?
             </p>
-          )}
 
-          {upcoming.map(({ goal, next }) => (
-            <NextStepCard
-              key={goal.id}
-              goal={goal}
-              step={next!}
-              onComplete={() => handleComplete(goal.id, next!.title, next!.id)}
-            />
-          ))}
+            <div className="mt-3 space-y-2.5">
+              {upcoming.length === 0 && (
+                <p className="rounded-xl bg-card px-3 py-3 text-sm text-muted-foreground shadow-sm ring-1 ring-border">
+                  {goals.length === 0
+                    ? "Add a goal to see your next steps here."
+                    : "You're all caught up — nice work."}
+                </p>
+              )}
+
+              {upcoming.map(({ goal, next }) => (
+                <NextStepCard
+                  key={goal.id}
+                  goal={goal}
+                  step={next!}
+                  onComplete={() => handleComplete(goal.id, next!.title, next!.id)}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Column 2 — today's habits + yesterday's catch-up */}
+          <div className="mt-6 lg:mt-0">
+            <div className="border-t border-dashed border-border lg:hidden" />
+
+            {/* Habits for the current time of day */}
+            <TodayHabits />
+
+            {/* Habits missed yesterday — a gentle nudge to catch up today */}
+            <MissedYesterday />
+          </div>
         </div>
-
-        <div className="mt-6 border-t border-dashed border-border" />
-
-        {/* Habits for the current time of day */}
-        <TodayHabits />
-
-        {/* Habits missed yesterday — a gentle nudge to catch up today */}
-        <MissedYesterday />
 
         <Link
           to="/goals"
-          className="mt-6 block text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+          className="mt-8 block text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground"
         >
           See all goals
         </Link>

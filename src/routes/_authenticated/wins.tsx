@@ -78,7 +78,7 @@ function WinsPage() {
 
   return (
     <AppShell title="Wins">
-      <div className="mt-4 space-y-8 pb-4">
+      <div className="mt-4 space-y-8 pb-4 md:grid md:grid-cols-2 md:items-start md:gap-6 md:space-y-0">
         {/* Completed goals */}
         <section>
           <div className="flex items-center gap-1.5">
@@ -151,7 +151,7 @@ function WinsPage() {
         </section>
 
         {/* Manual wins */}
-        <section>
+        <section className="md:col-span-2">
           <div className="flex items-center justify-between">
             <p className="font-heading text-sm uppercase text-olive">Your wins</p>
             <button

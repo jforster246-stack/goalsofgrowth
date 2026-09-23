@@ -221,7 +221,7 @@ function GoalDetailBody({
   };
 
   return (
-    <div className="mt-4 space-y-6 pb-4">
+    <div className="mt-4 space-y-6 pb-4 md:mx-auto md:max-w-2xl">
       {/* Hero (previews the chosen colour live) */}
       <GoalHero goal={{ ...goal, accent: accentValue }}>
         <textarea

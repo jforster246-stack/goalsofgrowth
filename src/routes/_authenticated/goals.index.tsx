@@ -83,10 +83,12 @@ function GoalsListPage() {
           </button>
         </div>
       ) : (
-        <div className="mt-4 space-y-4 pb-4">
-          {active.map((goal) => (
-            <GoalCardItem key={goal.id} goal={goal} />
-          ))}
+        <div className="mt-4 pb-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {active.map((goal) => (
+              <GoalCardItem key={goal.id} goal={goal} />
+            ))}
+          </div>
           {active.length === 0 && (
             <p className="rounded-2xl bg-white/60 px-4 py-4 text-center font-serif text-sm text-black/40">
               All your goals are complete — nice work.
@@ -94,7 +96,7 @@ function GoalsListPage() {
           )}
 
           {archived.length > 0 && (
-            <div className="pt-2">
+            <div className="pt-6">
               <button
                 type="button"
                 onClick={() => setShowCompleted((v) => !v)}

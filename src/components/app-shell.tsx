@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { Check, House, Repeat, Settings, Target } from "lucide-react";
+import { Check, House, Repeat, Settings, Target, Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getTheme, setTheme, THEMES, type ThemeId } from "@/lib/theme";
 import { cn } from "@/lib/utils";
@@ -115,42 +115,43 @@ export function AppShell({
   };
 
   return (
-    <div className="relative min-h-dvh bg-background font-body text-foreground antialiased">
-      <div className="relative z-[1] mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 pb-28 pt-6">
+    <div className="relative min-h-dvh bg-background font-body text-foreground antialiased lg:pl-60">
+      <Sidebar onOpenSettings={() => setProfileOpen(true)} />
+      <div className="relative z-[1] mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 pb-28 pt-6 md:max-w-3xl lg:max-w-5xl lg:pb-12">
         <header className="flex items-center justify-between gap-2">
-          {backTo ? (
-            <button
-              type="button"
-              aria-label="Back"
-              onClick={() => {
-                if (window.history.length > 1) router.history.back();
-                else navigate({ to: backTo });
-              }}
-              className="grid size-10 shrink-0 place-items-center rounded-full bg-focus text-white shadow-md transition-colors hover:bg-focus/90"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="size-5"
+          <div className="size-10 shrink-0">
+            {backTo ? (
+              <button
+                type="button"
+                aria-label="Back"
+                onClick={() => {
+                  if (window.history.length > 1) router.history.back();
+                  else navigate({ to: backTo });
+                }}
+                className="grid size-10 place-items-center rounded-full bg-focus text-white shadow-md transition-colors hover:bg-focus/90"
               >
-                <path d="M15 18l-6-6 6-6" />
-              </svg>
-            </button>
-          ) : hideSettings ? (
-            <div className="size-10 shrink-0" />
-          ) : (
-            <button
-              onClick={() => setProfileOpen(true)}
-              aria-label="Open settings"
-              className="grid size-10 shrink-0 place-items-center rounded-full bg-card text-muted-foreground shadow-sm ring-1 ring-border transition-colors hover:bg-muted"
-            >
-              <Settings className="size-4" strokeWidth={2} />
-            </button>
-          )}
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="size-5"
+                >
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+              </button>
+            ) : hideSettings ? null : (
+              <button
+                onClick={() => setProfileOpen(true)}
+                aria-label="Open settings"
+                className="grid size-10 place-items-center rounded-full bg-card text-muted-foreground shadow-sm ring-1 ring-border transition-colors hover:bg-muted lg:hidden"
+              >
+                <Settings className="size-4" strokeWidth={2} />
+              </button>
+            )}
+          </div>
 
           {title ? (
             <h1 className="min-w-0 flex-1 truncate text-center font-heading text-lg tracking-tight">
@@ -239,12 +240,62 @@ export function AppShell({
   );
 }
 
+/** Desktop-only left rail: app identity, primary nav, and settings. */
+function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
+  return (
+    <aside className="fixed inset-y-0 left-0 z-20 hidden w-60 flex-col border-r border-border bg-card px-4 py-7 lg:flex">
+      <p className="px-2 font-display text-[26px] leading-tight text-foreground">
+        Goals of Growth
+      </p>
+
+      <nav className="mt-9 flex flex-col gap-1.5">
+        <SideLink to="/overview" icon={House} label="Home" />
+        <SideLink to="/goals" icon={Target} label="Goals" />
+        <SideLink to="/habits" icon={Repeat} label="Habits" />
+        <SideLink to="/wins" icon={Trophy} label="Wins" />
+      </nav>
+
+      <button
+        type="button"
+        onClick={onOpenSettings}
+        className="mt-auto flex items-center gap-3 rounded-xl px-3 py-2.5 font-heading text-sm uppercase tracking-wide text-muted-foreground transition-colors hover:bg-muted/50"
+      >
+        <Settings className="size-5" strokeWidth={2} />
+        Settings
+      </button>
+    </aside>
+  );
+}
+
+function SideLink({
+  to,
+  icon: Icon,
+  label,
+}: {
+  to: string;
+  icon: typeof House;
+  label: string;
+}) {
+  const base =
+    "flex items-center gap-3 rounded-xl px-3 py-2.5 font-heading text-sm uppercase tracking-wide transition-colors";
+  return (
+    <Link
+      to={to}
+      className={`${base} text-muted-foreground hover:bg-muted/50`}
+      activeProps={{ className: `${base} bg-olive text-white` }}
+    >
+      <Icon className="size-5" strokeWidth={2} />
+      {label}
+    </Link>
+  );
+}
+
 function BottomNav() {
   const itemClass =
     "flex flex-1 flex-col items-center justify-center gap-1 py-3.5 text-[11px] font-semibold uppercase tracking-wide transition-colors";
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-10 bg-gradient-to-t from-background via-background/95 to-transparent px-5 pb-4 pt-8">
+    <div className="fixed inset-x-0 bottom-0 z-10 bg-gradient-to-t from-background via-background/95 to-transparent px-5 pb-4 pt-8 lg:hidden">
       <nav className="mx-auto flex max-w-md items-stretch rounded-2xl bg-card shadow-lg ring-1 ring-border">
         <Link
           to="/overview"
