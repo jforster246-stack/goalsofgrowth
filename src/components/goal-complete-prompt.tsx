@@ -52,10 +52,10 @@ export function GoalCompletePrompt({
             transition={{ type: "spring", stiffness: 320, damping: 26 }}
             className="w-full max-w-sm rounded-3xl bg-background p-6 text-center shadow-xl"
           >
-            <div className="mx-auto grid size-14 place-items-center rounded-full bg-primary/15 text-2xl text-primary">
+            <div className="mx-auto grid size-14 place-items-center rounded-full bg-gold/20 text-2xl text-gold-deep">
               ✓
             </div>
-            <h2 className="mt-4 font-heading text-lg text-focus">
+            <h2 className="mt-4 font-heading text-lg text-olive">
               Every step is done
             </h2>
             <p className="mt-2 font-serif text-sm text-black/70">
@@ -67,7 +67,7 @@ export function GoalCompletePrompt({
                 type="button"
                 disabled={winMutation.isPending}
                 onClick={() => winMutation.mutate(goal.title)}
-                className="w-full rounded-2xl bg-primary py-3 font-heading text-sm uppercase text-white transition-colors hover:bg-primary/90 disabled:opacity-50"
+                className="w-full rounded-2xl bg-olive py-3 font-heading text-sm uppercase text-white transition-colors hover:bg-olive/90 disabled:opacity-50"
               >
                 {winMutation.isPending ? "Saving…" : "Yes, I did it!"}
               </button>
@@ -80,7 +80,7 @@ export function GoalCompletePrompt({
                     params: { goalId: goal.id },
                   });
                 }}
-                className="w-full rounded-2xl bg-focus py-3 font-heading text-sm uppercase text-white transition-colors hover:bg-focus/90"
+                className="w-full rounded-2xl bg-black/5 py-3 font-heading text-sm uppercase text-black/70 transition-colors hover:bg-black/10"
               >
                 Not yet — add more steps
               </button>
