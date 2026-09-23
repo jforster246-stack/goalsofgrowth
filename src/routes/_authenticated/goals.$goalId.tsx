@@ -1,8 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AppShell, useAppShell } from "@/components/app-shell";
 import {
+  FOCUS_ADD_STEP_KEY,
   GoalCompletePrompt,
   type CompletedGoal,
 } from "@/components/goal-complete-prompt";
@@ -19,9 +20,6 @@ import {
 } from "@/lib/goals.functions";
 
 export const Route = createFileRoute("/_authenticated/goals/$goalId")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    add: search.add === true,
-  }),
   head: () => ({
     meta: [
       { title: "Goal — Goals of Growth" },
@@ -81,7 +79,6 @@ function GoalDetailBody({ goal, goalId }: { goal: HomeGoal & { why?: string | nu
   const navigate = useNavigate();
   const { openFocus, celebrate } = useAppShell();
   const accent = accentOf(goal);
-  const { add } = Route.useSearch();
 
   const [title, setTitle] = useState(goal.title);
   const [why, setWhy] = useState(goal.why ?? "");
@@ -89,6 +86,15 @@ function GoalDetailBody({ goal, goalId }: { goal: HomeGoal & { why?: string | nu
   const [stepDraft, setStepDraft] = useState("");
   const [saved, setSaved] = useState(false);
   const [promptGoal, setPromptGoal] = useState<CompletedGoal | null>(null);
+  const addStepRef = useRef<HTMLInputElement>(null);
+
+  // "Not yet — add more steps" sets this flag so the add-step box focuses on arrival.
+  useEffect(() => {
+    if (sessionStorage.getItem(FOCUS_ADD_STEP_KEY) === goal.id) {
+      sessionStorage.removeItem(FOCUS_ADD_STEP_KEY);
+      addStepRef.current?.focus();
+    }
+  }, [goal.id]);
 
   useEffect(() => {
     setTitle(goal.title);
@@ -200,9 +206,7 @@ function GoalDetailBody({ goal, goalId }: { goal: HomeGoal & { why?: string | nu
 
           <form onSubmit={submitStep} className="flex items-center gap-2 pt-1">
             <input
-              ref={(el) => {
-                if (add && el) el.focus();
-              }}
+              ref={addStepRef}
               value={stepDraft}
               onChange={(e) => setStepDraft(e.target.value)}
               placeholder="Add a step…"
