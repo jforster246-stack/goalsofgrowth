@@ -47,33 +47,6 @@ export type Database = {
         }
         Relationships: []
       }
-      habits: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-          position: number
-          time_of_day: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name: string
-          position?: number
-          time_of_day?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-          position?: number
-          time_of_day?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       habit_completions: {
         Row: {
           completed_on: string
@@ -102,6 +75,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      habits: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          position: number
+          time_of_day: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          position?: number
+          time_of_day?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          position?: number
+          time_of_day?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
