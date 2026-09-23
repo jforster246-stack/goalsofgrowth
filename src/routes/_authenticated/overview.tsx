@@ -10,6 +10,10 @@ import { AppShell, useAppShell } from "@/components/app-shell";
 import { goalProgress, localToday, STAR_PATH } from "@/components/goal-ui";
 import { HabitRow, NextStepRow, type HabitTime } from "@/components/home-cards";
 import {
+  GoalCompletePrompt,
+  type CompletedGoal,
+} from "@/components/goal-complete-prompt";
+import {
   goalsQueryOptions,
   habitsQueryOptions,
   profileQueryOptions,
@@ -81,11 +85,13 @@ function OverviewPage() {
     },
   });
 
-  // Marks a step as done, then shows the "nice work" popup.
+  // Marks a step as done, then shows either the "nice work" popup or,
+  // if that was the goal's last remaining step, the shared completion prompt.
   const [celebrating, setCelebrating] = useState<{
     goalId: string;
     completedTitle: string;
   } | null>(null);
+  const [promptGoal, setPromptGoal] = useState<CompletedGoal | null>(null);
 
   const completeStepMutation = useMutation({
     mutationFn: (stepId: string) => toggleStep({ data: { id: stepId, done: true } }),
@@ -96,8 +102,18 @@ function OverviewPage() {
   });
 
   const handleComplete = (goalId: string, stepTitle: string, stepId: string) => {
+    const goal = goals.find((g) => g.id === goalId);
+    const willComplete =
+      !!goal && goal.steps.every((s) => s.id === stepId || s.done);
+
     completeStepMutation.mutate(stepId, {
-      onSuccess: () => setCelebrating({ goalId, completedTitle: stepTitle }),
+      onSuccess: () => {
+        if (willComplete && goal) {
+          setPromptGoal({ id: goal.id, title: goal.title });
+        } else {
+          setCelebrating({ goalId, completedTitle: stepTitle });
+        }
+      },
     });
   };
 
@@ -167,7 +183,7 @@ function OverviewPage() {
         </Link>
       </div>
 
-      {/* "Nice work" popup after completing a step */}
+      {/* "Nice work" popup after completing a step (when the goal isn't finished yet) */}
       {celebrating && (
         <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/40 sm:items-center">
           <div className="w-full max-w-sm rounded-t-3xl bg-card p-6 text-center shadow-xl sm:rounded-3xl">
@@ -177,17 +193,13 @@ function OverviewPage() {
             <p className="mt-2 text-lg font-semibold">
               You completed: {celebrating.completedTitle}
             </p>
-            {celebratingNext ? (
+            {celebratingNext && (
               <>
                 <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   Next up for this goal
                 </p>
                 <p className="mt-1 text-base">{celebratingNext.title}</p>
               </>
-            ) : (
-              <p className="mt-4 text-sm text-muted-foreground">
-                That was the last step — this goal is complete!
-              </p>
             )}
             <button
               onClick={() => setCelebrating(null)}
@@ -198,6 +210,9 @@ function OverviewPage() {
           </div>
         </div>
       )}
+
+      {/* Shown instead of the popup above when that was the goal's last step */}
+      <GoalCompletePrompt goal={promptGoal} onClose={() => setPromptGoal(null)} />
     </AppShell>
   );
 }
