@@ -57,6 +57,13 @@
       "when": 1790294400000,
       "tag": "0007_create_wins",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790126273899,
+      "tag": "0008_create_wins",
+      "breakpoints": true
     }
   ]
 }
