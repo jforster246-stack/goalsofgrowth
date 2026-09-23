@@ -109,8 +109,10 @@ function OverviewPage() {
     completeStepMutation.mutate(stepId, {
       onSuccess: () => {
         if (willComplete && goal) {
+          setCelebrating(null);
           setPromptGoal({ id: goal.id, title: goal.title });
         } else {
+          setPromptGoal(null);
           setCelebrating({ goalId, completedTitle: stepTitle });
         }
       },
