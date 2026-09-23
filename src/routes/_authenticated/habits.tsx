@@ -5,7 +5,7 @@ import {
 } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Gem, Moon, Plus, Sun, Sunset } from "lucide-react";
+import { CalendarClock, Gem, Moon, Plus, Sun, Sunset } from "lucide-react";
 import { AppShell, useAppShell } from "@/components/app-shell";
 import { HabitRow, type HabitTime } from "@/components/home-cards";
 import { HabitFormModal, type EditableHabit } from "@/components/habit-form-modal";
@@ -199,6 +199,13 @@ function HabitsBody({
     );
   }
 
+  // "Special" habits: anything on a custom cadence (every N days, certain days,
+  // weekdays/weekends). They still appear in their time-of-day section above;
+  // this is just a place to see them all at a glance.
+  const timeLabel = (t: HabitTime) =>
+    TIMES.find((x) => x.key === t)?.label ?? "";
+  const scheduled = habits.filter((h) => frequencyLabel(h) !== "Daily");
+
   return (
     <div className="mt-4 space-y-8 pb-4">
       {TIMES.map((time) => {
@@ -213,6 +220,22 @@ function HabitsBody({
           />
         );
       })}
+
+      {scheduled.length > 0 && (
+        <section>
+          <div className="flex items-center gap-1.5">
+            <CalendarClock className="size-4 text-olive" strokeWidth={2} />
+            <p className="font-heading text-sm uppercase text-olive">Scheduled</p>
+          </div>
+          <p className="mt-1 font-serif text-xs text-black/40">
+            Habits on a custom cadence — they also show under their time of day
+            above.
+          </p>
+          <div className="mt-4 space-y-2">
+            {scheduled.map((h) => renderHabit(h, timeLabel(h.time_of_day)))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Check, Flame } from "lucide-react";
 import {
   useMutation,
   useQuery,
@@ -23,6 +24,7 @@ import { toggleHabit } from "@/lib/habits.functions";
 import { frequencyLabel, isHabitDueToday } from "@/lib/habit-schedule";
 import { StepActionsModal } from "@/components/step-actions-modal";
 import { HabitFormModal } from "@/components/habit-form-modal";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/overview")({
   loader: ({ context }) => context.queryClient.ensureQueryData(goalsQueryOptions),
@@ -149,6 +151,14 @@ function OverviewPage() {
       }
     >
       <div className="relative w-full pb-24 pt-2">
+        {profile && (
+          <StreakCard
+            streak={profile.streak_count ?? 0}
+            lastActive={profile.last_active_date ?? null}
+            name={profile.display_name ?? null}
+          />
+        )}
+
         <div className="mt-5 border-t border-dashed border-border" />
 
         {/* Next steps */}
@@ -175,13 +185,13 @@ function OverviewPage() {
           ))}
         </div>
 
-        {/* Habits missed yesterday — a gentle nudge to catch up today */}
-        <MissedYesterday />
-
         <div className="mt-6 border-t border-dashed border-border" />
 
         {/* Habits for the current time of day */}
         <TodayHabits />
+
+        {/* Habits missed yesterday — a gentle nudge to catch up today */}
+        <MissedYesterday />
 
         <Link
           to="/goals"
@@ -222,6 +232,113 @@ function OverviewPage() {
       {/* Shown instead of the popup above when that was the goal's last step */}
       <GoalCompletePrompt goal={promptGoal} onClose={() => setPromptGoal(null)} />
     </AppShell>
+  );
+}
+
+/** Parses a YYYY-MM-DD string into a local Date (midnight). */
+function parseLocal(s: string) {
+  const [y, m, d] = s.split("-").map(Number);
+  return new Date(y!, (m ?? 1) - 1, d ?? 1);
+}
+function fmtLocal(dt: Date) {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`;
+}
+
+/**
+ * The sign-in streak as a flame count plus the current week, so the run of
+ * connected days reads at a glance: active days show a tick, the rest show
+ * their date, and today is highlighted.
+ */
+function StreakCard({
+  streak,
+  lastActive,
+  name,
+}: {
+  streak: number;
+  lastActive: string | null;
+  name: string | null;
+}) {
+  const todayStr = localToday();
+  const today = parseLocal(todayStr);
+
+  // Monday-first week containing today.
+  const monday = parseLocal(todayStr);
+  monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+
+  const lastActiveDate = lastActive ? parseLocal(lastActive) : null;
+  const activeStart =
+    lastActiveDate && streak > 0
+      ? (() => {
+          const a = new Date(lastActiveDate);
+          a.setDate(a.getDate() - (streak - 1));
+          return a;
+        })()
+      : null;
+
+  const LETTERS = ["M", "T", "W", "T", "F", "S", "S"];
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const dt = new Date(monday);
+    dt.setDate(monday.getDate() + i);
+    const active =
+      !!activeStart &&
+      !!lastActiveDate &&
+      dt.getTime() >= activeStart.getTime() &&
+      dt.getTime() <= lastActiveDate.getTime();
+    return {
+      letter: LETTERS[i]!,
+      dateNum: dt.getDate(),
+      isToday: fmtLocal(dt) === todayStr,
+      active,
+    };
+  });
+
+  return (
+    <div className="mt-1 flex flex-col items-center rounded-3xl bg-white px-5 py-6 text-center shadow-sm">
+      <div className="grid size-16 place-items-center rounded-full bg-clay/15">
+        <Flame className="size-8 text-clay-deep" strokeWidth={2} fill="currentColor" />
+      </div>
+      <p className="mt-3 font-heading text-4xl leading-none text-black">{streak}</p>
+      <p className="mt-1 font-heading text-sm uppercase tracking-wide text-olive">
+        Day streak
+      </p>
+      <p className="mt-1 font-serif text-xs italic text-black/50">
+        {streak > 0
+          ? `You are doing really great${name ? `, ${name}` : ""}!`
+          : "Check in each day to start your streak."}
+      </p>
+
+      <div className="mt-5 grid w-full grid-cols-7 gap-1">
+        {days.map((d, i) => (
+          <div key={i} className="flex flex-col items-center gap-1.5">
+            <span
+              className={cn(
+                "font-heading text-[11px] uppercase",
+                d.isToday ? "text-clay-deep" : "text-black/40",
+              )}
+            >
+              {d.letter}
+            </span>
+            {d.active ? (
+              <span className="grid size-8 place-items-center rounded-full bg-clay-deep text-white">
+                <Check className="size-4" strokeWidth={3} />
+              </span>
+            ) : (
+              <span
+                className={cn(
+                  "grid size-8 place-items-center rounded-full font-mono text-xs",
+                  d.isToday
+                    ? "ring-2 ring-clay-deep/40 text-clay-deep"
+                    : "text-black/30",
+                )}
+              >
+                {d.dateNum}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
