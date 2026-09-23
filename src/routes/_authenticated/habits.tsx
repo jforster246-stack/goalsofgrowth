@@ -8,10 +8,10 @@ import { useState } from "react";
 import { Moon, Plus, Sun, Sunset } from "lucide-react";
 import { AppShell, useAppShell } from "@/components/app-shell";
 import { HabitRow, type HabitTime } from "@/components/home-cards";
-import { HabitFormModal } from "@/components/habit-form-modal";
+import { HabitFormModal, type EditableHabit } from "@/components/habit-form-modal";
 import { localToday } from "@/components/goal-ui";
 import { habitsQueryOptions } from "@/lib/goal-queries";
-import { deleteHabit, toggleHabit } from "@/lib/habits.functions";
+import { toggleHabit } from "@/lib/habits.functions";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/habits")({
@@ -36,6 +36,7 @@ type Habit = {
   name: string;
   time_of_day: HabitTime;
   frequency: string;
+  reason: string | null;
   done: boolean;
 };
 
@@ -58,38 +59,36 @@ function HabitsPage() {
   const { data: habits, isPending } = useQuery(habitsQueryOptions(today));
 
   const [adding, setAdding] = useState(false);
+  const [editing, setEditing] = useState<EditableHabit | null>(null);
 
   // Opened straight from the FAB (?new=true) — show the sheet, then clear the flag.
-  const showModal = adding || openNew;
+  const showAdd = adding || openNew;
   const closeModal = () => {
     setAdding(false);
+    setEditing(null);
     if (openNew) navigate({ to: "/habits", search: { new: false }, replace: true });
   };
 
   return (
-    <AppShell
-      title="Habits"
-      backTo="/overview"
-      right={
-        <button
-          type="button"
-          onClick={() => setAdding(true)}
-          aria-label="Add a habit"
-          className="grid size-10 shrink-0 place-items-center rounded-xl bg-olive text-white shadow-sm transition-colors hover:bg-olive/90"
-        >
-          <Plus className="size-5" strokeWidth={2} />
-        </button>
-      }
-    >
+    <AppShell title="Habits">
       {isPending || !habits ? (
         <p className="mt-10 text-center font-serif text-sm text-muted-foreground">
           Loading…
         </p>
       ) : (
-        <HabitsBody habits={habits as Habit[]} today={today} onAdd={() => setAdding(true)} />
+        <HabitsBody
+          habits={habits as Habit[]}
+          today={today}
+          onAdd={() => setAdding(true)}
+          onEdit={setEditing}
+        />
       )}
 
-      {showModal && <HabitFormModal onClose={closeModal} />}
+      {editing ? (
+        <HabitFormModal habit={editing} onClose={closeModal} />
+      ) : (
+        showAdd && <HabitFormModal onClose={closeModal} />
+      )}
     </AppShell>
   );
 }
@@ -102,13 +101,15 @@ function HabitsBody({
   habits,
   today,
   onAdd,
+  onEdit,
 }: {
   habits: Habit[];
   today: string;
   onAdd: () => void;
+  onEdit: (habit: EditableHabit) => void;
 }) {
   const queryClient = useQueryClient();
-  const { openTimer } = useAppShell();
+  const { openTimer, celebrate } = useAppShell();
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["habits"] });
 
@@ -117,10 +118,11 @@ function HabitsBody({
       toggleHabit({ data: { ...input, today } }),
     onSuccess: refresh,
   });
-  const deleteMutation = useMutation({
-    mutationFn: (input: { id: string }) => deleteHabit({ data: input }),
-    onSuccess: refresh,
-  });
+
+  const complete = (habit: Habit) => {
+    celebrate();
+    toggleMutation.mutate({ id: habit.id, done: true });
+  };
 
   const renderHabit = (habit: Habit, label: string) => (
     <HabitRow
@@ -129,14 +131,27 @@ function HabitsBody({
       timeOfDay={habit.time_of_day}
       frequency={habit.frequency}
       done={habit.done}
+      onOpen={() =>
+        onEdit({
+          id: habit.id,
+          name: habit.name,
+          time_of_day: habit.time_of_day,
+          frequency: habit.frequency,
+          reason: habit.reason,
+        })
+      }
       onTimer={() =>
         openTimer({
           title: habit.name,
           subtitle: `${label} habit`,
-          onComplete: () => toggleMutation.mutate({ id: habit.id, done: true }),
+          onComplete: () => complete(habit),
         })
       }
-      onToggle={() => toggleMutation.mutate({ id: habit.id, done: !habit.done })}
+      onToggle={() =>
+        habit.done
+          ? toggleMutation.mutate({ id: habit.id, done: false })
+          : complete(habit)
+      }
     />
   );
 
@@ -173,11 +188,6 @@ function HabitsBody({
           />
         );
       })}
-
-      <DeleteHabitList
-        habits={habits}
-        onDelete={(id) => deleteMutation.mutate({ id })}
-      />
     </div>
   );
 }
@@ -228,52 +238,6 @@ function HabitSection({
           {showDone && (
             <div className="mt-2 space-y-2">{completed.map(renderHabit)}</div>
           )}
-        </div>
-      )}
-    </section>
-  );
-}
-
-/** A small "manage" area so habits can be removed without cluttering each row. */
-function DeleteHabitList({
-  habits,
-  onDelete,
-}: {
-  habits: Habit[];
-  onDelete: (id: string) => void;
-}) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <section>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="font-heading text-xs uppercase text-black/40 transition-colors hover:text-black/70"
-      >
-        {open ? "Done managing" : "Manage habits"}
-      </button>
-
-      {open && (
-        <div className="mt-3 space-y-2">
-          {habits.map((habit) => (
-            <div
-              key={habit.id}
-              className="flex items-center justify-between gap-2 rounded-2xl bg-white px-4 py-2.5 shadow-sm"
-            >
-              <span className="min-w-0 flex-1 truncate font-serif text-sm text-black">
-                {habit.name}
-              </span>
-              <button
-                type="button"
-                onClick={() => onDelete(habit.id)}
-                aria-label={`Delete ${habit.name}`}
-                className="shrink-0 font-heading text-xs uppercase text-clay-deep transition-opacity hover:opacity-70"
-              >
-                Delete
-              </button>
-            </div>
-          ))}
         </div>
       )}
     </section>

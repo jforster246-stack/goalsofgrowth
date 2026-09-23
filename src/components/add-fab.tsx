@@ -20,7 +20,6 @@ export function AddFab() {
   const navigate = useNavigate();
   const { openFocus } = useAppShell();
   const [open, setOpen] = useState(false);
-  const [winSoon, setWinSoon] = useState(false);
 
   const close = () => setOpen(false);
 
@@ -33,7 +32,11 @@ export function AddFab() {
     },
     { label: "Routine", Icon: ListChecks, onClick: () => navigate({ to: "/routines" }) },
     { label: "Focus session", Icon: Timer, onClick: () => openFocus() },
-    { label: "Win", Icon: Trophy, onClick: () => setWinSoon(true) },
+    {
+      label: "Win",
+      Icon: Trophy,
+      onClick: () => navigate({ to: "/wins", search: { new: true } }),
+    },
   ];
 
   return (
@@ -85,27 +88,6 @@ export function AddFab() {
           <Plus className="size-6" strokeWidth={2} />
         </button>
       </div>
-
-      {winSoon && (
-        <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/40 sm:items-center">
-          <div className="w-full max-w-sm rounded-t-3xl bg-background p-6 text-center shadow-xl [animation:rise_0.25s_both] sm:rounded-3xl">
-            <div className="mx-auto grid size-14 place-items-center rounded-full bg-gold/20 text-gold-deep">
-              <Trophy className="size-7" strokeWidth={1.5} />
-            </div>
-            <p className="mt-4 font-display text-2xl text-black">Wins are coming</p>
-            <p className="mt-2 font-serif text-sm text-black/50">
-              Logging your wins isn't built yet — it's next on the list.
-            </p>
-            <button
-              type="button"
-              onClick={() => setWinSoon(false)}
-              className="mt-6 w-full rounded-2xl bg-olive py-3 font-heading text-sm uppercase text-white transition-colors hover:bg-olive/90"
-            >
-              Got it
-            </button>
-          </div>
-        </div>
-      )}
     </>
   );
 }

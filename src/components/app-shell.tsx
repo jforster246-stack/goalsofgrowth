@@ -12,6 +12,8 @@ import { Settings } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { localToday } from "@/components/goal-ui";
 import { FocusMode } from "@/components/focus-mode";
+import { AddFab } from "@/components/add-fab";
+import { Confetti } from "@/components/confetti";
 import { goalsQueryOptions, profileQueryOptions } from "@/lib/goal-queries";
 import {
   toggleStep,
@@ -28,6 +30,7 @@ type CustomFocus = {
 const AppShellContext = createContext<{
   openFocus: (stepId?: string) => void;
   openTimer: (target: CustomFocus) => void;
+  celebrate: () => void;
 } | null>(null);
 
 export function useAppShell() {
@@ -56,6 +59,7 @@ export function AppShell({
   const [focusOpen, setFocusOpen] = useState(false);
   const [focusStepId, setFocusStepId] = useState<string | null>(null);
   const [customFocus, setCustomFocus] = useState<CustomFocus | null>(null);
+  const [confettiKey, setConfettiKey] = useState(0);
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState("");
   const [email, setEmail] = useState<string | null>(null);
@@ -173,12 +177,16 @@ export function AppShell({
               setCustomFocus(target);
               setFocusOpen(true);
             },
+            celebrate: () => setConfettiKey((k) => k + 1),
           }}
         >
           {children}
+          <AddFab />
         </AppShellContext.Provider>
 
         <BottomNav />
+
+        {confettiKey > 0 && <Confetti key={confettiKey} />}
 
         {focusOpen && (
           <FocusMode
@@ -190,9 +198,10 @@ export function AppShell({
               setFocusStepId(null);
               setCustomFocus(null);
             }}
-            onCompleteStep={(stepId) =>
-              toggleStepMutation.mutate({ id: stepId, done: true })
-            }
+            onCompleteStep={(stepId) => {
+              setConfettiKey((k) => k + 1);
+              toggleStepMutation.mutate({ id: stepId, done: true });
+            }}
           />
         )}
 
@@ -228,6 +237,13 @@ function BottomNav() {
       <nav className="mx-auto flex max-w-md items-stretch rounded-2xl bg-card shadow-lg ring-1 ring-border">
         <Link
           to="/overview"
+          className={`${itemClass} text-muted-foreground`}
+          activeProps={{ className: `${itemClass} text-foreground` }}
+        >
+          Home
+        </Link>
+        <Link
+          to="/goals"
           className={`${itemClass} text-muted-foreground`}
           activeProps={{ className: `${itemClass} text-foreground` }}
         >

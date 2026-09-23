@@ -8,7 +8,6 @@ import {
 import { useState } from "react";
 import { Check, Sparkle, Timer } from "lucide-react";
 import { AppShell, useAppShell } from "@/components/app-shell";
-import { AddFab } from "@/components/add-fab";
 import { accentOf, goalProgress, localToday } from "@/components/goal-ui";
 import { goalsQueryOptions, profileQueryOptions } from "@/lib/goal-queries";
 import { setGoalOfDay, toggleStep } from "@/lib/goals.functions";
@@ -109,13 +108,13 @@ function OverviewPage() {
   return (
     <AppShell
       right={
-        <button
-          type="button"
+        <Link
+          to="/wins"
           className="flex items-center gap-1.5 rounded-full bg-card px-3 py-2 text-xs font-semibold text-focus shadow-sm ring-1 ring-border"
         >
           <Sparkle className="size-3.5" strokeWidth={1.75} />
           WINS
-        </button>
+        </Link>
       }
     >
       <div className="relative mx-auto min-w-0 max-w-md pb-24 pt-2">
@@ -227,8 +226,6 @@ function OverviewPage() {
         </Link>
       </div>
 
-      <AddFab />
-
       {/* "Nice work" popup after completing a step */}
       {celebrating && (
         <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/40 sm:items-center">
@@ -273,7 +270,7 @@ function NextStepCard({
   step: { id: string; title: string };
   onComplete: () => void;
 }) {
-  const { openFocus } = useAppShell();
+  const { openFocus, celebrate } = useAppShell();
 
   return (
     <div className="flex min-w-0 items-center gap-3 rounded-xl bg-card px-3 py-2.5 shadow-sm ring-1 ring-border">
@@ -302,7 +299,10 @@ function NextStepCard({
         <Timer className="size-4" strokeWidth={1.5} />
       </button>
       <button
-        onClick={onComplete}
+        onClick={() => {
+          celebrate();
+          onComplete();
+        }}
         className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-foreground"
         aria-label="Mark this step complete"
       >

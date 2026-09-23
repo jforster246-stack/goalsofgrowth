@@ -40,6 +40,59 @@ export const listHabits = createServerFn({ method: "GET" })
     }));
   });
 
+/**
+ * Current streak per habit = consecutive days (ending today or yesterday) with
+ * a completion. Used by the Wins page to show habit streaks at a glance.
+ */
+export const listHabitStreaks = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) => z.object({ today: dateSchema }).parse(data))
+  .handler(async ({ data, context }) => {
+    const supabase = context.supabase;
+    const [habitsResult, completionsResult] = await Promise.all([
+      supabase
+        .from("habits")
+        .select("id, name, time_of_day")
+        .order("position", { ascending: true }),
+      supabase.from("habit_completions").select("habit_id, completed_on"),
+    ]);
+    if (habitsResult.error) throw new Error(habitsResult.error.message);
+    if (completionsResult.error) throw new Error(completionsResult.error.message);
+
+    const byHabit = new Map<string, Set<string>>();
+    for (const c of completionsResult.data ?? []) {
+      const set = byHabit.get(c.habit_id) ?? new Set<string>();
+      set.add(c.completed_on);
+      byHabit.set(c.habit_id, set);
+    }
+
+    const dayKey = (d: Date) => d.toISOString().slice(0, 10);
+    const streakFor = (dates: Set<string>) => {
+      const cursor = new Date(`${data.today}T00:00:00Z`);
+      // If today isn't done yet, an unbroken run can still end yesterday.
+      if (!dates.has(dayKey(cursor))) {
+        cursor.setUTCDate(cursor.getUTCDate() - 1);
+        if (!dates.has(dayKey(cursor))) return 0;
+      }
+      let n = 0;
+      while (dates.has(dayKey(cursor))) {
+        n += 1;
+        cursor.setUTCDate(cursor.getUTCDate() - 1);
+      }
+      return n;
+    };
+
+    return (habitsResult.data ?? [])
+      .map((h) => ({
+        id: h.id,
+        name: h.name,
+        time_of_day: h.time_of_day,
+        streak: streakFor(byHabit.get(h.id) ?? new Set()),
+      }))
+      .filter((h) => h.streak > 0)
+      .sort((a, b) => b.streak - a.streak);
+  });
+
 export const createHabit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) =>

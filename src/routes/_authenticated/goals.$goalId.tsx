@@ -72,7 +72,7 @@ function GoalDetailPage() {
 function GoalDetailBody({ goal, goalId }: { goal: HomeGoal & { why?: string | null; vision?: string | null }; goalId: string }) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { openFocus } = useAppShell();
+  const { openFocus, celebrate } = useAppShell();
   const accent = accentOf(goal);
 
   const [title, setTitle] = useState(goal.title);
@@ -164,9 +164,10 @@ function GoalDetailBody({ goal, goalId }: { goal: HomeGoal & { why?: string | nu
               accent={accent}
               done={step.done}
               onTimer={() => openFocus(step.id)}
-              onToggle={() =>
-                toggleStepMutation.mutate({ id: step.id, done: !step.done })
-              }
+              onToggle={() => {
+                if (!step.done) celebrate();
+                toggleStepMutation.mutate({ id: step.id, done: !step.done });
+              }}
               titleNode={
                 <EditableStepTitle
                   title={step.title}

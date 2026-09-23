@@ -2,10 +2,18 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Moon, Sun, Sunset, X } from "lucide-react";
 import type { HabitTime } from "@/components/home-cards";
-import { createHabit } from "@/lib/habits.functions";
+import { createHabit, deleteHabit, updateHabit } from "@/lib/habits.functions";
 import { cn } from "@/lib/utils";
 
 type Frequency = "daily" | "weekly" | "fortnightly" | "monthly";
+
+export type EditableHabit = {
+  id: string;
+  name: string;
+  time_of_day: HabitTime;
+  frequency: string;
+  reason: string | null;
+};
 
 const TIMES: { key: HabitTime; label: string; Icon: typeof Sun; activeBg: string }[] = [
   { key: "morning", label: "Morning", Icon: Sun, activeBg: "bg-gold-deep" },
@@ -20,24 +28,49 @@ const FREQUENCIES: { key: Frequency; label: string }[] = [
   { key: "monthly", label: "Monthly" },
 ];
 
-/** One-screen "new habit" sheet: name, time of day, frequency, optional reason. */
-export function HabitFormModal({ onClose }: { onClose: () => void }) {
+/** One-screen habit sheet: name, time of day, frequency, optional reason.
+ *  Pass `habit` to edit an existing one (adds Save + Delete). */
+export function HabitFormModal({
+  onClose,
+  habit,
+}: {
+  onClose: () => void;
+  habit?: EditableHabit;
+}) {
   const queryClient = useQueryClient();
+  const editing = !!habit;
 
-  const [name, setName] = useState("");
-  const [timeOfDay, setTimeOfDay] = useState<HabitTime>("morning");
-  const [frequency, setFrequency] = useState<Frequency>("daily");
-  const [reason, setReason] = useState("");
+  const [name, setName] = useState(habit?.name ?? "");
+  const [timeOfDay, setTimeOfDay] = useState<HabitTime>(
+    habit?.time_of_day ?? "morning",
+  );
+  const [frequency, setFrequency] = useState<Frequency>(
+    (habit?.frequency as Frequency) ?? "daily",
+  );
+  const [reason, setReason] = useState(habit?.reason ?? "");
 
-  const createMutation = useMutation({
-    mutationFn: (input: {
+  const refresh = () => queryClient.invalidateQueries({ queryKey: ["habits"] });
+
+  const saveMutation = useMutation({
+    mutationFn: async (input: {
       name: string;
       timeOfDay: HabitTime;
       frequency: Frequency;
-      reason?: string;
-    }) => createHabit({ data: input }),
+      reason: string;
+    }) => {
+      if (editing) await updateHabit({ data: { id: habit!.id, ...input } });
+      else await createHabit({ data: input });
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["habits"] });
+      refresh();
+      onClose();
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteHabit({ data: { id: habit!.id } }),
+    onSuccess: () => {
+      refresh();
       onClose();
     },
   });
@@ -45,14 +78,8 @@ export function HabitFormModal({ onClose }: { onClose: () => void }) {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const value = name.trim();
-    if (!value || createMutation.isPending) return;
-    const trimmedReason = reason.trim();
-    createMutation.mutate({
-      name: value,
-      timeOfDay,
-      frequency,
-      ...(trimmedReason ? { reason: trimmedReason } : {}),
-    });
+    if (!value || saveMutation.isPending) return;
+    saveMutation.mutate({ name: value, timeOfDay, frequency, reason: reason.trim() });
   };
 
   return (
@@ -63,7 +90,7 @@ export function HabitFormModal({ onClose }: { onClose: () => void }) {
       >
         <div className="flex items-center justify-between">
           <h2 className="font-display text-2xl leading-none text-black">
-            New habit
+            {editing ? "Edit habit" : "New habit"}
           </h2>
           <button
             type="button"
@@ -151,11 +178,28 @@ export function HabitFormModal({ onClose }: { onClose: () => void }) {
 
         <button
           type="submit"
-          disabled={!name.trim() || createMutation.isPending}
+          disabled={!name.trim() || saveMutation.isPending}
           className="mt-6 w-full rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
         >
-          {createMutation.isPending ? "Adding…" : "Add habit"}
+          {saveMutation.isPending
+            ? editing
+              ? "Saving…"
+              : "Adding…"
+            : editing
+              ? "Save changes"
+              : "Add habit"}
         </button>
+
+        {editing && (
+          <button
+            type="button"
+            onClick={() => deleteMutation.mutate()}
+            disabled={deleteMutation.isPending}
+            className="mt-2 w-full py-2 font-heading text-sm uppercase text-clay-deep transition-opacity hover:opacity-70 disabled:opacity-40"
+          >
+            Delete habit
+          </button>
+        )}
       </form>
     </div>
   );

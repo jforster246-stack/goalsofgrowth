@@ -11,7 +11,7 @@ export const Route = createFileRoute("/_authenticated/routines")({
 
 function RoutinesPage() {
   return (
-    <AppShell title="Routines" backTo="/overview">
+    <AppShell title="Routines">
       <div className="flex flex-col items-center justify-center gap-3 py-28 text-center">
         <Sparkle className="size-10 text-focus" strokeWidth={1.25} />
         <p className="text-lg font-semibold">Coming soon</p>

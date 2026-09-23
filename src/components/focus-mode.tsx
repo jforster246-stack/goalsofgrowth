@@ -67,9 +67,9 @@ export function FocusMode({
             onComplete={() => {
               if (target.stepId === CUSTOM_STEP_ID) customTarget?.onComplete?.();
               else onCompleteStep(target.stepId);
-              setTarget(null);
+              onClose();
             }}
-            onEnd={() => setTarget(null)}
+            onEnd={onClose}
           />
         ) : (
           <>

@@ -180,6 +180,17 @@
   }
 }
 
+@keyframes confetti-burst {
+  0% {
+    transform: translate(0, 0) rotate(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--x), var(--y)) rotate(var(--r));
+    opacity: 0;
+  }
+}
+
 @keyframes pop {
   0% {
     transform: scale(0);

@@ -304,6 +304,7 @@ export function HabitRow({
   timeOfDay,
   done,
   frequency,
+  onOpen,
   onTimer,
   onToggle,
 }: {
@@ -311,6 +312,7 @@ export function HabitRow({
   timeOfDay: HabitTime;
   done: boolean;
   frequency?: string;
+  onOpen?: () => void;
   onTimer?: () => void;
   onToggle?: () => void;
 }) {
@@ -319,7 +321,12 @@ export function HabitRow({
 
   return (
     <div className="flex w-full items-center justify-between gap-2 rounded-2xl bg-white py-2 pl-3 pr-2 shadow-sm">
-      <div className="flex min-w-0 flex-1 items-center gap-2.5">
+      <button
+        type="button"
+        onClick={onOpen}
+        aria-label={`Edit ${name}`}
+        className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
+      >
         <Icon
           className={cn("size-8 shrink-0", HABIT_ICON_COLOR[timeOfDay])}
           strokeWidth={1.75}
@@ -340,7 +347,7 @@ export function HabitRow({
             </span>
           )}
         </span>
-      </div>
+      </button>
 
       <div className="flex shrink-0 items-center gap-2">
         <button

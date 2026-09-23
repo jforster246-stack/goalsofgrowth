@@ -87,18 +87,7 @@ function GoalsListPage() {
   };
 
   return (
-    <AppShell
-      title="All goals"
-      right={
-        <button
-          onClick={() => setShowNewGoal(true)}
-          aria-label="New goal"
-          className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-card text-foreground shadow-sm ring-1 ring-border"
-        >
-          <Plus className="size-5" strokeWidth={2} />
-        </button>
-      }
-    >
+    <AppShell title="All goals">
       {!showNewGoal && goals.length > 0 && (
         <p className="mt-3 text-xs text-muted-foreground">
           Tap to see next step
@@ -145,7 +134,7 @@ function GoalsListPage() {
         <div className="mt-5 rounded-2xl bg-card p-8 text-center shadow-sm ring-1 ring-border [animation:rise_0.4s_both]">
           <p className="text-base font-semibold">No goals yet</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Tap the + button up top to add your first one.
+            Tap the + button to add your first one.
           </p>
         </div>
       ) : (
