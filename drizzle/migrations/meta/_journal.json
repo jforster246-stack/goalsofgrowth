@@ -43,6 +43,13 @@
       "when": 1790208000000,
       "tag": "0005_add_habit_frequency_reason",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790125090511,
+      "tag": "0006_add_habit_frequency_reason",
+      "breakpoints": true
     }
   ]
 }
