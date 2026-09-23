@@ -175,6 +175,9 @@ function OverviewPage() {
           ))}
         </div>
 
+        {/* Habits missed yesterday — a gentle nudge to catch up today */}
+        <MissedYesterday />
+
         <div className="mt-6 border-t border-dashed border-border" />
 
         {/* Habits for the current time of day */}
@@ -232,6 +235,7 @@ function NextStepCard({
   onComplete: () => void;
 }) {
   const { openFocus, celebrate } = useAppShell();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [habitPrefill, setHabitPrefill] = useState<string | null>(null);
@@ -276,6 +280,9 @@ function NextStepCard({
             setOpen(false);
             setHabitPrefill(name);
           }}
+          onGoToGoal={() =>
+            navigate({ to: "/goals/$goalId", params: { goalId: goal.id } })
+          }
         />
       )}
       {habitPrefill !== null && (
@@ -300,6 +307,84 @@ function currentBucket(): HabitTime {
   if (h < 12) return "morning";
   if (h < 17) return "afternoon";
   return "evening";
+}
+
+/** The local calendar day before `today` (YYYY-MM-DD). */
+function yesterdayKey(today: string): string {
+  const d = new Date(`${today}T00:00:00`);
+  d.setDate(d.getDate() - 1);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+/**
+ * Habits that were due yesterday but never ticked off, so they can be caught up
+ * today. Ticking one marks it done for today, which removes it from the list.
+ */
+function MissedYesterday() {
+  const today = localToday();
+  const yKey = yesterdayKey(today);
+  const yDate = new Date(`${yKey}T00:00:00`);
+  const queryClient = useQueryClient();
+  const { openTimer, celebrate } = useAppShell();
+  const { data: yesterdayHabits } = useQuery(habitsQueryOptions(yKey));
+  const { data: todayHabits } = useQuery(habitsQueryOptions(today));
+
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: ["habits"] });
+    queryClient.invalidateQueries({ queryKey: ["crystals"] });
+    queryClient.invalidateQueries({ queryKey: ["habit-streaks"] });
+  };
+  const toggle = useMutation({
+    mutationFn: (id: string) => toggleHabit({ data: { id, done: true, today } }),
+    onSuccess: refresh,
+  });
+  const complete = (id: string) => {
+    celebrate();
+    toggle.mutate(id);
+  };
+
+  // Done today already? Then it's caught up — no need to nag.
+  const doneToday = new Set(
+    (todayHabits ?? []).filter((h) => h.done).map((h) => h.id),
+  );
+  const missed = (yesterdayHabits ?? []).filter(
+    (h) => isHabitDueToday(h, yDate) && !h.done && !doneToday.has(h.id),
+  );
+
+  if (missed.length === 0) return null;
+
+  return (
+    <section>
+      <div className="mt-6 border-t border-dashed border-border" />
+      <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        Missed yesterday
+      </p>
+      <p className="mt-1 text-sm text-muted-foreground">
+        These are the habits that you didn't complete yesterday. Can you do them
+        today?
+      </p>
+      <div className="mt-3 space-y-2">
+        {missed.map((h) => (
+          <HabitRow
+            key={h.id}
+            name={h.name}
+            timeOfDay={h.time_of_day as HabitTime}
+            frequencyLabel={frequencyLabel(h)}
+            done={false}
+            onTimer={() =>
+              openTimer({
+                title: h.name,
+                subtitle: "Missed yesterday",
+                onComplete: () => complete(h.id),
+              })
+            }
+            onToggle={() => complete(h.id)}
+          />
+        ))}
+      </div>
+    </section>
+  );
 }
 
 /** The current time-of-day's habits, shown on Home in place of the goal list. */

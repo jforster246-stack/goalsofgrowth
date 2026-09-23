@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Archive, Check, Moon, Plus, Sun, Sunset, Timer, Trophy } from "lucide-react";
+import { Archive, Check, Moon, Plus, Sun, Sunset, Timer, Trophy, Undo2 } from "lucide-react";
 import { accentOf, goalProgress, STAR_PATH } from "@/components/goal-ui";
 import { cn } from "@/lib/utils";
 
@@ -295,28 +295,41 @@ export function StepRow({
       {dragHandle}
       <div className="min-w-0 flex-1">{titleNode}</div>
       <div className="flex shrink-0 items-center gap-2">
-        <button
-          type="button"
-          onClick={onTimer}
-          aria-label="Start a focus timer for this step"
-          className={cn(
-            "flex items-center justify-center rounded-lg p-2 text-white",
-            accent.deep,
-          )}
-        >
-          <Timer className="size-6" strokeWidth={1.75} />
-        </button>
-        <button
-          type="button"
-          onClick={onToggle}
-          aria-label={done ? "Mark step not done" : "Mark step done"}
-          className={cn(
-            "flex items-center justify-center rounded-lg p-2 text-white transition-colors",
-            done ? accent.deep : accent.surface,
-          )}
-        >
-          <Check className="size-6" strokeWidth={2} />
-        </button>
+        {done ? (
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-label="Mark step not done"
+            className="flex items-center justify-center rounded-lg bg-black/5 p-2 text-black/45 transition-colors hover:bg-black/10 hover:text-black/70"
+          >
+            <Undo2 className="size-6" strokeWidth={2} />
+          </button>
+        ) : (
+          <>
+            <button
+              type="button"
+              onClick={onTimer}
+              aria-label="Start a focus timer for this step"
+              className={cn(
+                "flex items-center justify-center rounded-lg p-2 text-white",
+                accent.deep,
+              )}
+            >
+              <Timer className="size-6" strokeWidth={1.75} />
+            </button>
+            <button
+              type="button"
+              onClick={onToggle}
+              aria-label="Mark step done"
+              className={cn(
+                "flex items-center justify-center rounded-lg p-2 text-white transition-colors",
+                accent.surface,
+              )}
+            >
+              <Check className="size-6" strokeWidth={2} />
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

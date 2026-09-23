@@ -136,9 +136,17 @@ function GoalCardItem({ goal }: { goal: Goal }) {
     mutationFn: (stepId: string) => toggleStep({ data: { id: stepId, done: true } }),
     onSuccess: refresh,
   });
+  // "Add to wins log" both records the win and files the goal away under
+  // "Completed goals" at the bottom of the list.
   const winMutation = useMutation({
-    mutationFn: () => createWin({ data: { title: goal.title, kind: "achievement" } }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["wins"] }),
+    mutationFn: async () => {
+      await createWin({ data: { title: goal.title, kind: "achievement" } });
+      await setGoalArchived({ data: { id: goal.id, archived: true } });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["wins"] });
+      refresh();
+    },
   });
   const archiveMutation = useMutation({
     mutationFn: () => setGoalArchived({ data: { id: goal.id, archived: true } }),

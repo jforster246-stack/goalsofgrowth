@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Check, Repeat, Trash2, X } from "lucide-react";
+import { ArrowRight, Check, Repeat, Trash2, X } from "lucide-react";
 
 /**
  * Tapping a step (on Home or the goal page) opens this: rename, complete,
- * turn it into a habit, or delete.
+ * turn it into a habit, or delete. When opened from Home, `onGoToGoal` is
+ * passed so the primary action jumps to the goal instead of saving a rename.
  */
 export function StepActionsModal({
   title,
@@ -13,6 +14,7 @@ export function StepActionsModal({
   onToggle,
   onDelete,
   onAddAsHabit,
+  onGoToGoal,
 }: {
   title: string;
   done: boolean;
@@ -21,6 +23,7 @@ export function StepActionsModal({
   onToggle: () => void;
   onDelete: () => void;
   onAddAsHabit: (name: string) => void;
+  onGoToGoal?: () => void;
 }) {
   const [name, setName] = useState(title);
   const trimmed = name.trim();
@@ -49,17 +52,31 @@ export function StepActionsModal({
         />
 
         <div className="mt-4 space-y-2">
-          <button
-            type="button"
-            disabled={!trimmed || trimmed === title}
-            onClick={() => {
-              onRename(trimmed);
-              onClose();
-            }}
-            className="w-full rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white transition-colors hover:bg-olive/90 disabled:opacity-40"
-          >
-            Save changes
-          </button>
+          {onGoToGoal ? (
+            <button
+              type="button"
+              onClick={() => {
+                onGoToGoal();
+                onClose();
+              }}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white transition-colors hover:bg-olive/90"
+            >
+              Go to this goal
+              <ArrowRight className="size-5" strokeWidth={2} />
+            </button>
+          ) : (
+            <button
+              type="button"
+              disabled={!trimmed || trimmed === title}
+              onClick={() => {
+                onRename(trimmed);
+                onClose();
+              }}
+              className="w-full rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white transition-colors hover:bg-olive/90 disabled:opacity-40"
+            >
+              Save changes
+            </button>
+          )}
 
           <button
             type="button"
