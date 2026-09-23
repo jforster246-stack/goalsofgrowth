@@ -2,9 +2,10 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { Reorder, useDragControls } from "framer-motion";
-import { GripVertical } from "lucide-react";
+import { Check, GripVertical } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { AppShell, useAppShell } from "@/components/app-shell";
-import { accentOf } from "@/components/goal-ui";
+import { accentOf, GOAL_ACCENTS, type Accent } from "@/components/goal-ui";
 import { GoalHero, StepRow, type HomeGoal } from "@/components/home-cards";
 import {
   GoalCompletePrompt,
@@ -90,11 +91,12 @@ function GoalDetailBody({
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { openFocus, celebrate } = useAppShell();
-  const accent = accentOf(goal);
 
   const [title, setTitle] = useState(goal.title);
   const [why, setWhy] = useState(goal.why ?? "");
   const [vision, setVision] = useState(goal.vision ?? "");
+  const [accentValue, setAccentValue] = useState<string>(goal.accent);
+  const accent = accentOf({ accent: accentValue });
   const [stepDraft, setStepDraft] = useState("");
   const [saved, setSaved] = useState(false);
   const [promptGoal, setPromptGoal] = useState<CompletedGoal | null>(null);
@@ -117,7 +119,8 @@ function GoalDetailBody({
     setTitle(goal.title);
     setWhy(goal.why ?? "");
     setVision(goal.vision ?? "");
-  }, [goal.id, goal.title, goal.why, goal.vision]);
+    setAccentValue(goal.accent);
+  }, [goal.id, goal.title, goal.why, goal.vision, goal.accent]);
 
   // Keep the local drag order in sync with the latest fetched steps.
   useEffect(() => {
@@ -139,8 +142,12 @@ function GoalDetailBody({
   };
 
   const saveMutation = useMutation({
-    mutationFn: (input: { title: string; why: string; vision: string }) =>
-      updateGoalDetails({ data: { id: goalId, ...input } }),
+    mutationFn: (input: {
+      title: string;
+      why: string;
+      vision: string;
+      accent: Accent;
+    }) => updateGoalDetails({ data: { id: goalId, ...input } }),
     onSuccess: () => {
       refresh();
       setSaved(true);
@@ -185,7 +192,8 @@ function GoalDetailBody({
   const dirty =
     title.trim() !== goal.title ||
     why !== (goal.why ?? "") ||
-    vision !== (goal.vision ?? "");
+    vision !== (goal.vision ?? "") ||
+    accentValue !== goal.accent;
 
   const submitStep = (e: React.FormEvent) => {
     e.preventDefault();
@@ -214,8 +222,8 @@ function GoalDetailBody({
 
   return (
     <div className="mt-4 space-y-6 pb-4">
-      {/* Hero */}
-      <GoalHero goal={goal}>
+      {/* Hero (previews the chosen colour live) */}
+      <GoalHero goal={{ ...goal, accent: accentValue }}>
         <textarea
           ref={titleRef}
           value={title}
@@ -227,6 +235,28 @@ function GoalDetailBody({
           className="w-full resize-none overflow-hidden break-words bg-transparent text-center font-heading text-2xl leading-tight text-white placeholder:text-white/60 focus:outline-none"
         />
       </GoalHero>
+
+      {/* Colour */}
+      <div className="flex items-center justify-center gap-3">
+        {GOAL_ACCENTS.map((a) => (
+          <button
+            key={a.key}
+            type="button"
+            onClick={() => setAccentValue(a.key)}
+            aria-label={a.label}
+            aria-pressed={accentValue === a.key}
+            className={cn(
+              "grid size-10 place-items-center rounded-full text-white transition-transform",
+              a.swatch,
+              accentValue === a.key
+                ? "ring-2 ring-black/40 ring-offset-2 ring-offset-background"
+                : "",
+            )}
+          >
+            {accentValue === a.key && <Check className="size-5" strokeWidth={2.5} />}
+          </button>
+        ))}
+      </div>
 
       {/* Steps */}
       <section>
@@ -319,7 +349,12 @@ function GoalDetailBody({
 
       <button
         onClick={() =>
-          saveMutation.mutate({ title: title.trim() || goal.title, why, vision })
+          saveMutation.mutate({
+            title: title.trim() || goal.title,
+            why,
+            vision,
+            accent: accentValue as Accent,
+          })
         }
         disabled={!dirty || saveMutation.isPending}
         className="w-full rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"

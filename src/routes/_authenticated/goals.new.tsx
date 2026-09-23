@@ -1,8 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Plus, X } from "lucide-react";
+import { Check, Plus, X } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
+import { GOAL_ACCENTS, type Accent } from "@/components/goal-ui";
 import { addStep, createGoal, updateGoalDetails } from "@/lib/goals.functions";
 import { cn } from "@/lib/utils";
 
@@ -34,6 +35,7 @@ export function NewGoalForm() {
 
   const [step, setStep] = useState(0);
   const [title, setTitle] = useState("");
+  const [accent, setAccent] = useState<Accent>("mint");
   const [steps, setSteps] = useState<string[]>([]);
   const [stepDraft, setStepDraft] = useState("");
   const [why, setWhy] = useState("");
@@ -41,7 +43,7 @@ export function NewGoalForm() {
 
   const createMutation = useMutation({
     mutationFn: async () => {
-      const goal = await createGoal({ data: { title: title.trim() } });
+      const goal = await createGoal({ data: { title: title.trim(), accent } });
       for (const s of steps) {
         await addStep({ data: { goalId: goal.id, title: s } });
       }
@@ -111,6 +113,30 @@ export function NewGoalForm() {
                 maxLength={140}
                 className="mt-5 w-full rounded-2xl bg-black/5 px-4 py-3 font-serif text-base placeholder:text-black/40 focus:outline-none focus:ring-1 focus:ring-olive/40"
               />
+
+              <p className="mt-6 font-heading text-sm uppercase text-olive">
+                Colour
+              </p>
+              <div className="mt-2 flex gap-3">
+                {GOAL_ACCENTS.map((a) => (
+                  <button
+                    key={a.key}
+                    type="button"
+                    onClick={() => setAccent(a.key)}
+                    aria-label={a.label}
+                    aria-pressed={accent === a.key}
+                    className={cn(
+                      "grid size-11 place-items-center rounded-full text-white transition-transform",
+                      a.swatch,
+                      accent === a.key
+                        ? "ring-2 ring-black/40 ring-offset-2 ring-offset-background"
+                        : "",
+                    )}
+                  >
+                    {accent === a.key && <Check className="size-5" strokeWidth={2.5} />}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 

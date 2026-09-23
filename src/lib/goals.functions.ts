@@ -145,7 +145,12 @@ export const listGoals = createServerFn({ method: "GET" })
 export const createGoal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) =>
-    z.object({ title: z.string().trim().min(1).max(140) }).parse(data),
+    z
+      .object({
+        title: z.string().trim().min(1).max(140),
+        accent: z.enum(ACCENTS).optional(),
+      })
+      .parse(data),
   )
   .handler(async ({ data, context }) => {
     const supabase = context.supabase;
@@ -155,7 +160,8 @@ export const createGoal = createServerFn({ method: "POST" })
       .select("position, accent");
     if (existingError) throw new Error(existingError.message);
 
-    const accent = ACCENTS[(existing?.length ?? 0) % ACCENTS.length] ?? "mint";
+    const accent =
+      data.accent ?? ACCENTS[(existing?.length ?? 0) % ACCENTS.length] ?? "mint";
     const position =
       (existing ?? []).reduce((max, g) => Math.max(max, g.position), 0) + 1;
 
@@ -336,14 +342,21 @@ export const updateGoalDetails = createServerFn({ method: "POST" })
         title: z.string().trim().min(1).max(140).optional(),
         why: z.string().max(2000).optional(),
         vision: z.string().max(2000).optional(),
+        accent: z.enum(ACCENTS).optional(),
       })
       .parse(data),
   )
   .handler(async ({ data, context }) => {
-    const fields: { title?: string; why?: string; vision?: string } = {};
+    const fields: {
+      title?: string;
+      why?: string;
+      vision?: string;
+      accent?: string;
+    } = {};
     if (data.title !== undefined) fields.title = data.title;
     if (data.why !== undefined) fields.why = data.why;
     if (data.vision !== undefined) fields.vision = data.vision;
+    if (data.accent !== undefined) fields.accent = data.accent;
     const { error } = await context.supabase
       .from("goals")
       .update(fields)

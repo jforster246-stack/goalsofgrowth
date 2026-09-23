@@ -41,6 +41,13 @@ export const ACCENT_STYLES = {
 
 export type Accent = keyof typeof ACCENT_STYLES;
 
+/** The pickable goal colours, shown as swatches. */
+export const GOAL_ACCENTS: { key: Accent; label: string; swatch: string }[] = [
+  { key: "mint", label: "Sage", swatch: "bg-sage" },
+  { key: "sea", label: "Gold", swatch: "bg-gold" },
+  { key: "clay", label: "Clay", swatch: "bg-clay" },
+];
+
 export function accentOf(goal: { accent: string }) {
   return ACCENT_STYLES[(goal.accent as Accent) ?? "mint"] ?? ACCENT_STYLES.mint;
 }
