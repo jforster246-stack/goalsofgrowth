@@ -3,6 +3,11 @@ import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { AccentStar, accentOf, DIAMOND_PATH, goalProgress } from "@/components/goal-ui";
+import {
+  GoalCompletePrompt,
+  FOCUS_ADD_STEP_KEY,
+  type CompletedGoal,
+} from "@/components/goal-complete-prompt";
 import { goalQueryOptions } from "@/lib/goal-queries";
 import {
   addStep,
@@ -58,7 +63,7 @@ function GoalDetailPage() {
   const [vision, setVision] = useState("");
   const [stepDraft, setStepDraft] = useState("");
   const [saved, setSaved] = useState(false);
-  const [showCompletionPrompt, setShowCompletionPrompt] = useState(false);
+  const [promptGoal, setPromptGoal] = useState<CompletedGoal | null>(null);
   const stepInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -67,6 +72,16 @@ function GoalDetailPage() {
     setWhy(goal.why ?? "");
     setVision(goal.vision ?? "");
   }, [goal?.id, goal?.title, goal?.why, goal?.vision]);
+
+  // If we were sent here from the "Not yet — add more steps" button
+  // (on this page or the goals list page), focus the add-step box.
+  useEffect(() => {
+    const flagged = sessionStorage.getItem(FOCUS_ADD_STEP_KEY);
+    if (flagged && flagged === goalId) {
+      sessionStorage.removeItem(FOCUS_ADD_STEP_KEY);
+      setTimeout(() => stepInputRef.current?.focus(), 100);
+    }
+  }, [goalId]);
 
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ["goal", goalId] });
@@ -137,7 +152,7 @@ function GoalDetailPage() {
 
   const handleToggleStep = (stepId: string, currentlyDone: boolean) => {
     // If this step is being marked done AND it's the last one left, this
-    // completes the whole goal — show the "have you completed this?" prompt.
+    // completes the whole goal — show the shared "have you completed this?" prompt.
     const willCompleteGoal =
       !currentlyDone &&
       goal.steps.every((s) => s.id === stepId || s.done);
@@ -146,7 +161,7 @@ function GoalDetailPage() {
       { id: stepId, done: !currentlyDone },
       {
         onSuccess: () => {
-          if (willCompleteGoal) setShowCompletionPrompt(true);
+          if (willCompleteGoal) setPromptGoal({ id: goal.id, title: goal.title });
         },
       },
     );
@@ -310,36 +325,7 @@ function GoalDetailPage() {
         </button>
       </div>
 
-      {showCompletionPrompt && (
-        <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/50 sm:items-center">
-          <div className="w-full max-w-sm rounded-t-3xl bg-card p-6 text-center shadow-xl sm:rounded-3xl">
-            <p className="text-lg font-semibold">Have you completed this goal?</p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Every step for "{goal.title}" is checked off.
-            </p>
-            <div className="mt-6 flex flex-col gap-2">
-              <button
-                onClick={() => {
-                  setShowCompletionPrompt(false);
-                  navigate({ to: "/wins" });
-                }}
-                className="w-full rounded-2xl bg-primary py-3 text-sm font-semibold text-primary-foreground"
-              >
-                Yes — add to my wins
-              </button>
-              <button
-                onClick={() => {
-                  setShowCompletionPrompt(false);
-                  setTimeout(() => stepInputRef.current?.focus(), 100);
-                }}
-                className="w-full rounded-2xl bg-muted py-3 text-sm font-semibold text-foreground"
-              >
-                No — add more steps
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <GoalCompletePrompt goal={promptGoal} onClose={() => setPromptGoal(null)} />
     </AppShell>
   );
 }
