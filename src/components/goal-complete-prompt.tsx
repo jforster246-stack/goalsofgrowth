@@ -5,6 +5,9 @@ import { createWin } from "@/lib/wins.functions";
 
 export type CompletedGoal = { id: string; title: string };
 
+/** sessionStorage flag telling the goal page to focus its add-step box. */
+export const FOCUS_ADD_STEP_KEY = "gog-focus-add-step";
+
 /**
  * Shown when the last remaining step of a goal is ticked.
  * "Yes" → saves the goal as a win. "Not yet" → goes to the goal page
@@ -70,13 +73,13 @@ export function GoalCompletePrompt({
               </button>
               <button
                 type="button"
-                onClick={() =>
+                onClick={() => {
+                  sessionStorage.setItem(FOCUS_ADD_STEP_KEY, goal.id);
                   navigate({
                     to: "/goals/$goalId",
                     params: { goalId: goal.id },
-                    search: { add: true },
-                  })
-                }
+                  });
+                }}
                 className="w-full rounded-2xl bg-focus py-3 font-heading text-sm uppercase text-white transition-colors hover:bg-focus/90"
               >
                 Not yet — add more steps
