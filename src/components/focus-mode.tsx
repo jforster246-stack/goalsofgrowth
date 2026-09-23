@@ -12,16 +12,24 @@ type FocusTarget = {
 
 const FOCUS_MINUTES = 25;
 
+const CUSTOM_STEP_ID = "__custom__";
+
 export function FocusMode({
   goals,
   onClose,
   onCompleteStep,
   initialStepId,
+  customTarget,
 }: {
   goals: GoalWithSteps[];
   onClose: () => void;
   onCompleteStep: (stepId: string) => void;
   initialStepId?: string | null;
+  customTarget?: {
+    title: string;
+    subtitle?: string;
+    onComplete?: () => void;
+  } | null;
 }) {
   const nextSteps = goals
     .map((goal): FocusTarget | null => {
@@ -37,8 +45,16 @@ export function FocusMode({
         : null;
     })
     .filter((t): t is FocusTarget => t !== null);
-  const [target, setTarget] = useState<FocusTarget | null>(
-    () => nextSteps.find((item) => item.stepId === initialStepId) ?? null,
+  const [target, setTarget] = useState<FocusTarget | null>(() =>
+    customTarget
+      ? {
+          goalTitle: customTarget.subtitle ?? "Focus",
+          accentClass: "fill-olive",
+          accentTextClass: "text-olive",
+          stepTitle: customTarget.title,
+          stepId: CUSTOM_STEP_ID,
+        }
+      : (nextSteps.find((item) => item.stepId === initialStepId) ?? null),
   );
 
   return (
@@ -49,7 +65,8 @@ export function FocusMode({
             key={target.stepId}
             target={target}
             onComplete={() => {
-              onCompleteStep(target.stepId);
+              if (target.stepId === CUSTOM_STEP_ID) customTarget?.onComplete?.();
+              else onCompleteStep(target.stepId);
               setTarget(null);
             }}
             onEnd={() => setTarget(null)}

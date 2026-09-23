@@ -19,7 +19,16 @@ import {
   updateDisplayName,
 } from "@/lib/goals.functions";
 
-const AppShellContext = createContext<{ openFocus: (stepId?: string) => void } | null>(null);
+type CustomFocus = {
+  title: string;
+  subtitle?: string;
+  onComplete?: () => void;
+};
+
+const AppShellContext = createContext<{
+  openFocus: (stepId?: string) => void;
+  openTimer: (target: CustomFocus) => void;
+} | null>(null);
 
 export function useAppShell() {
   const context = useContext(AppShellContext);
@@ -48,6 +57,7 @@ export function AppShell({
   const [profileOpen, setProfileOpen] = useState(false);
   const [focusOpen, setFocusOpen] = useState(false);
   const [focusStepId, setFocusStepId] = useState<string | null>(null);
+  const [customFocus, setCustomFocus] = useState<CustomFocus | null>(null);
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState("");
   const [email, setEmail] = useState<string | null>(null);
@@ -162,7 +172,13 @@ export function AppShell({
         <AppShellContext.Provider
           value={{
             openFocus: (stepId) => {
+              setCustomFocus(null);
               setFocusStepId(stepId ?? null);
+              setFocusOpen(true);
+            },
+            openTimer: (target) => {
+              setFocusStepId(null);
+              setCustomFocus(target);
               setFocusOpen(true);
             },
           }}
@@ -176,9 +192,11 @@ export function AppShell({
           <FocusMode
             goals={goals ?? []}
             initialStepId={focusStepId}
+            customTarget={customFocus}
             onClose={() => {
               setFocusOpen(false);
               setFocusStepId(null);
+              setCustomFocus(null);
             }}
             onCompleteStep={(stepId) =>
               toggleStepMutation.mutate({ id: stepId, done: true })

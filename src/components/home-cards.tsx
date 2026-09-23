@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Check, Plus, Timer } from "lucide-react";
+import { Check, Moon, Plus, Sun, Timer } from "lucide-react";
 import { accentOf, goalProgress, STAR_PATH } from "@/components/goal-ui";
 import { cn } from "@/lib/utils";
 
@@ -276,6 +276,75 @@ export function StepRow({
           className={cn(
             "flex items-center justify-center rounded-lg p-2 text-white transition-colors",
             done ? accent.deep : accent.surface,
+          )}
+        >
+          <Check className="size-6" strokeWidth={2} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Habit row — a habit styled like a step card, with a sun/moon icon   */
+/* on the left for its time of day, plus a focus timer + daily tick.   */
+/* ------------------------------------------------------------------ */
+
+export type HabitTime = "morning" | "afternoon";
+
+export function HabitRow({
+  name,
+  timeOfDay,
+  done,
+  onTimer,
+  onToggle,
+}: {
+  name: string;
+  timeOfDay: HabitTime;
+  done: boolean;
+  onTimer?: () => void;
+  onToggle?: () => void;
+}) {
+  const morning = timeOfDay === "morning";
+  const Icon = morning ? Sun : Moon;
+
+  return (
+    <div className="flex w-full items-center justify-between gap-2 rounded-2xl bg-white py-2 pl-3 pr-2 shadow-sm">
+      <div className="flex min-w-0 flex-1 items-center gap-2.5">
+        <Icon
+          className={cn(
+            "size-8 shrink-0",
+            morning ? "text-gold-deep" : "text-olive",
+          )}
+          strokeWidth={1.75}
+          aria-hidden
+        />
+        <span
+          className={cn(
+            "truncate font-serif text-sm",
+            done ? "text-black/40 line-through decoration-black/30" : "text-black",
+          )}
+        >
+          {name}
+        </span>
+      </div>
+
+      <div className="flex shrink-0 items-center gap-2">
+        <button
+          type="button"
+          onClick={onTimer}
+          aria-label={`Start a focus timer for ${name}`}
+          className="flex items-center justify-center rounded-lg bg-olive p-2 text-white"
+        >
+          <Timer className="size-6" strokeWidth={1.75} />
+        </button>
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-label={done ? `Mark ${name} not done today` : `Mark ${name} done today`}
+          className={cn(
+            "flex items-center justify-center rounded-lg p-2 text-white transition-colors",
+            done ? "bg-olive" : "bg-sage",
           )}
         >
           <Check className="size-6" strokeWidth={2} />

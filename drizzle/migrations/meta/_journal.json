@@ -22,6 +22,13 @@
       "when": 1789951023345,
       "tag": "0002_add_goal_details_streak_goal_of_day",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790121600000,
+      "tag": "0003_create_habits",
+      "breakpoints": true
     }
   ]
 }
