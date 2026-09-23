@@ -174,7 +174,15 @@ function GoalDetailBody({ goal, goalId }: { goal: HomeGoal & { why?: string | nu
               done={step.done}
               onTimer={() => openFocus(step.id)}
               onToggle={() => {
-                if (!step.done) celebrate();
+                if (!step.done) {
+                  celebrate();
+                  // This tick finishes the goal when every other step is done.
+                  if (
+                    goal.steps.every((s) => s.done || s.id === step.id)
+                  ) {
+                    setPromptGoal({ id: goal.id, title: goal.title });
+                  }
+                }
                 toggleStepMutation.mutate({ id: step.id, done: !step.done });
               }}
               titleNode={
@@ -192,6 +200,9 @@ function GoalDetailBody({ goal, goalId }: { goal: HomeGoal & { why?: string | nu
 
           <form onSubmit={submitStep} className="flex items-center gap-2 pt-1">
             <input
+              ref={(el) => {
+                if (add && el) el.focus();
+              }}
               value={stepDraft}
               onChange={(e) => setStepDraft(e.target.value)}
               placeholder="Add a step…"
