@@ -188,6 +188,11 @@ export function GoalCardDeck({
       >
         {view === "deck" ? "See all goals grid" : "See swipeable cards"}
       </Button>
+
+      <GoalCompletePrompt
+        goal={promptGoal}
+        onClose={() => setPromptGoal(null)}
+      />
     </section>
   );
 }
