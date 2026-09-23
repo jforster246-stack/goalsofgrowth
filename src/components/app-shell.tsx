@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { Settings } from "lucide-react";
+import { House, Repeat, Settings, Target } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { localToday } from "@/components/goal-ui";
 import { FocusMode } from "@/components/focus-mode";
@@ -230,7 +230,7 @@ export function AppShell({
 
 function BottomNav() {
   const itemClass =
-    "flex flex-1 items-center justify-center py-3 text-xs font-semibold uppercase tracking-wide transition-colors";
+    "flex flex-1 flex-col items-center justify-center gap-1 py-3.5 text-[11px] font-semibold uppercase tracking-wide transition-colors";
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-10 bg-gradient-to-t from-background via-background/95 to-transparent px-5 pb-4 pt-8">
@@ -240,6 +240,7 @@ function BottomNav() {
           className={`${itemClass} text-muted-foreground`}
           activeProps={{ className: `${itemClass} text-foreground` }}
         >
+          <House className="size-5" strokeWidth={2} />
           Home
         </Link>
         <Link
@@ -247,6 +248,7 @@ function BottomNav() {
           className={`${itemClass} text-muted-foreground`}
           activeProps={{ className: `${itemClass} text-foreground` }}
         >
+          <Target className="size-5" strokeWidth={2} />
           Goals
         </Link>
         <Link
@@ -254,14 +256,8 @@ function BottomNav() {
           className={`${itemClass} text-muted-foreground`}
           activeProps={{ className: `${itemClass} text-foreground` }}
         >
+          <Repeat className="size-5" strokeWidth={2} />
           Habits
-        </Link>
-        <Link
-          to="/routines"
-          className={`${itemClass} text-muted-foreground`}
-          activeProps={{ className: `${itemClass} text-foreground` }}
-        >
-          Routines
         </Link>
       </nav>
     </div>
