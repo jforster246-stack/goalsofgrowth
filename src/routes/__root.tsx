@@ -127,6 +127,13 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        {/* Apply the saved colour theme before first paint to avoid a flash. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{var t=localStorage.getItem('gog-theme');document.documentElement.setAttribute('data-theme',t||'natural');}catch(e){}",
+          }}
+        />
       </head>
       <body>
         {children}

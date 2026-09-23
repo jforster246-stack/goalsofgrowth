@@ -63,7 +63,7 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(0.966 0.004 90); /* #f5f4f0 — warm off-white */
+  --background: #f4eee1; /* almond cream — the Natural theme canvas */
   --foreground: oklch(0.24 0.01 264);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.24 0.01 264);
@@ -132,6 +132,50 @@
   --sidebar-ring: oklch(0.551 0.027 264.364);
 }
 
+/* =============================================================
+ * Colour themes — swapped by the settings picker via a data-theme
+ * attribute on <html>. Each block only redefines the brand palette +
+ * page background; all cards stay light so every screen stays legible.
+ * "natural" matches the @theme defaults and is here for completeness.
+ * ============================================================= */
+:root[data-theme="natural"] {
+  --background: #f4eee1;
+  --color-olive: #3b4a30;
+  --color-sage: #6f7c4e;
+  --color-gold: #d19a4a;
+  --color-gold-deep: #9c5a28;
+  --color-clay: #a24b57;
+  --color-clay-deep: #6e1d3c;
+  --color-focus: #3b4a30;
+  --color-star: #d9c39c;
+}
+
+/* Ice cream — soft strawberry, mint and toffee on oat-milk cream. */
+:root[data-theme="ice-cream"] {
+  --background: #fff7ec;
+  --color-olive: #6e4326;
+  --color-sage: #6aa07c;
+  --color-gold: #cf9a5a;
+  --color-gold-deep: #9a6a34;
+  --color-clay: #cf7f92;
+  --color-clay-deep: #a85166;
+  --color-focus: #6e4326;
+  --color-star: #f2c9d3;
+}
+
+/* Dark magic — deep forest, plum and crimson (Forest Reverie). */
+:root[data-theme="dark-magic"] {
+  --background: #dde1d6;
+  --color-olive: #24361f;
+  --color-sage: #4e6b4a;
+  --color-gold: #6e4a59;
+  --color-gold-deep: #4a3340;
+  --color-clay: #8a2733;
+  --color-clay-deep: #6e0f1b;
+  --color-focus: #24361f;
+  --color-star: #7a5560;
+}
+
 /* ============= Design tokens ============= */
 
 @theme {
@@ -139,16 +183,21 @@
   --color-ink: #4a5a52;
   --color-soft: #7c8b81;
   --color-sand: #efdfc4;
-  --color-star: #dfd0c3;
+  --color-star: #d9c39c;
 
-  /* Goals of Growth brand palette (from Figma) */
-  --color-olive: #49552d; /* deep olive — primary text/buttons */
-  --color-sage: #88936b; /* sage — green card surface */
-  --color-clay: #b97d69; /* terracotta — clay card surface */
-  --color-clay-deep: #863d2b; /* deep terracotta — clay buttons */
-  --color-gold: #bb996b; /* tan — gold card check */
-  --color-gold-deep: #895c2d; /* brown — gold buttons */
-  --color-focus: #49552d; /* focus accent now maps to olive */
+  /*
+   * Goals of Growth brand palette. These are the "Natural" (autumn) defaults;
+   * the theme picker swaps them at runtime via :root[data-theme="…"] blocks
+   * further down. Every brand utility (bg-olive, text-clay-deep, …) reads these
+   * custom properties, so overriding the property re-skins the whole app.
+   */
+  --color-olive: #3b4a30; /* deep forest green — primary text/buttons */
+  --color-sage: #6f7c4e; /* olive-green — green card surface */
+  --color-clay: #a24b57; /* dusty plum-rose — clay card surface */
+  --color-clay-deep: #6e1d3c; /* persian plum — clay buttons */
+  --color-gold: #d19a4a; /* anzac amber — gold card surface */
+  --color-gold-deep: #9c5a28; /* prairie sand — gold buttons */
+  --color-focus: #3b4a30; /* headings map to olive */
 
   --font-body: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-display: "Pinyon Script", "Inter", cursive;

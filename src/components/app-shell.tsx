@@ -8,8 +8,10 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { House, Repeat, Settings, Target } from "lucide-react";
+import { Check, House, Repeat, Settings, Target } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { getTheme, setTheme, THEMES, type ThemeId } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 import { localToday } from "@/components/goal-ui";
 import { FocusMode } from "@/components/focus-mode";
 import { AddFab } from "@/components/add-fab";
@@ -299,10 +301,15 @@ function ProfileSheet({
   onClose: () => void;
 }) {
   const initial = (displayName?.trim()?.[0] ?? "?").toUpperCase();
+  const [theme, setThemeState] = useState<ThemeId>(() => getTheme());
+  const chooseTheme = (id: ThemeId) => {
+    setTheme(id);
+    setThemeState(id);
+  };
 
   return (
     <div className="fixed inset-0 z-30 flex flex-col bg-background [animation:rise_0.25s_both]">
-      <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-5 pb-8 pt-6">
+      <div className="mx-auto flex w-full max-w-md flex-1 flex-col overflow-y-auto px-5 pb-8 pt-6">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold tracking-tight">Profile</h2>
           <button
@@ -358,7 +365,53 @@ function ProfileSheet({
           </p>
         </div>
 
-        <div className="mt-auto pt-8">
+        <div className="mt-10">
+          <p className="font-heading text-sm uppercase tracking-wide text-olive">
+            Appearance
+          </p>
+          <div className="mt-3 space-y-2">
+            {THEMES.map((t) => {
+              const active = theme === t.id;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => chooseTheme(t.id)}
+                  aria-pressed={active}
+                  className={cn(
+                    "flex w-full items-center gap-3 rounded-2xl bg-card p-3 text-left ring-1 transition-colors",
+                    active ? "ring-olive" : "ring-border hover:bg-muted/50",
+                  )}
+                >
+                  <span className="flex shrink-0 overflow-hidden rounded-full ring-1 ring-black/10">
+                    {t.swatches.map((c, i) => (
+                      <span
+                        key={i}
+                        className="size-6"
+                        style={{ backgroundColor: c }}
+                      />
+                    ))}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-heading text-sm text-foreground">
+                      {t.label}
+                    </span>
+                    <span className="block truncate font-serif text-xs text-muted-foreground">
+                      {t.blurb}
+                    </span>
+                  </span>
+                  {active && (
+                    <span className="grid size-6 shrink-0 place-items-center rounded-full bg-olive text-white">
+                      <Check className="size-4" strokeWidth={3} />
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="mt-10 pt-2">
           <button
             onClick={onSignOut}
             className="w-full rounded-2xl bg-muted py-3.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted/70"
