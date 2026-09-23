@@ -87,7 +87,7 @@ function GoalsListPage() {
   };
 
   return (
-    <AppShell title="All goals">
+    <AppShell title="All goals" hideSettings>
       {!showNewGoal && goals.length > 0 && (
         <p className="mt-3 text-xs text-muted-foreground">
           Tap to see next step

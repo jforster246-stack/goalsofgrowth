@@ -43,11 +43,13 @@ export function AppShell({
   right,
   backTo,
   title,
+  hideSettings,
   children,
 }: {
   right?: ReactNode;
   backTo?: "/overview" | "/goals";
   title?: string;
+  hideSettings?: boolean;
   children: ReactNode;
 }) {
   const queryClient = useQueryClient();
@@ -131,6 +133,8 @@ export function AppShell({
                 <path d="M15 18l-6-6 6-6" />
               </svg>
             </Link>
+          ) : hideSettings ? (
+            <div className="size-10 shrink-0" />
           ) : (
             <button
               onClick={() => setProfileOpen(true)}
