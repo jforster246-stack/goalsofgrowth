@@ -1,6 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
+import { Reorder, useDragControls } from "framer-motion";
+import { GripVertical } from "lucide-react";
 import { AppShell, useAppShell } from "@/components/app-shell";
 import { accentOf } from "@/components/goal-ui";
 import { GoalHero, StepRow, type HomeGoal } from "@/components/home-cards";
@@ -14,10 +16,13 @@ import {
   addStep,
   deleteGoal,
   deleteStep,
+  reorderSteps,
   toggleStep,
   updateGoalDetails,
   updateStep,
 } from "@/lib/goals.functions";
+
+type Step = HomeGoal["steps"][number];
 
 export const Route = createFileRoute("/_authenticated/goals/$goalId")({
   head: () => ({
@@ -92,6 +97,7 @@ function GoalDetailBody({
   const [stepDraft, setStepDraft] = useState("");
   const [saved, setSaved] = useState(false);
   const [promptGoal, setPromptGoal] = useState<CompletedGoal | null>(null);
+  const [orderedSteps, setOrderedSteps] = useState<Step[]>(goal.steps);
   const stepInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -99,6 +105,11 @@ function GoalDetailBody({
     setWhy(goal.why ?? "");
     setVision(goal.vision ?? "");
   }, [goal.id, goal.title, goal.why, goal.vision]);
+
+  // Keep the local drag order in sync with the latest fetched steps.
+  useEffect(() => {
+    setOrderedSteps(goal.steps);
+  }, [goal.steps]);
 
   // If we arrived from a "Not yet — add more steps" prompt, focus the add box.
   useEffect(() => {
@@ -140,6 +151,16 @@ function GoalDetailBody({
     mutationFn: (input: { id: string }) => deleteStep({ data: input }),
     onSuccess: refresh,
   });
+  const reorderMutation = useMutation({
+    mutationFn: (orderedIds: string[]) =>
+      reorderSteps({ data: { orderedIds } }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["goals"] }),
+  });
+
+  const handleReorder = (next: Step[]) => {
+    setOrderedSteps(next);
+    reorderMutation.mutate(next.map((s) => s.id));
+  };
   const deleteGoalMutation = useMutation({
     mutationFn: () => deleteGoal({ data: { id: goalId } }),
     onSuccess: () => {
@@ -196,12 +217,18 @@ function GoalDetailBody({
       <section>
         <p className="font-heading text-sm uppercase text-olive">Next steps:</p>
 
-        <div className="mt-4 space-y-2">
-          {goal.steps.map((step) => (
-            <StepRow
+        <Reorder.Group
+          as="div"
+          axis="y"
+          values={orderedSteps}
+          onReorder={handleReorder}
+          className="mt-4 space-y-2"
+        >
+          {orderedSteps.map((step) => (
+            <DraggableStep
               key={step.id}
+              step={step}
               accent={accent}
-              done={step.done}
               onTimer={() => openFocus(step.id)}
               onToggle={() => handleToggle(step.id, step.done)}
               titleNode={
@@ -216,7 +243,9 @@ function GoalDetailBody({
               }
             />
           ))}
+        </Reorder.Group>
 
+        <div className="mt-2">
           <form onSubmit={submitStep} className="flex items-center gap-2 pt-1">
             <input
               ref={stepInputRef}
@@ -288,6 +317,49 @@ function GoalDetailBody({
 
       <GoalCompletePrompt goal={promptGoal} onClose={() => setPromptGoal(null)} />
     </div>
+  );
+}
+
+function DraggableStep({
+  step,
+  accent,
+  onTimer,
+  onToggle,
+  titleNode,
+}: {
+  step: Step;
+  accent: { deep: string; surface: string };
+  onTimer: () => void;
+  onToggle: () => void;
+  titleNode: React.ReactNode;
+}) {
+  const controls = useDragControls();
+
+  return (
+    <Reorder.Item
+      as="div"
+      value={step}
+      dragListener={false}
+      dragControls={controls}
+    >
+      <StepRow
+        accent={accent}
+        done={step.done}
+        onTimer={onTimer}
+        onToggle={onToggle}
+        titleNode={titleNode}
+        dragHandle={
+          <button
+            type="button"
+            aria-label="Drag to reorder"
+            onPointerDown={(e) => controls.start(e)}
+            className="grid size-8 shrink-0 cursor-grab touch-none place-items-center text-black/25 active:cursor-grabbing"
+          >
+            <GripVertical className="size-5" />
+          </button>
+        }
+      />
+    </Reorder.Item>
   );
 }
 

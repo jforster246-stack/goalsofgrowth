@@ -249,6 +249,22 @@ export const addStep = createServerFn({ method: "POST" })
     return step;
   });
 
+export const reorderSteps = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) =>
+    z.object({ orderedIds: z.array(z.string().uuid()).min(1) }).parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const supabase = context.supabase;
+    // RLS scopes updates to the user's own steps.
+    await Promise.all(
+      data.orderedIds.map((id, index) =>
+        supabase.from("steps").update({ position: index }).eq("id", id),
+      ),
+    );
+    return { ok: true };
+  });
+
 export const updateStep = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) =>

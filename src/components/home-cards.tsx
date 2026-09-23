@@ -274,17 +274,25 @@ export function StepRow({
   accent,
   done,
   titleNode,
+  dragHandle,
   onTimer,
   onToggle,
 }: {
   accent: { deep: string; surface: string };
   done: boolean;
   titleNode: ReactNode;
+  dragHandle?: ReactNode;
   onTimer?: () => void;
   onToggle?: () => void;
 }) {
   return (
-    <div className="flex w-full items-center justify-between gap-2 rounded-2xl bg-white py-2 pl-3.5 pr-2 shadow-sm">
+    <div
+      className={cn(
+        "flex w-full items-center justify-between gap-2 rounded-2xl bg-white py-2 pr-2 shadow-sm",
+        dragHandle ? "select-none pl-1.5" : "pl-3.5",
+      )}
+    >
+      {dragHandle}
       <div className="min-w-0 flex-1">{titleNode}</div>
       <div className="flex shrink-0 items-center gap-2">
         <button
