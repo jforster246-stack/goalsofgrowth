@@ -13,6 +13,7 @@ type FocusTarget = {
 const FOCUS_MINUTES = 25;
 
 const CUSTOM_STEP_ID = "__custom__";
+const GENERAL_STEP_ID = "__general__";
 
 export function FocusMode({
   goals,
@@ -66,7 +67,8 @@ export function FocusMode({
             target={target}
             onComplete={() => {
               if (target.stepId === CUSTOM_STEP_ID) customTarget?.onComplete?.();
-              else onCompleteStep(target.stepId);
+              else if (target.stepId !== GENERAL_STEP_ID)
+                onCompleteStep(target.stepId);
               onClose();
             }}
             onEnd={onClose}
@@ -90,37 +92,49 @@ export function FocusMode({
             </p>
 
             <div className="mt-6 flex-1 space-y-3 overflow-y-auto">
-              {nextSteps.length === 0 ? (
-                <div className="rounded-2xl bg-card p-8 text-center shadow-sm ring-1 ring-border">
-                  <p className="text-base font-semibold">All caught up</p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Add a goal with some steps to focus on.
+              {nextSteps.map((t) => (
+                <button
+                  key={t.stepId}
+                  onClick={() => setTarget(t)}
+                  className="w-full rounded-2xl bg-card p-4 text-left shadow-sm ring-1 ring-border transition-colors hover:bg-muted/40"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <AccentStar fillClass={t.accentClass} />
+                    <p
+                      className={`text-xs font-semibold uppercase tracking-wide ${t.accentTextClass}`}
+                    >
+                      {t.goalTitle}
+                    </p>
+                  </div>
+                  <p className="mt-1.5 text-[15px] font-semibold tracking-tight">
+                    {t.stepTitle}
                   </p>
-                </div>
-              ) : (
-                nextSteps.map((t) => (
-                  <button
-                    key={t.stepId}
-                    onClick={() => setTarget(t)}
-                    className="w-full rounded-2xl bg-card p-4 text-left shadow-sm ring-1 ring-border transition-colors hover:bg-muted/40"
-                  >
-                    <div className="flex items-center gap-1.5">
-                      <AccentStar fillClass={t.accentClass} />
-                      <p
-                        className={`text-xs font-semibold uppercase tracking-wide ${t.accentTextClass}`}
-                      >
-                        {t.goalTitle}
-                      </p>
-                    </div>
-                    <p className="mt-1.5 text-[15px] font-semibold tracking-tight">
-                      {t.stepTitle}
-                    </p>
-                    <p className="mt-2 text-xs font-medium text-muted-foreground">
-                      Tap to start a {FOCUS_MINUTES}-minute focus
-                    </p>
-                  </button>
-                ))
-              )}
+                  <p className="mt-2 text-xs font-medium text-muted-foreground">
+                    Tap to start a {FOCUS_MINUTES}-minute focus
+                  </p>
+                </button>
+              ))}
+
+              {/* General session, not tied to any goal/step */}
+              <button
+                onClick={() =>
+                  setTarget({
+                    goalTitle: "General focus",
+                    accentClass: "fill-olive",
+                    accentTextClass: "text-olive",
+                    stepTitle: "Focus session",
+                    stepId: GENERAL_STEP_ID,
+                  })
+                }
+                className="w-full rounded-2xl border border-dashed border-border bg-transparent p-4 text-left transition-colors hover:bg-muted/30"
+              >
+                <p className="text-[15px] font-semibold tracking-tight">
+                  Just focus
+                </p>
+                <p className="mt-1 text-xs font-medium text-muted-foreground">
+                  Start a {FOCUS_MINUTES}-minute session not tied to anything
+                </p>
+              </button>
             </div>
           </>
         )}

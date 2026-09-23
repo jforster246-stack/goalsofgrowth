@@ -6,12 +6,16 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { useState } from "react";
-import { Check, Sparkle, Timer } from "lucide-react";
 import { AppShell, useAppShell } from "@/components/app-shell";
-import { accentOf, goalProgress, localToday, STAR_PATH } from "@/components/goal-ui";
-import { NextStepRow } from "@/components/home-cards";
-import { goalsQueryOptions, profileQueryOptions } from "@/lib/goal-queries";
+import { goalProgress, localToday, STAR_PATH } from "@/components/goal-ui";
+import { HabitRow, NextStepRow, type HabitTime } from "@/components/home-cards";
+import {
+  goalsQueryOptions,
+  habitsQueryOptions,
+  profileQueryOptions,
+} from "@/lib/goal-queries";
 import { setGoalOfDay, toggleStep } from "@/lib/goals.functions";
+import { toggleHabit } from "@/lib/habits.functions";
 
 export const Route = createFileRoute("/_authenticated/overview")({
   loader: ({ context }) => context.queryClient.ensureQueryData(goalsQueryOptions),
@@ -152,83 +156,14 @@ function OverviewPage() {
 
         <div className="mt-6 border-t border-dashed border-border" />
 
-        {/* All goals carousel */}
-        <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          All goals
-        </p>
-
-        <div className="mt-3 min-w-0 max-w-full overflow-x-auto">
-          <div className="flex w-max snap-x snap-mandatory gap-3 pb-2">
-            {goals.map((goal) => {
-              const progress = goalProgress(goal);
-              const isGoalOfDay = goal.id === goalOfDay?.id;
-              return (
-                <div
-                  key={goal.id}
-                  className={`w-64 shrink-0 snap-center overflow-hidden rounded-2xl shadow-sm ring-1 ring-border ${accentOf(goal).bar}`}
-                >
-                  <Link
-                    to="/goals/$goalId"
-                    params={{ goalId: goal.id }}
-                    className="flex flex-col items-center px-4 pb-5 pt-4 text-primary-foreground"
-                  >
-                    {isGoalOfDay && (
-                      <span className="mb-2 rounded-full bg-black/20 px-3 py-0.5 text-[10px] font-semibold uppercase tracking-wide">
-                        Goal of the day
-                      </span>
-                    )}
-                    <Sparkle className="size-8" strokeWidth={1.25} />
-                    <p className="mt-3 text-center text-lg font-semibold leading-snug">
-                      {goal.title}
-                    </p>
-                    <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-black/20">
-                      <div
-                        className="h-full rounded-full bg-primary-foreground/90 transition-[width] duration-500"
-                        style={{ width: `${progress.pct}%` }}
-                      />
-                    </div>
-                    <p className="mt-1 self-end text-[11px] text-primary-foreground/80">
-                      {progress.pct}%
-                    </p>
-                  </Link>
-
-                  <div className="bg-card px-4 py-4 text-center">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Next step
-                    </p>
-                    <p className="mt-1 text-sm">
-                      {progress.nextStep?.title ?? "Every step is done — nice work."}
-                    </p>
-
-                    <div className="mt-3 flex items-center gap-2">
-                      <button
-                        onClick={() => chooseMutation.mutate(goal.id)}
-                        className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-semibold text-primary-foreground ${accentOf(goal).bar}`}
-                      >
-                        Focus on this
-                        <Timer className="size-3.5" strokeWidth={2} />
-                      </button>
-                      <Link
-                        to="/goals/$goalId"
-                        params={{ goalId: goal.id }}
-                        className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground"
-                        aria-label="Open goal"
-                      >
-                        <Check className="size-4" strokeWidth={2} />
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        {/* Habits for the current time of day */}
+        <TodayHabits />
 
         <Link
           to="/goals"
-          className="mt-4 block text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+          className="mt-6 block text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground"
         >
-          See goals grid
+          See all goals
         </Link>
       </div>
 
@@ -290,5 +225,81 @@ function NextStepCard({
         onComplete();
       }}
     />
+  );
+}
+
+const BUCKET_LABEL: Record<HabitTime, string> = {
+  morning: "This morning",
+  afternoon: "This afternoon",
+  evening: "This evening",
+};
+
+/** morning 12am–12pm, afternoon 12–5pm, evening 5pm–12am. */
+function currentBucket(): HabitTime {
+  const h = new Date().getHours();
+  if (h < 12) return "morning";
+  if (h < 17) return "afternoon";
+  return "evening";
+}
+
+/** The current time-of-day's habits, shown on Home in place of the goal list. */
+function TodayHabits() {
+  const today = localToday();
+  const bucket = currentBucket();
+  const queryClient = useQueryClient();
+  const { openTimer, celebrate } = useAppShell();
+  const { data: habits } = useQuery(habitsQueryOptions(today));
+
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: ["habits"] });
+    queryClient.invalidateQueries({ queryKey: ["crystals"] });
+    queryClient.invalidateQueries({ queryKey: ["habit-streaks"] });
+  };
+  const toggle = useMutation({
+    mutationFn: (id: string) => toggleHabit({ data: { id, done: true, today } }),
+    onSuccess: refresh,
+  });
+
+  const complete = (id: string) => {
+    celebrate();
+    toggle.mutate(id);
+  };
+
+  const inBucket = (habits ?? []).filter((h) => h.time_of_day === bucket);
+  const active = inBucket.filter((h) => !h.done);
+
+  return (
+    <section>
+      <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        {BUCKET_LABEL[bucket]}
+      </p>
+      <div className="mt-3 space-y-2">
+        {active.length === 0 ? (
+          <p className="rounded-xl bg-card px-3 py-3 text-sm text-muted-foreground shadow-sm ring-1 ring-border">
+            {inBucket.length === 0
+              ? "No habits for this time of day yet — add one with the + button."
+              : "All done for now — nice work."}
+          </p>
+        ) : (
+          active.map((h) => (
+            <HabitRow
+              key={h.id}
+              name={h.name}
+              timeOfDay={h.time_of_day as HabitTime}
+              frequency={h.frequency}
+              done={h.done}
+              onTimer={() =>
+                openTimer({
+                  title: h.name,
+                  subtitle: `${BUCKET_LABEL[bucket]} habit`,
+                  onComplete: () => complete(h.id),
+                })
+              }
+              onToggle={() => complete(h.id)}
+            />
+          ))
+        )}
+      </div>
+    </section>
   );
 }

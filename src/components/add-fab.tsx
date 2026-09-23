@@ -1,14 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import {
-  ListChecks,
-  Plus,
-  Repeat,
-  Target,
-  Timer,
-  Trophy,
-  X,
-} from "lucide-react";
+import { Plus, Repeat, Target, Timer, Trophy } from "lucide-react";
 import { useAppShell } from "@/components/app-shell";
 import { cn } from "@/lib/utils";
 
@@ -30,7 +22,6 @@ export function AddFab() {
       Icon: Repeat,
       onClick: () => navigate({ to: "/habits", search: { new: true } }),
     },
-    { label: "Routine", Icon: ListChecks, onClick: () => navigate({ to: "/routines" }) },
     { label: "Focus session", Icon: Timer, onClick: () => openFocus() },
     {
       label: "Win",

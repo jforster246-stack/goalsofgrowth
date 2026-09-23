@@ -16,6 +16,7 @@ import { Route as AuthenticatedGoalsRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedHabitsRouteImport } from './routes/_authenticated/habits'
 import { Route as AuthenticatedOverviewRouteImport } from './routes/_authenticated/overview'
 import { Route as AuthenticatedRoutinesRouteImport } from './routes/_authenticated/routines'
+import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated/welcome'
 import { Route as AuthenticatedWinsRouteImport } from './routes/_authenticated/wins'
 import { Route as AuthenticatedGoalsIndexRouteImport } from './routes/_authenticated/goals.index'
 import { Route as AuthenticatedGoalsGoalIdRouteImport } from './routes/_authenticated/goals.$goalId'
@@ -55,6 +56,11 @@ const AuthenticatedRoutinesRoute = AuthenticatedRoutinesRouteImport.update({
   path: '/routines',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedWelcomeRoute = AuthenticatedWelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedWinsRoute = AuthenticatedWinsRouteImport.update({
   id: '/wins',
   path: '/wins',
@@ -84,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/habits': typeof AuthenticatedHabitsRoute
   '/overview': typeof AuthenticatedOverviewRoute
   '/routines': typeof AuthenticatedRoutinesRoute
+  '/welcome': typeof AuthenticatedWelcomeRoute
   '/wins': typeof AuthenticatedWinsRoute
   '/goals/$goalId': typeof AuthenticatedGoalsGoalIdRoute
   '/goals/new': typeof AuthenticatedGoalsNewRoute
@@ -95,6 +102,7 @@ export interface FileRoutesByTo {
   '/habits': typeof AuthenticatedHabitsRoute
   '/overview': typeof AuthenticatedOverviewRoute
   '/routines': typeof AuthenticatedRoutinesRoute
+  '/welcome': typeof AuthenticatedWelcomeRoute
   '/wins': typeof AuthenticatedWinsRoute
   '/goals/$goalId': typeof AuthenticatedGoalsGoalIdRoute
   '/goals/new': typeof AuthenticatedGoalsNewRoute
@@ -109,6 +117,7 @@ export interface FileRoutesById {
   '/_authenticated/habits': typeof AuthenticatedHabitsRoute
   '/_authenticated/overview': typeof AuthenticatedOverviewRoute
   '/_authenticated/routines': typeof AuthenticatedRoutinesRoute
+  '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
   '/_authenticated/wins': typeof AuthenticatedWinsRoute
   '/_authenticated/goals/$goalId': typeof AuthenticatedGoalsGoalIdRoute
   '/_authenticated/goals/new': typeof AuthenticatedGoalsNewRoute
@@ -123,6 +132,7 @@ export interface FileRouteTypes {
     | '/habits'
     | '/overview'
     | '/routines'
+    | '/welcome'
     | '/wins'
     | '/goals/$goalId'
     | '/goals/new'
@@ -134,6 +144,7 @@ export interface FileRouteTypes {
     | '/habits'
     | '/overview'
     | '/routines'
+    | '/welcome'
     | '/wins'
     | '/goals/$goalId'
     | '/goals/new'
@@ -147,6 +158,7 @@ export interface FileRouteTypes {
     | '/_authenticated/habits'
     | '/_authenticated/overview'
     | '/_authenticated/routines'
+    | '/_authenticated/welcome'
     | '/_authenticated/wins'
     | '/_authenticated/goals/$goalId'
     | '/_authenticated/goals/new'
@@ -210,6 +222,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRoutinesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/welcome': {
+      id: '/_authenticated/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof AuthenticatedWelcomeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/wins': {
       id: '/_authenticated/wins'
       path: '/wins'
@@ -261,6 +280,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedHabitsRoute: typeof AuthenticatedHabitsRoute
   AuthenticatedOverviewRoute: typeof AuthenticatedOverviewRoute
   AuthenticatedRoutinesRoute: typeof AuthenticatedRoutinesRoute
+  AuthenticatedWelcomeRoute: typeof AuthenticatedWelcomeRoute
   AuthenticatedWinsRoute: typeof AuthenticatedWinsRoute
 }
 
@@ -269,6 +289,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedHabitsRoute: AuthenticatedHabitsRoute,
   AuthenticatedOverviewRoute: AuthenticatedOverviewRoute,
   AuthenticatedRoutinesRoute: AuthenticatedRoutinesRoute,
+  AuthenticatedWelcomeRoute: AuthenticatedWelcomeRoute,
   AuthenticatedWinsRoute: AuthenticatedWinsRoute,
 }
 

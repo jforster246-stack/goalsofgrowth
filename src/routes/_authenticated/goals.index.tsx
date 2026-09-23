@@ -1,16 +1,16 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   useMutation,
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
-import { Plus, Sparkle } from "lucide-react";
-import { AppShell } from "@/components/app-shell";
-import { accentOf, goalProgress, type GoalWithSteps } from "@/components/goal-ui";
-import { Button } from "@/components/ui/button";
+import { useEffect, useRef } from "react";
+import { Plus } from "lucide-react";
+import { AppShell, useAppShell } from "@/components/app-shell";
+import { GoalCard } from "@/components/home-cards";
+import { goalProgress, type GoalWithSteps } from "@/components/goal-ui";
 import { goalsQueryOptions } from "@/lib/goal-queries";
-import { claimUnownedGoals, createGoal } from "@/lib/goals.functions";
+import { claimUnownedGoals, toggleStep } from "@/lib/goals.functions";
 
 export const Route = createFileRoute("/_authenticated/goals/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(goalsQueryOptions),
@@ -22,13 +22,6 @@ export const Route = createFileRoute("/_authenticated/goals/")({
         content:
           "Every goal you're growing, with its progress and the very next small step.",
       },
-      { property: "og:title", content: "Your goals — Goals of Growth" },
-      {
-        property: "og:description",
-        content: "Every goal you're growing, with its next small step.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
     ],
   }),
   errorComponent: ({ error }) => (
@@ -39,23 +32,13 @@ export const Route = createFileRoute("/_authenticated/goals/")({
       </div>
     </div>
   ),
-  notFoundComponent: () => (
-    <div className="flex min-h-dvh items-center justify-center bg-background px-5">
-      <p className="text-base text-muted-foreground">Nothing here.</p>
-    </div>
-  ),
   component: GoalsListPage,
 });
 
 function GoalsListPage() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const { data: goals } = useSuspenseQuery(goalsQueryOptions);
-
-  const [showNewGoal, setShowNewGoal] = useState(false);
-  const [newGoalTitle, setNewGoalTitle] = useState("");
-
-  const invalidate = () =>
-    queryClient.invalidateQueries({ queryKey: ["goals"] });
 
   // Adopt goals created before sign-in existed (no-op after the first account).
   const claimed = useRef(false);
@@ -64,111 +47,71 @@ function GoalsListPage() {
     claimed.current = true;
     claimUnownedGoals()
       .then((r) => {
-        if (r.claimed > 0) invalidate();
+        if (r.claimed > 0)
+          queryClient.invalidateQueries({ queryKey: ["goals"] });
       })
       .catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const createGoalMutation = useMutation({
-    mutationFn: (input: { title: string }) => createGoal({ data: input }),
-    onSuccess: () => {
-      setNewGoalTitle("");
-      setShowNewGoal(false);
-      invalidate();
-    },
-  });
-
-  const submitNewGoal = (e: React.FormEvent) => {
-    e.preventDefault();
-    const title = newGoalTitle.trim();
-    if (!title || createGoalMutation.isPending) return;
-    createGoalMutation.mutate({ title });
-  };
+  }, [queryClient]);
 
   return (
     <AppShell title="All goals" hideSettings>
-      {!showNewGoal && goals.length > 0 && (
-        <p className="mt-3 text-xs text-muted-foreground">
-          Tap to see next step
-        </p>
-      )}
-
-      {showNewGoal && (
-        <form
-          onSubmit={submitNewGoal}
-          className="mt-5 rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border [animation:rise_0.3s_both]"
-        >
-          <input
-            autoFocus
-            value={newGoalTitle}
-            onChange={(e) => setNewGoalTitle(e.target.value)}
-            placeholder="What do you want to achieve?"
-            maxLength={140}
-            className="w-full bg-transparent text-base placeholder:text-muted-foreground/60 focus:outline-none"
-          />
-          <div className="mt-3 flex items-center gap-2">
-            <Button
-              type="submit"
-              disabled={!newGoalTitle.trim() || createGoalMutation.isPending}
-              className="h-10 flex-1 rounded-xl"
-            >
-              Add goal
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => {
-                setShowNewGoal(false);
-                setNewGoalTitle("");
-              }}
-              className="h-10 rounded-xl px-4 text-muted-foreground"
-            >
-              Cancel
-            </Button>
-          </div>
-        </form>
-      )}
-
-      {goals.length === 0 && !showNewGoal ? (
-        <div className="mt-5 rounded-2xl bg-card p-8 text-center shadow-sm ring-1 ring-border [animation:rise_0.4s_both]">
-          <p className="text-base font-semibold">No goals yet</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Tap the + button to add your first one.
+      {goals.length === 0 ? (
+        <div className="mt-6 rounded-2xl bg-white p-8 text-center shadow-sm">
+          <p className="font-heading text-base text-black">No goals yet</p>
+          <p className="mt-2 font-serif text-sm text-black/50">
+            Tap the + button to create your first goal.
           </p>
+          <button
+            type="button"
+            onClick={() => navigate({ to: "/goals/new" })}
+            className="mt-5 inline-flex items-center gap-1.5 rounded-2xl bg-olive px-5 py-2.5 font-heading text-sm uppercase text-white transition-colors hover:bg-olive/90"
+          >
+            <Plus className="size-4" strokeWidth={2} />
+            New goal
+          </button>
         </div>
       ) : (
-        <GoalsGrid goals={goals} />
+        <div className="mt-4 space-y-4 pb-4">
+          {goals.map((goal) => (
+            <GoalCardItem key={goal.id} goal={goal} />
+          ))}
+        </div>
       )}
     </AppShell>
   );
 }
 
-function GoalsGrid({ goals }: { goals: GoalWithSteps[] }) {
+/** A goal rendered as the full card, wired to focus/complete its next step. */
+function GoalCardItem({ goal }: { goal: GoalWithSteps }) {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { openFocus, celebrate } = useAppShell();
+
+  const next = goalProgress(goal).nextStep;
+
+  const completeMutation = useMutation({
+    mutationFn: (stepId: string) =>
+      toggleStep({ data: { id: stepId, done: true } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["goals"] });
+      queryClient.invalidateQueries({ queryKey: ["goal"] });
+    },
+  });
+
+  const open = () =>
+    navigate({ to: "/goals/$goalId", params: { goalId: goal.id } });
+
   return (
-    <div className="mt-3 grid grid-cols-2 gap-3">
-      {goals.map((goal) => {
-        const progress = goalProgress(goal);
-        return (
-          <Link
-            key={goal.id}
-            to="/goals/$goalId"
-            params={{ goalId: goal.id }}
-            className={`flex flex-col rounded-2xl px-4 py-5 text-primary-foreground shadow-sm ring-1 ring-border ${accentOf(goal).bar}`}
-          >
-            <Sparkle className="size-7" strokeWidth={1.25} />
-            <p className="mt-3 flex-1 text-base font-semibold leading-snug">
-              {goal.title}
-            </p>
-            <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-black/20">
-              <div
-                className="h-full rounded-full bg-primary-foreground/90 transition-[width] duration-500"
-                style={{ width: `${progress.pct}%` }}
-              />
-            </div>
-          </Link>
-        );
-      })}
-    </div>
+    <GoalCard
+      goal={goal}
+      onOpen={open}
+      onAdd={open}
+      onFocus={() => next && openFocus(next.id)}
+      onComplete={() => {
+        if (!next) return;
+        celebrate();
+        completeMutation.mutate(next.id);
+      }}
+    />
   );
 }

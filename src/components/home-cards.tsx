@@ -111,7 +111,7 @@ export function GoalCard({
   return (
     <div
       className={cn(
-        "relative w-[297px] shrink-0 snap-center rounded-2xl border border-black bg-white",
+        "relative w-full rounded-2xl bg-white shadow-sm",
         isGoalOfDay ? "overflow-visible" : "overflow-hidden",
       )}
     >
@@ -126,7 +126,7 @@ export function GoalCard({
         type="button"
         onClick={onOpen}
         className={cn(
-          "flex w-full flex-col items-center gap-7 rounded-t-2xl border-b border-black px-8 pb-6 pt-8 text-center",
+          "flex w-full flex-col items-center gap-7 rounded-t-2xl px-8 pb-6 pt-8 text-center",
           accent.surface,
         )}
       >
