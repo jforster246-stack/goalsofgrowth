@@ -164,6 +164,31 @@ function FocusSession({
     return () => clearInterval(id);
   }, [running]);
 
+  // Keep the screen awake while a focus session is open.
+  useEffect(() => {
+    let lock: { release: () => Promise<void> } | null = null;
+    const nav = navigator as Navigator & {
+      wakeLock?: { request: (type: "screen") => Promise<typeof lock> };
+    };
+    const request = () => {
+      nav.wakeLock
+        ?.request("screen")
+        .then((l) => {
+          lock = l;
+        })
+        .catch(() => {});
+    };
+    request();
+    const onVisible = () => {
+      if (document.visibilityState === "visible") request();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisible);
+      lock?.release().catch(() => {});
+    };
+  }, []);
+
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;
   const display = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;

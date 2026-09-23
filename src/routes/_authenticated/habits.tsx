@@ -12,6 +12,7 @@ import { HabitFormModal, type EditableHabit } from "@/components/habit-form-moda
 import { localToday } from "@/components/goal-ui";
 import { crystalsQueryOptions, habitsQueryOptions } from "@/lib/goal-queries";
 import { toggleHabit } from "@/lib/habits.functions";
+import { frequencyLabel } from "@/lib/habit-schedule";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/habits")({
@@ -36,7 +37,10 @@ type Habit = {
   name: string;
   time_of_day: HabitTime;
   frequency: string;
+  days_of_week: string | null;
+  interval_days: number | null;
   reason: string | null;
+  created_at: string;
   done: boolean;
 };
 
@@ -149,7 +153,7 @@ function HabitsBody({
       key={habit.id}
       name={habit.name}
       timeOfDay={habit.time_of_day}
-      frequency={habit.frequency}
+      frequencyLabel={frequencyLabel(habit)}
       done={habit.done}
       onOpen={() =>
         onEdit({
@@ -157,6 +161,8 @@ function HabitsBody({
           name: habit.name,
           time_of_day: habit.time_of_day,
           frequency: habit.frequency,
+          days_of_week: habit.days_of_week,
+          interval_days: habit.interval_days,
           reason: habit.reason,
         })
       }

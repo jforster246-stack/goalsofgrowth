@@ -1,17 +1,18 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Moon, Sun, Sunset, X } from "lucide-react";
+import { Minus, Moon, Plus, Sun, Sunset, X } from "lucide-react";
 import type { HabitTime } from "@/components/home-cards";
+import { parseDays, type Frequency } from "@/lib/habit-schedule";
 import { createHabit, deleteHabit, updateHabit } from "@/lib/habits.functions";
 import { cn } from "@/lib/utils";
-
-type Frequency = "daily" | "weekly" | "fortnightly" | "monthly";
 
 export type EditableHabit = {
   id: string;
   name: string;
   time_of_day: HabitTime;
   frequency: string;
+  days_of_week?: string | null;
+  interval_days?: number | null;
   reason: string | null;
 };
 
@@ -21,15 +22,57 @@ const TIMES: { key: HabitTime; label: string; Icon: typeof Sun; activeBg: string
   { key: "evening", label: "Evening", Icon: Moon, activeBg: "bg-olive" },
 ];
 
-const FREQUENCIES: { key: Frequency; label: string }[] = [
+type PickFreq = "daily" | "weekdays" | "weekends" | "specific_days" | "interval";
+
+const FREQ_OPTIONS: { key: PickFreq; label: string }[] = [
   { key: "daily", label: "Daily" },
-  { key: "weekly", label: "Weekly" },
-  { key: "fortnightly", label: "Fortnightly" },
-  { key: "monthly", label: "Monthly" },
+  { key: "weekdays", label: "Weekdays" },
+  { key: "weekends", label: "Weekends" },
+  { key: "specific_days", label: "Specific days" },
+  { key: "interval", label: "Every N days" },
 ];
 
-/** One-screen habit sheet: name, time of day, frequency, optional reason.
- *  Pass `habit` to edit an existing one (adds Save + Delete). */
+// Mon-first day toggles; values are JS getDay() numbers (0 = Sun).
+const DAY_TOGGLES = [
+  { v: 1, l: "M" },
+  { v: 2, l: "T" },
+  { v: 3, l: "W" },
+  { v: 4, l: "T" },
+  { v: 5, l: "F" },
+  { v: 6, l: "S" },
+  { v: 0, l: "S" },
+];
+
+function initialFreq(h?: EditableHabit): {
+  freq: PickFreq;
+  days: Set<number>;
+  interval: number;
+} {
+  if (!h) return { freq: "daily", days: new Set(), interval: 3 };
+  switch (h.frequency) {
+    case "weekly":
+      return { freq: "interval", days: new Set(), interval: 7 };
+    case "fortnightly":
+      return { freq: "interval", days: new Set(), interval: 14 };
+    case "monthly":
+      return { freq: "interval", days: new Set(), interval: 30 };
+    case "interval":
+      return { freq: "interval", days: new Set(), interval: h.interval_days ?? 3 };
+    case "specific_days":
+      return {
+        freq: "specific_days",
+        days: new Set(parseDays(h.days_of_week)),
+        interval: 3,
+      };
+    case "weekdays":
+    case "weekends":
+      return { freq: h.frequency, days: new Set(), interval: 3 };
+    default:
+      return { freq: "daily", days: new Set(), interval: 3 };
+  }
+}
+
+/** One-screen habit sheet: name, time of day, frequency, optional reason. */
 export function HabitFormModal({
   onClose,
   habit,
@@ -39,27 +82,51 @@ export function HabitFormModal({
 }) {
   const queryClient = useQueryClient();
   const editing = !!habit;
+  const init = initialFreq(habit);
 
   const [name, setName] = useState(habit?.name ?? "");
   const [timeOfDay, setTimeOfDay] = useState<HabitTime>(
     habit?.time_of_day ?? "morning",
   );
-  const [frequency, setFrequency] = useState<Frequency>(
-    (habit?.frequency as Frequency) ?? "daily",
-  );
+  const [frequency, setFrequency] = useState<PickFreq>(init.freq);
+  const [days, setDays] = useState<Set<number>>(init.days);
+  const [interval, setIntervalDays] = useState<number>(init.interval);
   const [reason, setReason] = useState(habit?.reason ?? "");
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["habits"] });
 
   const saveMutation = useMutation({
-    mutationFn: async (input: {
-      name: string;
-      timeOfDay: HabitTime;
-      frequency: Frequency;
-      reason: string;
-    }) => {
-      if (editing) await updateHabit({ data: { id: habit!.id, ...input } });
-      else await createHabit({ data: input });
+    mutationFn: async () => {
+      const daysCsv =
+        frequency === "specific_days"
+          ? [...days].sort((a, b) => a - b).join(",")
+          : null;
+      const intervalDays = frequency === "interval" ? interval : null;
+      const trimmedReason = reason.trim();
+      if (editing) {
+        await updateHabit({
+          data: {
+            id: habit!.id,
+            name: name.trim(),
+            timeOfDay,
+            frequency,
+            daysOfWeek: daysCsv,
+            intervalDays,
+            reason: trimmedReason,
+          },
+        });
+      } else {
+        await createHabit({
+          data: {
+            name: name.trim(),
+            timeOfDay,
+            frequency,
+            ...(daysCsv ? { daysOfWeek: daysCsv } : {}),
+            ...(intervalDays ? { intervalDays } : {}),
+            ...(trimmedReason ? { reason: trimmedReason } : {}),
+          },
+        });
+      }
     },
     onSuccess: () => {
       refresh();
@@ -75,11 +142,23 @@ export function HabitFormModal({
     },
   });
 
+  const toggleDay = (v: number) =>
+    setDays((prev) => {
+      const next = new Set(prev);
+      if (next.has(v)) next.delete(v);
+      else next.add(v);
+      return next;
+    });
+
+  const invalid =
+    !name.trim() ||
+    (frequency === "specific_days" && days.size === 0) ||
+    saveMutation.isPending;
+
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    const value = name.trim();
-    if (!value || saveMutation.isPending) return;
-    saveMutation.mutate({ name: value, timeOfDay, frequency, reason: reason.trim() });
+    if (invalid) return;
+    saveMutation.mutate();
   };
 
   return (
@@ -142,8 +221,8 @@ export function HabitFormModal({
 
         {/* Frequency */}
         <p className="mt-5 font-heading text-sm uppercase text-olive">Frequency</p>
-        <div className="mt-2 grid grid-cols-2 gap-2">
-          {FREQUENCIES.map((f) => {
+        <div className="mt-2 flex flex-wrap gap-2">
+          {FREQ_OPTIONS.map((f) => {
             const active = frequency === f.key;
             return (
               <button
@@ -152,7 +231,7 @@ export function HabitFormModal({
                 onClick={() => setFrequency(f.key)}
                 aria-pressed={active}
                 className={cn(
-                  "rounded-2xl py-2.5 font-heading text-xs uppercase transition-colors",
+                  "rounded-full px-4 py-2 font-heading text-xs uppercase transition-colors",
                   active ? "bg-olive text-white" : "bg-black/5 text-black/50",
                 )}
               >
@@ -161,6 +240,56 @@ export function HabitFormModal({
             );
           })}
         </div>
+
+        {/* Specific-days picker */}
+        {frequency === "specific_days" && (
+          <div className="mt-3 flex justify-between gap-1">
+            {DAY_TOGGLES.map((d, i) => {
+              const active = days.has(d.v);
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => toggleDay(d.v)}
+                  aria-pressed={active}
+                  aria-label={`Toggle day ${d.v}`}
+                  className={cn(
+                    "grid size-9 place-items-center rounded-full font-heading text-xs uppercase transition-colors",
+                    active ? "bg-olive text-white" : "bg-black/5 text-black/50",
+                  )}
+                >
+                  {d.l}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Every-N-days stepper */}
+        {frequency === "interval" && (
+          <div className="mt-3 flex items-center justify-center gap-4">
+            <button
+              type="button"
+              onClick={() => setIntervalDays((n) => Math.max(1, n - 1))}
+              aria-label="Fewer days"
+              className="grid size-10 place-items-center rounded-full bg-black/5 text-black/60 transition-colors hover:bg-black/10"
+            >
+              <Minus className="size-4" strokeWidth={2.5} />
+            </button>
+            <span className="font-serif text-sm text-black">
+              Every <span className="font-mono">{interval}</span>{" "}
+              {interval === 1 ? "day" : "days"}
+            </span>
+            <button
+              type="button"
+              onClick={() => setIntervalDays((n) => Math.min(365, n + 1))}
+              aria-label="More days"
+              className="grid size-10 place-items-center rounded-full bg-black/5 text-black/60 transition-colors hover:bg-black/10"
+            >
+              <Plus className="size-4" strokeWidth={2.5} />
+            </button>
+          </div>
+        )}
 
         {/* Reason */}
         <div className="mt-5 flex items-baseline justify-between">
@@ -178,7 +307,7 @@ export function HabitFormModal({
 
         <button
           type="submit"
-          disabled={!name.trim() || saveMutation.isPending}
+          disabled={invalid}
           className="mt-6 w-full rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
         >
           {saveMutation.isPending

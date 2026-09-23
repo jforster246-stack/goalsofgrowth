@@ -30,6 +30,7 @@ export function GoalCompletePrompt({
       queryClient.invalidateQueries({ queryKey: ["wins"] });
       queryClient.invalidateQueries({ queryKey: ["goals"] });
       onClose();
+      navigate({ to: "/wins" });
     },
   });
 

@@ -340,7 +340,7 @@ export function HabitRow({
   name,
   timeOfDay,
   done,
-  frequency,
+  frequencyLabel,
   onOpen,
   onTimer,
   onToggle,
@@ -348,13 +348,13 @@ export function HabitRow({
   name: string;
   timeOfDay: HabitTime;
   done: boolean;
-  frequency?: string;
+  frequencyLabel?: string;
   onOpen?: () => void;
   onTimer?: () => void;
   onToggle?: () => void;
 }) {
   const Icon = HABIT_ICON[timeOfDay];
-  const showFrequency = frequency && frequency !== "daily";
+  const showFrequency = frequencyLabel && frequencyLabel !== "Daily";
 
   return (
     <div className="flex w-full items-center justify-between gap-2 rounded-2xl bg-white py-2 pl-3 pr-2 shadow-sm">
@@ -380,7 +380,7 @@ export function HabitRow({
           </span>
           {showFrequency && (
             <span className="font-heading text-[10px] uppercase text-black/40">
-              {frequency}
+              {frequencyLabel}
             </span>
           )}
         </span>

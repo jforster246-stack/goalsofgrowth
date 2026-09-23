@@ -4,7 +4,23 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const timeOfDaySchema = z.enum(["morning", "afternoon", "evening"]);
-const frequencySchema = z.enum(["daily", "weekly", "fortnightly", "monthly"]);
+const frequencySchema = z.enum([
+  "daily",
+  "weekdays",
+  "weekends",
+  "specific_days",
+  "interval",
+  // legacy values still accepted
+  "weekly",
+  "fortnightly",
+  "monthly",
+]);
+// comma-separated day numbers 0-6, e.g. "1,2,3,4,5"
+const daysOfWeekSchema = z
+  .string()
+  .regex(/^([0-6])(,[0-6])*$/)
+  .optional();
+const intervalSchema = z.number().int().min(1).max(365).optional();
 
 /**
  * Lists the user's habits with a `done` flag for the given local day.
@@ -112,6 +128,8 @@ export const createHabit = createServerFn({ method: "POST" })
         name: z.string().trim().min(1).max(140),
         timeOfDay: timeOfDaySchema,
         frequency: frequencySchema.default("daily"),
+        daysOfWeek: daysOfWeekSchema,
+        intervalDays: intervalSchema,
         reason: z.string().trim().max(2000).optional(),
       })
       .parse(data),
@@ -133,6 +151,8 @@ export const createHabit = createServerFn({ method: "POST" })
         name: data.name,
         time_of_day: data.timeOfDay,
         frequency: data.frequency,
+        days_of_week: data.daysOfWeek ?? null,
+        interval_days: data.intervalDays ?? null,
         reason: data.reason ?? null,
         position,
         user_id: context.userId,
@@ -152,6 +172,8 @@ export const updateHabit = createServerFn({ method: "POST" })
         name: z.string().trim().min(1).max(140).optional(),
         timeOfDay: timeOfDaySchema.optional(),
         frequency: frequencySchema.optional(),
+        daysOfWeek: z.string().regex(/^([0-6])(,[0-6])*$/).nullable().optional(),
+        intervalDays: z.number().int().min(1).max(365).nullable().optional(),
         reason: z.string().trim().max(2000).optional(),
       })
       .parse(data),
@@ -161,11 +183,15 @@ export const updateHabit = createServerFn({ method: "POST" })
       name?: string;
       time_of_day?: string;
       frequency?: string;
+      days_of_week?: string | null;
+      interval_days?: number | null;
       reason?: string;
     } = {};
     if (data.name !== undefined) fields.name = data.name;
     if (data.timeOfDay !== undefined) fields.time_of_day = data.timeOfDay;
     if (data.frequency !== undefined) fields.frequency = data.frequency;
+    if (data.daysOfWeek !== undefined) fields.days_of_week = data.daysOfWeek;
+    if (data.intervalDays !== undefined) fields.interval_days = data.intervalDays;
     if (data.reason !== undefined) fields.reason = data.reason;
 
     const { error } = await context.supabase

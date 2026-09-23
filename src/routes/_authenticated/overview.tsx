@@ -20,6 +20,7 @@ import {
 } from "@/lib/goal-queries";
 import { setGoalOfDay, toggleStep } from "@/lib/goals.functions";
 import { toggleHabit } from "@/lib/habits.functions";
+import { frequencyLabel, isHabitDueToday } from "@/lib/habit-schedule";
 
 export const Route = createFileRoute("/_authenticated/overview")({
   loader: ({ context }) => context.queryClient.ensureQueryData(goalsQueryOptions),
@@ -282,7 +283,9 @@ function TodayHabits() {
     toggle.mutate(id);
   };
 
-  const inBucket = (habits ?? []).filter((h) => h.time_of_day === bucket);
+  const inBucket = (habits ?? []).filter(
+    (h) => h.time_of_day === bucket && isHabitDueToday(h),
+  );
   const active = inBucket.filter((h) => !h.done);
 
   return (
@@ -303,7 +306,7 @@ function TodayHabits() {
               key={h.id}
               name={h.name}
               timeOfDay={h.time_of_day as HabitTime}
-              frequency={h.frequency}
+              frequencyLabel={frequencyLabel(h)}
               done={h.done}
               onTimer={() =>
                 openTimer({

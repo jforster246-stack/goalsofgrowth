@@ -99,6 +99,16 @@ function GoalDetailBody({
   const [promptGoal, setPromptGoal] = useState<CompletedGoal | null>(null);
   const [orderedSteps, setOrderedSteps] = useState<Step[]>(goal.steps);
   const stepInputRef = useRef<HTMLInputElement>(null);
+  const titleRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-grow the goal title so long titles wrap instead of truncating.
+  useEffect(() => {
+    const el = titleRef.current;
+    if (el) {
+      el.style.height = "auto";
+      el.style.height = `${el.scrollHeight}px`;
+    }
+  }, [title]);
 
   useEffect(() => {
     setTitle(goal.title);
@@ -203,13 +213,15 @@ function GoalDetailBody({
     <div className="mt-4 space-y-6 pb-4">
       {/* Hero */}
       <GoalHero goal={goal}>
-        <input
+        <textarea
+          ref={titleRef}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          rows={1}
           maxLength={140}
           aria-label="Goal title"
           placeholder="Name this goal"
-          className="w-full bg-transparent text-center font-heading text-2xl leading-tight text-white placeholder:text-white/60 focus:outline-none"
+          className="w-full resize-none overflow-hidden break-words bg-transparent text-center font-heading text-2xl leading-tight text-white placeholder:text-white/60 focus:outline-none"
         />
       </GoalHero>
 

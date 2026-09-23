@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createContext,
@@ -54,6 +54,7 @@ export function AppShell({
 }) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const router = useRouter();
   const { data: profile } = useQuery(profileQueryOptions);
   const { data: goals } = useQuery(goalsQueryOptions);
 
@@ -116,9 +117,13 @@ export function AppShell({
       <div className="relative z-[1] mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 pb-28 pt-6">
         <header className="flex items-center justify-between gap-2">
           {backTo ? (
-            <Link
-              to={backTo}
+            <button
+              type="button"
               aria-label="Back"
+              onClick={() => {
+                if (window.history.length > 1) router.history.back();
+                else navigate({ to: backTo });
+              }}
               className="grid size-10 shrink-0 place-items-center rounded-full bg-focus text-white shadow-md transition-colors hover:bg-focus/90"
             >
               <svg
@@ -132,7 +137,7 @@ export function AppShell({
               >
                 <path d="M15 18l-6-6 6-6" />
               </svg>
-            </Link>
+            </button>
           ) : hideSettings ? (
             <div className="size-10 shrink-0" />
           ) : (

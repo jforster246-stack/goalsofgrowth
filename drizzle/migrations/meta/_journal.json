@@ -71,6 +71,13 @@
       "when": 1790380800000,
       "tag": "0009_add_goal_archived",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790467200000,
+      "tag": "0010_habit_custom_frequency",
+      "breakpoints": true
     }
   ]
 }

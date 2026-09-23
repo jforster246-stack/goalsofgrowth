@@ -82,8 +82,10 @@ export type Database = {
       habits: {
         Row: {
           created_at: string
+          days_of_week: string | null
           frequency: string
           id: string
+          interval_days: number | null
           name: string
           position: number
           reason: string | null
@@ -92,8 +94,10 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          days_of_week?: string | null
           frequency?: string
           id?: string
+          interval_days?: number | null
           name: string
           position?: number
           reason?: string | null
@@ -102,8 +106,10 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          days_of_week?: string | null
           frequency?: string
           id?: string
+          interval_days?: number | null
           name?: string
           position?: number
           reason?: string | null
