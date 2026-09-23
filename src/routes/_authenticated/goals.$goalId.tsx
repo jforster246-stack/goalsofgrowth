@@ -268,6 +268,11 @@ function GoalDetailBody({ goal, goalId }: { goal: HomeGoal & { why?: string | nu
       >
         Delete this goal
       </button>
+
+      <GoalCompletePrompt
+        goal={promptGoal}
+        onClose={() => setPromptGoal(null)}
+      />
     </div>
   );
 }
