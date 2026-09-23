@@ -1,15 +1,23 @@
-import { createFileRoute } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  useNavigate,
+  type SearchSchemaInput,
+} from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Moon, Sun, Sunset } from "lucide-react";
+import { Moon, Plus, Sun, Sunset } from "lucide-react";
 import { AppShell, useAppShell } from "@/components/app-shell";
 import { HabitRow, type HabitTime } from "@/components/home-cards";
+import { HabitFormModal } from "@/components/habit-form-modal";
 import { localToday } from "@/components/goal-ui";
 import { habitsQueryOptions } from "@/lib/goal-queries";
-import { createHabit, deleteHabit, toggleHabit } from "@/lib/habits.functions";
+import { deleteHabit, toggleHabit } from "@/lib/habits.functions";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/habits")({
+  validateSearch: (search: { new?: boolean } & SearchSchemaInput) => ({
+    new: search["new"] === true || (search["new"] as unknown) === "true",
+  }),
   head: () => ({
     meta: [
       { title: "Habits — Goals of Growth" },
@@ -27,6 +35,7 @@ type Habit = {
   id: string;
   name: string;
   time_of_day: HabitTime;
+  frequency: string;
   done: boolean;
 };
 
@@ -44,17 +53,43 @@ const TIMES: {
 
 function HabitsPage() {
   const today = localToday();
+  const { new: openNew } = Route.useSearch();
+  const navigate = useNavigate();
   const { data: habits, isPending } = useQuery(habitsQueryOptions(today));
 
+  const [adding, setAdding] = useState(false);
+
+  // Opened straight from the FAB (?new=true) — show the sheet, then clear the flag.
+  const showModal = adding || openNew;
+  const closeModal = () => {
+    setAdding(false);
+    if (openNew) navigate({ to: "/habits", search: { new: false }, replace: true });
+  };
+
   return (
-    <AppShell title="Habits" backTo="/overview">
+    <AppShell
+      title="Habits"
+      backTo="/overview"
+      right={
+        <button
+          type="button"
+          onClick={() => setAdding(true)}
+          aria-label="Add a habit"
+          className="grid size-10 shrink-0 place-items-center rounded-xl bg-olive text-white shadow-sm transition-colors hover:bg-olive/90"
+        >
+          <Plus className="size-5" strokeWidth={2} />
+        </button>
+      }
+    >
       {isPending || !habits ? (
         <p className="mt-10 text-center font-serif text-sm text-muted-foreground">
           Loading…
         </p>
       ) : (
-        <HabitsBody habits={habits as Habit[]} today={today} />
+        <HabitsBody habits={habits as Habit[]} today={today} onAdd={() => setAdding(true)} />
       )}
+
+      {showModal && <HabitFormModal onClose={closeModal} />}
     </AppShell>
   );
 }
@@ -63,20 +98,20 @@ function HabitsPage() {
  * The habits list + add form. Rendered inside <AppShell> so the per-habit
  * timer button can open the shared focus timer (useAppShell).
  */
-function HabitsBody({ habits, today }: { habits: Habit[]; today: string }) {
+function HabitsBody({
+  habits,
+  today,
+  onAdd,
+}: {
+  habits: Habit[];
+  today: string;
+  onAdd: () => void;
+}) {
   const queryClient = useQueryClient();
   const { openTimer } = useAppShell();
 
-  const [name, setName] = useState("");
-  const [timeOfDay, setTimeOfDay] = useState<HabitTime>("morning");
-
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["habits"] });
 
-  const addMutation = useMutation({
-    mutationFn: (input: { name: string; timeOfDay: HabitTime }) =>
-      createHabit({ data: input }),
-    onSuccess: refresh,
-  });
   const toggleMutation = useMutation({
     mutationFn: (input: { id: string; done: boolean }) =>
       toggleHabit({ data: { ...input, today } }),
@@ -87,19 +122,12 @@ function HabitsBody({ habits, today }: { habits: Habit[]; today: string }) {
     onSuccess: refresh,
   });
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const value = name.trim();
-    if (!value || addMutation.isPending) return;
-    addMutation.mutate({ name: value, timeOfDay });
-    setName("");
-  };
-
   const renderHabit = (habit: Habit, label: string) => (
     <HabitRow
       key={habit.id}
       name={habit.name}
       timeOfDay={habit.time_of_day}
+      frequency={habit.frequency}
       done={habit.done}
       onTimer={() =>
         openTimer({
@@ -112,80 +140,44 @@ function HabitsBody({ habits, today }: { habits: Habit[]; today: string }) {
     />
   );
 
+  if (habits.length === 0) {
+    return (
+      <div className="mt-4 rounded-2xl bg-white p-8 text-center shadow-sm">
+        <p className="font-heading text-base text-black">No habits yet</p>
+        <p className="mt-2 font-serif text-sm text-black/50">
+          Add a small habit to start building momentum.
+        </p>
+        <button
+          type="button"
+          onClick={onAdd}
+          className="mt-5 inline-flex items-center gap-1.5 rounded-2xl bg-olive px-5 py-2.5 font-heading text-sm uppercase text-white transition-colors hover:bg-olive/90"
+        >
+          <Plus className="size-4" strokeWidth={2} />
+          Add a habit
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-4 space-y-8 pb-4">
-      {habits.length === 0 ? (
-        <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
-          <p className="font-heading text-base text-black">No habits yet</p>
-          <p className="mt-2 font-serif text-sm text-black/50">
-            Add a small daily habit below — it'll reset each day so you can keep
-            the streak going.
-          </p>
-        </div>
-      ) : (
-        TIMES.map((time) => {
-          const inBucket = habits.filter((h) => h.time_of_day === time.key);
-          if (inBucket.length === 0) return null;
-          return (
-            <HabitSection
-              key={time.key}
-              time={time}
-              habits={inBucket}
-              renderHabit={(h) => renderHabit(h, time.label)}
-            />
-          );
-        })
-      )}
-
-      {/* Add a habit */}
-      <form onSubmit={submit} className="space-y-3">
-        <p className="font-heading text-sm uppercase text-olive">Add a habit</p>
-
-        <div className="grid grid-cols-3 gap-2">
-          {TIMES.map((time) => {
-            const active = timeOfDay === time.key;
-            return (
-              <button
-                key={time.key}
-                type="button"
-                onClick={() => setTimeOfDay(time.key)}
-                aria-pressed={active}
-                className={cn(
-                  "flex flex-col items-center gap-1 rounded-2xl py-2.5 font-heading text-[11px] uppercase transition-colors",
-                  active ? `${time.activeBg} text-white` : "bg-black/5 text-black/50",
-                )}
-              >
-                <time.Icon className="size-4" strokeWidth={2} />
-                {time.label}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="flex items-center gap-2">
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Name your habit…"
-            maxLength={140}
-            className="min-w-0 flex-1 rounded-2xl bg-black/5 px-4 py-3 font-serif text-sm placeholder:text-black/40 focus:outline-none focus:ring-1 focus:ring-olive/40"
+      {TIMES.map((time) => {
+        const inBucket = habits.filter((h) => h.time_of_day === time.key);
+        if (inBucket.length === 0) return null;
+        return (
+          <HabitSection
+            key={time.key}
+            time={time}
+            habits={inBucket}
+            renderHabit={(h) => renderHabit(h, time.label)}
           />
-          <button
-            type="submit"
-            disabled={!name.trim()}
-            className="shrink-0 rounded-2xl bg-sage/60 px-6 py-3 font-heading text-sm uppercase text-white transition-colors hover:bg-sage/80 disabled:opacity-40"
-          >
-            Add
-          </button>
-        </div>
-      </form>
+        );
+      })}
 
-      {habits.length > 0 && (
-        <DeleteHabitList
-          habits={habits}
-          onDelete={(id) => deleteMutation.mutate({ id })}
-        />
-      )}
+      <DeleteHabitList
+        habits={habits}
+        onDelete={(id) => deleteMutation.mutate({ id })}
+      />
     </div>
   );
 }

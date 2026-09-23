@@ -18,6 +18,7 @@ import { Route as AuthenticatedOverviewRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedRoutinesRouteImport } from './routes/_authenticated/routines'
 import { Route as AuthenticatedGoalsIndexRouteImport } from './routes/_authenticated/goals.index'
 import { Route as AuthenticatedGoalsGoalIdRouteImport } from './routes/_authenticated/goals.$goalId'
+import { Route as AuthenticatedGoalsNewRouteImport } from './routes/_authenticated/goals.new'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -64,6 +65,11 @@ const AuthenticatedGoalsGoalIdRoute =
     path: '/$goalId',
     getParentRoute: () => AuthenticatedGoalsRoute,
   } as any)
+const AuthenticatedGoalsNewRoute = AuthenticatedGoalsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AuthenticatedGoalsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -73,6 +79,7 @@ export interface FileRoutesByFullPath {
   '/overview': typeof AuthenticatedOverviewRoute
   '/routines': typeof AuthenticatedRoutinesRoute
   '/goals/$goalId': typeof AuthenticatedGoalsGoalIdRoute
+  '/goals/new': typeof AuthenticatedGoalsNewRoute
   '/goals/': typeof AuthenticatedGoalsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/overview': typeof AuthenticatedOverviewRoute
   '/routines': typeof AuthenticatedRoutinesRoute
   '/goals/$goalId': typeof AuthenticatedGoalsGoalIdRoute
+  '/goals/new': typeof AuthenticatedGoalsNewRoute
   '/goals': typeof AuthenticatedGoalsIndexRoute
 }
 export interface FileRoutesById {
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/_authenticated/overview': typeof AuthenticatedOverviewRoute
   '/_authenticated/routines': typeof AuthenticatedRoutinesRoute
   '/_authenticated/goals/$goalId': typeof AuthenticatedGoalsGoalIdRoute
+  '/_authenticated/goals/new': typeof AuthenticatedGoalsNewRoute
   '/_authenticated/goals/': typeof AuthenticatedGoalsIndexRoute
 }
 export interface FileRouteTypes {
@@ -106,6 +115,7 @@ export interface FileRouteTypes {
     | '/overview'
     | '/routines'
     | '/goals/$goalId'
+    | '/goals/new'
     | '/goals/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -115,6 +125,7 @@ export interface FileRouteTypes {
     | '/overview'
     | '/routines'
     | '/goals/$goalId'
+    | '/goals/new'
     | '/goals'
   id:
     | '__root__'
@@ -126,6 +137,7 @@ export interface FileRouteTypes {
     | '/_authenticated/overview'
     | '/_authenticated/routines'
     | '/_authenticated/goals/$goalId'
+    | '/_authenticated/goals/new'
     | '/_authenticated/goals/'
   fileRoutesById: FileRoutesById
 }
@@ -200,16 +212,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGoalsGoalIdRouteImport
       parentRoute: typeof AuthenticatedGoalsRoute
     }
+    '/_authenticated/goals/new': {
+      id: '/_authenticated/goals/new'
+      path: '/new'
+      fullPath: '/goals/new'
+      preLoaderRoute: typeof AuthenticatedGoalsNewRouteImport
+      parentRoute: typeof AuthenticatedGoalsRoute
+    }
   }
 }
 
 interface AuthenticatedGoalsRouteChildren {
   AuthenticatedGoalsGoalIdRoute: typeof AuthenticatedGoalsGoalIdRoute
+  AuthenticatedGoalsNewRoute: typeof AuthenticatedGoalsNewRoute
   AuthenticatedGoalsIndexRoute: typeof AuthenticatedGoalsIndexRoute
 }
 
 const AuthenticatedGoalsRouteChildren: AuthenticatedGoalsRouteChildren = {
   AuthenticatedGoalsGoalIdRoute: AuthenticatedGoalsGoalIdRoute,
+  AuthenticatedGoalsNewRoute: AuthenticatedGoalsNewRoute,
   AuthenticatedGoalsIndexRoute: AuthenticatedGoalsIndexRoute,
 }
 

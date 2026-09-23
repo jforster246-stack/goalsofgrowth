@@ -6,8 +6,9 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { useState } from "react";
-import { Check, Plus, Sparkle, Timer } from "lucide-react";
+import { Check, Sparkle, Timer } from "lucide-react";
 import { AppShell, useAppShell } from "@/components/app-shell";
+import { AddFab } from "@/components/add-fab";
 import { accentOf, goalProgress, localToday } from "@/components/goal-ui";
 import { goalsQueryOptions, profileQueryOptions } from "@/lib/goal-queries";
 import { setGoalOfDay, toggleStep } from "@/lib/goals.functions";
@@ -220,19 +221,13 @@ function OverviewPage() {
 
         <Link
           to="/goals"
-          className="fixed bottom-24 right-5 z-10 flex size-12 items-center justify-center rounded-full bg-card text-foreground shadow-lg ring-1 ring-border"
-          aria-label="Add a goal"
-        >
-          <Plus className="size-5" strokeWidth={2} />
-        </Link>
-
-        <Link
-          to="/goals"
           className="mt-4 block text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground"
         >
           See goals grid
         </Link>
       </div>
+
+      <AddFab />
 
       {/* "Nice work" popup after completing a step */}
       {celebrating && (

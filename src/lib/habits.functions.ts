@@ -4,6 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const timeOfDaySchema = z.enum(["morning", "afternoon", "evening"]);
+const frequencySchema = z.enum(["daily", "weekly", "fortnightly", "monthly"]);
 
 /**
  * Lists the user's habits with a `done` flag for the given local day.
@@ -46,6 +47,8 @@ export const createHabit = createServerFn({ method: "POST" })
       .object({
         name: z.string().trim().min(1).max(140),
         timeOfDay: timeOfDaySchema,
+        frequency: frequencySchema.default("daily"),
+        reason: z.string().trim().max(2000).optional(),
       })
       .parse(data),
   )
@@ -65,6 +68,8 @@ export const createHabit = createServerFn({ method: "POST" })
       .insert({
         name: data.name,
         time_of_day: data.timeOfDay,
+        frequency: data.frequency,
+        reason: data.reason ?? null,
         position,
         user_id: context.userId,
       })
@@ -82,13 +87,22 @@ export const updateHabit = createServerFn({ method: "POST" })
         id: z.string().uuid(),
         name: z.string().trim().min(1).max(140).optional(),
         timeOfDay: timeOfDaySchema.optional(),
+        frequency: frequencySchema.optional(),
+        reason: z.string().trim().max(2000).optional(),
       })
       .parse(data),
   )
   .handler(async ({ data, context }) => {
-    const fields: { name?: string; time_of_day?: string } = {};
+    const fields: {
+      name?: string;
+      time_of_day?: string;
+      frequency?: string;
+      reason?: string;
+    } = {};
     if (data.name !== undefined) fields.name = data.name;
     if (data.timeOfDay !== undefined) fields.time_of_day = data.timeOfDay;
+    if (data.frequency !== undefined) fields.frequency = data.frequency;
+    if (data.reason !== undefined) fields.reason = data.reason;
 
     const { error } = await context.supabase
       .from("habits")

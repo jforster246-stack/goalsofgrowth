@@ -303,16 +303,19 @@ export function HabitRow({
   name,
   timeOfDay,
   done,
+  frequency,
   onTimer,
   onToggle,
 }: {
   name: string;
   timeOfDay: HabitTime;
   done: boolean;
+  frequency?: string;
   onTimer?: () => void;
   onToggle?: () => void;
 }) {
   const Icon = HABIT_ICON[timeOfDay];
+  const showFrequency = frequency && frequency !== "daily";
 
   return (
     <div className="flex w-full items-center justify-between gap-2 rounded-2xl bg-white py-2 pl-3 pr-2 shadow-sm">
@@ -322,13 +325,20 @@ export function HabitRow({
           strokeWidth={1.75}
           aria-hidden
         />
-        <span
-          className={cn(
-            "truncate font-serif text-sm",
-            done ? "text-black/40 line-through decoration-black/30" : "text-black",
+        <span className="flex min-w-0 flex-col">
+          <span
+            className={cn(
+              "truncate font-serif text-sm",
+              done ? "text-black/40 line-through decoration-black/30" : "text-black",
+            )}
+          >
+            {name}
+          </span>
+          {showFrequency && (
+            <span className="truncate font-heading text-[10px] uppercase text-black/40">
+              {frequency}
+            </span>
           )}
-        >
-          {name}
         </span>
       </div>
 
