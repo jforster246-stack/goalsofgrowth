@@ -85,6 +85,69 @@ export function NextStepRow({
   );
 }
 
+/**
+ * Portrait next-step card — a taller card for the wide (tablet/desktop) Home,
+ * where several sit in a row. Star + step + goal on top, timer + tick below.
+ */
+export function NextStepPortrait({
+  goal,
+  step,
+  onOpen,
+  onStartTimer,
+  onComplete,
+}: {
+  goal: HomeGoal;
+  step: { id: string; title: string };
+  onOpen?: () => void;
+  onStartTimer?: () => void;
+  onComplete?: () => void;
+}) {
+  const accent = accentOf(goal);
+
+  return (
+    <div className="flex w-48 shrink-0 flex-col rounded-2xl bg-white p-3 shadow-sm">
+      <button
+        type="button"
+        onClick={onOpen}
+        className="flex flex-1 flex-col items-start gap-2 text-left"
+      >
+        <Star className={cn("size-9 shrink-0", accent.text)} />
+        <span className="font-serif text-sm leading-snug text-black [overflow-wrap:anywhere]">
+          {step.title}
+        </span>
+        <span className={cn("font-serif text-[10px] italic", accent.text)}>
+          {goal.title}
+        </span>
+      </button>
+
+      <div className="mt-3 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onStartTimer}
+          aria-label="Start a focus timer for this step"
+          className={cn(
+            "flex flex-1 items-center justify-center rounded-lg p-2 text-white",
+            accent.deep,
+          )}
+        >
+          <Timer className="size-5" strokeWidth={1.75} />
+        </button>
+        <button
+          type="button"
+          onClick={onComplete}
+          aria-label="Mark this step complete"
+          className={cn(
+            "flex items-center justify-center rounded-lg p-2 text-white",
+            accent.surface,
+          )}
+        >
+          <Check className="size-5" strokeWidth={2} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /* ------------------------------------------------------------------ */
 /* Goal card — the horizontally-scrolling "All goals" cards            */
 /* ------------------------------------------------------------------ */

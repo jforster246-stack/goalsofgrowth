@@ -9,7 +9,12 @@ import {
 import { useState } from "react";
 import { AppShell, useAppShell } from "@/components/app-shell";
 import { goalProgress, localToday, STAR_PATH } from "@/components/goal-ui";
-import { HabitRow, NextStepRow, type HabitTime } from "@/components/home-cards";
+import {
+  HabitRow,
+  NextStepPortrait,
+  NextStepRow,
+  type HabitTime,
+} from "@/components/home-cards";
 import {
   GoalCompletePrompt,
   type CompletedGoal,
@@ -151,53 +156,89 @@ function OverviewPage() {
       }
     >
       <div className="relative w-full pb-24 pt-2">
-        <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-8">
-          {/* Column 1 — streak + today's next steps */}
-          <div>
-            {profile && (
-              <StreakCard
-                streak={profile.streak_count ?? 0}
-                lastActive={profile.last_active_date ?? null}
-                name={profile.display_name ?? null}
-              />
+        {/* Mobile — the stacked layout */}
+        <div className="md:hidden">
+          {profile && (
+            <StreakCard
+              streak={profile.streak_count ?? 0}
+              lastActive={profile.last_active_date ?? null}
+              name={profile.display_name ?? null}
+            />
+          )}
+
+          <div className="mt-5 border-t border-dashed border-border" />
+
+          <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            What next step will you take today?
+          </p>
+
+          <div className="mt-3 space-y-2.5">
+            {upcoming.length === 0 && (
+              <p className="rounded-xl bg-card px-3 py-3 text-sm text-muted-foreground shadow-sm ring-1 ring-border">
+                {goals.length === 0
+                  ? "Add a goal to see your next steps here."
+                  : "You're all caught up — nice work."}
+              </p>
             )}
 
-            <div className="mt-5 border-t border-dashed border-border lg:hidden" />
+            {upcoming.map(({ goal, next }) => (
+              <NextStepCard
+                key={goal.id}
+                goal={goal}
+                step={next!}
+                onComplete={() => handleComplete(goal.id, next!.title, next!.id)}
+              />
+            ))}
+          </div>
 
-            {/* Next steps */}
-            <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              What next step will you take today?
+          <div className="mt-6 border-t border-dashed border-border" />
+          <TodayHabits />
+          <MissedYesterday />
+        </div>
+
+        {/* Tablet & desktop — the dashboard layout */}
+        <div className="hidden md:block">
+          {/* Streak bar */}
+          <div className="flex items-center justify-between gap-4 border-y border-border py-4">
+            <p className="font-heading text-sm uppercase tracking-wide text-foreground">
+              {profile?.streak_count ?? 0} day streak
             </p>
+            <StreakBar
+              streak={profile?.streak_count ?? 0}
+              lastActive={profile?.last_active_date ?? null}
+            />
+          </div>
 
-            <div className="mt-3 space-y-2.5">
-              {upcoming.length === 0 && (
-                <p className="rounded-xl bg-card px-3 py-3 text-sm text-muted-foreground shadow-sm ring-1 ring-border">
-                  {goals.length === 0
-                    ? "Add a goal to see your next steps here."
-                    : "You're all caught up — nice work."}
-                </p>
-              )}
-
+          {/* Next steps for today — a row of portrait cards */}
+          <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Next steps for today
+          </p>
+          {upcoming.length === 0 ? (
+            <p className="mt-4 rounded-xl bg-card px-4 py-4 text-sm text-muted-foreground shadow-sm ring-1 ring-border">
+              {goals.length === 0
+                ? "Add a goal to see your next steps here."
+                : "You're all caught up — nice work."}
+            </p>
+          ) : (
+            <div className="mt-4 flex flex-wrap items-stretch gap-4">
               {upcoming.map(({ goal, next }) => (
                 <NextStepCard
                   key={goal.id}
                   goal={goal}
                   step={next!}
+                  portrait
                   onComplete={() => handleComplete(goal.id, next!.title, next!.id)}
                 />
               ))}
             </div>
-          </div>
+          )}
 
-          {/* Column 2 — today's habits + yesterday's catch-up */}
-          <div className="mt-6 lg:mt-0">
-            <div className="border-t border-dashed border-border lg:hidden" />
-
-            {/* Habits for the current time of day */}
+          {/* Habits + missed yesterday, side by side */}
+          <div className="mt-8 grid grid-cols-2 gap-8 border-t border-border pt-2">
             <TodayHabits />
-
-            {/* Habits missed yesterday — a gentle nudge to catch up today */}
-            <MissedYesterday />
+            <div className="border-l border-border pl-8">
+              <MissedYesterday variant="column" />
+            </div>
           </div>
         </div>
 
@@ -254,23 +295,13 @@ function fmtLocal(dt: Date) {
 }
 
 /**
- * The sign-in streak as a flame count plus the current week, so the run of
- * connected days reads at a glance: active days show a tick, the rest show
- * their date, and today is highlighted.
+ * The current Monday-first week with each day flagged: `active` if it falls
+ * within the streak's run, plus today. Shared by the streak card and bar.
  */
-function StreakCard({
-  streak,
-  lastActive,
-  name,
-}: {
-  streak: number;
-  lastActive: string | null;
-  name: string | null;
-}) {
+function streakWeek(streak: number, lastActive: string | null) {
   const todayStr = localToday();
   const today = parseLocal(todayStr);
 
-  // Monday-first week containing today.
   const monday = parseLocal(todayStr);
   monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
 
@@ -285,7 +316,7 @@ function StreakCard({
       : null;
 
   const LETTERS = ["M", "T", "W", "T", "F", "S", "S"];
-  const days = Array.from({ length: 7 }, (_, i) => {
+  return Array.from({ length: 7 }, (_, i) => {
     const dt = new Date(monday);
     dt.setDate(monday.getDate() + i);
     const active =
@@ -300,6 +331,52 @@ function StreakCard({
       active,
     };
   });
+}
+
+/** Compact week strip: a dot per day, filled for the days in the streak. */
+function StreakBar({
+  streak,
+  lastActive,
+}: {
+  streak: number;
+  lastActive: string | null;
+}) {
+  const days = streakWeek(streak, lastActive);
+  return (
+    <div className="flex items-center gap-1.5">
+      {days.map((d, i) => (
+        <span
+          key={i}
+          aria-hidden
+          className={cn(
+            "size-3.5 rounded-full border-2 transition-colors",
+            d.active
+              ? "border-clay-deep bg-clay-deep"
+              : d.isToday
+                ? "border-clay-deep bg-transparent"
+                : "border-black/20 bg-transparent",
+          )}
+        />
+      ))}
+    </div>
+  );
+}
+
+/**
+ * The sign-in streak as a flame count plus the current week, so the run of
+ * connected days reads at a glance: active days show a tick, the rest show
+ * their date, and today is highlighted.
+ */
+function StreakCard({
+  streak,
+  lastActive,
+  name,
+}: {
+  streak: number;
+  lastActive: string | null;
+  name: string | null;
+}) {
+  const days = streakWeek(streak, lastActive);
 
   return (
     <div className="mt-1 flex flex-col items-center rounded-3xl bg-white px-5 py-6 text-center shadow-sm">
@@ -354,10 +431,12 @@ function NextStepCard({
   goal,
   step,
   onComplete,
+  portrait,
 }: {
   goal: { id: string; title: string; accent: string; steps: { id: string; title: string; done: boolean }[] };
   step: { id: string; title: string };
   onComplete: () => void;
+  portrait?: boolean;
 }) {
   const { openFocus, celebrate } = useAppShell();
   const navigate = useNavigate();
@@ -378,18 +457,30 @@ function NextStepCard({
     onSuccess: invalidate,
   });
 
+  const complete = () => {
+    celebrate();
+    onComplete();
+  };
+
   return (
     <>
-      <NextStepRow
-        goal={goal}
-        step={step}
-        onOpen={() => setOpen(true)}
-        onStartTimer={() => openFocus(step.id)}
-        onComplete={() => {
-          celebrate();
-          onComplete();
-        }}
-      />
+      {portrait ? (
+        <NextStepPortrait
+          goal={goal}
+          step={step}
+          onOpen={() => setOpen(true)}
+          onStartTimer={() => openFocus(step.id)}
+          onComplete={complete}
+        />
+      ) : (
+        <NextStepRow
+          goal={goal}
+          step={step}
+          onOpen={() => setOpen(true)}
+          onStartTimer={() => openFocus(step.id)}
+          onComplete={complete}
+        />
+      )}
       {open && (
         <StepActionsModal
           title={step.title}
@@ -446,7 +537,11 @@ function yesterdayKey(today: string): string {
  * Habits that were due yesterday but never ticked off, so they can be caught up
  * today. Ticking one marks it done for today, which removes it from the list.
  */
-function MissedYesterday() {
+function MissedYesterday({
+  variant = "stack",
+}: {
+  variant?: "stack" | "column";
+}) {
   const today = localToday();
   const yKey = yesterdayKey(today);
   const yDate = new Date(`${yKey}T00:00:00`);
@@ -477,17 +572,22 @@ function MissedYesterday() {
     (h) => isHabitDueToday(h, yDate) && !h.done && !doneToday.has(h.id),
   );
 
-  if (missed.length === 0) return null;
+  // In the mobile stack we hide the whole block when there's nothing missed;
+  // as a desktop column we keep the heading so the two columns stay balanced.
+  if (missed.length === 0 && variant === "stack") return null;
 
   return (
     <section>
-      <div className="mt-6 border-t border-dashed border-border" />
+      {variant === "stack" && (
+        <div className="mt-6 border-t border-dashed border-border" />
+      )}
       <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         Missed yesterday
       </p>
       <p className="mt-1 text-sm text-muted-foreground">
-        These are the habits that you didn't complete yesterday. Can you do them
-        today?
+        {missed.length === 0
+          ? "Nothing missed — you're all caught up."
+          : "Habits you didn't complete yesterday. Can you do them today?"}
       </p>
       <div className="mt-3 space-y-2">
         {missed.map((h) => (

@@ -158,11 +158,11 @@ export function AppShell({
               {title}
             </h1>
           ) : (
-            <h1 className="min-w-0 flex-1 text-center font-display text-2xl font-normal leading-[1.15] tracking-tight">
-              <span className="block truncate">
-                {profile?.display_name ? `${profile.display_name}'s` : "Your"}
+            <h1 className="min-w-0 flex-1 text-center font-display text-2xl font-normal leading-[1.15] tracking-tight md:text-left md:text-3xl">
+              <span className="block truncate md:inline">
+                {profile?.display_name ? `${profile.display_name}'s ` : "Your "}
               </span>
-              <span className="block truncate">Goals of Growth</span>
+              <span className="block truncate md:inline">Goals of Growth</span>
             </h1>
           )}
 
@@ -172,7 +172,7 @@ export function AppShell({
         </header>
 
         {!title && (
-          <p className="mt-2 text-center text-sm italic text-muted-foreground">
+          <p className="mt-2 text-center text-sm italic text-muted-foreground md:text-left">
             "I am a vibrational match to all that I desire"
           </p>
         )}
