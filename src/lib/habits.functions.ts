@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
-const timeOfDaySchema = z.enum(["morning", "afternoon"]);
+const timeOfDaySchema = z.enum(["morning", "afternoon", "evening"]);
 
 /**
  * Lists the user's habits with a `done` flag for the given local day.

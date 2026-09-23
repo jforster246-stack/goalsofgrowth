@@ -2,7 +2,7 @@ CREATE TABLE public.habits (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null,
   name text not null,
-  time_of_day text not null default 'morning' check (time_of_day in ('morning', 'afternoon')),
+  time_of_day text not null default 'morning' check (time_of_day in ('morning', 'afternoon', 'evening')),
   position integer not null default 0,
   created_at timestamptz not null default now()
 );

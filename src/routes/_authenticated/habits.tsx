@@ -1,16 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, Sunset } from "lucide-react";
 import { AppShell, useAppShell } from "@/components/app-shell";
 import { HabitRow, type HabitTime } from "@/components/home-cards";
 import { localToday } from "@/components/goal-ui";
 import { habitsQueryOptions } from "@/lib/goal-queries";
-import {
-  createHabit,
-  deleteHabit,
-  toggleHabit,
-} from "@/lib/habits.functions";
+import { createHabit, deleteHabit, toggleHabit } from "@/lib/habits.functions";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/habits")({
@@ -20,7 +16,7 @@ export const Route = createFileRoute("/_authenticated/habits")({
       {
         name: "description",
         content:
-          "Your daily habits, morning and afternoon — tick each one off and it resets for tomorrow.",
+          "Your daily habits by time of day — tick each one off and it resets for tomorrow.",
       },
     ],
   }),
@@ -33,6 +29,18 @@ type Habit = {
   time_of_day: HabitTime;
   done: boolean;
 };
+
+const TIMES: {
+  key: HabitTime;
+  label: string;
+  Icon: typeof Sun;
+  color: string;
+  activeBg: string;
+}[] = [
+  { key: "morning", label: "Morning", Icon: Sun, color: "text-gold-deep", activeBg: "bg-gold-deep" },
+  { key: "afternoon", label: "Afternoon", Icon: Sunset, color: "text-clay-deep", activeBg: "bg-clay-deep" },
+  { key: "evening", label: "Evening", Icon: Moon, color: "text-olive", activeBg: "bg-olive" },
+];
 
 function HabitsPage() {
   const today = localToday();
@@ -62,8 +70,7 @@ function HabitsBody({ habits, today }: { habits: Habit[]; today: string }) {
   const [name, setName] = useState("");
   const [timeOfDay, setTimeOfDay] = useState<HabitTime>("morning");
 
-  const refresh = () =>
-    queryClient.invalidateQueries({ queryKey: ["habits"] });
+  const refresh = () => queryClient.invalidateQueries({ queryKey: ["habits"] });
 
   const addMutation = useMutation({
     mutationFn: (input: { name: string; timeOfDay: HabitTime }) =>
@@ -80,9 +87,6 @@ function HabitsBody({ habits, today }: { habits: Habit[]; today: string }) {
     onSuccess: refresh,
   });
 
-  const morning = habits.filter((h) => h.time_of_day === "morning");
-  const afternoon = habits.filter((h) => h.time_of_day === "afternoon");
-
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const value = name.trim();
@@ -91,7 +95,7 @@ function HabitsBody({ habits, today }: { habits: Habit[]; today: string }) {
     setName("");
   };
 
-  const renderHabit = (habit: Habit) => (
+  const renderHabit = (habit: Habit, label: string) => (
     <HabitRow
       key={habit.id}
       name={habit.name}
@@ -100,8 +104,7 @@ function HabitsBody({ habits, today }: { habits: Habit[]; today: string }) {
       onTimer={() =>
         openTimer({
           title: habit.name,
-          subtitle:
-            habit.time_of_day === "morning" ? "Morning habit" : "Afternoon habit",
+          subtitle: `${label} habit`,
           onComplete: () => toggleMutation.mutate({ id: habit.id, done: true }),
         })
       }
@@ -115,64 +118,48 @@ function HabitsBody({ habits, today }: { habits: Habit[]; today: string }) {
         <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
           <p className="font-heading text-base text-black">No habits yet</p>
           <p className="mt-2 font-serif text-sm text-black/50">
-            Add a small daily habit below — it'll reset each morning so you can
-            keep the streak going.
+            Add a small daily habit below — it'll reset each day so you can keep
+            the streak going.
           </p>
         </div>
       ) : (
-        <>
-          {morning.length > 0 && (
-            <HabitGroup
-              label="Morning"
-              icon={<Sun className="size-4 text-gold-deep" strokeWidth={2} />}
-            >
-              {morning.map(renderHabit)}
-            </HabitGroup>
-          )}
-          {afternoon.length > 0 && (
-            <HabitGroup
-              label="Afternoon"
-              icon={<Moon className="size-4 text-olive" strokeWidth={2} />}
-            >
-              {afternoon.map(renderHabit)}
-            </HabitGroup>
-          )}
-        </>
+        TIMES.map((time) => {
+          const inBucket = habits.filter((h) => h.time_of_day === time.key);
+          if (inBucket.length === 0) return null;
+          return (
+            <HabitSection
+              key={time.key}
+              time={time}
+              habits={inBucket}
+              renderHabit={(h) => renderHabit(h, time.label)}
+            />
+          );
+        })
       )}
 
       {/* Add a habit */}
       <form onSubmit={submit} className="space-y-3">
         <p className="font-heading text-sm uppercase text-olive">Add a habit</p>
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setTimeOfDay("morning")}
-            aria-pressed={timeOfDay === "morning"}
-            className={cn(
-              "flex flex-1 items-center justify-center gap-1.5 rounded-2xl py-2.5 font-heading text-xs uppercase transition-colors",
-              timeOfDay === "morning"
-                ? "bg-gold-deep text-white"
-                : "bg-black/5 text-black/50",
-            )}
-          >
-            <Sun className="size-4" strokeWidth={2} />
-            Morning
-          </button>
-          <button
-            type="button"
-            onClick={() => setTimeOfDay("afternoon")}
-            aria-pressed={timeOfDay === "afternoon"}
-            className={cn(
-              "flex flex-1 items-center justify-center gap-1.5 rounded-2xl py-2.5 font-heading text-xs uppercase transition-colors",
-              timeOfDay === "afternoon"
-                ? "bg-olive text-white"
-                : "bg-black/5 text-black/50",
-            )}
-          >
-            <Moon className="size-4" strokeWidth={2} />
-            Afternoon
-          </button>
+        <div className="grid grid-cols-3 gap-2">
+          {TIMES.map((time) => {
+            const active = timeOfDay === time.key;
+            return (
+              <button
+                key={time.key}
+                type="button"
+                onClick={() => setTimeOfDay(time.key)}
+                aria-pressed={active}
+                className={cn(
+                  "flex flex-col items-center gap-1 rounded-2xl py-2.5 font-heading text-[11px] uppercase transition-colors",
+                  active ? `${time.activeBg} text-white` : "bg-black/5 text-black/50",
+                )}
+              >
+                <time.Icon className="size-4" strokeWidth={2} />
+                {time.label}
+              </button>
+            );
+          })}
         </div>
 
         <div className="flex items-center gap-2">
@@ -194,28 +181,63 @@ function HabitsBody({ habits, today }: { habits: Habit[]; today: string }) {
       </form>
 
       {habits.length > 0 && (
-        <DeleteHabitList habits={habits} onDelete={(id) => deleteMutation.mutate({ id })} />
+        <DeleteHabitList
+          habits={habits}
+          onDelete={(id) => deleteMutation.mutate({ id })}
+        />
       )}
     </div>
   );
 }
 
-function HabitGroup({
-  label,
-  icon,
-  children,
+/** One time-of-day group: header with a done/total count, the active habits,
+ *  and a reveal for the ones already ticked off today (so a mistap is undoable). */
+function HabitSection({
+  time,
+  habits,
+  renderHabit,
 }: {
-  label: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
+  time: (typeof TIMES)[number];
+  habits: Habit[];
+  renderHabit: (habit: Habit) => React.ReactNode;
 }) {
+  const [showDone, setShowDone] = useState(false);
+  const active = habits.filter((h) => !h.done);
+  const completed = habits.filter((h) => h.done);
+
   return (
     <section>
       <div className="flex items-center gap-1.5">
-        {icon}
-        <p className="font-heading text-sm uppercase text-olive">{label}</p>
+        <time.Icon className={cn("size-4", time.color)} strokeWidth={2} />
+        <p className="font-heading text-sm uppercase text-olive">{time.label}</p>
+        <span className="ml-1 font-mono text-xs text-olive/50">
+          {completed.length}/{habits.length}
+        </span>
       </div>
-      <div className="mt-4 space-y-2">{children}</div>
+
+      <div className="mt-4 space-y-2">
+        {active.map(renderHabit)}
+        {active.length === 0 && (
+          <p className="rounded-2xl bg-white/60 py-4 text-center font-serif text-sm text-black/40">
+            All done for now ✨
+          </p>
+        )}
+      </div>
+
+      {completed.length > 0 && (
+        <div className="mt-2">
+          <button
+            type="button"
+            onClick={() => setShowDone((v) => !v)}
+            className="font-heading text-[11px] uppercase text-black/40 transition-colors hover:text-black/70"
+          >
+            {showDone ? "Hide done" : `Done today (${completed.length})`}
+          </button>
+          {showDone && (
+            <div className="mt-2 space-y-2">{completed.map(renderHabit)}</div>
+          )}
+        </div>
+      )}
     </section>
   );
 }

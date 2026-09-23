@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Check, Moon, Plus, Sun, Timer } from "lucide-react";
+import { Check, Moon, Plus, Sun, Sunset, Timer } from "lucide-react";
 import { accentOf, goalProgress, STAR_PATH } from "@/components/goal-ui";
 import { cn } from "@/lib/utils";
 
@@ -290,7 +290,14 @@ export function StepRow({
 /* on the left for its time of day, plus a focus timer + daily tick.   */
 /* ------------------------------------------------------------------ */
 
-export type HabitTime = "morning" | "afternoon";
+export type HabitTime = "morning" | "afternoon" | "evening";
+
+const HABIT_ICON = { morning: Sun, afternoon: Sunset, evening: Moon } as const;
+const HABIT_ICON_COLOR = {
+  morning: "text-gold-deep",
+  afternoon: "text-clay-deep",
+  evening: "text-olive",
+} as const;
 
 export function HabitRow({
   name,
@@ -305,17 +312,13 @@ export function HabitRow({
   onTimer?: () => void;
   onToggle?: () => void;
 }) {
-  const morning = timeOfDay === "morning";
-  const Icon = morning ? Sun : Moon;
+  const Icon = HABIT_ICON[timeOfDay];
 
   return (
     <div className="flex w-full items-center justify-between gap-2 rounded-2xl bg-white py-2 pl-3 pr-2 shadow-sm">
       <div className="flex min-w-0 flex-1 items-center gap-2.5">
         <Icon
-          className={cn(
-            "size-8 shrink-0",
-            morning ? "text-gold-deep" : "text-olive",
-          )}
+          className={cn("size-8 shrink-0", HABIT_ICON_COLOR[timeOfDay])}
           strokeWidth={1.75}
           aria-hidden
         />

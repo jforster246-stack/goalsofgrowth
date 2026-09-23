@@ -1,8 +1,13 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
+  beforeLoad: async () => {
+    const { data } = await supabase.auth.getSession();
+    if (data.session) {
+      throw redirect({ to: "/overview", replace: true });
+    }
+  },
   head: () => ({
     meta: [
       { title: "Goals of Growth — a quiet place to finish small things" },
@@ -28,14 +33,6 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/overview", replace: true });
-    });
-  }, [navigate]);
-
   return (
     <div className="min-h-dvh bg-background font-body text-foreground antialiased">
       <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-5 py-10">
