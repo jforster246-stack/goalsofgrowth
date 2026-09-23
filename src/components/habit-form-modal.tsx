@@ -76,15 +76,17 @@ function initialFreq(h?: EditableHabit): {
 export function HabitFormModal({
   onClose,
   habit,
+  initialName,
 }: {
   onClose: () => void;
   habit?: EditableHabit;
+  initialName?: string;
 }) {
   const queryClient = useQueryClient();
   const editing = !!habit;
   const init = initialFreq(habit);
 
-  const [name, setName] = useState(habit?.name ?? "");
+  const [name, setName] = useState(habit?.name ?? initialName ?? "");
   const [timeOfDay, setTimeOfDay] = useState<HabitTime>(
     habit?.time_of_day ?? "morning",
   );

@@ -13,6 +13,7 @@ import { localToday } from "@/components/goal-ui";
 import { crystalsQueryOptions, habitsQueryOptions } from "@/lib/goal-queries";
 import { toggleHabit } from "@/lib/habits.functions";
 import { frequencyLabel } from "@/lib/habit-schedule";
+import { Loading } from "@/components/loading";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/habits")({
@@ -92,9 +93,7 @@ function HabitsPage() {
       }
     >
       {isPending || !habits ? (
-        <p className="mt-10 text-center font-serif text-sm text-muted-foreground">
-          Loading…
-        </p>
+        <Loading />
       ) : (
         <HabitsBody
           habits={habits as Habit[]}

@@ -18,9 +18,11 @@ import {
   habitsQueryOptions,
   profileQueryOptions,
 } from "@/lib/goal-queries";
-import { setGoalOfDay, toggleStep } from "@/lib/goals.functions";
+import { deleteStep, setGoalOfDay, toggleStep, updateStep } from "@/lib/goals.functions";
 import { toggleHabit } from "@/lib/habits.functions";
 import { frequencyLabel, isHabitDueToday } from "@/lib/habit-schedule";
+import { StepActionsModal } from "@/components/step-actions-modal";
+import { HabitFormModal } from "@/components/habit-form-modal";
 
 export const Route = createFileRoute("/_authenticated/overview")({
   loader: ({ context }) => context.queryClient.ensureQueryData(goalsQueryOptions),
@@ -229,20 +231,60 @@ function NextStepCard({
   step: { id: string; title: string };
   onComplete: () => void;
 }) {
-  const navigate = useNavigate();
   const { openFocus, celebrate } = useAppShell();
+  const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [habitPrefill, setHabitPrefill] = useState<string | null>(null);
+
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: ["goals"] });
+    queryClient.invalidateQueries({ queryKey: ["goal"] });
+  };
+  const renameMutation = useMutation({
+    mutationFn: (title: string) => updateStep({ data: { id: step.id, title } }),
+    onSuccess: invalidate,
+  });
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteStep({ data: { id: step.id } }),
+    onSuccess: invalidate,
+  });
 
   return (
-    <NextStepRow
-      goal={goal}
-      step={step}
-      onOpen={() => navigate({ to: "/goals/$goalId", params: { goalId: goal.id } })}
-      onStartTimer={() => openFocus(step.id)}
-      onComplete={() => {
-        celebrate();
-        onComplete();
-      }}
-    />
+    <>
+      <NextStepRow
+        goal={goal}
+        step={step}
+        onOpen={() => setOpen(true)}
+        onStartTimer={() => openFocus(step.id)}
+        onComplete={() => {
+          celebrate();
+          onComplete();
+        }}
+      />
+      {open && (
+        <StepActionsModal
+          title={step.title}
+          done={false}
+          onClose={() => setOpen(false)}
+          onRename={(t) => renameMutation.mutate(t)}
+          onToggle={() => {
+            celebrate();
+            onComplete();
+          }}
+          onDelete={() => deleteMutation.mutate()}
+          onAddAsHabit={(name) => {
+            setOpen(false);
+            setHabitPrefill(name);
+          }}
+        />
+      )}
+      {habitPrefill !== null && (
+        <HabitFormModal
+          initialName={habitPrefill}
+          onClose={() => setHabitPrefill(null)}
+        />
+      )}
+    </>
   );
 }
 

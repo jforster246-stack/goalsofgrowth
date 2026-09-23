@@ -11,6 +11,9 @@ import {
   FOCUS_ADD_STEP_KEY,
   type CompletedGoal,
 } from "@/components/goal-complete-prompt";
+import { StepActionsModal } from "@/components/step-actions-modal";
+import { HabitFormModal } from "@/components/habit-form-modal";
+import { Loading } from "@/components/loading";
 import { goalQueryOptions } from "@/lib/goal-queries";
 import {
   addStep,
@@ -65,9 +68,7 @@ function GoalDetailPage() {
   return (
     <AppShell backTo="/overview">
       {isPending || !goal ? (
-        <p className="mt-10 text-center font-serif text-sm text-muted-foreground">
-          Loading…
-        </p>
+        <Loading />
       ) : (
         <GoalDetailBody goal={goal} goalId={goalId} />
       )}
@@ -97,6 +98,8 @@ function GoalDetailBody({
   const [stepDraft, setStepDraft] = useState("");
   const [saved, setSaved] = useState(false);
   const [promptGoal, setPromptGoal] = useState<CompletedGoal | null>(null);
+  const [activeStep, setActiveStep] = useState<Step | null>(null);
+  const [habitPrefill, setHabitPrefill] = useState<string | null>(null);
   const [orderedSteps, setOrderedSteps] = useState<Step[]>(goal.steps);
   const stepInputRef = useRef<HTMLInputElement>(null);
   const titleRef = useRef<HTMLTextAreaElement>(null);
@@ -244,14 +247,18 @@ function GoalDetailBody({
               onTimer={() => openFocus(step.id)}
               onToggle={() => handleToggle(step.id, step.done)}
               titleNode={
-                <EditableStepTitle
-                  title={step.title}
-                  done={step.done}
-                  onSave={(next) =>
-                    updateStepMutation.mutate({ id: step.id, title: next })
-                  }
-                  onDelete={() => deleteStepMutation.mutate({ id: step.id })}
-                />
+                <button
+                  type="button"
+                  onClick={() => setActiveStep(step)}
+                  aria-label={`Open ${step.title}`}
+                  className={`block w-full text-left font-serif text-sm ${
+                    step.done
+                      ? "text-black/40 line-through decoration-black/30"
+                      : "text-black"
+                  }`}
+                >
+                  {step.title}
+                </button>
               }
             />
           ))}
@@ -328,6 +335,30 @@ function GoalDetailBody({
       </button>
 
       <GoalCompletePrompt goal={promptGoal} onClose={() => setPromptGoal(null)} />
+
+      {activeStep && (
+        <StepActionsModal
+          title={activeStep.title}
+          done={activeStep.done}
+          onClose={() => setActiveStep(null)}
+          onRename={(t) =>
+            updateStepMutation.mutate({ id: activeStep.id, title: t })
+          }
+          onToggle={() => handleToggle(activeStep.id, activeStep.done)}
+          onDelete={() => deleteStepMutation.mutate({ id: activeStep.id })}
+          onAddAsHabit={(habitName) => {
+            setActiveStep(null);
+            setHabitPrefill(habitName);
+          }}
+        />
+      )}
+
+      {habitPrefill !== null && (
+        <HabitFormModal
+          initialName={habitPrefill}
+          onClose={() => setHabitPrefill(null)}
+        />
+      )}
     </div>
   );
 }

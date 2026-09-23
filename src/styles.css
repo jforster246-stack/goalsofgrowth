@@ -180,6 +180,18 @@
   }
 }
 
+@keyframes pulse-star {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
 @keyframes confetti-burst {
   0% {
     transform: translate(0, 0) rotate(0);
