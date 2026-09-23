@@ -142,36 +142,6 @@ export type Database = {
         }
         Relationships: []
       }
-      wins: {
-        Row: {
-          achieved_on: string
-          created_at: string
-          id: string
-          kind: string
-          note: string | null
-          title: string
-          user_id: string
-        }
-        Insert: {
-          achieved_on?: string
-          created_at?: string
-          id?: string
-          kind?: string
-          note?: string | null
-          title: string
-          user_id: string
-        }
-        Update: {
-          achieved_on?: string
-          created_at?: string
-          id?: string
-          kind?: string
-          note?: string | null
-          title?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       steps: {
         Row: {
           created_at: string
