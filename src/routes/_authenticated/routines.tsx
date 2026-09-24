@@ -2,7 +2,16 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Reorder, useDragControls } from "framer-motion";
-import { Check, GripVertical, ListChecks, Plus, RotateCcw, Trash2, X } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  GripVertical,
+  ListChecks,
+  Plus,
+  RotateCcw,
+  Trash2,
+  X,
+} from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { Loading } from "@/components/loading";
 import { IconPicker } from "@/components/icon-picker";
@@ -117,7 +126,7 @@ function RoutinesPage() {
             </p>
           </div>
         ) : (
-          <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <div className="mt-4 grid gap-4 md:grid-cols-2 md:items-start">
             {(lists as Checklist[]).map((list) => (
               <ChecklistCard key={list.id} list={list} />
             ))}
@@ -128,12 +137,39 @@ function RoutinesPage() {
   );
 }
 
+/** Per-card collapse state, remembered across visits. */
+function collapseKey(id: string) {
+  return `gog-routine-collapsed:${id}`;
+}
+function readCollapsed(id: string) {
+  try {
+    return localStorage.getItem(collapseKey(id)) === "1";
+  } catch {
+    return false;
+  }
+}
+
 function ChecklistCard({ list }: { list: Checklist }) {
   const queryClient = useQueryClient();
   const [title, setTitle] = useState(list.title);
   const [itemDraft, setItemDraft] = useState("");
   const [iconOpen, setIconOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const [order, setOrder] = useState<Item[]>(list.items);
+
+  // Restore the saved collapse state on mount (client-only, so start expanded).
+  useEffect(() => setCollapsed(readCollapsed(list.id)), [list.id]);
+
+  const toggleCollapsed = () =>
+    setCollapsed((v) => {
+      const next = !v;
+      try {
+        localStorage.setItem(collapseKey(list.id), next ? "1" : "0");
+      } catch {
+        // ignore — collapse is just a convenience
+      }
+      return next;
+    });
 
   // Keep the local (drag-reorderable) copy in step with the server list.
   useEffect(() => setOrder(list.items), [list.items]);
@@ -207,6 +243,22 @@ function ChecklistCard({ list }: { list: Checklist }) {
       <div className="flex items-center gap-1.5">
         <button
           type="button"
+          onClick={toggleCollapsed}
+          aria-label={collapsed ? "Expand checklist" : "Collapse checklist"}
+          aria-expanded={!collapsed}
+          title={collapsed ? "Expand" : "Collapse"}
+          className="grid size-7 shrink-0 place-items-center rounded-lg text-black/40 transition-colors hover:bg-black/5 hover:text-black/70"
+        >
+          <ChevronDown
+            className={cn(
+              "size-4 transition-transform",
+              collapsed && "-rotate-90",
+            )}
+            strokeWidth={2}
+          />
+        </button>
+        <button
+          type="button"
           onClick={() => setIconOpen((v) => !v)}
           aria-label="Change icon"
           title="Change icon"
@@ -264,49 +316,55 @@ function ChecklistCard({ list }: { list: Checklist }) {
         </div>
       )}
 
-      <Reorder.Group
-        as="div"
-        axis="y"
-        values={order}
-        onReorder={handleReorder}
-        className="mt-3 space-y-0.5"
-      >
-        {order.map((item) => (
-          <ChecklistItemRow
-            key={item.id}
-            item={item}
-            onToggle={() =>
-              toggleMutation.mutate({ id: item.id, done: !item.done })
-            }
-            onRename={(text) => renameItemMutation.mutate({ id: item.id, text })}
-            onDelete={() => deleteItemMutation.mutate(item.id)}
-          />
-        ))}
-      </Reorder.Group>
+      {!collapsed && (
+        <>
+          <Reorder.Group
+            as="div"
+            axis="y"
+            values={order}
+            onReorder={handleReorder}
+            className="mt-3 space-y-0.5"
+          >
+            {order.map((item) => (
+              <ChecklistItemRow
+                key={item.id}
+                item={item}
+                onToggle={() =>
+                  toggleMutation.mutate({ id: item.id, done: !item.done })
+                }
+                onRename={(text) =>
+                  renameItemMutation.mutate({ id: item.id, text })
+                }
+                onDelete={() => deleteItemMutation.mutate(item.id)}
+              />
+            ))}
+          </Reorder.Group>
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          addItem();
-        }}
-        className="mt-3 flex items-center gap-2"
-      >
-        <input
-          value={itemDraft}
-          onChange={(e) => setItemDraft(e.target.value)}
-          placeholder="Add an item…"
-          maxLength={300}
-          className="min-w-0 flex-1 rounded-xl bg-black/5 px-3 py-2 font-serif text-sm placeholder:text-black/40 focus:outline-none focus:ring-1 focus:ring-olive/40"
-        />
-        <button
-          type="submit"
-          disabled={!itemDraft.trim()}
-          aria-label="Add item"
-          className="grid size-9 shrink-0 place-items-center rounded-xl bg-sage/60 text-white transition-colors hover:bg-sage/80 disabled:opacity-40"
-        >
-          <Plus className="size-4" strokeWidth={2} />
-        </button>
-      </form>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              addItem();
+            }}
+            className="mt-3 flex items-center gap-2"
+          >
+            <input
+              value={itemDraft}
+              onChange={(e) => setItemDraft(e.target.value)}
+              placeholder="Add an item…"
+              maxLength={300}
+              className="min-w-0 flex-1 rounded-xl bg-black/5 px-3 py-2 font-serif text-sm placeholder:text-black/40 focus:outline-none focus:ring-1 focus:ring-olive/40"
+            />
+            <button
+              type="submit"
+              disabled={!itemDraft.trim()}
+              aria-label="Add item"
+              className="grid size-9 shrink-0 place-items-center rounded-xl bg-sage/60 text-white transition-colors hover:bg-sage/80 disabled:opacity-40"
+            >
+              <Plus className="size-4" strokeWidth={2} />
+            </button>
+          </form>
+        </>
+      )}
     </div>
   );
 }
