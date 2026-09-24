@@ -23,6 +23,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getTheme, setTheme, THEMES, type ThemeId } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import { localToday } from "@/components/goal-ui";
+import { quoteOfTheDay } from "@/lib/quotes";
 import { FocusMode } from "@/components/focus-mode";
 import { AddFab } from "@/components/add-fab";
 import { Confetti } from "@/components/confetti";
@@ -195,7 +196,7 @@ export function AppShell({
 
         {!title && (
           <p className="mt-2 text-center text-sm italic text-muted-foreground md:text-left">
-            "I am a vibrational match to all that I desire"
+            "{quoteOfTheDay(localToday())}"
           </p>
         )}
 
