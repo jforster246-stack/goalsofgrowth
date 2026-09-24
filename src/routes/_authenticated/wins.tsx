@@ -6,18 +6,13 @@ import {
 } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Flame, Heart, Plus, Trophy, X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { WinFormModal } from "@/components/win-form-modal";
 import { Stamp } from "@/components/stamp";
-import { goalProgress, localToday } from "@/components/goal-ui";
-import {
-  goalsQueryOptions,
-  habitStreaksQueryOptions,
-  winsQueryOptions,
-} from "@/lib/goal-queries";
+import { goalProgress } from "@/components/goal-ui";
+import { goalsQueryOptions, winsQueryOptions } from "@/lib/goal-queries";
 import { deleteWin } from "@/lib/wins.functions";
-import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/wins")({
   validateSearch: (search: { new?: boolean } & SearchSchemaInput) => ({
@@ -29,7 +24,7 @@ export const Route = createFileRoute("/_authenticated/wins")({
       {
         name: "description",
         content:
-          "Your gallery: the stamps you've collected, completed goals, habit streaks, and wins worth remembering.",
+          "Your gallery: the stamps you've collected for completed goals, achievements, and life events.",
       },
     ],
   }),
@@ -44,23 +39,12 @@ type Win = {
   achieved_on: string;
 };
 
-function fmtDate(iso: string) {
-  const d = new Date(`${iso}T00:00:00`);
-  return d.toLocaleDateString(undefined, {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
-
 function WinsPage() {
-  const today = localToday();
   const { new: openNew } = Route.useSearch();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const { data: goals } = useQuery(goalsQueryOptions);
-  const { data: streaks } = useQuery(habitStreaksQueryOptions(today));
   const { data: wins } = useQuery(winsQueryOptions);
 
   const [adding, setAdding] = useState(false);
@@ -76,24 +60,29 @@ function WinsPage() {
   });
 
   const completedGoals = (goals ?? []).filter((g) => goalProgress(g).complete);
+  const winList = (wins ?? []) as Win[];
+  const achievements = winList.filter((w) => w.kind === "achievement");
+  const lifeEvents = winList.filter((w) => w.kind === "life_event");
 
   return (
     <AppShell title="Gallery">
       <div className="mt-4 space-y-8 pb-4 md:grid md:grid-cols-2 md:items-start md:gap-6 md:space-y-0">
-        {/* Stamps — one for every completed goal */}
+        {/* Gallery intro */}
+        <p className="font-serif text-sm text-black/50 md:col-span-2">
+          Every stamp you've collected. Spend them on artworks for your gallery
+          — coming soon.
+        </p>
+
+        {/* Completed goals */}
         <section className="md:col-span-2">
           <div className="flex items-center gap-1.5">
             <p className="font-heading text-sm uppercase text-olive">
-              Your stamps
+              Completed goals
             </p>
             <span className="ml-1 font-mono text-xs text-olive/50">
               {completedGoals.length}
             </span>
           </div>
-          <p className="mt-1 font-serif text-xs text-black/40">
-            You earn a stamp each time you finish a goal. Spend them on artworks
-            for your gallery — coming soon.
-          </p>
           {completedGoals.length === 0 ? (
             <p className="mt-4 rounded-2xl bg-white/60 px-4 py-4 font-serif text-sm text-black/40">
               Complete a goal to earn your first stamp.
@@ -118,69 +107,21 @@ function WinsPage() {
           )}
         </section>
 
-        {/* Habit streaks */}
-        <section>
-          <p className="font-heading text-sm uppercase text-olive">Habit streaks</p>
-          <div className="mt-4 space-y-2">
-            {!streaks || streaks.length === 0 ? (
-              <p className="rounded-2xl bg-white/60 px-4 py-4 font-serif text-sm text-black/40">
-                Tick off a habit two days running to start a streak.
-              </p>
-            ) : (
-              streaks.slice(0, 3).map((h) => (
-                <div
-                  key={h.id}
-                  className="flex items-center gap-3 rounded-2xl bg-white py-3 pl-3 pr-4 shadow-sm"
-                >
-                  <span className="grid size-8 shrink-0 place-items-center rounded-full bg-clay/15 text-clay-deep">
-                    <Flame className="size-4" strokeWidth={2} />
-                  </span>
-                  <span className="min-w-0 flex-1 font-serif text-sm text-black">
-                    {h.name}
-                  </span>
-                  <span className="shrink-0 font-mono text-xs text-clay-deep">
-                    {h.streak} day{h.streak === 1 ? "" : "s"}
-                  </span>
-                </div>
-              ))
-            )}
-          </div>
-        </section>
+        {/* Achievements */}
+        <WinCollection
+          title="Achievements"
+          wins={achievements}
+          onAdd={() => setAdding(true)}
+          onDelete={(id) => deleteMutation.mutate(id)}
+        />
 
-        {/* Manual wins */}
-        <section className="md:col-span-2">
-          <div className="flex items-center justify-between">
-            <p className="font-heading text-sm uppercase text-olive">Your wins</p>
-            <button
-              type="button"
-              onClick={() => setAdding(true)}
-              className="inline-flex items-center gap-1 font-heading text-xs uppercase text-olive transition-opacity hover:opacity-70"
-            >
-              <Plus className="size-4" strokeWidth={2} />
-              Add
-            </button>
-          </div>
-
-          <div className="mt-4 space-y-2">
-            {!wins || wins.length === 0 ? (
-              <div className="rounded-2xl bg-white p-6 text-center shadow-sm">
-                <p className="font-serif text-sm text-black/50">
-                  Log an achievement or a life event worth remembering.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setAdding(true)}
-                  className="mt-4 inline-flex items-center gap-1.5 rounded-2xl bg-olive px-5 py-2.5 font-heading text-sm uppercase text-white transition-colors hover:bg-olive/90"
-                >
-                  <Plus className="size-4" strokeWidth={2} />
-                  Add a win
-                </button>
-              </div>
-            ) : (
-              (wins as Win[]).map((win) => <WinCard key={win.id} win={win} onDelete={() => deleteMutation.mutate(win.id)} />)
-            )}
-          </div>
-        </section>
+        {/* Life events */}
+        <WinCollection
+          title="Life events"
+          wins={lifeEvents}
+          onAdd={() => setAdding(true)}
+          onDelete={(id) => deleteMutation.mutate(id)}
+        />
       </div>
 
       {showModal && <WinFormModal onClose={closeModal} />}
@@ -188,41 +129,70 @@ function WinsPage() {
   );
 }
 
-function WinCard({ win, onDelete }: { win: Win; onDelete: () => void }) {
-  const isLifeEvent = win.kind === "life_event";
-  const Icon = isLifeEvent ? Heart : Trophy;
-
+/** A gallery section of win stamps (achievements or life events). */
+function WinCollection({
+  title,
+  wins,
+  onAdd,
+  onDelete,
+}: {
+  title: string;
+  wins: Win[];
+  onAdd: () => void;
+  onDelete: (id: string) => void;
+}) {
   return (
-    <div className="rounded-2xl bg-white p-4 shadow-sm">
-      <div className="flex items-start gap-3">
-        <span
-          className={cn(
-            "mt-0.5 grid size-8 shrink-0 place-items-center rounded-full",
-            isLifeEvent ? "bg-clay/15 text-clay-deep" : "bg-gold/20 text-gold-deep",
-          )}
-        >
-          <Icon className="size-4" strokeWidth={2} />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="font-serif text-sm text-black">{win.title}</p>
-          <p className="mt-0.5 font-heading text-[10px] uppercase text-black/40">
-            {isLifeEvent ? "Life event" : "Achievement"} · {fmtDate(win.achieved_on)}
-          </p>
-          {win.note && (
-            <p className="mt-2 font-serif text-sm leading-relaxed text-black/60">
-              {win.note}
-            </p>
-          )}
+    <section>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
+          <p className="font-heading text-sm uppercase text-olive">{title}</p>
+          <span className="ml-1 font-mono text-xs text-olive/50">
+            {wins.length}
+          </span>
         </div>
         <button
           type="button"
-          onClick={onDelete}
-          aria-label={`Delete ${win.title}`}
-          className="grid size-7 shrink-0 place-items-center rounded-full text-black/30 transition-colors hover:bg-black/5 hover:text-black/60"
+          onClick={onAdd}
+          className="inline-flex items-center gap-1 font-heading text-xs uppercase text-olive transition-opacity hover:opacity-70"
         >
-          <X className="size-4" />
+          <Plus className="size-4" strokeWidth={2} />
+          Add
         </button>
       </div>
+      {wins.length === 0 ? (
+        <p className="mt-4 rounded-2xl bg-white/60 px-4 py-4 font-serif text-sm text-black/40">
+          Nothing here yet.
+        </p>
+      ) : (
+        <div className="mt-4 flex flex-wrap gap-3">
+          {wins.map((win) => (
+            <WinStamp key={win.id} win={win} onDelete={() => onDelete(win.id)} />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function WinStamp({ win, onDelete }: { win: Win; onDelete: () => void }) {
+  const isLifeEvent = win.kind === "life_event";
+  return (
+    <div className="relative flex w-[76px] flex-col items-center gap-1.5 text-center">
+      <Stamp
+        icon={isLifeEvent ? "m024" : null}
+        accent={isLifeEvent ? "clay" : "sea"}
+      />
+      <span className="font-serif text-[10px] leading-tight text-black/50 [overflow-wrap:anywhere]">
+        {win.title}
+      </span>
+      <button
+        type="button"
+        onClick={onDelete}
+        aria-label={`Delete ${win.title}`}
+        className="absolute -right-1 -top-1 grid size-5 place-items-center rounded-full bg-white text-black/40 shadow ring-1 ring-black/5 transition-colors hover:text-clay-deep"
+      >
+        <X className="size-3" />
+      </button>
     </div>
   );
 }
