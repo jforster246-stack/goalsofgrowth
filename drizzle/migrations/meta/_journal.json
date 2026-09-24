@@ -155,6 +155,13 @@
       "when": 1791158400000,
       "tag": "0021_create_bingo",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1790223060440,
+      "tag": "0022_apply_bingo_and_checklist_icon",
+      "breakpoints": true
     }
   ]
 }
