@@ -16,7 +16,7 @@ export function IconPicker({
   defaultLabel?: string;
 }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex max-h-48 flex-wrap gap-2 overflow-y-auto pr-1">
       <button
         type="button"
         onClick={() => onChange(null)}
