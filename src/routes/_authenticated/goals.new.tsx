@@ -8,6 +8,11 @@ import { addStep, createGoal, updateGoalDetails } from "@/lib/goals.functions";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/goals/new")({
+  validateSearch: (search: Record<string, unknown>): { title?: string } => {
+    const raw = search["title"];
+    const title = typeof raw === "string" ? raw.slice(0, 140) : undefined;
+    return title ? { title } : {};
+  },
   head: () => ({
     meta: [{ title: "New goal — Goals of Growth" }],
   }),
@@ -22,19 +27,22 @@ const STEPS = [
 ] as const;
 
 function NewGoalPage() {
+  const { title } = Route.useSearch();
   return (
     <AppShell title="New goal" backTo="/goals">
-      <NewGoalForm />
+      <NewGoalForm initialTitle={title} />
     </AppShell>
   );
 }
 
-export function NewGoalForm() {
+export function NewGoalForm({
+  initialTitle,
+}: { initialTitle?: string | undefined } = {}) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const [step, setStep] = useState(0);
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState(initialTitle ?? "");
   const [accent, setAccent] = useState<Accent>("mint");
   const [steps, setSteps] = useState<string[]>([]);
   const [stepDraft, setStepDraft] = useState("");

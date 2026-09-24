@@ -85,6 +85,13 @@
       "when": 1790208308767,
       "tag": "0011_apply_habit_custom_frequency_and_archived",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1790640000000,
+      "tag": "0012_create_brain_dump",
+      "breakpoints": true
     }
   ]
 }

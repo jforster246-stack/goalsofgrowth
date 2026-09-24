@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { Check, House, Repeat, Settings, Target, Trophy } from "lucide-react";
+import { Brain, Check, House, Repeat, Settings, Target, Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getTheme, setTheme, THEMES, type ThemeId } from "@/lib/theme";
 import { cn } from "@/lib/utils";
@@ -252,6 +252,7 @@ function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
         <SideLink to="/overview" icon={House} label="Home" />
         <SideLink to="/goals" icon={Target} label="Goals" />
         <SideLink to="/habits" icon={Repeat} label="Habits" />
+        <SideLink to="/braindump" icon={Brain} label="Brain dump" />
         <SideLink to="/wins" icon={Trophy} label="Wins" />
       </nav>
 
@@ -320,6 +321,14 @@ function BottomNav() {
         >
           <Repeat className="size-5" strokeWidth={2} />
           Habits
+        </Link>
+        <Link
+          to="/braindump"
+          className={`${itemClass} text-muted-foreground`}
+          activeProps={{ className: `${itemClass} text-foreground` }}
+        >
+          <Brain className="size-5" strokeWidth={2} />
+          Brain
         </Link>
       </nav>
     </div>
