@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Heart, Trophy, X } from "lucide-react";
+import { Heart, Trash2, Trophy, X } from "lucide-react";
 import { localToday } from "@/components/goal-ui";
-import { createWin } from "@/lib/wins.functions";
+import { createWin, deleteWin, updateWin } from "@/lib/wins.functions";
 import { cn } from "@/lib/utils";
 
 type Kind = "achievement" | "life_event";
@@ -12,14 +12,39 @@ const KINDS: { key: Kind; label: string; Icon: typeof Trophy }[] = [
   { key: "life_event", label: "Life event", Icon: Heart },
 ];
 
-/** One-screen "add a win" sheet: title, kind, date, optional note. */
-export function WinFormModal({ onClose }: { onClose: () => void }) {
-  const queryClient = useQueryClient();
+export type EditableWin = {
+  id: string;
+  title: string;
+  kind: string;
+  note: string | null;
+  achieved_on: string;
+};
 
-  const [title, setTitle] = useState("");
-  const [kind, setKind] = useState<Kind>("achievement");
-  const [achievedOn, setAchievedOn] = useState(localToday());
-  const [note, setNote] = useState("");
+/**
+ * One-screen win sheet. With no `win` it adds a new win; with a `win` it edits
+ * that one in place and offers a delete.
+ */
+export function WinFormModal({
+  win,
+  onClose,
+}: {
+  win?: EditableWin | undefined;
+  onClose: () => void;
+}) {
+  const queryClient = useQueryClient();
+  const isEdit = !!win;
+
+  const [title, setTitle] = useState(win?.title ?? "");
+  const [kind, setKind] = useState<Kind>(
+    win?.kind === "life_event" ? "life_event" : "achievement",
+  );
+  const [achievedOn, setAchievedOn] = useState(win?.achieved_on ?? localToday());
+  const [note, setNote] = useState(win?.note ?? "");
+
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: ["wins"] });
+    onClose();
+  };
 
   const createMutation = useMutation({
     mutationFn: (input: {
@@ -28,23 +53,49 @@ export function WinFormModal({ onClose }: { onClose: () => void }) {
       achievedOn: string;
       note?: string;
     }) => createWin({ data: input }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["wins"] });
-      onClose();
-    },
+    onSuccess: invalidate,
   });
+  const updateMutation = useMutation({
+    mutationFn: (input: {
+      id: string;
+      title: string;
+      kind: Kind;
+      achievedOn: string;
+      note?: string;
+    }) => updateWin({ data: input }),
+    onSuccess: invalidate,
+  });
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteWin({ data: { id } }),
+    onSuccess: invalidate,
+  });
+
+  const busy =
+    createMutation.isPending ||
+    updateMutation.isPending ||
+    deleteMutation.isPending;
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const value = title.trim();
-    if (!value || createMutation.isPending) return;
+    if (!value || busy) return;
     const trimmedNote = note.trim();
-    createMutation.mutate({
-      title: value,
-      kind,
-      achievedOn,
-      ...(trimmedNote ? { note: trimmedNote } : {}),
-    });
+    if (isEdit && win) {
+      updateMutation.mutate({
+        id: win.id,
+        title: value,
+        kind,
+        achievedOn,
+        ...(trimmedNote ? { note: trimmedNote } : {}),
+      });
+    } else {
+      createMutation.mutate({
+        title: value,
+        kind,
+        achievedOn,
+        ...(trimmedNote ? { note: trimmedNote } : {}),
+      });
+    }
   };
 
   return (
@@ -54,7 +105,9 @@ export function WinFormModal({ onClose }: { onClose: () => void }) {
         className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-background p-6 shadow-xl [animation:rise_0.25s_both] sm:rounded-3xl"
       >
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-2xl leading-none text-black">Add a win</h2>
+          <h2 className="font-display text-2xl leading-none text-black">
+            {isEdit ? "Edit win" : "Add a win"}
+          </h2>
           <button
             type="button"
             onClick={onClose}
@@ -125,11 +178,25 @@ export function WinFormModal({ onClose }: { onClose: () => void }) {
 
         <button
           type="submit"
-          disabled={!title.trim() || createMutation.isPending}
+          disabled={!title.trim() || busy}
           className="mt-6 w-full rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
         >
-          {createMutation.isPending ? "Saving…" : "Save win"}
+          {busy ? "Saving…" : isEdit ? "Save changes" : "Save win"}
         </button>
+
+        {isEdit && win && (
+          <button
+            type="button"
+            onClick={() => {
+              if (!busy) deleteMutation.mutate(win.id);
+            }}
+            disabled={busy}
+            className="mt-2 flex w-full items-center justify-center gap-1.5 py-2 font-heading text-sm uppercase text-black/40 transition-colors hover:text-clay-deep disabled:opacity-40"
+          >
+            <Trash2 className="size-4" strokeWidth={2} />
+            Delete win
+          </button>
+        )}
       </form>
     </div>
   );

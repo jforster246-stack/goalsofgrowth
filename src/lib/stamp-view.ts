@@ -6,6 +6,7 @@ type StampRow = {
   icon: string | null;
   accent: string;
   title: string;
+  earned_at?: string | null;
 };
 type GoalLike = {
   id: string;
@@ -21,6 +22,7 @@ export type StampView = {
   icon: string | null;
   accent: string;
   title: string;
+  earnedAt: string | null;
 };
 
 /**
@@ -43,6 +45,7 @@ export function mergeStamps(
     icon: s.icon,
     accent: s.accent,
     title: s.title,
+    earnedAt: s.earned_at ?? null,
   }));
 
   const fromGoals: StampView[] = (goals ?? [])
@@ -53,6 +56,7 @@ export function mergeStamps(
       icon: g.icon ?? null,
       accent: g.accent,
       title: g.title,
+      earnedAt: null,
     }));
 
   return [...fromGoals, ...fromLedger];

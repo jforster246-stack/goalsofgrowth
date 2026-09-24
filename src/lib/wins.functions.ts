@@ -45,6 +45,35 @@ export const createWin = createServerFn({ method: "POST" })
     return win;
   });
 
+export const updateWin = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        title: z.string().trim().min(1).max(140),
+        kind: kindSchema,
+        note: z.string().trim().max(2000).optional(),
+        achievedOn: dateSchema,
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: win, error } = await context.supabase
+      .from("wins")
+      .update({
+        title: data.title,
+        kind: data.kind,
+        note: data.note ?? null,
+        achieved_on: data.achievedOn,
+      })
+      .eq("id", data.id)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return win;
+  });
+
 export const deleteWin = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) => z.object({ id: z.string().uuid() }).parse(data))
