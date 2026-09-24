@@ -337,36 +337,6 @@ export type Database = {
           },
         ]
       }
-      stamps: {
-        Row: {
-          accent: string
-          earned_at: string
-          goal_id: string | null
-          icon: string | null
-          id: string
-          title: string
-          user_id: string
-        }
-        Insert: {
-          accent?: string
-          earned_at?: string
-          goal_id?: string | null
-          icon?: string | null
-          id?: string
-          title: string
-          user_id: string
-        }
-        Update: {
-          accent?: string
-          earned_at?: string
-          goal_id?: string | null
-          icon?: string | null
-          id?: string
-          title?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       wins: {
         Row: {
           achieved_on: string
