@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Reorder, useDragControls } from "framer-motion";
 import { Check, GripVertical, Plus, Repeat, Target } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
@@ -49,6 +49,7 @@ function BrainDumpPage() {
   const [order, setOrder] = useState<Item[]>([]);
   const [active, setActive] = useState<Item | null>(null);
   const [habitPrefill, setHabitPrefill] = useState<string | null>(null);
+  const [showDone, setShowDone] = useState(false);
 
   // Keep the local (drag-reorderable) copy in step with the server list.
   useEffect(() => {
@@ -89,10 +90,24 @@ function BrainDumpPage() {
     addMutation.mutate(text);
   };
 
-  const handleReorder = (next: Item[]) => {
-    setOrder(next);
-    reorderMutation.mutate(next.map((i) => i.id));
+  // Only the active (un-ticked) ideas are draggable; ticked ones collapse
+  // into a "Done" toggle underneath.
+  const handleReorder = (nextActive: Item[]) => {
+    const merged = [...nextActive, ...order.filter((i) => i.done)];
+    setOrder(merged);
+    reorderMutation.mutate(merged.map((i) => i.id));
   };
+
+  const activeItems = order.filter((i) => !i.done);
+  const doneItems = order.filter((i) => i.done);
+
+  const itemHandlers = (item: Item) => ({
+    onOpen: () => setActive(item),
+    onAddGoal: () =>
+      navigate({ to: "/goals/new", search: { title: item.text } }),
+    onAddHabit: () => setHabitPrefill(item.text),
+    onToggle: () => toggleMutation.mutate({ id: item.id, done: !item.done }),
+  });
 
   return (
     <AppShell title="Brain dump" hideSettings>
@@ -138,28 +153,38 @@ function BrainDumpPage() {
             </p>
           </div>
         ) : (
-          <Reorder.Group
-            as="div"
-            axis="y"
-            values={order}
-            onReorder={handleReorder}
-            className="mt-4 space-y-2"
-          >
-            {order.map((item) => (
-              <DraggableItem
-                key={item.id}
-                item={item}
-                onOpen={() => setActive(item)}
-                onAddGoal={() =>
-                  navigate({ to: "/goals/new", search: { title: item.text } })
-                }
-                onAddHabit={() => setHabitPrefill(item.text)}
-                onToggle={() =>
-                  toggleMutation.mutate({ id: item.id, done: !item.done })
-                }
-              />
-            ))}
-          </Reorder.Group>
+          <>
+            <Reorder.Group
+              as="div"
+              axis="y"
+              values={activeItems}
+              onReorder={handleReorder}
+              className="mt-4 space-y-2"
+            >
+              {activeItems.map((item) => (
+                <DraggableItem key={item.id} item={item} {...itemHandlers(item)} />
+              ))}
+            </Reorder.Group>
+
+            {doneItems.length > 0 && (
+              <div className="mt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowDone((v) => !v)}
+                  className="font-heading text-[11px] uppercase text-black/40 transition-colors hover:text-black/70"
+                >
+                  {showDone ? "Hide done" : `Done (${doneItems.length})`}
+                </button>
+                {showDone && (
+                  <div className="mt-2 space-y-2">
+                    {doneItems.map((item) => (
+                      <ItemRow key={item.id} item={item} {...itemHandlers(item)} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -190,84 +215,98 @@ function BrainDumpPage() {
   );
 }
 
+type RowHandlers = {
+  onOpen: () => void;
+  onAddGoal: () => void;
+  onAddHabit: () => void;
+  onToggle: () => void;
+};
+
 /**
- * One draggable idea: grip handle, the tappable text (opens edit/delete),
- * quick "make a goal" / "make a habit" shortcuts, and a tick so the list can
- * double as a plain to-do.
+ * The idea row: tappable text (opens edit/delete), quick "make a goal" /
+ * "make a habit" shortcuts, and a tick so the list can double as a to-do.
+ * `dragHandle` is supplied only for the active, draggable rows.
  */
-function DraggableItem({
+function ItemRow({
   item,
   onOpen,
   onAddGoal,
   onAddHabit,
   onToggle,
-}: {
-  item: Item;
-  onOpen: () => void;
-  onAddGoal: () => void;
-  onAddHabit: () => void;
-  onToggle: () => void;
-}) {
-  const controls = useDragControls();
-
+  dragHandle,
+}: RowHandlers & { item: Item; dragHandle?: ReactNode }) {
   return (
-    <Reorder.Item as="div" value={item} dragListener={false} dragControls={controls}>
-      <div className="flex w-full items-center gap-1 rounded-2xl bg-white py-2 pl-1.5 pr-2 shadow-sm">
+    <div className="flex w-full items-center gap-1 rounded-2xl bg-white py-2 pl-1.5 pr-2 shadow-sm">
+      {dragHandle ?? <span className="w-2 shrink-0" />}
+      <button
+        type="button"
+        onClick={onOpen}
+        className={cn(
+          "min-w-0 flex-1 py-1 text-left font-serif text-sm [overflow-wrap:anywhere]",
+          item.done
+            ? "text-black/40 line-through decoration-black/30"
+            : "text-black",
+        )}
+      >
+        {item.text}
+      </button>
+
+      <div className="flex shrink-0 items-center gap-0.5">
         <button
           type="button"
-          aria-label="Drag to reorder"
-          onPointerDown={(e) => controls.start(e)}
-          className="grid size-8 shrink-0 cursor-grab touch-none place-items-center text-black/25 active:cursor-grabbing"
+          onClick={onAddGoal}
+          aria-label="Make this a goal"
+          title="Make this a goal"
+          className="grid size-8 place-items-center rounded-lg text-olive transition-colors hover:bg-black/5"
         >
-          <GripVertical className="size-5" />
+          <Target className="size-4" strokeWidth={2} />
         </button>
         <button
           type="button"
-          onClick={onOpen}
+          onClick={onAddHabit}
+          aria-label="Make this a habit"
+          title="Make this a habit"
+          className="grid size-8 place-items-center rounded-lg text-olive transition-colors hover:bg-black/5"
+        >
+          <Repeat className="size-4" strokeWidth={2} />
+        </button>
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-label={item.done ? "Mark not done" : "Mark done"}
           className={cn(
-            "min-w-0 flex-1 py-1 text-left font-serif text-sm [overflow-wrap:anywhere]",
+            "ml-0.5 grid size-7 place-items-center rounded-md border-2 transition-colors",
             item.done
-              ? "text-black/40 line-through decoration-black/30"
-              : "text-black",
+              ? "border-olive bg-olive text-white"
+              : "border-black/20 text-transparent hover:border-olive/50",
           )}
         >
-          {item.text}
+          <Check className="size-4" strokeWidth={3} />
         </button>
-
-        <div className="flex shrink-0 items-center gap-0.5">
-          <button
-            type="button"
-            onClick={onAddGoal}
-            aria-label="Make this a goal"
-            title="Make this a goal"
-            className="grid size-8 place-items-center rounded-lg text-olive transition-colors hover:bg-black/5"
-          >
-            <Target className="size-4" strokeWidth={2} />
-          </button>
-          <button
-            type="button"
-            onClick={onAddHabit}
-            aria-label="Make this a habit"
-            title="Make this a habit"
-            className="grid size-8 place-items-center rounded-lg text-olive transition-colors hover:bg-black/5"
-          >
-            <Repeat className="size-4" strokeWidth={2} />
-          </button>
-          <button
-            type="button"
-            onClick={onToggle}
-            aria-label={item.done ? "Mark not done" : "Mark done"}
-            className={cn(
-              "ml-0.5 grid size-7 place-items-center rounded-md border-2 transition-colors",
-              item.done
-                ? "border-olive bg-olive text-white"
-                : "border-black/20 text-transparent hover:border-olive/50",
-            )}
-          >
-            <Check className="size-4" strokeWidth={3} />
-          </button>
-        </div>
       </div>
+    </div>
+  );
+}
+
+/** An active idea wrapped for drag-reordering. */
+function DraggableItem({ item, ...handlers }: RowHandlers & { item: Item }) {
+  const controls = useDragControls();
+  return (
+    <Reorder.Item as="div" value={item} dragListener={false} dragControls={controls}>
+      <ItemRow
+        item={item}
+        {...handlers}
+        dragHandle={
+          <button
+            type="button"
+            aria-label="Drag to reorder"
+            onPointerDown={(e) => controls.start(e)}
+            className="grid size-8 shrink-0 cursor-grab touch-none place-items-center text-black/25 active:cursor-grabbing"
+          >
+            <GripVertical className="size-5" />
+          </button>
+        }
+      />
     </Reorder.Item>
   );
 }
