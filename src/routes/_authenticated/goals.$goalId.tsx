@@ -2,11 +2,11 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { Reorder, useDragControls } from "framer-motion";
-import { Check, GripVertical } from "lucide-react";
+import { GripVertical, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AppShell, useAppShell } from "@/components/app-shell";
-import { accentOf, GOAL_ACCENTS, type Accent } from "@/components/goal-ui";
-import { IconPicker } from "@/components/icon-picker";
+import { accentOf } from "@/components/goal-ui";
+import { GoalEditModal } from "@/components/goal-edit-modal";
 import { GoalHero, StepRow, type HomeGoal } from "@/components/home-cards";
 import {
   GoalCompletePrompt,
@@ -93,12 +93,10 @@ function GoalDetailBody({
   const navigate = useNavigate();
   const { openFocus, celebrate } = useAppShell();
 
-  const [title, setTitle] = useState(goal.title);
   const [why, setWhy] = useState(goal.why ?? "");
   const [vision, setVision] = useState(goal.vision ?? "");
-  const [accentValue, setAccentValue] = useState<string>(goal.accent);
-  const [iconValue, setIconValue] = useState<string | null>(goal.icon ?? null);
-  const accent = accentOf({ accent: accentValue });
+  const accent = accentOf(goal);
+  const [editOpen, setEditOpen] = useState(false);
   const [stepDraft, setStepDraft] = useState("");
   const [saved, setSaved] = useState(false);
   const [promptGoal, setPromptGoal] = useState<CompletedGoal | null>(null);
@@ -106,24 +104,11 @@ function GoalDetailBody({
   const [habitPrefill, setHabitPrefill] = useState<string | null>(null);
   const [orderedSteps, setOrderedSteps] = useState<Step[]>(goal.steps);
   const stepInputRef = useRef<HTMLInputElement>(null);
-  const titleRef = useRef<HTMLTextAreaElement>(null);
-
-  // Auto-grow the goal title so long titles wrap instead of truncating.
-  useEffect(() => {
-    const el = titleRef.current;
-    if (el) {
-      el.style.height = "auto";
-      el.style.height = `${el.scrollHeight}px`;
-    }
-  }, [title]);
 
   useEffect(() => {
-    setTitle(goal.title);
     setWhy(goal.why ?? "");
     setVision(goal.vision ?? "");
-    setAccentValue(goal.accent);
-    setIconValue(goal.icon ?? null);
-  }, [goal.id, goal.title, goal.why, goal.vision, goal.accent, goal.icon]);
+  }, [goal.id, goal.why, goal.vision]);
 
   // Keep the local drag order in sync with the latest fetched steps.
   useEffect(() => {
@@ -145,13 +130,8 @@ function GoalDetailBody({
   };
 
   const saveMutation = useMutation({
-    mutationFn: (input: {
-      title: string;
-      why: string;
-      vision: string;
-      accent: Accent;
-      icon: string;
-    }) => updateGoalDetails({ data: { id: goalId, ...input } }),
+    mutationFn: (input: { why: string; vision: string }) =>
+      updateGoalDetails({ data: { id: goalId, ...input } }),
     onSuccess: () => {
       refresh();
       setSaved(true);
@@ -193,12 +173,7 @@ function GoalDetailBody({
     },
   });
 
-  const dirty =
-    title.trim() !== goal.title ||
-    why !== (goal.why ?? "") ||
-    vision !== (goal.vision ?? "") ||
-    accentValue !== goal.accent ||
-    (iconValue ?? "") !== (goal.icon ?? "");
+  const dirty = why !== (goal.why ?? "") || vision !== (goal.vision ?? "");
 
   const submitStep = (e: React.FormEvent) => {
     e.preventDefault();
@@ -227,45 +202,21 @@ function GoalDetailBody({
 
   return (
     <div className="mt-4 space-y-6 pb-4 md:mx-auto md:max-w-2xl">
-      {/* Hero (previews the chosen colour + icon live) */}
-      <GoalHero goal={{ ...goal, accent: accentValue, icon: iconValue }}>
-        <textarea
-          ref={titleRef}
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          rows={1}
-          maxLength={140}
-          aria-label="Goal title"
-          placeholder="Name this goal"
-          className="w-full resize-none overflow-hidden break-words bg-transparent text-center font-heading text-2xl leading-tight text-white placeholder:text-white/60 focus:outline-none"
-        />
-      </GoalHero>
-
-      {/* Colour */}
-      <div className="flex items-center justify-center gap-3">
-        {GOAL_ACCENTS.map((a) => (
-          <button
-            key={a.key}
-            type="button"
-            onClick={() => setAccentValue(a.key)}
-            aria-label={a.label}
-            aria-pressed={accentValue === a.key}
-            className={cn(
-              "grid size-10 place-items-center rounded-full text-white transition-transform",
-              a.swatch,
-              accentValue === a.key
-                ? "ring-2 ring-black/40 ring-offset-2 ring-offset-background"
-                : "",
-            )}
-          >
-            {accentValue === a.key && <Check className="size-5" strokeWidth={2.5} />}
-          </button>
-        ))}
-      </div>
-
-      {/* Icon (previews live in the hero above) */}
-      <div className="flex justify-center">
-        <IconPicker value={iconValue} onChange={setIconValue} defaultLabel="Star" />
+      {/* Hero with an edit button in the corner (name / colour / icon) */}
+      <div className="relative">
+        <GoalHero goal={goal}>
+          <p className="w-full break-words text-center font-heading text-2xl leading-tight text-white">
+            {goal.title}
+          </p>
+        </GoalHero>
+        <button
+          type="button"
+          onClick={() => setEditOpen(true)}
+          aria-label="Edit name, colour and icon"
+          className="absolute right-3 top-3 grid size-9 place-items-center rounded-full bg-white/20 text-white backdrop-blur transition-colors hover:bg-white/30"
+        >
+          <Pencil className="size-4" strokeWidth={2} />
+        </button>
       </div>
 
       {/* Steps */}
@@ -359,13 +310,7 @@ function GoalDetailBody({
 
       <button
         onClick={() =>
-          saveMutation.mutate({
-            title: title.trim() || goal.title,
-            why,
-            vision,
-            accent: accentValue as Accent,
-            icon: iconValue ?? "",
-          })
+          saveMutation.mutate({ why, vision })
         }
         disabled={!dirty || saveMutation.isPending}
         className="w-full rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
@@ -404,6 +349,10 @@ function GoalDetailBody({
           initialName={habitPrefill}
           onClose={() => setHabitPrefill(null)}
         />
+      )}
+
+      {editOpen && (
+        <GoalEditModal goal={goal} onClose={() => setEditOpen(false)} />
       )}
     </div>
   );
