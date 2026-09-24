@@ -16,6 +16,7 @@ import { goalProgress, type GoalWithSteps } from "@/components/goal-ui";
 import { goalsQueryOptions } from "@/lib/goal-queries";
 import { claimUnownedGoals, setGoalArchived, toggleStep } from "@/lib/goals.functions";
 import { createWin } from "@/lib/wins.functions";
+import { createStamp } from "@/lib/stamps.functions";
 
 export const Route = createFileRoute("/_authenticated/goals/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(goalsQueryOptions),
@@ -162,12 +163,21 @@ function GoalCardItem({ goal }: { goal: Goal }) {
   const winMutation = useMutation({
     mutationFn: async () => {
       await createWin({ data: { title: goal.title, kind: "achievement" } });
+      await createStamp({
+        data: {
+          goalId: goal.id,
+          title: goal.title,
+          ...(goal.icon ? { icon: goal.icon } : {}),
+          accent: goal.accent,
+        },
+      });
       await setGoalArchived({ data: { id: goal.id, archived: true } });
     },
     onMutate: () => optimisticArchive(true),
     onError: (_e, _v, ctx) => rollback(ctx),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["wins"] });
+      queryClient.invalidateQueries({ queryKey: ["stamps"] });
       refresh();
     },
   });
@@ -193,7 +203,7 @@ function GoalCardItem({ goal }: { goal: Goal }) {
           celebrate();
           // This tick finishes the goal when every other step is already done.
           if (goal.steps.every((s) => s.done || s.id === next.id)) {
-            setPromptGoal({ id: goal.id, title: goal.title });
+            setPromptGoal({ id: goal.id, title: goal.title, icon: goal.icon, accent: goal.accent });
           }
           completeMutation.mutate(next.id);
         }}

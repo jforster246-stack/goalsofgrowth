@@ -1,8 +1,14 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { createWin } from "@/lib/wins.functions";
+import { createStamp } from "@/lib/stamps.functions";
 
-export type CompletedGoal = { id: string; title: string };
+export type CompletedGoal = {
+  id: string;
+  title: string;
+  icon?: string | null | undefined;
+  accent?: string | undefined;
+};
 
 /** sessionStorage flag telling the goal page to focus its add-step box. */
 export const FOCUS_ADD_STEP_KEY = "gog-focus-add-step";
@@ -24,10 +30,21 @@ export function GoalCompletePrompt({
   const navigate = useNavigate();
 
   const winMutation = useMutation({
-    mutationFn: (title: string) =>
-      createWin({ data: { title, kind: "achievement" } }),
+    mutationFn: async (g: CompletedGoal) => {
+      await createWin({ data: { title: g.title, kind: "achievement" } });
+      // Earn a stamp for the gallery, stamped with the goal's own icon.
+      await createStamp({
+        data: {
+          goalId: g.id,
+          title: g.title,
+          ...(g.icon ? { icon: g.icon } : {}),
+          ...(g.accent ? { accent: g.accent } : {}),
+        },
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["wins"] });
+      queryClient.invalidateQueries({ queryKey: ["stamps"] });
       queryClient.invalidateQueries({ queryKey: ["goals"] });
       onClose();
       navigate({ to: "/wins" });
@@ -58,7 +75,7 @@ export function GoalCompletePrompt({
           <button
             type="button"
             disabled={winMutation.isPending}
-            onClick={() => winMutation.mutate(goal.title)}
+            onClick={() => winMutation.mutate(goal)}
             className="w-full rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white transition-colors hover:bg-olive/90 disabled:opacity-50"
           >
             {winMutation.isPending ? "Adding…" : "Yes, add to my wins"}

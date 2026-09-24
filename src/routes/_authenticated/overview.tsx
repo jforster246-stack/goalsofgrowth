@@ -120,7 +120,7 @@ function OverviewPage() {
       onSuccess: () => {
         if (willComplete && goal) {
           setCelebrating(null);
-          setPromptGoal({ id: goal.id, title: goal.title });
+          setPromptGoal({ id: goal.id, title: goal.title, icon: goal.icon, accent: goal.accent });
         } else {
           setPromptGoal(null);
           setCelebrating({ goalId, completedTitle: stepTitle });
@@ -143,14 +143,14 @@ function OverviewPage() {
       right={
         <Link
           to="/wins"
-          aria-label="Wins"
+          aria-label="Gallery"
           className="flex size-[50px] shrink-0 flex-col items-center justify-center gap-1 rounded-xl bg-white shadow-sm"
         >
           <svg viewBox="0 0 24 24" className="size-5 fill-gold-deep" aria-hidden>
             <path d={STAR_PATH} fillRule="evenodd" />
           </svg>
           <span className="font-heading text-[8px] uppercase leading-none text-black">
-            Wins
+            Gallery
           </span>
         </Link>
       }

@@ -11,12 +11,12 @@ import {
 import {
   Brain,
   Check,
+  Frame,
   House,
   ListChecks,
   Repeat,
   Settings,
   Target,
-  Trophy,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getTheme, setTheme, THEMES, type ThemeId } from "@/lib/theme";
@@ -263,7 +263,7 @@ function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
         <SideLink to="/habits" icon={Repeat} label="Habits" />
         <SideLink to="/braindump" icon={Brain} label="Brain dump" />
         <SideLink to="/routines" icon={ListChecks} label="Routines" />
-        <SideLink to="/wins" icon={Trophy} label="Wins" />
+        <SideLink to="/wins" icon={Frame} label="Gallery" />
       </nav>
 
       <button

@@ -162,6 +162,13 @@
       "when": 1790223060440,
       "tag": "0022_apply_bingo_and_checklist_icon",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1791331200000,
+      "tag": "0023_create_stamps",
+      "breakpoints": true
     }
   ]
 }

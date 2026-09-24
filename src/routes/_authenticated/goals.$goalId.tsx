@@ -200,7 +200,7 @@ function GoalDetailBody({
       {
         onSuccess: () => {
           if (willComplete)
-            setPromptGoal({ id: goal.id, title: goal.title });
+            setPromptGoal({ id: goal.id, title: goal.title, icon: goal.icon, accent: goal.accent });
         },
       },
     );
