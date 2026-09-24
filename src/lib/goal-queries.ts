@@ -1,6 +1,10 @@
 import { queryOptions } from "@tanstack/react-query";
 import { getGoal, getProfile, listGoals } from "@/lib/goals.functions";
-import { listHabits, listHabitStreaks } from "@/lib/habits.functions";
+import {
+  getHabitStampBonus,
+  listHabits,
+  listHabitStreaks,
+} from "@/lib/habits.functions";
 import { listWins } from "@/lib/wins.functions";
 import { listBrainDump } from "@/lib/braindump.functions";
 import { listChecklists } from "@/lib/checklists.functions";
@@ -52,4 +56,10 @@ export const checklistsQueryOptions = queryOptions({
 export const stampsQueryOptions = queryOptions({
   queryKey: ["stamps"],
   queryFn: () => listStamps(),
+});
+
+// Legacy habit "crystals" (2 per completion), now counted toward the stamp balance.
+export const habitStampBonusQueryOptions = queryOptions({
+  queryKey: ["habit-stamp-bonus"],
+  queryFn: () => getHabitStampBonus(),
 });

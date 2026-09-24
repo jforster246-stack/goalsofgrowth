@@ -13,7 +13,13 @@ import { Motif, TIME_MOTIF } from "@/components/motif-icons";
 import { HabitFormModal, type EditableHabit } from "@/components/habit-form-modal";
 import { Stamp } from "@/components/stamp";
 import { localToday } from "@/components/goal-ui";
-import { habitsQueryOptions, stampsQueryOptions } from "@/lib/goal-queries";
+import {
+  goalsQueryOptions,
+  habitStampBonusQueryOptions,
+  habitsQueryOptions,
+  stampsQueryOptions,
+} from "@/lib/goal-queries";
+import { mergeStamps } from "@/lib/stamp-view";
 import { toggleHabit } from "@/lib/habits.functions";
 import { frequencyLabel } from "@/lib/habit-schedule";
 import { Loading } from "@/components/loading";
@@ -65,7 +71,9 @@ function HabitsPage() {
   const navigate = useNavigate();
   const { data: habits, isPending } = useQuery(habitsQueryOptions(today));
   const { data: stamps } = useQuery(stampsQueryOptions);
-  const stampCount = stamps?.length ?? 0;
+  const { data: goals } = useQuery(goalsQueryOptions);
+  const { data: habitBonus } = useQuery(habitStampBonusQueryOptions);
+  const stampCount = mergeStamps(stamps, goals).length + (habitBonus ?? 0);
 
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<EditableHabit | null>(null);
@@ -136,6 +144,7 @@ function HabitsBody({
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ["habits"] });
     queryClient.invalidateQueries({ queryKey: ["habit-streaks"] });
+    queryClient.invalidateQueries({ queryKey: ["habit-stamp-bonus"] });
   };
 
   const toggleMutation = useMutation({

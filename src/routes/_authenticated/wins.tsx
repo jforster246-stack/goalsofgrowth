@@ -10,7 +10,13 @@ import { Plus, X } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { WinFormModal } from "@/components/win-form-modal";
 import { Stamp } from "@/components/stamp";
-import { stampsQueryOptions, winsQueryOptions } from "@/lib/goal-queries";
+import {
+  goalsQueryOptions,
+  habitStampBonusQueryOptions,
+  stampsQueryOptions,
+  winsQueryOptions,
+} from "@/lib/goal-queries";
+import { mergeStamps } from "@/lib/stamp-view";
 import { deleteWin } from "@/lib/wins.functions";
 
 export const Route = createFileRoute("/_authenticated/wins")({
@@ -44,6 +50,8 @@ function WinsPage() {
   const queryClient = useQueryClient();
 
   const { data: stamps } = useQuery(stampsQueryOptions);
+  const { data: goals } = useQuery(goalsQueryOptions);
+  const { data: habitBonus } = useQuery(habitStampBonusQueryOptions);
   const { data: wins } = useQuery(winsQueryOptions);
 
   const [adding, setAdding] = useState(false);
@@ -58,7 +66,8 @@ function WinsPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["wins"] }),
   });
 
-  const stampList = stamps ?? [];
+  const stampList = mergeStamps(stamps, goals);
+  const totalStamps = stampList.length + (habitBonus ?? 0);
   const winList = (wins ?? []) as Win[];
   const achievements = winList.filter((w) => w.kind === "achievement");
   const lifeEvents = winList.filter((w) => w.kind === "life_event");
@@ -68,7 +77,11 @@ function WinsPage() {
       <div className="mt-4 space-y-8 pb-4 md:grid md:grid-cols-2 md:items-start md:gap-6 md:space-y-0">
         {/* Intro */}
         <p className="font-serif text-sm text-black/50 md:col-span-2">
-          Every star stamp you've collected. Spend them on artworks in the{" "}
+          You've collected{" "}
+          <span className="font-heading text-olive">
+            {totalStamps} star stamp{totalStamps === 1 ? "" : "s"}
+          </span>{" "}
+          from completed goals and habits. Spend them on artworks in the{" "}
           <Link to="/gallery" className="text-olive underline underline-offset-2">
             gallery
           </Link>{" "}
@@ -93,7 +106,7 @@ function WinsPage() {
             <div className="mt-4 flex flex-wrap gap-3">
               {stampList.map((s) => (
                 <div
-                  key={s.id}
+                  key={s.key}
                   className="flex w-[76px] flex-col items-center gap-1.5 text-center"
                 >
                   <Stamp icon={s.icon} accent={s.accent} />

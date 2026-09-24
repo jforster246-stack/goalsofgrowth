@@ -109,6 +109,21 @@ export const listHabitStreaks = createServerFn({ method: "GET" })
       .sort((a, b) => b.streak - a.streak);
   });
 
+/**
+ * Legacy habit reward, now folded into the stamp balance: habits used to earn
+ * two "crystals" per completion. Those crystals are counted as stamps, so this
+ * returns 2 × the total number of habit completions.
+ */
+export const getHabitStampBonus = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { count, error } = await context.supabase
+      .from("habit_completions")
+      .select("*", { count: "exact", head: true });
+    if (error) throw new Error(error.message);
+    return (count ?? 0) * 2;
+  });
+
 export const createHabit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) =>

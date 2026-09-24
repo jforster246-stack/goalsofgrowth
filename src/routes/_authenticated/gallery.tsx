@@ -3,7 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/app-shell";
 import { Stamp } from "@/components/stamp";
 import { STAR_PATH } from "@/components/goal-ui";
-import { stampsQueryOptions } from "@/lib/goal-queries";
+import {
+  goalsQueryOptions,
+  habitStampBonusQueryOptions,
+  stampsQueryOptions,
+} from "@/lib/goal-queries";
+import { mergeStamps } from "@/lib/stamp-view";
 
 export const Route = createFileRoute("/_authenticated/gallery")({
   head: () => ({
@@ -21,7 +26,9 @@ export const Route = createFileRoute("/_authenticated/gallery")({
 
 function GalleryPage() {
   const { data: stampList } = useQuery(stampsQueryOptions);
-  const stamps = stampList?.length ?? 0;
+  const { data: goals } = useQuery(goalsQueryOptions);
+  const { data: habitBonus } = useQuery(habitStampBonusQueryOptions);
+  const stamps = mergeStamps(stampList, goals).length + (habitBonus ?? 0);
 
   return (
     <AppShell title="Gallery">
