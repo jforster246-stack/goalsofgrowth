@@ -161,10 +161,16 @@ function GoalDetailBody({
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["goals"] }),
   });
 
-  const handleReorder = (next: Step[]) => {
-    setOrderedSteps(next);
-    reorderMutation.mutate(next.map((s) => s.id));
+  // Only the active steps are draggable; keep the done ones in their order
+  // after them so positions stay stable.
+  const handleReorder = (nextActive: Step[]) => {
+    const merged = [...nextActive, ...orderedSteps.filter((s) => s.done)];
+    setOrderedSteps(merged);
+    reorderMutation.mutate(merged.map((s) => s.id));
   };
+
+  const activeSteps = orderedSteps.filter((s) => !s.done);
+  const doneSteps = orderedSteps.filter((s) => s.done);
   const deleteGoalMutation = useMutation({
     mutationFn: () => deleteGoal({ data: { id: goalId } }),
     onSuccess: () => {
@@ -226,11 +232,11 @@ function GoalDetailBody({
         <Reorder.Group
           as="div"
           axis="y"
-          values={orderedSteps}
+          values={activeSteps}
           onReorder={handleReorder}
           className="mt-4 space-y-2"
         >
-          {orderedSteps.map((step) => (
+          {activeSteps.map((step) => (
             <DraggableStep
               key={step.id}
               step={step}
@@ -307,6 +313,38 @@ function GoalDetailBody({
           className="mt-3 w-full resize-y bg-transparent font-serif text-sm leading-relaxed text-black placeholder:text-black/40 focus:outline-none"
         />
       </section>
+
+      {/* Completed steps — ticked items collect here */}
+      {doneSteps.length > 0 && (
+        <section>
+          <p className="font-heading text-sm uppercase text-olive">
+            Completed steps
+            <span className="ml-1.5 font-mono text-xs text-olive/50">
+              {doneSteps.length}
+            </span>
+          </p>
+          <div className="mt-4 space-y-2">
+            {doneSteps.map((step) => (
+              <StepRow
+                key={step.id}
+                accent={accent}
+                done
+                onToggle={() => handleToggle(step.id, step.done)}
+                titleNode={
+                  <button
+                    type="button"
+                    onClick={() => setActiveStep(step)}
+                    aria-label={`Open ${step.title}`}
+                    className="block w-full text-left font-serif text-sm text-black/40 line-through decoration-black/30"
+                  >
+                    {step.title}
+                  </button>
+                }
+              />
+            ))}
+          </div>
+        </section>
+      )}
 
       <button
         onClick={() =>
