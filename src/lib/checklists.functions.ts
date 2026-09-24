@@ -70,6 +70,22 @@ export const renameChecklist = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const setChecklistIcon = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) =>
+    z
+      .object({ id: z.string().uuid(), icon: z.string().trim().max(40) })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("checklists")
+      .update({ icon: data.icon || null })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const deleteChecklist = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) => z.object({ id: z.string().uuid() }).parse(data))
@@ -127,6 +143,38 @@ export const addChecklistItem = createServerFn({ method: "POST" })
       .single();
     if (error) throw new Error(error.message);
     return item;
+  });
+
+export const updateChecklistItem = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) =>
+    z
+      .object({ id: z.string().uuid(), text: z.string().trim().min(1).max(300) })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("checklist_items")
+      .update({ text: data.text })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const reorderChecklistItems = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) =>
+    z.object({ orderedIds: z.array(z.string().uuid()).min(1) }).parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const supabase = context.supabase;
+    // RLS scopes updates to items in the user's own checklists.
+    await Promise.all(
+      data.orderedIds.map((id, index) =>
+        supabase.from("checklist_items").update({ position: index }).eq("id", id),
+      ),
+    );
+    return { ok: true };
   });
 
 export const toggleChecklistItem = createServerFn({ method: "POST" })

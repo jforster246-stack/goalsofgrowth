@@ -79,6 +79,7 @@ export type Database = {
       checklists: {
         Row: {
           created_at: string
+          icon: string | null
           id: string
           position: number
           title: string
@@ -86,6 +87,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          icon?: string | null
           id?: string
           position?: number
           title: string
@@ -93,6 +95,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          icon?: string | null
           id?: string
           position?: number
           title?: string

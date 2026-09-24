@@ -1,9 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { Check, Plus, RotateCcw, Trash2, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Reorder, useDragControls } from "framer-motion";
+import { Check, GripVertical, ListChecks, Plus, RotateCcw, Trash2, X } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { Loading } from "@/components/loading";
+import { IconPicker } from "@/components/icon-picker";
+import { Motif } from "@/components/motif-icons";
 import { checklistsQueryOptions } from "@/lib/goal-queries";
 import {
   addChecklistItem,
@@ -11,8 +14,11 @@ import {
   deleteChecklist,
   deleteChecklistItem,
   renameChecklist,
+  reorderChecklistItems,
   resetChecklist,
+  setChecklistIcon,
   toggleChecklistItem,
+  updateChecklistItem,
 } from "@/lib/checklists.functions";
 import { cn } from "@/lib/utils";
 
@@ -41,6 +47,7 @@ type Item = {
 type Checklist = {
   id: string;
   title: string;
+  icon: string | null;
   position: number;
   created_at: string;
   user_id: string;
@@ -125,12 +132,21 @@ function ChecklistCard({ list }: { list: Checklist }) {
   const queryClient = useQueryClient();
   const [title, setTitle] = useState(list.title);
   const [itemDraft, setItemDraft] = useState("");
+  const [iconOpen, setIconOpen] = useState(false);
+  const [order, setOrder] = useState<Item[]>(list.items);
+
+  // Keep the local (drag-reorderable) copy in step with the server list.
+  useEffect(() => setOrder(list.items), [list.items]);
 
   const invalidate = () =>
     queryClient.invalidateQueries({ queryKey: ["checklists"] });
 
   const renameMutation = useMutation({
     mutationFn: (t: string) => renameChecklist({ data: { id: list.id, title: t } }),
+    onSuccess: invalidate,
+  });
+  const iconMutation = useMutation({
+    mutationFn: (icon: string) => setChecklistIcon({ data: { id: list.id, icon } }),
     onSuccess: invalidate,
   });
   const deleteMutation = useMutation({
@@ -151,8 +167,18 @@ function ChecklistCard({ list }: { list: Checklist }) {
       toggleChecklistItem({ data: input }),
     onSuccess: invalidate,
   });
+  const renameItemMutation = useMutation({
+    mutationFn: (input: { id: string; text: string }) =>
+      updateChecklistItem({ data: input }),
+    onSuccess: invalidate,
+  });
   const deleteItemMutation = useMutation({
     mutationFn: (id: string) => deleteChecklistItem({ data: { id } }),
+    onSuccess: invalidate,
+  });
+  const reorderMutation = useMutation({
+    mutationFn: (orderedIds: string[]) =>
+      reorderChecklistItems({ data: { orderedIds } }),
     onSuccess: invalidate,
   });
 
@@ -171,9 +197,27 @@ function ChecklistCard({ list }: { list: Checklist }) {
     else if (!t) setTitle(list.title);
   };
 
+  const handleReorder = (next: Item[]) => {
+    setOrder(next);
+    reorderMutation.mutate(next.map((i) => i.id));
+  };
+
   return (
     <div className="rounded-2xl bg-white p-4 shadow-sm">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
+        <button
+          type="button"
+          onClick={() => setIconOpen((v) => !v)}
+          aria-label="Change icon"
+          title="Change icon"
+          className="grid size-8 shrink-0 place-items-center rounded-lg text-olive transition-colors hover:bg-black/5"
+        >
+          {list.icon ? (
+            <Motif id={list.icon} className="size-5" />
+          ) : (
+            <ListChecks className="size-5" strokeWidth={2} />
+          )}
+        </button>
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -207,45 +251,38 @@ function ChecklistCard({ list }: { list: Checklist }) {
         </button>
       </div>
 
-      <div className="mt-3 space-y-1.5">
-        {list.items.map((item) => (
-          <div key={item.id} className="group flex items-center gap-2.5">
-            <button
-              type="button"
-              onClick={() =>
-                toggleMutation.mutate({ id: item.id, done: !item.done })
-              }
-              aria-label={item.done ? `Uncheck ${item.text}` : `Check ${item.text}`}
-              className={cn(
-                "grid size-6 shrink-0 place-items-center rounded-md border-2 transition-colors",
-                item.done
-                  ? "border-olive bg-olive text-white"
-                  : "border-black/20 text-transparent hover:border-olive/50",
-              )}
-            >
-              <Check className="size-4" strokeWidth={3} />
-            </button>
-            <span
-              className={cn(
-                "min-w-0 flex-1 font-serif text-sm [overflow-wrap:anywhere]",
-                item.done
-                  ? "text-black/40 line-through decoration-black/30"
-                  : "text-black",
-              )}
-            >
-              {item.text}
-            </span>
-            <button
-              type="button"
-              onClick={() => deleteItemMutation.mutate(item.id)}
-              aria-label={`Delete ${item.text}`}
-              className="grid size-6 shrink-0 place-items-center rounded-full text-black/25 opacity-0 transition-opacity hover:text-black/60 group-hover:opacity-100"
-            >
-              <X className="size-4" />
-            </button>
-          </div>
+      {iconOpen && (
+        <div className="mt-3">
+          <IconPicker
+            value={list.icon ?? null}
+            onChange={(id) => {
+              iconMutation.mutate(id ?? "");
+              setIconOpen(false);
+            }}
+            defaultLabel="Default"
+          />
+        </div>
+      )}
+
+      <Reorder.Group
+        as="div"
+        axis="y"
+        values={order}
+        onReorder={handleReorder}
+        className="mt-3 space-y-0.5"
+      >
+        {order.map((item) => (
+          <ChecklistItemRow
+            key={item.id}
+            item={item}
+            onToggle={() =>
+              toggleMutation.mutate({ id: item.id, done: !item.done })
+            }
+            onRename={(text) => renameItemMutation.mutate({ id: item.id, text })}
+            onDelete={() => deleteItemMutation.mutate(item.id)}
+          />
         ))}
-      </div>
+      </Reorder.Group>
 
       <form
         onSubmit={(e) => {
@@ -271,5 +308,78 @@ function ChecklistCard({ list }: { list: Checklist }) {
         </button>
       </form>
     </div>
+  );
+}
+
+/** A draggable, editable checklist item: grip, checkbox, inline text, delete. */
+function ChecklistItemRow({
+  item,
+  onToggle,
+  onRename,
+  onDelete,
+}: {
+  item: Item;
+  onToggle: () => void;
+  onRename: (text: string) => void;
+  onDelete: () => void;
+}) {
+  const controls = useDragControls();
+  const [text, setText] = useState(item.text);
+  useEffect(() => setText(item.text), [item.text]);
+
+  const save = () => {
+    const t = text.trim();
+    if (t && t !== item.text) onRename(t);
+    else if (!t) setText(item.text);
+  };
+
+  return (
+    <Reorder.Item as="div" value={item} dragListener={false} dragControls={controls}>
+      <div className="group flex items-center gap-1">
+        <button
+          type="button"
+          aria-label="Drag to reorder"
+          onPointerDown={(e) => controls.start(e)}
+          className="grid size-7 shrink-0 cursor-grab touch-none place-items-center text-black/20 active:cursor-grabbing"
+        >
+          <GripVertical className="size-4" />
+        </button>
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-label={item.done ? "Mark not done" : "Mark done"}
+          className={cn(
+            "grid size-6 shrink-0 place-items-center rounded-md border-2 transition-colors",
+            item.done
+              ? "border-olive bg-olive text-white"
+              : "border-black/20 text-transparent hover:border-olive/50",
+          )}
+        >
+          <Check className="size-4" strokeWidth={3} />
+        </button>
+        <input
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onBlur={save}
+          onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
+          aria-label="Item text"
+          maxLength={300}
+          className={cn(
+            "min-w-0 flex-1 rounded bg-transparent px-1 py-1 font-serif text-sm focus:bg-black/5 focus:outline-none",
+            item.done
+              ? "text-black/40 line-through decoration-black/30"
+              : "text-black",
+          )}
+        />
+        <button
+          type="button"
+          onClick={onDelete}
+          aria-label="Delete item"
+          className="grid size-6 shrink-0 place-items-center rounded-full text-black/25 opacity-0 transition-opacity hover:text-black/60 group-hover:opacity-100"
+        >
+          <X className="size-4" />
+        </button>
+      </div>
+    </Reorder.Item>
   );
 }
