@@ -200,6 +200,14 @@ function GoalCardItem({ goal }: { goal: Goal }) {
         onAddWin={() => winMutation.mutate()}
         onArchive={() => archiveMutation.mutate()}
       />
+      {(winMutation.isError || archiveMutation.isError) && (
+        <p className="mt-2 rounded-xl bg-clay/10 px-3 py-2 font-mono text-[11px] leading-snug text-clay-deep">
+          Couldn't save:{" "}
+          {String(
+            (winMutation.error ?? archiveMutation.error) as unknown,
+          ).replace(/^Error:\s*/, "")}
+        </p>
+      )}
       <GoalCompletePrompt goal={promptGoal} onClose={() => setPromptGoal(null)} />
     </>
   );
