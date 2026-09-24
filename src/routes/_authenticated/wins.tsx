@@ -10,8 +10,7 @@ import { Plus, X } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { WinFormModal } from "@/components/win-form-modal";
 import { Stamp } from "@/components/stamp";
-import { goalProgress } from "@/components/goal-ui";
-import { goalsQueryOptions, winsQueryOptions } from "@/lib/goal-queries";
+import { stampsQueryOptions, winsQueryOptions } from "@/lib/goal-queries";
 import { deleteWin } from "@/lib/wins.functions";
 
 export const Route = createFileRoute("/_authenticated/wins")({
@@ -44,7 +43,7 @@ function WinsPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const { data: goals } = useQuery(goalsQueryOptions);
+  const { data: stamps } = useQuery(stampsQueryOptions);
   const { data: wins } = useQuery(winsQueryOptions);
 
   const [adding, setAdding] = useState(false);
@@ -59,7 +58,7 @@ function WinsPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["wins"] }),
   });
 
-  const completedGoals = (goals ?? []).filter((g) => goalProgress(g).complete);
+  const stampList = stamps ?? [];
   const winList = (wins ?? []) as Win[];
   const achievements = winList.filter((w) => w.kind === "achievement");
   const lifeEvents = winList.filter((w) => w.kind === "life_event");
@@ -76,35 +75,32 @@ function WinsPage() {
           — coming soon.
         </p>
 
-        {/* Completed goals */}
+        {/* Completed goals — one stamp per goal you've finished */}
         <section className="md:col-span-2">
           <div className="flex items-center gap-1.5">
             <p className="font-heading text-sm uppercase text-olive">
               Completed goals
             </p>
             <span className="ml-1 font-mono text-xs text-olive/50">
-              {completedGoals.length}
+              {stampList.length}
             </span>
           </div>
-          {completedGoals.length === 0 ? (
+          {stampList.length === 0 ? (
             <p className="mt-4 rounded-2xl bg-white/60 px-4 py-4 font-serif text-sm text-black/40">
               Complete a goal to earn your first stamp.
             </p>
           ) : (
             <div className="mt-4 flex flex-wrap gap-3">
-              {completedGoals.map((goal) => (
-                <Link
-                  key={goal.id}
-                  to="/goals/$goalId"
-                  params={{ goalId: goal.id }}
-                  aria-label={`Goal: ${goal.title}`}
+              {stampList.map((s) => (
+                <div
+                  key={s.id}
                   className="flex w-[76px] flex-col items-center gap-1.5 text-center"
                 >
-                  <Stamp icon={goal.icon} accent={goal.accent} />
+                  <Stamp icon={s.icon} accent={s.accent} />
                   <span className="font-serif text-[10px] leading-tight text-black/50 [overflow-wrap:anywhere]">
-                    for {goal.title}
+                    for {s.title}
                   </span>
-                </Link>
+                </div>
               ))}
             </div>
           )}

@@ -12,8 +12,8 @@ import { HabitRow, type HabitTime } from "@/components/home-cards";
 import { Motif, TIME_MOTIF } from "@/components/motif-icons";
 import { HabitFormModal, type EditableHabit } from "@/components/habit-form-modal";
 import { Stamp } from "@/components/stamp";
-import { goalProgress, localToday } from "@/components/goal-ui";
-import { goalsQueryOptions, habitsQueryOptions } from "@/lib/goal-queries";
+import { localToday } from "@/components/goal-ui";
+import { habitsQueryOptions, stampsQueryOptions } from "@/lib/goal-queries";
 import { toggleHabit } from "@/lib/habits.functions";
 import { frequencyLabel } from "@/lib/habit-schedule";
 import { Loading } from "@/components/loading";
@@ -64,8 +64,8 @@ function HabitsPage() {
   const { new: openNew } = Route.useSearch();
   const navigate = useNavigate();
   const { data: habits, isPending } = useQuery(habitsQueryOptions(today));
-  const { data: goals } = useQuery(goalsQueryOptions);
-  const stampCount = (goals ?? []).filter((g) => goalProgress(g).complete).length;
+  const { data: stamps } = useQuery(stampsQueryOptions);
+  const stampCount = stamps?.length ?? 0;
 
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<EditableHabit | null>(null);

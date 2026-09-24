@@ -8,7 +8,8 @@ import {
 } from "@tanstack/react-query";
 import { useState } from "react";
 import { AppShell, useAppShell } from "@/components/app-shell";
-import { goalProgress, localToday, STAR_PATH } from "@/components/goal-ui";
+import { goalProgress, localToday } from "@/components/goal-ui";
+import { Stamp } from "@/components/stamp";
 import {
   HabitRow,
   NextStepPortrait,
@@ -143,14 +144,12 @@ function OverviewPage() {
       right={
         <Link
           to="/wins"
-          aria-label="Wins stamps"
+          aria-label="Wins"
           className="flex size-[50px] shrink-0 flex-col items-center justify-center gap-1 rounded-xl bg-white shadow-sm"
         >
-          <svg viewBox="0 0 24 24" className="size-5 fill-gold-deep" aria-hidden>
-            <path d={STAR_PATH} fillRule="evenodd" />
-          </svg>
+          <Stamp icon={null} accent="sea" className="size-5" />
           <span className="font-heading text-[8px] uppercase leading-none text-black">
-            Stamps
+            Wins
           </span>
         </Link>
       }
