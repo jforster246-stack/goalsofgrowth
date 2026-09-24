@@ -17,7 +17,6 @@ export type Database = {
       brain_dump_items: {
         Row: {
           created_at: string
-          done: boolean
           id: string
           position: number
           text: string
@@ -25,7 +24,6 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          done?: boolean
           id?: string
           position?: number
           text: string
@@ -33,7 +31,6 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          done?: boolean
           id?: string
           position?: number
           text?: string
