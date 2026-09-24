@@ -69,8 +69,9 @@
   --card-foreground: oklch(0.24 0.01 264);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.24 0.01 264);
-  --primary: oklch(0.442 0.147 294.9);
-  --primary-foreground: oklch(0.99 0.003 300);
+  /* Primary follows the active theme's main colour (was a fixed purple). */
+  --primary: var(--color-olive);
+  --primary-foreground: #ffffff;
   --secondary: oklch(0.968 0.007 247.896);
   --secondary-foreground: oklch(0.208 0.042 265.755);
   --muted: oklch(0.968 0.007 247.896);

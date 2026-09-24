@@ -77,8 +77,8 @@ export function AddFab() {
           aria-label={open ? "Close add menu" : "Add something"}
           aria-expanded={open}
           className={cn(
-            "grid size-14 place-items-center rounded-full bg-olive text-white shadow-lg transition-transform",
-            open && "rotate-45",
+            "grid size-14 place-items-center rounded-full shadow-lg ring-1 ring-black/5 transition-all",
+            open ? "rotate-45 bg-olive text-white" : "bg-white text-olive",
           )}
         >
           <Plus className="size-6" strokeWidth={2} />
