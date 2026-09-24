@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/wins")({
   }),
   head: () => ({
     meta: [
-      { title: "Gallery — Goals of Growth" },
+      { title: "Wins stamps — Goals of Growth" },
       {
         name: "description",
         content:
@@ -65,11 +65,14 @@ function WinsPage() {
   const lifeEvents = winList.filter((w) => w.kind === "life_event");
 
   return (
-    <AppShell title="Gallery">
+    <AppShell title="Wins stamps">
       <div className="mt-4 space-y-8 pb-4 md:grid md:grid-cols-2 md:items-start md:gap-6 md:space-y-0">
-        {/* Gallery intro */}
+        {/* Intro */}
         <p className="font-serif text-sm text-black/50 md:col-span-2">
-          Every stamp you've collected. Spend them on artworks for your gallery
+          Every star stamp you've collected. Spend them on artworks in the{" "}
+          <Link to="/gallery" className="text-olive underline underline-offset-2">
+            gallery
+          </Link>{" "}
           — coming soon.
         </p>
 

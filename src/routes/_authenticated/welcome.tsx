@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Gem, Plus, Repeat, Target, Timer, Trophy } from "lucide-react";
+import { Plus, Repeat, Stamp, Target, Timer, Trophy } from "lucide-react";
 import { StarField, STAR_PATH } from "@/components/goal-ui";
 import { cn } from "@/lib/utils";
 
@@ -37,13 +37,13 @@ const SLIDES: Slide[] = [
     hero: Repeat,
     accent: "bg-gold-deep",
     title: "Build daily habits",
-    body: "Add habits for the morning, afternoon or evening. Tick them off each day to build streaks — and earn crystals as you go.",
+    body: "Add habits for the morning, afternoon or evening, and tick them off each day to build streaks.",
   },
   {
     hero: Trophy,
     accent: "bg-clay-deep",
-    title: "Celebrate your wins",
-    body: "Completed goals, your best habit streaks, and life moments worth remembering all live on your Wins page.",
+    title: "Collect your stamps",
+    body: "Finish a goal to earn a star stamp. They collect on your Wins stamps page, and soon you'll spend them on artworks in the gallery.",
   },
   {
     hero: Plus,
@@ -110,11 +110,11 @@ export function WelcomePage() {
             {slide.body}
           </p>
 
-          {index === 2 && (
+          {index === 3 && (
             <span className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-sm">
-              <Gem className="size-4 text-clay-deep" strokeWidth={2} />
+              <Stamp className="size-4 text-clay-deep" strokeWidth={2} />
               <span className="font-heading text-[11px] uppercase text-olive">
-                2 crystals per habit
+                A star stamp per goal
               </span>
             </span>
           )}

@@ -143,14 +143,14 @@ function OverviewPage() {
       right={
         <Link
           to="/wins"
-          aria-label="Gallery"
+          aria-label="Wins stamps"
           className="flex size-[50px] shrink-0 flex-col items-center justify-center gap-1 rounded-xl bg-white shadow-sm"
         >
           <svg viewBox="0 0 24 24" className="size-5 fill-gold-deep" aria-hidden>
             <path d={STAR_PATH} fillRule="evenodd" />
           </svg>
           <span className="font-heading text-[8px] uppercase leading-none text-black">
-            Gallery
+            Stamps
           </span>
         </Link>
       }
@@ -546,7 +546,6 @@ function MissedYesterday({
 
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ["habits"] });
-    queryClient.invalidateQueries({ queryKey: ["crystals"] });
     queryClient.invalidateQueries({ queryKey: ["habit-streaks"] });
   };
   const toggle = useMutation({
@@ -617,7 +616,6 @@ function TodayHabits() {
 
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ["habits"] });
-    queryClient.invalidateQueries({ queryKey: ["crystals"] });
     queryClient.invalidateQueries({ queryKey: ["habit-streaks"] });
   };
   const toggle = useMutation({

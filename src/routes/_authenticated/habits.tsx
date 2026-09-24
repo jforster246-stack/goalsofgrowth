@@ -5,13 +5,13 @@ import {
 } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { CalendarClock, Gem, Plus } from "lucide-react";
+import { CalendarClock, Plus } from "lucide-react";
 import { AppShell, useAppShell } from "@/components/app-shell";
 import { HabitRow, type HabitTime } from "@/components/home-cards";
 import { Motif, TIME_MOTIF } from "@/components/motif-icons";
 import { HabitFormModal, type EditableHabit } from "@/components/habit-form-modal";
 import { localToday } from "@/components/goal-ui";
-import { crystalsQueryOptions, habitsQueryOptions } from "@/lib/goal-queries";
+import { habitsQueryOptions } from "@/lib/goal-queries";
 import { toggleHabit } from "@/lib/habits.functions";
 import { frequencyLabel } from "@/lib/habit-schedule";
 import { Loading } from "@/components/loading";
@@ -62,7 +62,6 @@ function HabitsPage() {
   const { new: openNew } = Route.useSearch();
   const navigate = useNavigate();
   const { data: habits, isPending } = useQuery(habitsQueryOptions(today));
-  const { data: crystalData } = useQuery(crystalsQueryOptions);
 
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<EditableHabit | null>(null);
@@ -76,22 +75,7 @@ function HabitsPage() {
   };
 
   return (
-    <AppShell
-      title="Habits"
-      hideSettings
-      right={
-        <span
-          className="flex items-center gap-1 rounded-full bg-white px-3 py-1.5 shadow-sm"
-          title="Crystals earned from habits"
-          aria-label={`${crystalData?.crystals ?? 0} crystals`}
-        >
-          <Gem className="size-4 text-clay-deep" strokeWidth={2} />
-          <span className="font-mono text-sm text-olive">
-            {crystalData?.crystals ?? 0}
-          </span>
-        </span>
-      }
-    >
+    <AppShell title="Habits" hideSettings>
       {isPending || !habits ? (
         <Loading />
       ) : (
@@ -132,7 +116,6 @@ function HabitsBody({
 
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ["habits"] });
-    queryClient.invalidateQueries({ queryKey: ["crystals"] });
     queryClient.invalidateQueries({ queryKey: ["habit-streaks"] });
   };
 

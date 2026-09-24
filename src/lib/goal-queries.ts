@@ -1,6 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 import { getGoal, getProfile, listGoals } from "@/lib/goals.functions";
-import { getCrystals, listHabits, listHabitStreaks } from "@/lib/habits.functions";
+import { listHabits, listHabitStreaks } from "@/lib/habits.functions";
 import { listWins } from "@/lib/wins.functions";
 import { listBrainDump } from "@/lib/braindump.functions";
 import { listChecklists } from "@/lib/checklists.functions";
@@ -37,11 +37,6 @@ export const habitStreaksQueryOptions = (today: string) =>
 export const winsQueryOptions = queryOptions({
   queryKey: ["wins"],
   queryFn: () => listWins(),
-});
-
-export const crystalsQueryOptions = queryOptions({
-  queryKey: ["crystals"],
-  queryFn: () => getCrystals(),
 });
 
 export const brainDumpQueryOptions = queryOptions({
