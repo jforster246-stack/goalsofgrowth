@@ -5,9 +5,10 @@ import {
 } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { CalendarClock, Gem, Moon, Plus, Sun, Sunset } from "lucide-react";
+import { CalendarClock, Gem, Plus } from "lucide-react";
 import { AppShell, useAppShell } from "@/components/app-shell";
 import { HabitRow, type HabitTime } from "@/components/home-cards";
+import { Motif, TIME_MOTIF } from "@/components/motif-icons";
 import { HabitFormModal, type EditableHabit } from "@/components/habit-form-modal";
 import { localToday } from "@/components/goal-ui";
 import { crystalsQueryOptions, habitsQueryOptions } from "@/lib/goal-queries";
@@ -41,6 +42,7 @@ type Habit = {
   days_of_week: string | null;
   interval_days: number | null;
   reason: string | null;
+  icon: string | null;
   created_at: string;
   done: boolean;
 };
@@ -48,13 +50,11 @@ type Habit = {
 const TIMES: {
   key: HabitTime;
   label: string;
-  Icon: typeof Sun;
   color: string;
-  activeBg: string;
 }[] = [
-  { key: "morning", label: "Morning", Icon: Sun, color: "text-gold-deep", activeBg: "bg-gold-deep" },
-  { key: "afternoon", label: "Afternoon", Icon: Sunset, color: "text-clay-deep", activeBg: "bg-clay-deep" },
-  { key: "evening", label: "Evening", Icon: Moon, color: "text-olive", activeBg: "bg-olive" },
+  { key: "morning", label: "Morning", color: "text-gold-deep" },
+  { key: "afternoon", label: "Afternoon", color: "text-clay-deep" },
+  { key: "evening", label: "Evening", color: "text-olive" },
 ];
 
 function HabitsPage() {
@@ -153,6 +153,7 @@ function HabitsBody({
       name={habit.name}
       timeOfDay={habit.time_of_day}
       frequencyLabel={frequencyLabel(habit)}
+      icon={habit.icon}
       done={habit.done}
       onOpen={() =>
         onEdit({
@@ -163,6 +164,7 @@ function HabitsBody({
           days_of_week: habit.days_of_week,
           interval_days: habit.interval_days,
           reason: habit.reason,
+          icon: habit.icon,
         })
       }
       onTimer={() =>
@@ -260,7 +262,7 @@ function HabitSection({
   return (
     <section>
       <div className="flex items-center gap-1.5">
-        <time.Icon className={cn("size-4", time.color)} strokeWidth={2} />
+        <Motif id={TIME_MOTIF[time.key]} className={cn("size-4", time.color)} />
         <p className="font-heading text-sm uppercase text-olive">{time.label}</p>
         <span className="ml-1 font-mono text-xs text-olive/50">
           {completed.length}/{habits.length}

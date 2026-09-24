@@ -149,6 +149,7 @@ export const createGoal = createServerFn({ method: "POST" })
       .object({
         title: z.string().trim().min(1).max(140),
         accent: z.enum(ACCENTS).optional(),
+        icon: z.string().trim().max(40).optional(),
       })
       .parse(data),
   )
@@ -170,6 +171,7 @@ export const createGoal = createServerFn({ method: "POST" })
       .insert({
         title: data.title,
         accent,
+        icon: data.icon || null,
         position,
         user_id: context.userId,
       })
@@ -343,6 +345,7 @@ export const updateGoalDetails = createServerFn({ method: "POST" })
         why: z.string().max(2000).optional(),
         vision: z.string().max(2000).optional(),
         accent: z.enum(ACCENTS).optional(),
+        icon: z.string().trim().max(40).optional(),
       })
       .parse(data),
   )
@@ -352,11 +355,13 @@ export const updateGoalDetails = createServerFn({ method: "POST" })
       why?: string;
       vision?: string;
       accent?: string;
+      icon?: string | null;
     } = {};
     if (data.title !== undefined) fields.title = data.title;
     if (data.why !== undefined) fields.why = data.why;
     if (data.vision !== undefined) fields.vision = data.vision;
     if (data.accent !== undefined) fields.accent = data.accent;
+    if (data.icon !== undefined) fields.icon = data.icon || null;
     const { error } = await context.supabase
       .from("goals")
       .update(fields)

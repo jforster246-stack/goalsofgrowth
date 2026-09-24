@@ -4,6 +4,7 @@ import { Minus, Moon, Plus, Sun, Sunset, X } from "lucide-react";
 import type { HabitTime } from "@/components/home-cards";
 import { parseDays, type Frequency } from "@/lib/habit-schedule";
 import { createHabit, deleteHabit, updateHabit } from "@/lib/habits.functions";
+import { IconPicker } from "@/components/icon-picker";
 import { cn } from "@/lib/utils";
 
 export type EditableHabit = {
@@ -14,6 +15,7 @@ export type EditableHabit = {
   days_of_week?: string | null;
   interval_days?: number | null;
   reason: string | null;
+  icon?: string | null;
 };
 
 const TIMES: { key: HabitTime; label: string; Icon: typeof Sun; activeBg: string }[] = [
@@ -94,6 +96,7 @@ export function HabitFormModal({
   const [days, setDays] = useState<Set<number>>(init.days);
   const [interval, setIntervalDays] = useState<number>(init.interval);
   const [reason, setReason] = useState(habit?.reason ?? "");
+  const [icon, setIcon] = useState<string | null>(habit?.icon ?? null);
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["habits"] });
 
@@ -115,6 +118,7 @@ export function HabitFormModal({
             daysOfWeek: daysCsv,
             intervalDays,
             reason: trimmedReason,
+            icon: icon ?? "",
           },
         });
       } else {
@@ -126,6 +130,7 @@ export function HabitFormModal({
             ...(daysCsv ? { daysOfWeek: daysCsv } : {}),
             ...(intervalDays ? { intervalDays } : {}),
             ...(trimmedReason ? { reason: trimmedReason } : {}),
+            ...(icon ? { icon } : {}),
           },
         });
       }
@@ -219,6 +224,12 @@ export function HabitFormModal({
               </button>
             );
           })}
+        </div>
+
+        {/* Icon */}
+        <p className="mt-5 font-heading text-sm uppercase text-olive">Icon</p>
+        <div className="mt-2">
+          <IconPicker value={icon} onChange={setIcon} defaultLabel="Time of day" />
         </div>
 
         {/* Frequency */}

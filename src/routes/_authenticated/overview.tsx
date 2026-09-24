@@ -590,6 +590,7 @@ function MissedYesterday({
             name={h.name}
             timeOfDay={h.time_of_day as HabitTime}
             frequencyLabel={frequencyLabel(h)}
+            icon={h.icon}
             done={false}
             onTimer={() =>
               openTimer({
@@ -653,6 +654,7 @@ function TodayHabits() {
               name={h.name}
               timeOfDay={h.time_of_day as HabitTime}
               frequencyLabel={frequencyLabel(h)}
+              icon={h.icon}
               done={h.done}
               onTimer={() =>
                 openTimer({

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
-import { Archive, Check, Moon, Plus, Sun, Sunset, Timer, Trophy, Undo2 } from "lucide-react";
+import { Archive, Check, Plus, Timer, Trophy, Undo2 } from "lucide-react";
 import { accentOf, goalProgress, STAR_PATH } from "@/components/goal-ui";
+import { Motif, TIME_MOTIF } from "@/components/motif-icons";
 import { cn } from "@/lib/utils";
 
 /** Minimal goal shape the Home cards need (kept loose so mock + real data both fit). */
@@ -8,6 +9,7 @@ export type HomeGoal = {
   id: string;
   title: string;
   accent: string;
+  icon?: string | null;
   steps: { id: string; title: string; done: boolean }[];
 };
 
@@ -18,6 +20,12 @@ function Star({ className }: { className?: string }) {
       <path d={STAR_PATH} fillRule="evenodd" />
     </svg>
   );
+}
+
+/** The goal's chosen motif, or the six-pointed star when none is set. */
+function GoalGlyph({ goal, className }: { goal: HomeGoal; className: string }) {
+  if (goal.icon) return <Motif id={goal.icon} className={className} />;
+  return <Star className={className} />;
 }
 
 /* ------------------------------------------------------------------ */
@@ -46,7 +54,7 @@ export function NextStepRow({
         onClick={onOpen}
         className="flex min-w-0 flex-1 items-center gap-2 text-left"
       >
-        <Star className={cn("size-10 shrink-0", accent.text)} />
+        <GoalGlyph goal={goal} className={cn("size-10 shrink-0", accent.text)} />
         <span className="flex min-w-0 flex-col">
           <span className="font-serif text-sm text-black">
             {step.title}
@@ -111,7 +119,7 @@ export function NextStepPortrait({
         onClick={onOpen}
         className="flex flex-1 flex-col items-start gap-2 text-left"
       >
-        <Star className={cn("size-9 shrink-0", accent.text)} />
+        <GoalGlyph goal={goal} className={cn("size-9 shrink-0", accent.text)} />
         <span className="font-serif text-sm leading-snug text-black [overflow-wrap:anywhere]">
           {step.title}
         </span>
@@ -199,7 +207,7 @@ export function GoalCard({
         )}
       >
         <div className="flex w-full flex-col items-center gap-4">
-          <Star className="size-[86px] text-white" />
+          <GoalGlyph goal={goal} className="size-[86px] text-white" />
           <p className="w-full font-heading text-2xl leading-tight text-white">
             {goal.title}
           </p>
@@ -317,7 +325,7 @@ export function GoalHero({
         accent.surface,
       )}
     >
-      <Star className="size-[86px] text-white" />
+      <GoalGlyph goal={goal} className="size-[86px] text-white" />
       {children}
       <div className="h-3 w-full overflow-hidden rounded-full bg-black/15">
         <div
@@ -405,7 +413,6 @@ export function StepRow({
 
 export type HabitTime = "morning" | "afternoon" | "evening";
 
-const HABIT_ICON = { morning: Sun, afternoon: Sunset, evening: Moon } as const;
 const HABIT_ICON_COLOR = {
   morning: "text-gold-deep",
   afternoon: "text-clay-deep",
@@ -417,6 +424,7 @@ export function HabitRow({
   timeOfDay,
   done,
   frequencyLabel,
+  icon,
   onOpen,
   onTimer,
   onToggle,
@@ -425,11 +433,11 @@ export function HabitRow({
   timeOfDay: HabitTime;
   done: boolean;
   frequencyLabel?: string;
+  icon?: string | null;
   onOpen?: () => void;
   onTimer?: () => void;
   onToggle?: () => void;
 }) {
-  const Icon = HABIT_ICON[timeOfDay];
   const showFrequency = frequencyLabel && frequencyLabel !== "Daily";
 
   return (
@@ -440,10 +448,9 @@ export function HabitRow({
         aria-label={`Edit ${name}`}
         className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
       >
-        <Icon
+        <Motif
+          id={icon || TIME_MOTIF[timeOfDay]}
           className={cn("size-8 shrink-0", HABIT_ICON_COLOR[timeOfDay])}
-          strokeWidth={1.75}
-          aria-hidden
         />
         <span className="flex min-w-0 flex-col">
           <span

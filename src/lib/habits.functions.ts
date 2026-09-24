@@ -131,6 +131,7 @@ export const createHabit = createServerFn({ method: "POST" })
         daysOfWeek: daysOfWeekSchema,
         intervalDays: intervalSchema,
         reason: z.string().trim().max(2000).optional(),
+        icon: z.string().trim().max(40).optional(),
       })
       .parse(data),
   )
@@ -154,6 +155,7 @@ export const createHabit = createServerFn({ method: "POST" })
         days_of_week: data.daysOfWeek ?? null,
         interval_days: data.intervalDays ?? null,
         reason: data.reason ?? null,
+        icon: data.icon || null,
         position,
         user_id: context.userId,
       })
@@ -175,6 +177,7 @@ export const updateHabit = createServerFn({ method: "POST" })
         daysOfWeek: z.string().regex(/^([0-6])(,[0-6])*$/).nullable().optional(),
         intervalDays: z.number().int().min(1).max(365).nullable().optional(),
         reason: z.string().trim().max(2000).optional(),
+        icon: z.string().trim().max(40).optional(),
       })
       .parse(data),
   )
@@ -186,6 +189,7 @@ export const updateHabit = createServerFn({ method: "POST" })
       days_of_week?: string | null;
       interval_days?: number | null;
       reason?: string;
+      icon?: string | null;
     } = {};
     if (data.name !== undefined) fields.name = data.name;
     if (data.timeOfDay !== undefined) fields.time_of_day = data.timeOfDay;
@@ -193,6 +197,7 @@ export const updateHabit = createServerFn({ method: "POST" })
     if (data.daysOfWeek !== undefined) fields.days_of_week = data.daysOfWeek;
     if (data.intervalDays !== undefined) fields.interval_days = data.intervalDays;
     if (data.reason !== undefined) fields.reason = data.reason;
+    if (data.icon !== undefined) fields.icon = data.icon || null;
 
     const { error } = await context.supabase
       .from("habits")

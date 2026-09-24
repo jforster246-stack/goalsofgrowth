@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Check, Plus, X } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { GOAL_ACCENTS, type Accent } from "@/components/goal-ui";
+import { IconPicker } from "@/components/icon-picker";
 import { addStep, createGoal, updateGoalDetails } from "@/lib/goals.functions";
 import { cn } from "@/lib/utils";
 
@@ -44,6 +45,7 @@ export function NewGoalForm({
   const [step, setStep] = useState(0);
   const [title, setTitle] = useState(initialTitle ?? "");
   const [accent, setAccent] = useState<Accent>("mint");
+  const [icon, setIcon] = useState<string | null>(null);
   const [steps, setSteps] = useState<string[]>([]);
   const [stepDraft, setStepDraft] = useState("");
   const [why, setWhy] = useState("");
@@ -51,7 +53,9 @@ export function NewGoalForm({
 
   const createMutation = useMutation({
     mutationFn: async () => {
-      const goal = await createGoal({ data: { title: title.trim(), accent } });
+      const goal = await createGoal({
+        data: { title: title.trim(), accent, ...(icon ? { icon } : {}) },
+      });
       for (const s of steps) {
         await addStep({ data: { goalId: goal.id, title: s } });
       }
@@ -144,6 +148,13 @@ export function NewGoalForm({
                     {accent === a.key && <Check className="size-5" strokeWidth={2.5} />}
                   </button>
                 ))}
+              </div>
+
+              <p className="mt-6 font-heading text-sm uppercase text-olive">
+                Icon
+              </p>
+              <div className="mt-2">
+                <IconPicker value={icon} onChange={setIcon} defaultLabel="Star" />
               </div>
             </div>
           )}

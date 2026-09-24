@@ -6,6 +6,7 @@ import { Check, GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AppShell, useAppShell } from "@/components/app-shell";
 import { accentOf, GOAL_ACCENTS, type Accent } from "@/components/goal-ui";
+import { IconPicker } from "@/components/icon-picker";
 import { GoalHero, StepRow, type HomeGoal } from "@/components/home-cards";
 import {
   GoalCompletePrompt,
@@ -96,6 +97,7 @@ function GoalDetailBody({
   const [why, setWhy] = useState(goal.why ?? "");
   const [vision, setVision] = useState(goal.vision ?? "");
   const [accentValue, setAccentValue] = useState<string>(goal.accent);
+  const [iconValue, setIconValue] = useState<string | null>(goal.icon ?? null);
   const accent = accentOf({ accent: accentValue });
   const [stepDraft, setStepDraft] = useState("");
   const [saved, setSaved] = useState(false);
@@ -120,7 +122,8 @@ function GoalDetailBody({
     setWhy(goal.why ?? "");
     setVision(goal.vision ?? "");
     setAccentValue(goal.accent);
-  }, [goal.id, goal.title, goal.why, goal.vision, goal.accent]);
+    setIconValue(goal.icon ?? null);
+  }, [goal.id, goal.title, goal.why, goal.vision, goal.accent, goal.icon]);
 
   // Keep the local drag order in sync with the latest fetched steps.
   useEffect(() => {
@@ -147,6 +150,7 @@ function GoalDetailBody({
       why: string;
       vision: string;
       accent: Accent;
+      icon: string;
     }) => updateGoalDetails({ data: { id: goalId, ...input } }),
     onSuccess: () => {
       refresh();
@@ -193,7 +197,8 @@ function GoalDetailBody({
     title.trim() !== goal.title ||
     why !== (goal.why ?? "") ||
     vision !== (goal.vision ?? "") ||
-    accentValue !== goal.accent;
+    accentValue !== goal.accent ||
+    (iconValue ?? "") !== (goal.icon ?? "");
 
   const submitStep = (e: React.FormEvent) => {
     e.preventDefault();
@@ -222,8 +227,8 @@ function GoalDetailBody({
 
   return (
     <div className="mt-4 space-y-6 pb-4 md:mx-auto md:max-w-2xl">
-      {/* Hero (previews the chosen colour live) */}
-      <GoalHero goal={{ ...goal, accent: accentValue }}>
+      {/* Hero (previews the chosen colour + icon live) */}
+      <GoalHero goal={{ ...goal, accent: accentValue, icon: iconValue }}>
         <textarea
           ref={titleRef}
           value={title}
@@ -256,6 +261,11 @@ function GoalDetailBody({
             {accentValue === a.key && <Check className="size-5" strokeWidth={2.5} />}
           </button>
         ))}
+      </div>
+
+      {/* Icon (previews live in the hero above) */}
+      <div className="flex justify-center">
+        <IconPicker value={iconValue} onChange={setIconValue} defaultLabel="Star" />
       </div>
 
       {/* Steps */}
@@ -354,6 +364,7 @@ function GoalDetailBody({
             why,
             vision,
             accent: accentValue as Accent,
+            icon: iconValue ?? "",
           })
         }
         disabled={!dirty || saveMutation.isPending}
