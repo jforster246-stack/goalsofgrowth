@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { Reorder, useDragControls } from "framer-motion";
-import { GripVertical, Plus } from "lucide-react";
+import { Check, GripVertical, Plus, Repeat, Target } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { BrainDumpItemModal } from "@/components/braindump-item-modal";
 import { HabitFormModal } from "@/components/habit-form-modal";
@@ -12,8 +12,10 @@ import {
   createBrainDumpItem,
   deleteBrainDumpItem,
   reorderBrainDump,
+  toggleBrainDumpItem,
   updateBrainDumpItem,
 } from "@/lib/braindump.functions";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/braindump")({
   head: () => ({
@@ -32,6 +34,7 @@ export const Route = createFileRoute("/_authenticated/braindump")({
 type Item = {
   id: string;
   text: string;
+  done: boolean;
   position: number;
   created_at: string;
   user_id: string;
@@ -71,6 +74,11 @@ function BrainDumpPage() {
   const reorderMutation = useMutation({
     mutationFn: (orderedIds: string[]) =>
       reorderBrainDump({ data: { orderedIds } }),
+    onSuccess: invalidate,
+  });
+  const toggleMutation = useMutation({
+    mutationFn: (input: { id: string; done: boolean }) =>
+      toggleBrainDumpItem({ data: input }),
     onSuccess: invalidate,
   });
 
@@ -142,6 +150,13 @@ function BrainDumpPage() {
                 key={item.id}
                 item={item}
                 onOpen={() => setActive(item)}
+                onAddGoal={() =>
+                  navigate({ to: "/goals/new", search: { title: item.text } })
+                }
+                onAddHabit={() => setHabitPrefill(item.text)}
+                onToggle={() =>
+                  toggleMutation.mutate({ id: item.id, done: !item.done })
+                }
               />
             ))}
           </Reorder.Group>
@@ -175,19 +190,29 @@ function BrainDumpPage() {
   );
 }
 
-/** One draggable idea: a grip handle plus the (tappable) text. */
+/**
+ * One draggable idea: grip handle, the tappable text (opens edit/delete),
+ * quick "make a goal" / "make a habit" shortcuts, and a tick so the list can
+ * double as a plain to-do.
+ */
 function DraggableItem({
   item,
   onOpen,
+  onAddGoal,
+  onAddHabit,
+  onToggle,
 }: {
   item: Item;
   onOpen: () => void;
+  onAddGoal: () => void;
+  onAddHabit: () => void;
+  onToggle: () => void;
 }) {
   const controls = useDragControls();
 
   return (
     <Reorder.Item as="div" value={item} dragListener={false} dragControls={controls}>
-      <div className="flex w-full items-center gap-1.5 rounded-2xl bg-white py-2.5 pl-1.5 pr-3 shadow-sm">
+      <div className="flex w-full items-center gap-1 rounded-2xl bg-white py-2 pl-1.5 pr-2 shadow-sm">
         <button
           type="button"
           aria-label="Drag to reorder"
@@ -199,10 +224,49 @@ function DraggableItem({
         <button
           type="button"
           onClick={onOpen}
-          className="min-w-0 flex-1 py-1 text-left font-serif text-sm text-black [overflow-wrap:anywhere]"
+          className={cn(
+            "min-w-0 flex-1 py-1 text-left font-serif text-sm [overflow-wrap:anywhere]",
+            item.done
+              ? "text-black/40 line-through decoration-black/30"
+              : "text-black",
+          )}
         >
           {item.text}
         </button>
+
+        <div className="flex shrink-0 items-center gap-0.5">
+          <button
+            type="button"
+            onClick={onAddGoal}
+            aria-label="Make this a goal"
+            title="Make this a goal"
+            className="grid size-8 place-items-center rounded-lg text-olive transition-colors hover:bg-black/5"
+          >
+            <Target className="size-4" strokeWidth={2} />
+          </button>
+          <button
+            type="button"
+            onClick={onAddHabit}
+            aria-label="Make this a habit"
+            title="Make this a habit"
+            className="grid size-8 place-items-center rounded-lg text-olive transition-colors hover:bg-black/5"
+          >
+            <Repeat className="size-4" strokeWidth={2} />
+          </button>
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-label={item.done ? "Mark not done" : "Mark done"}
+            className={cn(
+              "ml-0.5 grid size-7 place-items-center rounded-md border-2 transition-colors",
+              item.done
+                ? "border-olive bg-olive text-white"
+                : "border-black/20 text-transparent hover:border-olive/50",
+            )}
+          >
+            <Check className="size-4" strokeWidth={3} />
+          </button>
+        </div>
       </div>
     </Reorder.Item>
   );
