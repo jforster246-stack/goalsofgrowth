@@ -10,6 +10,8 @@ import { useState } from "react";
 import { AppShell, useAppShell } from "@/components/app-shell";
 import { goalProgress, localToday } from "@/components/goal-ui";
 import { Stamp } from "@/components/stamp";
+import { StampMark } from "@/components/stamp-mark";
+import { HabitDetailModal, type HabitFull } from "@/components/habit-detail-modal";
 import {
   HabitRow,
   NextStepPortrait,
@@ -338,16 +340,15 @@ function StreakBar({
   return (
     <div className="flex items-center gap-1.5">
       {days.map((d, i) => (
-        <span
+        <StampMark
           key={i}
-          aria-hidden
           className={cn(
-            "size-3.5 rounded-full border-2 transition-colors",
+            "size-4",
             d.active
-              ? "border-clay-deep bg-clay-deep"
+              ? "text-clay-deep"
               : d.isToday
-                ? "border-clay-deep bg-transparent"
-                : "border-black/20 bg-transparent",
+                ? "text-clay-deep/40"
+                : "text-black/15",
           )}
         />
       ))}
@@ -398,20 +399,25 @@ function StreakCard({
               {d.letter}
             </span>
             {d.active ? (
-              <span className="grid size-8 place-items-center rounded-full bg-clay-deep text-white">
-                <Check className="size-4" strokeWidth={3} />
-              </span>
+              <StampMark className="size-9 text-clay-deep">
+                <Check className="size-4 text-white" strokeWidth={3} />
+              </StampMark>
             ) : (
-              <span
+              <StampMark
                 className={cn(
-                  "grid size-8 place-items-center rounded-full font-mono text-xs",
-                  d.isToday
-                    ? "ring-2 ring-clay-deep/40 text-clay-deep"
-                    : "text-black/30",
+                  "size-9",
+                  d.isToday ? "text-clay-deep/25" : "text-black/10",
                 )}
               >
-                {d.dateNum}
-              </span>
+                <span
+                  className={cn(
+                    "font-mono text-xs",
+                    d.isToday ? "text-clay-deep" : "text-black/40",
+                  )}
+                >
+                  {d.dateNum}
+                </span>
+              </StampMark>
             )}
           </div>
         ))}
@@ -542,6 +548,7 @@ function MissedYesterday({
   const { openTimer, celebrate } = useAppShell();
   const { data: yesterdayHabits } = useQuery(habitsQueryOptions(yKey));
   const { data: todayHabits } = useQuery(habitsQueryOptions(today));
+  const [selected, setSelected] = useState<HabitFull | null>(null);
 
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ["habits"] });
@@ -590,6 +597,9 @@ function MissedYesterday({
             frequencyLabel={frequencyLabel(h)}
             icon={h.icon}
             done={false}
+            onOpen={() =>
+              setSelected({ ...h, time_of_day: h.time_of_day as HabitTime })
+            }
             onTimer={() =>
               openTimer({
                 title: h.name,
@@ -601,6 +611,9 @@ function MissedYesterday({
           />
         ))}
       </div>
+      {selected && (
+        <HabitDetailModal habit={selected} onClose={() => setSelected(null)} />
+      )}
     </section>
   );
 }
@@ -612,6 +625,7 @@ function TodayHabits() {
   const queryClient = useQueryClient();
   const { openTimer, celebrate } = useAppShell();
   const { data: habits } = useQuery(habitsQueryOptions(today));
+  const [selected, setSelected] = useState<HabitFull | null>(null);
 
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ["habits"] });
@@ -653,6 +667,9 @@ function TodayHabits() {
               frequencyLabel={frequencyLabel(h)}
               icon={h.icon}
               done={h.done}
+              onOpen={() =>
+                setSelected({ ...h, time_of_day: h.time_of_day as HabitTime })
+              }
               onTimer={() =>
                 openTimer({
                   title: h.name,
@@ -665,6 +682,9 @@ function TodayHabits() {
           ))
         )}
       </div>
+      {selected && (
+        <HabitDetailModal habit={selected} onClose={() => setSelected(null)} />
+      )}
     </section>
   );
 }

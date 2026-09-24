@@ -10,7 +10,8 @@ import { CalendarClock, Plus } from "lucide-react";
 import { AppShell, useAppShell } from "@/components/app-shell";
 import { HabitRow, type HabitTime } from "@/components/home-cards";
 import { Motif, TIME_MOTIF } from "@/components/motif-icons";
-import { HabitFormModal, type EditableHabit } from "@/components/habit-form-modal";
+import { HabitFormModal } from "@/components/habit-form-modal";
+import { HabitDetailModal } from "@/components/habit-detail-modal";
 import { Stamp } from "@/components/stamp";
 import { localToday } from "@/components/goal-ui";
 import {
@@ -76,13 +77,12 @@ function HabitsPage() {
   const stampCount = mergeStamps(stamps, goals).length + (habitBonus ?? 0);
 
   const [adding, setAdding] = useState(false);
-  const [editing, setEditing] = useState<EditableHabit | null>(null);
+  const [selected, setSelected] = useState<Habit | null>(null);
 
   // Opened straight from the FAB (?new=true) — show the sheet, then clear the flag.
   const showAdd = adding || openNew;
   const closeModal = () => {
     setAdding(false);
-    setEditing(null);
     if (openNew) navigate({ to: "/habits", search: { new: false }, replace: true });
   };
 
@@ -110,15 +110,14 @@ function HabitsPage() {
           habits={habits as Habit[]}
           today={today}
           onAdd={() => setAdding(true)}
-          onEdit={setEditing}
+          onOpen={setSelected}
         />
       )}
 
-      {editing ? (
-        <HabitFormModal habit={editing} onClose={closeModal} />
-      ) : (
-        showAdd && <HabitFormModal onClose={closeModal} />
+      {selected && (
+        <HabitDetailModal habit={selected} onClose={() => setSelected(null)} />
       )}
+      {showAdd && <HabitFormModal onClose={closeModal} />}
     </AppShell>
   );
 }
@@ -131,12 +130,12 @@ function HabitsBody({
   habits,
   today,
   onAdd,
-  onEdit,
+  onOpen,
 }: {
   habits: Habit[];
   today: string;
   onAdd: () => void;
-  onEdit: (habit: EditableHabit) => void;
+  onOpen: (habit: Habit) => void;
 }) {
   const queryClient = useQueryClient();
   const { openTimer, celebrate } = useAppShell();
@@ -167,18 +166,7 @@ function HabitsBody({
       frequencyLabel={frequencyLabel(habit)}
       icon={habit.icon}
       done={habit.done}
-      onOpen={() =>
-        onEdit({
-          id: habit.id,
-          name: habit.name,
-          time_of_day: habit.time_of_day,
-          frequency: habit.frequency,
-          days_of_week: habit.days_of_week,
-          interval_days: habit.interval_days,
-          reason: habit.reason,
-          icon: habit.icon,
-        })
-      }
+      onOpen={() => onOpen(habit)}
       onTimer={() =>
         openTimer({
           title: habit.name,
