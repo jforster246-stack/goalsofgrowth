@@ -7,7 +7,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { supabase } from "@/integrations/supabase/client";
@@ -124,7 +124,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
         {/* Apply the saved colour theme before first paint to avoid a flash. */}
@@ -146,17 +146,33 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+  const signedInUserId = useRef<string | null>(null);
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
-      if (
-        event !== "SIGNED_IN" &&
-        event !== "SIGNED_OUT" &&
-        event !== "USER_UPDATED"
-      )
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "INITIAL_SESSION") {
+        signedInUserId.current = session?.user.id ?? null;
         return;
-      router.invalidate();
-      if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
+      }
+
+      if (event === "SIGNED_IN") {
+        const nextUserId = session?.user.id ?? null;
+        if (nextUserId === signedInUserId.current) return;
+        signedInUserId.current = nextUserId;
+      } else if (event === "SIGNED_OUT") {
+        signedInUserId.current = null;
+      } else if (event !== "USER_UPDATED") {
+        return;
+      }
+
+      // Defer router work until the auth callback has released its internal lock.
+      // This also avoids invalidating a route while React is hydrating it.
+      window.setTimeout(() => {
+        router.invalidate().catch((error: unknown) => {
+          reportLovableError(error, { boundary: "auth_router_invalidation" });
+        });
+        if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
+      }, 0);
     });
     return () => sub.subscription.unsubscribe();
   }, [router, queryClient]);
