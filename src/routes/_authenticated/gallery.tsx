@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/app-shell";
+import { Stamp } from "@/components/stamp";
 import { goalProgress, STAR_PATH } from "@/components/goal-ui";
 import { goalsQueryOptions } from "@/lib/goal-queries";
 
@@ -25,11 +26,7 @@ function GalleryPage() {
   return (
     <AppShell title="Gallery">
       <div className="mt-4 flex flex-col items-center justify-center gap-5 py-16 text-center">
-        <span className="grid size-20 place-items-center rounded-full bg-olive/10">
-          <svg viewBox="0 0 24 24" className="size-9 fill-olive" aria-hidden>
-            <path d={STAR_PATH} fillRule="evenodd" />
-          </svg>
-        </span>
+        <Stamp icon={null} accent="sea" className="size-24" />
 
         <div>
           <p className="font-heading text-lg uppercase tracking-wide text-olive">
