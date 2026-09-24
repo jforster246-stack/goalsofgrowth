@@ -78,6 +78,13 @@
       "when": 1790467200000,
       "tag": "0010_habit_custom_frequency",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1790208308767,
+      "tag": "0011_apply_habit_custom_frequency_and_archived",
+      "breakpoints": true
     }
   ]
 }
