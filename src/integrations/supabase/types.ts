@@ -14,6 +14,62 @@ export type Database = {
   }
   public: {
     Tables: {
+      bingo_cards: {
+        Row: {
+          created_at: string
+          id: string
+          size: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          size?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          size?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      bingo_cells: {
+        Row: {
+          card_id: string
+          created_at: string
+          done: boolean
+          id: string
+          position: number
+          text: string
+        }
+        Insert: {
+          card_id: string
+          created_at?: string
+          done?: boolean
+          id?: string
+          position: number
+          text?: string
+        }
+        Update: {
+          card_id?: string
+          created_at?: string
+          done?: boolean
+          id?: string
+          position?: number
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bingo_cells_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "bingo_cards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       brain_dump_items: {
         Row: {
           created_at: string
@@ -79,6 +135,7 @@ export type Database = {
       checklists: {
         Row: {
           created_at: string
+          icon: string | null
           id: string
           position: number
           title: string
@@ -86,6 +143,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          icon?: string | null
           id?: string
           position?: number
           title: string
@@ -93,6 +151,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          icon?: string | null
           id?: string
           position?: number
           title?: string
