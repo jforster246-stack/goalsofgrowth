@@ -3,6 +3,7 @@ import { getGoal, getProfile, listGoals } from "@/lib/goals.functions";
 import { getCrystals, listHabits, listHabitStreaks } from "@/lib/habits.functions";
 import { listWins } from "@/lib/wins.functions";
 import { listBrainDump } from "@/lib/braindump.functions";
+import { listChecklists } from "@/lib/checklists.functions";
 
 export const goalsQueryOptions = queryOptions({
   queryKey: ["goals"],
@@ -45,4 +46,9 @@ export const crystalsQueryOptions = queryOptions({
 export const brainDumpQueryOptions = queryOptions({
   queryKey: ["brain-dump"],
   queryFn: () => listBrainDump(),
+});
+
+export const checklistsQueryOptions = queryOptions({
+  queryKey: ["checklists"],
+  queryFn: () => listChecklists(),
 });

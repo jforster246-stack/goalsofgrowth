@@ -38,6 +38,65 @@ export type Database = {
         }
         Relationships: []
       }
+      checklists: {
+        Row: {
+          created_at: string
+          id: string
+          position: number
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          position?: number
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          position?: number
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      checklist_items: {
+        Row: {
+          checklist_id: string
+          created_at: string
+          done: boolean
+          id: string
+          position: number
+          text: string
+        }
+        Insert: {
+          checklist_id: string
+          created_at?: string
+          done?: boolean
+          id?: string
+          position?: number
+          text: string
+        }
+        Update: {
+          checklist_id?: string
+          created_at?: string
+          done?: boolean
+          id?: string
+          position?: number
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checklist_items_checklist_id_fkey"
+            columns: ["checklist_id"]
+            isOneToOne: false
+            referencedRelation: "checklists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goals: {
         Row: {
           accent: string
