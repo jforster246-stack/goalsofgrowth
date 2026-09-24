@@ -2,8 +2,17 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState, type ReactNode } from "react";
 import { Reorder, useDragControls } from "framer-motion";
-import { Check, GripVertical, Plus, Repeat, Target } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  GripVertical,
+  LayoutGrid,
+  Plus,
+  Repeat,
+  Target,
+} from "lucide-react";
 import { AppShell } from "@/components/app-shell";
+import { WeeklyBingo } from "@/components/weekly-bingo";
 import { BrainDumpItemModal } from "@/components/braindump-item-modal";
 import { HabitFormModal } from "@/components/habit-form-modal";
 import { Loading } from "@/components/loading";
@@ -50,6 +59,7 @@ function BrainDumpPage() {
   const [active, setActive] = useState<Item | null>(null);
   const [habitPrefill, setHabitPrefill] = useState<string | null>(null);
   const [showDone, setShowDone] = useState(false);
+  const [bingoOpen, setBingoOpen] = useState(false);
 
   // Keep the local (drag-reorderable) copy in step with the server list.
   useEffect(() => {
@@ -112,7 +122,31 @@ function BrainDumpPage() {
   return (
     <AppShell title="Brain dump" hideSettings>
       <div className="mt-4 pb-4">
-        <p className="font-serif text-sm text-black/50">
+        {/* Weekly bingo (collapsible) */}
+        <button
+          type="button"
+          onClick={() => setBingoOpen((v) => !v)}
+          aria-expanded={bingoOpen}
+          className="flex w-full items-center gap-2 rounded-2xl bg-white px-4 py-3 shadow-sm"
+        >
+          <LayoutGrid className="size-4 text-olive" strokeWidth={2} />
+          <span className="font-heading text-sm uppercase text-olive">
+            Weekly bingo
+          </span>
+          <ChevronDown
+            className={cn(
+              "ml-auto size-4 text-black/40 transition-transform",
+              bingoOpen && "rotate-180",
+            )}
+          />
+        </button>
+        {bingoOpen && (
+          <div className="mt-2">
+            <WeeklyBingo />
+          </div>
+        )}
+
+        <p className="mt-6 font-serif text-sm text-black/50">
           Everything you want to do or try. Drag to reorder, or tap an idea to
           turn it into a goal or a habit.
         </p>

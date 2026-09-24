@@ -4,6 +4,7 @@ import { getCrystals, listHabits, listHabitStreaks } from "@/lib/habits.function
 import { listWins } from "@/lib/wins.functions";
 import { listBrainDump } from "@/lib/braindump.functions";
 import { listChecklists } from "@/lib/checklists.functions";
+import { getBingo } from "@/lib/bingo.functions";
 
 export const goalsQueryOptions = queryOptions({
   queryKey: ["goals"],
@@ -51,4 +52,9 @@ export const brainDumpQueryOptions = queryOptions({
 export const checklistsQueryOptions = queryOptions({
   queryKey: ["checklists"],
   queryFn: () => listChecklists(),
+});
+
+export const bingoQueryOptions = queryOptions({
+  queryKey: ["bingo"],
+  queryFn: () => getBingo(),
 });
