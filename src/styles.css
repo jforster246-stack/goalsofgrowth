@@ -176,6 +176,19 @@
   --color-star: #7a5560;
 }
 
+/* Wild berries — amethyst, faded copper and wine plum on soft lavender. */
+:root[data-theme="wild-berries"] {
+  --background: #ece4ed;
+  --color-olive: #241d37;
+  --color-sage: #8c80b5;
+  --color-gold: #95805f;
+  --color-gold-deep: #6e5e44;
+  --color-clay: #5c1f31;
+  --color-clay-deep: #3f1522;
+  --color-focus: #241d37;
+  --color-star: #8c80b5;
+}
+
 /* ============= Design tokens ============= */
 
 @theme {

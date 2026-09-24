@@ -1,6 +1,6 @@
 /** Colour themes the user can switch between under settings. */
 
-export type ThemeId = "natural" | "ice-cream" | "dark-magic";
+export type ThemeId = "natural" | "ice-cream" | "dark-magic" | "wild-berries";
 
 export const THEMES: {
   id: ThemeId;
@@ -26,6 +26,12 @@ export const THEMES: {
     label: "Dark magic",
     blurb: "Deep forest, plum and crimson",
     swatches: ["#24361f", "#8a2733", "#6e4a59", "#dde1d6"],
+  },
+  {
+    id: "wild-berries",
+    label: "Wild berries",
+    blurb: "Amethyst, copper and wine plum",
+    swatches: ["#241d37", "#5c1f31", "#8c80b5", "#ece4ed"],
   },
 ];
 
