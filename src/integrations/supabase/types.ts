@@ -43,7 +43,6 @@ export type Database = {
           accent: string
           archived_at: string | null
           created_at: string
-          icon: string | null
           id: string
           position: number
           title: string
@@ -55,7 +54,6 @@ export type Database = {
           accent?: string
           archived_at?: string | null
           created_at?: string
-          icon?: string | null
           id?: string
           position?: number
           title: string
@@ -67,7 +65,6 @@ export type Database = {
           accent?: string
           archived_at?: string | null
           created_at?: string
-          icon?: string | null
           id?: string
           position?: number
           title?: string
@@ -111,7 +108,6 @@ export type Database = {
           created_at: string
           days_of_week: string | null
           frequency: string
-          icon: string | null
           id: string
           interval_days: number | null
           name: string
@@ -124,7 +120,6 @@ export type Database = {
           created_at?: string
           days_of_week?: string | null
           frequency?: string
-          icon?: string | null
           id?: string
           interval_days?: number | null
           name: string
@@ -137,7 +132,6 @@ export type Database = {
           created_at?: string
           days_of_week?: string | null
           frequency?: string
-          icon?: string | null
           id?: string
           interval_days?: number | null
           name?: string
