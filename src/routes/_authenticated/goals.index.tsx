@@ -4,8 +4,9 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
-import { Plus } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Reorder, useDragControls } from "framer-motion";
+import { GripVertical, Plus } from "lucide-react";
 import { AppShell, useAppShell } from "@/components/app-shell";
 import { GoalCard } from "@/components/home-cards";
 import {
@@ -14,7 +15,12 @@ import {
 } from "@/components/goal-complete-prompt";
 import { goalProgress, type GoalWithSteps } from "@/components/goal-ui";
 import { goalsQueryOptions } from "@/lib/goal-queries";
-import { claimUnownedGoals, setGoalArchived, toggleStep } from "@/lib/goals.functions";
+import {
+  claimUnownedGoals,
+  reorderGoals,
+  setGoalArchived,
+  toggleStep,
+} from "@/lib/goals.functions";
 import { createWin } from "@/lib/wins.functions";
 import { createStamp } from "@/lib/stamps.functions";
 
@@ -63,8 +69,24 @@ function GoalsListPage() {
       .catch(() => {});
   }, [queryClient]);
 
-  const active = (goals as Goal[]).filter((g) => !g.archived_at);
+  const active = useMemo(
+    () => (goals as Goal[]).filter((g) => !g.archived_at),
+    [goals],
+  );
   const archived = (goals as Goal[]).filter((g) => g.archived_at);
+
+  // Local, drag-reorderable copy of the active goals.
+  const [order, setOrder] = useState<Goal[]>(active);
+  useEffect(() => setOrder(active), [active]);
+
+  const reorderMutation = useMutation({
+    mutationFn: (orderedIds: string[]) => reorderGoals({ data: { orderedIds } }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["goals"] }),
+  });
+  const handleReorder = (next: Goal[]) => {
+    setOrder(next);
+    reorderMutation.mutate(next.map((g) => g.id));
+  };
 
   return (
     <AppShell title="All goals" hideSettings>
@@ -85,11 +107,16 @@ function GoalsListPage() {
         </div>
       ) : (
         <div className="mt-4 pb-4">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            {active.map((goal) => (
-              <GoalCardItem key={goal.id} goal={goal} />
+          <Reorder.Group
+            as="div"
+            values={order}
+            onReorder={handleReorder}
+            className="grid grid-cols-1 gap-4 md:grid-cols-3"
+          >
+            {order.map((goal) => (
+              <DraggableGoalCard key={goal.id} goal={goal} />
             ))}
-          </div>
+          </Reorder.Group>
           {active.length === 0 && (
             <p className="rounded-2xl bg-white/60 px-4 py-4 text-center font-serif text-sm text-black/40">
               All your goals are complete — nice work.
@@ -121,8 +148,30 @@ function GoalsListPage() {
   );
 }
 
+/** Wraps a goal card so it can be dragged to reorder via its grip handle. */
+function DraggableGoalCard({ goal }: { goal: Goal }) {
+  const controls = useDragControls();
+  return (
+    <Reorder.Item as="div" value={goal} dragListener={false} dragControls={controls}>
+      <GoalCardItem
+        goal={goal}
+        dragHandle={
+          <button
+            type="button"
+            aria-label="Drag to reorder"
+            onPointerDown={(e) => controls.start(e)}
+            className="absolute left-2 top-2 z-20 grid size-8 cursor-grab touch-none place-items-center rounded-full bg-white/25 text-white backdrop-blur transition-colors hover:bg-white/40 active:cursor-grabbing"
+          >
+            <GripVertical className="size-4" strokeWidth={2} />
+          </button>
+        }
+      />
+    </Reorder.Item>
+  );
+}
+
 /** A goal rendered as the full card. When complete it offers add-to-wins + archive. */
-function GoalCardItem({ goal }: { goal: Goal }) {
+function GoalCardItem({ goal, dragHandle }: { goal: Goal; dragHandle?: ReactNode }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { openFocus, celebrate } = useAppShell();
@@ -195,6 +244,7 @@ function GoalCardItem({ goal }: { goal: Goal }) {
     <>
       <GoalCard
         goal={goal}
+        dragHandle={dragHandle}
         onOpen={open}
         onAdd={open}
         onFocus={() => next && openFocus(next.id)}

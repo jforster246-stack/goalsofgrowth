@@ -223,6 +223,22 @@ export const deleteGoal = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const reorderGoals = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) =>
+    z.object({ orderedIds: z.array(z.string().uuid()).min(1) }).parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const supabase = context.supabase;
+    // RLS scopes updates to the user's own goals.
+    await Promise.all(
+      data.orderedIds.map((id, index) =>
+        supabase.from("goals").update({ position: index }).eq("id", id),
+      ),
+    );
+    return { ok: true };
+  });
+
 export const addStep = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) =>

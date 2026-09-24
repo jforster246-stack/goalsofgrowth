@@ -169,6 +169,7 @@ export function GoalCard({
   onAdd,
   onAddWin,
   onArchive,
+  dragHandle,
 }: {
   goal: HomeGoal;
   isGoalOfDay?: boolean;
@@ -178,6 +179,7 @@ export function GoalCard({
   onAdd?: () => void;
   onAddWin?: () => void;
   onArchive?: () => void;
+  dragHandle?: ReactNode;
 }) {
   const accent = accentOf(goal);
   const progress = goalProgress(goal);
@@ -196,6 +198,8 @@ export function GoalCard({
           Goal of the day
         </span>
       )}
+
+      {dragHandle}
 
       {/* Coloured header */}
       <button
