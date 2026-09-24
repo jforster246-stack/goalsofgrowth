@@ -10,11 +10,10 @@ import { Flame, Heart, Plus, Trophy, X } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { WinFormModal } from "@/components/win-form-modal";
 import { Stamp } from "@/components/stamp";
-import { goalProgress, localToday, STAR_PATH } from "@/components/goal-ui";
+import { goalProgress, localToday } from "@/components/goal-ui";
 import {
   goalsQueryOptions,
   habitStreaksQueryOptions,
-  stampsQueryOptions,
   winsQueryOptions,
 } from "@/lib/goal-queries";
 import { deleteWin } from "@/lib/wins.functions";
@@ -63,7 +62,6 @@ function WinsPage() {
   const { data: goals } = useQuery(goalsQueryOptions);
   const { data: streaks } = useQuery(habitStreaksQueryOptions(today));
   const { data: wins } = useQuery(winsQueryOptions);
-  const { data: stamps } = useQuery(stampsQueryOptions);
 
   const [adding, setAdding] = useState(false);
   const showModal = adding || openNew;
@@ -82,81 +80,42 @@ function WinsPage() {
   return (
     <AppShell title="Gallery">
       <div className="mt-4 space-y-8 pb-4 md:grid md:grid-cols-2 md:items-start md:gap-6 md:space-y-0">
-        {/* Stamps — earned by completing goals */}
+        {/* Stamps — one for every completed goal */}
         <section className="md:col-span-2">
           <div className="flex items-center gap-1.5">
             <p className="font-heading text-sm uppercase text-olive">
               Your stamps
             </p>
             <span className="ml-1 font-mono text-xs text-olive/50">
-              {stamps?.length ?? 0}
+              {completedGoals.length}
             </span>
           </div>
           <p className="mt-1 font-serif text-xs text-black/40">
-            Earn a stamp each time you finish a goal. Spend them on artworks for
-            your gallery — coming soon.
+            You earn a stamp each time you finish a goal. Spend them on artworks
+            for your gallery — coming soon.
           </p>
-          {!stamps || stamps.length === 0 ? (
+          {completedGoals.length === 0 ? (
             <p className="mt-4 rounded-2xl bg-white/60 px-4 py-4 font-serif text-sm text-black/40">
               Complete a goal to earn your first stamp.
             </p>
           ) : (
             <div className="mt-4 flex flex-wrap gap-3">
-              {stamps.map((s) => (
-                <div
-                  key={s.id}
-                  className="flex w-[76px] flex-col items-center gap-1.5 text-center"
-                >
-                  <Stamp icon={s.icon} accent={s.accent} />
-                  <span className="font-serif text-[10px] leading-tight text-black/50 [overflow-wrap:anywhere]">
-                    for {s.title}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* Completed goals */}
-        <section>
-          <div className="flex items-center gap-1.5">
-            <p className="font-heading text-sm uppercase text-olive">
-              Completed goals
-            </p>
-            <span className="ml-1 font-mono text-xs text-olive/50">
-              {completedGoals.length}
-            </span>
-          </div>
-          <div className="mt-4 space-y-2">
-            {completedGoals.length === 0 ? (
-              <p className="rounded-2xl bg-white/60 px-4 py-4 font-serif text-sm text-black/40">
-                Finish every step of a goal and it'll appear here.
-              </p>
-            ) : (
-              completedGoals.map((goal) => (
+              {completedGoals.map((goal) => (
                 <Link
                   key={goal.id}
                   to="/goals/$goalId"
                   params={{ goalId: goal.id }}
-                  className="flex items-center gap-3 rounded-2xl bg-white py-3 pl-3 pr-4 shadow-sm"
+                  aria-label={`Goal: ${goal.title}`}
+                  className="flex w-[76px] flex-col items-center gap-1.5 text-center"
                 >
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="size-8 shrink-0 fill-olive"
-                    aria-hidden
-                  >
-                    <path d={STAR_PATH} fillRule="evenodd" />
-                  </svg>
-                  <span className="min-w-0 flex-1 truncate font-serif text-sm text-black">
-                    {goal.title}
-                  </span>
-                  <span className="shrink-0 font-heading text-[10px] uppercase text-olive/60">
-                    Done
+                  <Stamp icon={goal.icon} accent={goal.accent} />
+                  <span className="font-serif text-[10px] leading-tight text-black/50 [overflow-wrap:anywhere]">
+                    for {goal.title}
                   </span>
                 </Link>
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Habit streaks */}
