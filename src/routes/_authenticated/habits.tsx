@@ -1,5 +1,6 @@
 import {
   createFileRoute,
+  Link,
   useNavigate,
   type SearchSchemaInput,
 } from "@tanstack/react-router";
@@ -10,8 +11,9 @@ import { AppShell, useAppShell } from "@/components/app-shell";
 import { HabitRow, type HabitTime } from "@/components/home-cards";
 import { Motif, TIME_MOTIF } from "@/components/motif-icons";
 import { HabitFormModal, type EditableHabit } from "@/components/habit-form-modal";
-import { localToday } from "@/components/goal-ui";
-import { habitsQueryOptions } from "@/lib/goal-queries";
+import { Stamp } from "@/components/stamp";
+import { goalProgress, localToday } from "@/components/goal-ui";
+import { goalsQueryOptions, habitsQueryOptions } from "@/lib/goal-queries";
 import { toggleHabit } from "@/lib/habits.functions";
 import { frequencyLabel } from "@/lib/habit-schedule";
 import { Loading } from "@/components/loading";
@@ -62,6 +64,8 @@ function HabitsPage() {
   const { new: openNew } = Route.useSearch();
   const navigate = useNavigate();
   const { data: habits, isPending } = useQuery(habitsQueryOptions(today));
+  const { data: goals } = useQuery(goalsQueryOptions);
+  const stampCount = (goals ?? []).filter((g) => goalProgress(g).complete).length;
 
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<EditableHabit | null>(null);
@@ -75,7 +79,22 @@ function HabitsPage() {
   };
 
   return (
-    <AppShell title="Habits" hideSettings>
+    <AppShell
+      title="Habits"
+      titleLeft
+      hideSettings
+      right={
+        <Link
+          to="/wins"
+          aria-label={`${stampCount} stamps earned`}
+          title="Stamps earned"
+          className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-sm"
+        >
+          <Stamp icon={null} accent="sea" className="size-5" />
+          <span className="font-mono text-sm text-olive">{stampCount}</span>
+        </Link>
+      }
+    >
       {isPending || !habits ? (
         <Loading />
       ) : (

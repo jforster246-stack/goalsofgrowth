@@ -55,12 +55,14 @@ export function AppShell({
   right,
   backTo,
   title,
+  titleLeft,
   hideSettings,
   children,
 }: {
   right?: ReactNode;
   backTo?: "/overview" | "/goals";
   title?: string;
+  titleLeft?: boolean;
   hideSettings?: boolean;
   children: ReactNode;
 }) {
@@ -129,7 +131,12 @@ export function AppShell({
       <Sidebar onOpenSettings={() => setProfileOpen(true)} />
       <div className="relative z-[1] mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 pb-28 pt-6 md:max-w-3xl lg:max-w-5xl lg:pb-12">
         <header className="flex items-center justify-between gap-2">
-          <div className="size-10 shrink-0">
+          <div
+            className={cn(
+              "size-10 shrink-0",
+              titleLeft && hideSettings && !backTo && "hidden",
+            )}
+          >
             {backTo ? (
               <button
                 type="button"
@@ -164,7 +171,12 @@ export function AppShell({
           </div>
 
           {title ? (
-            <h1 className="min-w-0 flex-1 truncate text-center font-heading text-lg tracking-tight">
+            <h1
+              className={cn(
+                "min-w-0 flex-1 truncate font-heading text-lg tracking-tight",
+                titleLeft ? "text-left" : "text-center",
+              )}
+            >
               {title}
             </h1>
           ) : (
