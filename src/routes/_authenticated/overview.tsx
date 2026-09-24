@@ -242,12 +242,6 @@ function OverviewPage() {
           </div>
         </div>
 
-        <Link
-          to="/goals"
-          className="mt-8 block text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground"
-        >
-          See all goals
-        </Link>
       </div>
 
       {/* "Nice work" popup after completing a step (when the goal isn't finished yet) */}
