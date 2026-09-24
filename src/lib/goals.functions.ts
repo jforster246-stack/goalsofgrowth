@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const ACCENTS = ["mint", "sea", "clay"] as const;
+const ACCENTS = ["mint", "sea", "clay", "plum", "rose", "sky"] as const;
 
 const PROFILE_FIELDS =
   "id, display_name, streak_count, longest_streak, last_active_date, goal_of_day_id, goal_of_day_date";

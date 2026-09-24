@@ -37,6 +37,33 @@ export const ACCENT_STYLES = {
     check: "fill-clay",
     text: "text-clay-deep",
   },
+  // Plum (stored as "plum")
+  plum: {
+    surface: "bg-plum",
+    deep: "bg-plum-deep",
+    dot: "bg-plum-deep",
+    bar: "bg-plum",
+    check: "fill-plum",
+    text: "text-plum-deep",
+  },
+  // Rose (stored as "rose")
+  rose: {
+    surface: "bg-rose",
+    deep: "bg-rose-deep",
+    dot: "bg-rose-deep",
+    bar: "bg-rose",
+    check: "fill-rose",
+    text: "text-rose-deep",
+  },
+  // Sky (stored as "sky")
+  sky: {
+    surface: "bg-sky",
+    deep: "bg-sky-deep",
+    dot: "bg-sky-deep",
+    bar: "bg-sky",
+    check: "fill-sky",
+    text: "text-sky-deep",
+  },
 } as const;
 
 export type Accent = keyof typeof ACCENT_STYLES;
@@ -46,6 +73,9 @@ export const GOAL_ACCENTS: { key: Accent; label: string; swatch: string }[] = [
   { key: "mint", label: "Sage", swatch: "bg-sage" },
   { key: "sea", label: "Gold", swatch: "bg-gold" },
   { key: "clay", label: "Clay", swatch: "bg-clay" },
+  { key: "plum", label: "Plum", swatch: "bg-plum" },
+  { key: "rose", label: "Rose", swatch: "bg-rose" },
+  { key: "sky", label: "Sky", swatch: "bg-sky" },
 ];
 
 export function accentOf(goal: { accent: string }) {

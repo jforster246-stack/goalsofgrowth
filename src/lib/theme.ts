@@ -18,31 +18,31 @@ export const THEMES: {
     id: "natural",
     label: "Natural",
     blurb: "Warm autumn earth tones",
-    swatches: ["#3b4a30", "#d19a4a", "#a24b57", "#f4eee1"],
+    swatches: ["#6f7c4e", "#d19a4a", "#a24b57", "#6a4b7a", "#b56b5e", "#5f8a7d"],
   },
   {
     id: "ice-cream",
     label: "Ice cream",
     blurb: "Soft strawberry, mint and toffee",
-    swatches: ["#6e4326", "#cf7f92", "#6aa07c", "#fff7ec"],
+    swatches: ["#6aa07c", "#cf9a5a", "#cf7f92", "#9a7bb0", "#d76b86", "#7fbfc0"],
   },
   {
     id: "dark-magic",
     label: "Dark magic",
     blurb: "Deep forest, plum and crimson",
-    swatches: ["#24361f", "#8a2733", "#6e4a59", "#dde1d6"],
+    swatches: ["#4e6b4a", "#6e4a59", "#8a2733", "#574266", "#7a5560", "#3f6660"],
   },
   {
     id: "wild-berries",
     label: "Wild berries",
     blurb: "Amethyst, copper and wine plum",
-    swatches: ["#241d37", "#5c1f31", "#8c80b5", "#ece4ed"],
+    swatches: ["#8c80b5", "#95805f", "#5c1f31", "#6f5b9c", "#a85f7a", "#5f6b9c"],
   },
   {
     id: "mono",
     label: "Black & white",
     blurb: "A simple monochrome palette",
-    swatches: ["#1c1c1c", "#4b4b4b", "#6f6f6f", "#f4f4f3"],
+    swatches: ["#4b4b4b", "#6f6f6f", "#262626", "#565656", "#7d7d7d", "#8f8f8f"],
   },
 ];
 

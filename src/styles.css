@@ -147,6 +147,12 @@
   --color-gold-deep: #9c5a28;
   --color-clay: #a24b57;
   --color-clay-deep: #6e1d3c;
+  --color-plum: #6a4b7a;
+  --color-plum-deep: #46315a;
+  --color-rose: #b56b5e;
+  --color-rose-deep: #86463b;
+  --color-sky: #5f8a7d;
+  --color-sky-deep: #3d5f55;
   --color-focus: #3b4a30;
   --color-star: #d9c39c;
 }
@@ -160,6 +166,12 @@
   --color-gold-deep: #9a6a34;
   --color-clay: #cf7f92;
   --color-clay-deep: #a85166;
+  --color-plum: #9a7bb0;
+  --color-plum-deep: #6e5188;
+  --color-rose: #d76b86;
+  --color-rose-deep: #a8465f;
+  --color-sky: #7fbfc0;
+  --color-sky-deep: #4e8f90;
   --color-focus: #6e4326;
   --color-star: #f2c9d3;
 }
@@ -173,6 +185,12 @@
   --color-gold-deep: #4a3340;
   --color-clay: #8a2733;
   --color-clay-deep: #6e0f1b;
+  --color-plum: #574266;
+  --color-plum-deep: #3a2a45;
+  --color-rose: #7a5560;
+  --color-rose-deep: #533a43;
+  --color-sky: #3f6660;
+  --color-sky-deep: #274740;
   --color-focus: #24361f;
   --color-star: #7a5560;
 }
@@ -186,6 +204,12 @@
   --color-gold-deep: #6e5e44;
   --color-clay: #5c1f31;
   --color-clay-deep: #3f1522;
+  --color-plum: #6f5b9c;
+  --color-plum-deep: #453a6b;
+  --color-rose: #a85f7a;
+  --color-rose-deep: #7a4356;
+  --color-sky: #5f6b9c;
+  --color-sky-deep: #3f476b;
   --color-focus: #241d37;
   --color-star: #8c80b5;
 }
@@ -199,6 +223,12 @@
   --color-gold-deep: #3a3a3a;
   --color-clay: #262626;
   --color-clay-deep: #000000;
+  --color-plum: #565656;
+  --color-plum-deep: #2e2e2e;
+  --color-rose: #7d7d7d;
+  --color-rose-deep: #4a4a4a;
+  --color-sky: #8f8f8f;
+  --color-sky-deep: #5a5a5a;
   --color-focus: #1c1c1c;
   --color-star: #d6d6d6;
 }
@@ -224,6 +254,12 @@
   --color-clay-deep: #6e1d3c; /* persian plum — clay buttons */
   --color-gold: #d19a4a; /* anzac amber — gold card surface */
   --color-gold-deep: #9c5a28; /* prairie sand — gold buttons */
+  --color-plum: #6a4b7a; /* blackcurrant — plum card surface */
+  --color-plum-deep: #46315a;
+  --color-rose: #b56b5e; /* dusty rose card surface */
+  --color-rose-deep: #86463b;
+  --color-sky: #5f8a7d; /* muted teal card surface */
+  --color-sky-deep: #3d5f55;
   --color-focus: #3b4a30; /* headings map to olive */
 
   --font-body: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
