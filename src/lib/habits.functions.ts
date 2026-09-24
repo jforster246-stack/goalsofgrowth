@@ -124,6 +124,27 @@ export const getHabitStampBonus = createServerFn({ method: "GET" })
     return (count ?? 0) * 2;
   });
 
+/**
+ * The dates a habit was completed on or after `weekStart` (a local YYYY-MM-DD,
+ * usually this week's Monday). Used to show the ticked week in the habit sheet.
+ */
+export const getHabitWeek = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) =>
+    z
+      .object({ habitId: z.string().uuid(), weekStart: dateSchema })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: rows, error } = await context.supabase
+      .from("habit_completions")
+      .select("completed_on")
+      .eq("habit_id", data.habitId)
+      .gte("completed_on", data.weekStart);
+    if (error) throw new Error(error.message);
+    return (rows ?? []).map((r) => r.completed_on);
+  });
+
 export const createHabit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) =>

@@ -1,9 +1,10 @@
-import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Minus, Moon, Plus, Sun, Sunset, X } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Check, Minus, Moon, Plus, Sun, Sunset, X } from "lucide-react";
 import type { HabitTime } from "@/components/home-cards";
 import { parseDays, type Frequency } from "@/lib/habit-schedule";
 import { createHabit, deleteHabit, updateHabit } from "@/lib/habits.functions";
+import { habitWeekQueryOptions } from "@/lib/goal-queries";
 import { IconPicker } from "@/components/icon-picker";
 import { cn } from "@/lib/utils";
 
@@ -72,6 +73,80 @@ function initialFreq(h?: EditableHabit): {
     default:
       return { freq: "daily", days: new Set(), interval: 3 };
   }
+}
+
+const WEEK_LABELS = ["M", "T", "W", "T", "F", "S", "S"];
+
+function localYmd(d: Date) {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+/** This week's seven dates (Monday-first) as local YYYY-MM-DD, plus today. */
+function currentWeek() {
+  const today = new Date();
+  const mondayOffset = (today.getDay() + 6) % 7; // 0 = Monday
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - mondayOffset);
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return localYmd(d);
+  });
+  return { days, todayYmd: localYmd(today) };
+}
+
+/** The habit's ticked week: a Mon-Sun strip and a count of days done so far. */
+function HabitWeek({ habitId }: { habitId: string }) {
+  const { days, todayYmd } = useMemo(currentWeek, []);
+  const weekStart = days[0] ?? todayYmd;
+  const { data } = useQuery(habitWeekQueryOptions(habitId, weekStart));
+  const done = new Set(data ?? []);
+  const count = days.filter((d) => done.has(d)).length;
+
+  return (
+    <div className="mt-5 rounded-2xl bg-black/5 p-4">
+      <div className="flex items-baseline justify-between">
+        <p className="font-heading text-sm uppercase text-olive">This week</p>
+        <span className="font-serif text-xs text-black/50">
+          {count} {count === 1 ? "day" : "days"} done
+        </span>
+      </div>
+      <div className="mt-3 flex justify-between gap-1">
+        {days.map((d, i) => {
+          const ticked = done.has(d);
+          const isToday = d === todayYmd;
+          return (
+            <div key={d} className="flex flex-col items-center gap-1">
+              <span
+                className={cn(
+                  "font-heading text-[10px] uppercase",
+                  isToday ? "text-olive" : "text-black/40",
+                )}
+              >
+                {WEEK_LABELS[i]}
+              </span>
+              <div
+                className={cn(
+                  "grid size-8 place-items-center rounded-full font-mono text-[11px] transition-colors",
+                  ticked
+                    ? "bg-olive text-white"
+                    : "bg-white text-black/30",
+                  isToday && !ticked && "ring-1 ring-olive/50",
+                )}
+              >
+                {ticked ? (
+                  <Check className="size-4" strokeWidth={3} />
+                ) : (
+                  Number(d.slice(8, 10))
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 /** One-screen habit sheet: name, time of day, frequency, optional reason. */
@@ -187,6 +262,9 @@ export function HabitFormModal({
             <X className="size-5" />
           </button>
         </div>
+
+        {/* This week — ticked days + how many done, only for a saved habit */}
+        {editing && habit && <HabitWeek habitId={habit.id} />}
 
         {/* Name */}
         <label className="mt-6 block font-heading text-sm uppercase text-olive">

@@ -145,6 +145,7 @@ function HabitsBody({
     queryClient.invalidateQueries({ queryKey: ["habits"] });
     queryClient.invalidateQueries({ queryKey: ["habit-streaks"] });
     queryClient.invalidateQueries({ queryKey: ["habit-stamp-bonus"] });
+    queryClient.invalidateQueries({ queryKey: ["habit-week"] });
   };
 
   const toggleMutation = useMutation({
