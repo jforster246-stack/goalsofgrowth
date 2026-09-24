@@ -189,6 +189,19 @@
   --color-star: #8c80b5;
 }
 
+/* Black & white — a simple monochrome palette of greys. */
+:root[data-theme="mono"] {
+  --background: #f4f4f3;
+  --color-olive: #1c1c1c;
+  --color-sage: #4b4b4b;
+  --color-gold: #6f6f6f;
+  --color-gold-deep: #3a3a3a;
+  --color-clay: #262626;
+  --color-clay-deep: #000000;
+  --color-focus: #1c1c1c;
+  --color-star: #d6d6d6;
+}
+
 /* ============= Design tokens ============= */
 
 @theme {

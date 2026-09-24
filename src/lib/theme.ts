@@ -1,6 +1,11 @@
 /** Colour themes the user can switch between under settings. */
 
-export type ThemeId = "natural" | "ice-cream" | "dark-magic" | "wild-berries";
+export type ThemeId =
+  | "natural"
+  | "ice-cream"
+  | "dark-magic"
+  | "wild-berries"
+  | "mono";
 
 export const THEMES: {
   id: ThemeId;
@@ -32,6 +37,12 @@ export const THEMES: {
     label: "Wild berries",
     blurb: "Amethyst, copper and wine plum",
     swatches: ["#241d37", "#5c1f31", "#8c80b5", "#ece4ed"],
+  },
+  {
+    id: "mono",
+    label: "Black & white",
+    blurb: "A simple monochrome palette",
+    swatches: ["#1c1c1c", "#4b4b4b", "#6f6f6f", "#f4f4f3"],
   },
 ];
 
