@@ -1,48 +1,64 @@
+import { frameFor } from "@/lib/frames-data";
 import { cn } from "@/lib/utils";
 
-// A gilded, beveled gold border - light picks out the top-left, shadow the
-// bottom-right, so it reads as a real frame rather than a flat yellow box.
-const GOLD_BORDER =
-  "linear-gradient(135deg,#f9edc4 0%,#d9b563 20%,#a17f31 42%,#f0d98f 56%,#b9902f 74%,#7c5f1e 100%)";
-const GOLD_INNER = "linear-gradient(135deg,#7c5f1e,#c9a44a)";
-
 /**
- * A picture frame in gilded gold. Children fill the mount (a photo, a stamp, an
- * artwork placard, or an add button). Tapping it fires onClick.
+ * A picture in an ornate gold frame. A frame is picked at random (but stable)
+ * from `seed`; the content is mounted inside the frame's window and the frame
+ * image is laid over the top so its opening mattes the picture.
  */
 export function GoldFrame({
   children,
+  seed,
   onClick,
   ariaLabel,
   className,
   mountClassName,
 }: {
   children: React.ReactNode;
+  seed: string;
   onClick?: (() => void) | undefined;
   ariaLabel?: string | undefined;
   className?: string | undefined;
   mountClassName?: string | undefined;
 }) {
+  const frame = frameFor(seed);
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label={ariaLabel}
       className={cn(
-        "block w-full rounded-[10px] p-[7px] shadow-[0_8px_20px_rgba(0,0,0,0.4)] transition-transform hover:-translate-y-0.5",
+        "block w-full transition-transform hover:-translate-y-0.5",
         className,
       )}
-      style={{ background: GOLD_BORDER }}
     >
-      <span className="block rounded-[4px] p-px" style={{ background: GOLD_INNER }}>
+      <span
+        className="relative block w-full"
+        style={{ aspectRatio: String(frame.ar) }}
+      >
         <span
           className={cn(
-            "flex aspect-[4/5] w-full items-center justify-center overflow-hidden rounded-[3px]",
+            "absolute flex items-center justify-center overflow-hidden",
             mountClassName,
           )}
+          style={{
+            left: `${frame.inset.l * 100}%`,
+            right: `${frame.inset.r * 100}%`,
+            top: `${frame.inset.t * 100}%`,
+            bottom: `${frame.inset.b * 100}%`,
+            borderRadius: frame.radius,
+          }}
         >
           {children}
         </span>
+        <img
+          src={frame.src}
+          alt=""
+          aria-hidden
+          loading="lazy"
+          draggable={false}
+          className="pointer-events-none absolute inset-0 size-full select-none"
+        />
       </span>
     </button>
   );

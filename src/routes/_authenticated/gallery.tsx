@@ -244,6 +244,7 @@ function GalleryPage() {
               return (
                 <FrameCell key={`slot-${slot}`} caption={art ? art.work : "Add artwork"}>
                   <GoldFrame
+                    seed={`slot-${slot}`}
                     ariaLabel={art ? `Artwork: ${art.work}` : "Add an artwork"}
                     onClick={() =>
                       art ? setDetailArtwork({ slot, artwork: art }) : setPickSlot(slot)
@@ -265,11 +266,12 @@ function GalleryPage() {
             {goalStamps.map((s) => (
               <FrameCell key={s.key} caption={s.title}>
                 <GoldFrame
+                  seed={s.key}
                   ariaLabel={`Goal: ${s.title}`}
                   onClick={() => openGoal(s)}
                   mountClassName="bg-[#f4ece0]"
                 >
-                  <Stamp icon={s.icon} accent={s.accent} className="w-3/4" />
+                  <Stamp icon={s.icon} accent={s.accent} className="w-2/3" />
                 </GoldFrame>
               </FrameCell>
             ))}
@@ -280,6 +282,7 @@ function GalleryPage() {
               return (
                 <FrameCell key={w.id} caption={w.title}>
                   <GoldFrame
+                    seed={w.id}
                     ariaLabel={`Win: ${w.title}`}
                     onClick={() =>
                       setEditingWin({
@@ -297,7 +300,7 @@ function GalleryPage() {
                     <Stamp
                       icon={style.icon}
                       accent={style.accent}
-                      className="w-3/4"
+                      className="w-2/3"
                     />
                   </GoldFrame>
                 </FrameCell>
