@@ -10,6 +10,11 @@ import { listWins } from "@/lib/wins.functions";
 import { listBrainDump } from "@/lib/braindump.functions";
 import { listChecklists } from "@/lib/checklists.functions";
 import { listStamps } from "@/lib/stamps.functions";
+import {
+  getShowcase,
+  getStampBalance,
+  listPurchases,
+} from "@/lib/artworks.functions";
 
 export const goalsQueryOptions = queryOptions({
   queryKey: ["goals"],
@@ -69,4 +74,19 @@ export const stampsQueryOptions = queryOptions({
 export const habitStampBonusQueryOptions = queryOptions({
   queryKey: ["habit-stamp-bonus"],
   queryFn: () => getHabitStampBonus(),
+});
+
+export const stampBalanceQueryOptions = queryOptions({
+  queryKey: ["stamp-balance"],
+  queryFn: () => getStampBalance(),
+});
+
+export const purchasesQueryOptions = queryOptions({
+  queryKey: ["artwork-purchases"],
+  queryFn: () => listPurchases(),
+});
+
+export const showcaseQueryOptions = queryOptions({
+  queryKey: ["gallery-showcase"],
+  queryFn: () => getShowcase(),
 });

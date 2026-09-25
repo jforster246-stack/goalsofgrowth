@@ -91,11 +91,11 @@ function WinsPage() {
           <span className="font-heading text-olive">
             {totalStamps} star stamp{totalStamps === 1 ? "" : "s"}
           </span>{" "}
-          from completed goals and habits. Spend them on artworks in the{" "}
+          from completed goals and habits. Spend them on artworks for your{" "}
           <Link to="/gallery" className="text-olive underline underline-offset-2">
             gallery
-          </Link>{" "}
-          — coming soon.
+          </Link>
+          .
         </p>
 
         {/* Completed goals — one stamp per goal you've finished */}
