@@ -84,6 +84,7 @@ function GalleryPage() {
   const [editingWin, setEditingWin] = useState<EditableWin | null>(null);
   const [infoStamp, setInfoStamp] = useState<StampView | null>(null);
   const [detailGoal, setDetailGoal] = useState<GalleryGoal | null>(null);
+  const [confirmBuy, setConfirmBuy] = useState<Artwork | null>(null);
 
   const goalStamps = mergeStamps(stamps, goals);
   const winList = (wins ?? []) as Win[];
@@ -103,6 +104,7 @@ function GalleryPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["artwork-purchases"] });
       queryClient.invalidateQueries({ queryKey: ["stamp-balance"] });
+      setConfirmBuy(null);
     },
   });
   const place = useMutation({
@@ -164,8 +166,8 @@ function GalleryPage() {
                 </div>
                 <button
                   type="button"
-                  disabled={!canBuy || buy.isPending}
-                  onClick={() => buy.mutate(id)}
+                  disabled={!canBuy}
+                  onClick={() => setConfirmBuy(art)}
                   className={cn(
                     "mt-2 rounded-full py-2 font-heading text-[11px] uppercase transition-colors",
                     isOwned
@@ -175,7 +177,11 @@ function GalleryPage() {
                         : "bg-black/5 text-black/30",
                   )}
                 >
-                  {isOwned ? "Owned" : canBuy ? "Buy" : "Not enough"}
+                  {isOwned
+                    ? "Owned"
+                    : canBuy
+                      ? `Buy · ${ARTWORK_COST}`
+                      : `${ARTWORK_COST} stamps`}
                 </button>
               </div>
             );
@@ -295,6 +301,16 @@ function GalleryPage() {
       {/* Win edit */}
       {editingWin && (
         <WinFormModal win={editingWin} onClose={() => setEditingWin(null)} />
+      )}
+
+      {/* Confirm purchase */}
+      {confirmBuy && (
+        <ConfirmPurchaseModal
+          artwork={confirmBuy}
+          pending={buy.isPending}
+          onConfirm={() => buy.mutate(confirmBuy.id)}
+          onClose={() => setConfirmBuy(null)}
+        />
       )}
     </AppShell>
   );
@@ -443,6 +459,53 @@ function ArtworkDetailModal({
         className="mt-6 w-full py-2 font-heading text-sm uppercase text-black/40 transition-colors hover:text-clay-deep"
       >
         Take down from wall
+      </button>
+    </ModalShell>
+  );
+}
+
+/** Confirm spending stamps on an artwork before it's bought. */
+function ConfirmPurchaseModal({
+  artwork,
+  pending,
+  onConfirm,
+  onClose,
+}: {
+  artwork: Artwork;
+  pending: boolean;
+  onConfirm: () => void;
+  onClose: () => void;
+}) {
+  return (
+    <ModalShell title="Purchase artwork" onClose={onClose}>
+      <div className="mt-2 flex flex-col items-center gap-4 text-center">
+        <div className="aspect-[4/5] w-32 overflow-hidden rounded-2xl shadow">
+          <ArtworkPlacard artwork={artwork} />
+        </div>
+        <p className="font-serif text-base leading-relaxed text-black/80">
+          Purchase{" "}
+          <span className="font-heading text-black">{artwork.work}</span> for{" "}
+          <span className="font-heading text-olive">
+            {ARTWORK_COST} stamps
+          </span>
+          ?
+        </p>
+      </div>
+      <button
+        type="button"
+        onClick={onConfirm}
+        disabled={pending}
+        className="mt-6 w-full rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
+      >
+        {pending ? "Purchasing…" : "Purchase"}
+      </button>
+      <button
+        type="button"
+        onClick={onClose}
+        disabled={pending}
+        className="mt-2 w-full py-2 font-heading text-sm uppercase text-black/40 transition-colors hover:text-black/70 disabled:opacity-40"
+      >
+        Cancel
       </button>
     </ModalShell>
   );
