@@ -183,6 +183,13 @@
       "when": 1791417600000,
       "tag": "0025_create_artworks",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1790297321756,
+      "tag": "0026_apply_artworks",
+      "breakpoints": true
     }
   ]
 }
