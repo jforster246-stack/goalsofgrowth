@@ -78,7 +78,10 @@ function OverviewPage() {
   const { data: profile } = useQuery(profileQueryOptions);
   const { data: stamps } = useQuery(stampsQueryOptions);
   const { data: habitBonus } = useQuery(habitStampBonusQueryOptions);
-  const stampCount = mergeStamps(stamps, goals).length + (habitBonus ?? 0);
+  const stampCount =
+    mergeStamps(stamps, goals).length +
+    (habitBonus ?? 0) +
+    (profile?.bonus_stamps ?? 0);
 
   const today = localToday();
 
@@ -376,6 +379,8 @@ function StreakCard({
   name: string | null;
 }) {
   const days = streakWeek(streak, lastActive);
+  // Days left in the current run before the next 7-day, 5-stamp reward.
+  const untilBonus = streak > 0 ? (7 - (streak % 7)) % 7 : 7;
 
   return (
     <div className="mt-1 flex flex-col items-center rounded-3xl bg-white px-5 py-6 text-center shadow-sm">
@@ -391,6 +396,16 @@ function StreakCard({
           ? `You are doing really great${name ? `, ${name}` : ""}!`
           : "Check in each day to start your streak."}
       </p>
+      <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-clay/10 px-3 py-1.5">
+        <Stamp icon={null} accent="clay" className="size-4" />
+        <span className="font-heading text-[11px] uppercase text-clay-deep">
+          {streak === 0
+            ? "7 days in a row earns 5 stamps"
+            : untilBonus === 0
+              ? "You just earned 5 stamps!"
+              : `${untilBonus} more day${untilBonus === 1 ? "" : "s"} for 5 stamps`}
+        </span>
+      </span>
 
       <div className="mt-5 grid w-full grid-cols-7 gap-1">
         {days.map((d, i) => (

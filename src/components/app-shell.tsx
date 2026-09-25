@@ -93,7 +93,10 @@ export function AppShell({
     if (touched.current) return;
     touched.current = true;
     touchStreak({ data: { today: localToday() } })
-      .then(() => queryClient.invalidateQueries({ queryKey: ["profile"] }))
+      .then(() => {
+        queryClient.invalidateQueries({ queryKey: ["profile"] });
+        queryClient.invalidateQueries({ queryKey: ["stamp-balance"] });
+      })
       .catch(() => {});
   }, [queryClient]);
 

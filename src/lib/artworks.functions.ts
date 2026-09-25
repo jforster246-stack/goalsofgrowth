@@ -16,16 +16,19 @@ const artworkIdSchema = z
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 async function earnedStamps(supabase: any): Promise<number> {
-  const [stampsRes, goalsRes, stepsRes, habitRes] = await Promise.all([
-    supabase.from("stamps").select("goal_id"),
-    supabase.from("goals").select("id"),
-    supabase.from("steps").select("goal_id, done"),
-    supabase.from("habit_completions").select("habit_id, completed_on"),
-  ]);
+  const [stampsRes, goalsRes, stepsRes, habitRes, profileRes] =
+    await Promise.all([
+      supabase.from("stamps").select("goal_id"),
+      supabase.from("goals").select("id"),
+      supabase.from("steps").select("goal_id, done"),
+      supabase.from("habit_completions").select("habit_id, completed_on"),
+      supabase.from("profiles").select("bonus_stamps").maybeSingle(),
+    ]);
   if (stampsRes.error) throw new Error(stampsRes.error.message);
   if (goalsRes.error) throw new Error(goalsRes.error.message);
   if (stepsRes.error) throw new Error(stepsRes.error.message);
   if (habitRes.error) throw new Error(habitRes.error.message);
+  if (profileRes.error) throw new Error(profileRes.error.message);
 
   const ledger = (stampsRes.data ?? []) as { goal_id: string | null }[];
   const seen = new Set(ledger.map((s) => s.goal_id).filter(Boolean));
@@ -50,7 +53,8 @@ async function earnedStamps(supabase: any): Promise<number> {
   const habitBonus = habitStampBonusFromRows(
     (habitRes.data ?? []) as { habit_id: string; completed_on: string }[],
   );
-  return ledger.length + extraGoals + habitBonus;
+  const signinBonus = (profileRes.data?.bonus_stamps as number | undefined) ?? 0;
+  return ledger.length + extraGoals + habitBonus + signinBonus;
 }
 
 async function purchaseCount(supabase: any, userId: string) {

@@ -5,7 +5,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 const ACCENTS = ["mint", "sea", "clay", "plum", "rose", "sky"] as const;
 
 const PROFILE_FIELDS =
-  "id, display_name, streak_count, longest_streak, last_active_date, goal_of_day_id, goal_of_day_date";
+  "id, display_name, streak_count, longest_streak, last_active_date, goal_of_day_id, goal_of_day_date, bonus_stamps";
 
 const emptyProfile = (id: string) => ({
   id,
@@ -15,6 +15,7 @@ const emptyProfile = (id: string) => ({
   last_active_date: null as string | null,
   goal_of_day_id: null as string | null,
   goal_of_day_date: null as string | null,
+  bonus_stamps: 0,
 });
 
 export const getProfile = createServerFn({ method: "GET" })
@@ -55,11 +56,16 @@ export const touchStreak = createServerFn({ method: "POST" })
         ? (current.streak_count ?? 0) + 1
         : 1;
 
+    // Every 7 days signed in a row earns 5 stamps.
+    const awarded = streak % 7 === 0 ? 5 : 0;
+    const bonusStamps = (current.bonus_stamps ?? 0) + awarded;
+
     const next = {
       ...current,
       streak_count: streak,
       longest_streak: Math.max(current.longest_streak ?? 0, streak),
       last_active_date: data.today,
+      bonus_stamps: bonusStamps,
     };
 
     const { error: upsertError } = await context.supabase
@@ -69,6 +75,7 @@ export const touchStreak = createServerFn({ method: "POST" })
         streak_count: next.streak_count,
         longest_streak: next.longest_streak,
         last_active_date: next.last_active_date,
+        bonus_stamps: next.bonus_stamps,
       });
     if (upsertError) throw new Error(upsertError.message);
     return next;

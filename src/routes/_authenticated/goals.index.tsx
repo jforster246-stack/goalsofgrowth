@@ -20,6 +20,7 @@ import { mergeStamps } from "@/lib/stamp-view";
 import {
   goalsQueryOptions,
   habitStampBonusQueryOptions,
+  profileQueryOptions,
   stampsQueryOptions,
 } from "@/lib/goal-queries";
 import {
@@ -62,7 +63,11 @@ function GoalsListPage() {
   const { data: goals } = useSuspenseQuery(goalsQueryOptions);
   const { data: stamps } = useQuery(stampsQueryOptions);
   const { data: habitBonus } = useQuery(habitStampBonusQueryOptions);
-  const stampCount = mergeStamps(stamps, goals).length + (habitBonus ?? 0);
+  const { data: profile } = useQuery(profileQueryOptions);
+  const stampCount =
+    mergeStamps(stamps, goals).length +
+    (habitBonus ?? 0) +
+    (profile?.bonus_stamps ?? 0);
 
   const [showCompleted, setShowCompleted] = useState(false);
 

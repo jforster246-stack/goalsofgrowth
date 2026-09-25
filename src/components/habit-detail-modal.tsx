@@ -84,6 +84,8 @@ export function HabitDetailModal({
   const doneDays = useMemo(() => new Set(history ?? []), [history]);
   const weekCount = days.filter((d) => doneDays.has(d)).length;
   const streak = streaks?.find((s) => s.id === habit.id)?.streak ?? 0;
+  // Days left in the current run before the next 3-in-a-row stamp.
+  const untilStamp = streak > 0 ? (3 - (streak % 3)) % 3 : 3;
 
   // How many consecutive days end on `ymd` (0 if not completed). Every third
   // day in a run fills its stamp; the others just show an outline.
@@ -208,10 +210,16 @@ export function HabitDetailModal({
             </StampMark>
             <div className="text-left">
               <p className="font-heading text-lg leading-none text-black">
-                {streak} day{streak === 1 ? "" : "s"}
+                {streak > 0
+                  ? `${streak} day${streak === 1 ? "" : "s"} in a row`
+                  : "No streak yet"}
               </p>
               <p className="mt-0.5 font-serif text-xs text-black/50">
-                {streak > 0 ? "in a row" : "Tick it off to start a streak"}
+                {streak === 0
+                  ? "Do this 3 days in a row to earn a stamp"
+                  : untilStamp === 0
+                    ? "That's another stamp earned!"
+                    : `${untilStamp} more day${untilStamp === 1 ? "" : "s"} to earn a stamp`}
               </p>
             </div>
           </div>
