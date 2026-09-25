@@ -5,7 +5,8 @@ import { Check, Plus, X } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { GoldFrame } from "@/components/gold-frame";
 import { Stamp } from "@/components/stamp";
-import { localToday } from "@/components/goal-ui";
+import { localToday, type Accent } from "@/components/goal-ui";
+import { StampStyleEditor } from "@/components/stamp-style-editor";
 import { WinFormModal, type EditableWin } from "@/components/win-form-modal";
 import {
   goalsQueryOptions,
@@ -20,6 +21,8 @@ import {
   clearShowcaseSlot,
   setShowcaseSlot,
 } from "@/lib/artworks.functions";
+import { updateStamp } from "@/lib/stamps.functions";
+import { updateGoalDetails } from "@/lib/goals.functions";
 import {
   ARTWORK_COST,
   ARTWORKS,
@@ -82,8 +85,10 @@ function GalleryPage() {
     artwork: Artwork;
   } | null>(null);
   const [editingWin, setEditingWin] = useState<EditableWin | null>(null);
-  const [infoStamp, setInfoStamp] = useState<StampView | null>(null);
-  const [detailGoal, setDetailGoal] = useState<GalleryGoal | null>(null);
+  const [detailGoal, setDetailGoal] = useState<{
+    stamp: StampView;
+    goal?: GalleryGoal | undefined;
+  } | null>(null);
   const [confirmBuy, setConfirmBuy] = useState<Artwork | null>(null);
 
   const goalStamps = mergeStamps(stamps, goals);
@@ -122,13 +127,38 @@ function GalleryPage() {
       setDetailArtwork(null);
     },
   });
+  const saveStyle = useMutation({
+    mutationFn: ({
+      stamp,
+      icon,
+      accent,
+    }: {
+      stamp: StampView;
+      icon: string | null;
+      accent: string;
+    }) =>
+      stamp.stampId
+        ? updateStamp({ data: { id: stamp.stampId, icon: icon ?? undefined, accent } })
+        : updateGoalDetails({
+            data: {
+              id: stamp.goalId!,
+              title: stamp.title,
+              icon: icon ?? "",
+              accent: accent as Accent,
+            },
+          }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["stamps"] });
+      queryClient.invalidateQueries({ queryKey: ["goals"] });
+      setDetailGoal(null);
+    },
+  });
 
   const openGoal = (s: StampView) => {
     const full = s.goalId
       ? (goals ?? []).find((g) => g.id === s.goalId)
       : undefined;
-    if (full) setDetailGoal(full as GalleryGoal);
-    else setInfoStamp(s);
+    setDetailGoal({ stamp: s, goal: full as GalleryGoal | undefined });
   };
 
   const dailyIds = dailyArtworkIds(today);
@@ -288,14 +318,17 @@ function GalleryPage() {
         />
       )}
 
-      {/* Goal details */}
+      {/* Goal details + restyle */}
       {detailGoal && (
-        <GoalInfoModal goal={detailGoal} onClose={() => setDetailGoal(null)} />
-      )}
-
-      {/* Deleted-goal snapshot */}
-      {infoStamp && (
-        <StampInfoModal stamp={infoStamp} onClose={() => setInfoStamp(null)} />
+        <GoalInfoModal
+          stamp={detailGoal.stamp}
+          goal={detailGoal.goal}
+          saving={saveStyle.isPending}
+          onSave={(icon, accent) =>
+            saveStyle.mutate({ stamp: detailGoal.stamp, icon, accent })
+          }
+          onClose={() => setDetailGoal(null)}
+        />
       )}
 
       {/* Win edit */}
@@ -511,29 +544,61 @@ function ConfirmPurchaseModal({
   );
 }
 
-/** The goal behind a gallery frame: its stamp, why, vision and steps. */
+/**
+ * A completed-goal frame: its stamp (recolour / re-icon it here), plus the
+ * goal's why, vision and steps when the goal still exists.
+ */
 function GoalInfoModal({
+  stamp,
   goal,
+  saving,
+  onSave,
   onClose,
 }: {
-  goal: GalleryGoal;
+  stamp: StampView;
+  goal?: GalleryGoal | undefined;
+  saving: boolean;
+  onSave: (icon: string | null, accent: string) => void;
   onClose: () => void;
 }) {
-  const steps = goal.steps ?? [];
+  const [icon, setIcon] = useState<string | null>(stamp.icon);
+  const [accent, setAccent] = useState<string>(stamp.accent);
+  const dirty = icon !== stamp.icon || accent !== stamp.accent;
+
+  const steps = goal?.steps ?? [];
   const doneCount = steps.filter((s) => s.done).length;
+
   return (
     <ModalShell title="Completed goal" onClose={onClose}>
       <div className="mt-2 flex flex-col items-center gap-3 text-center">
-        <Stamp icon={goal.icon} accent={goal.accent} className="size-24" />
+        <Stamp icon={icon} accent={accent} className="size-24" />
         <p className="font-display text-2xl leading-tight text-black">
-          {goal.title}
+          {stamp.title}
         </p>
         <p className="flex items-center gap-1.5 font-serif text-sm text-black/50">
           <Check className="size-4 text-olive" strokeWidth={2.5} /> Completed
         </p>
       </div>
 
-      {goal.why?.trim() && (
+      {/* Recolour / re-icon */}
+      <div className="mt-5">
+        <StampStyleEditor
+          icon={icon}
+          accent={accent}
+          onIcon={setIcon}
+          onAccent={setAccent}
+        />
+        <button
+          type="button"
+          onClick={() => onSave(icon, accent)}
+          disabled={!dirty || saving}
+          className="mt-4 w-full rounded-2xl bg-olive py-3 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
+        >
+          {saving ? "Saving…" : "Save look"}
+        </button>
+      </div>
+
+      {goal?.why?.trim() && (
         <section className="mt-5">
           <p className="font-heading text-sm uppercase text-olive">
             Why I did this
@@ -544,7 +609,7 @@ function GoalInfoModal({
         </section>
       )}
 
-      {goal.vision?.trim() && (
+      {goal?.vision?.trim() && (
         <section className="mt-4">
           <p className="font-heading text-sm uppercase text-olive">
             What it looked like when done
@@ -591,29 +656,6 @@ function GoalInfoModal({
           </ul>
         </section>
       )}
-    </ModalShell>
-  );
-}
-
-/** Read-only detail for a completed-goal frame whose goal has been deleted. */
-function StampInfoModal({
-  stamp,
-  onClose,
-}: {
-  stamp: StampView;
-  onClose: () => void;
-}) {
-  return (
-    <ModalShell title="Completed goal" onClose={onClose}>
-      <div className="mt-2 flex flex-col items-center gap-3 text-center">
-        <Stamp icon={stamp.icon} accent={stamp.accent} className="size-28" />
-        <p className="font-display text-2xl leading-tight text-black">
-          {stamp.title}
-        </p>
-        <p className="flex items-center gap-1.5 font-serif text-sm text-black/50">
-          <Check className="size-4 text-olive" strokeWidth={2.5} /> Completed
-        </p>
-      </div>
     </ModalShell>
   );
 }

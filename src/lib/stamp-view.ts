@@ -18,6 +18,8 @@ type GoalLike = {
 
 export type StampView = {
   key: string;
+  /** The earned-ledger row id, when this stamp comes from the ledger. */
+  stampId: string | null;
   goalId: string | null;
   icon: string | null;
   accent: string;
@@ -41,6 +43,7 @@ export function mergeStamps(
 
   const fromLedger: StampView[] = list.map((s) => ({
     key: s.id,
+    stampId: s.id,
     goalId: s.goal_id,
     icon: s.icon,
     accent: s.accent,
@@ -52,6 +55,7 @@ export function mergeStamps(
     .filter((g) => goalProgress(g).complete && !seen.has(g.id))
     .map((g) => ({
       key: g.id,
+      stampId: null,
       goalId: g.id,
       icon: g.icon ?? null,
       accent: g.accent,
