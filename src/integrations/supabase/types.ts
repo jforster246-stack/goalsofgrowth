@@ -35,30 +35,6 @@ export type Database = {
         }
         Relationships: []
       }
-      gallery_showcase: {
-        Row: {
-          artwork_id: number
-          created_at: string
-          id: string
-          position: number
-          user_id: string
-        }
-        Insert: {
-          artwork_id: number
-          created_at?: string
-          id?: string
-          position: number
-          user_id: string
-        }
-        Update: {
-          artwork_id?: number
-          created_at?: string
-          id?: string
-          position?: number
-          user_id?: string
-        }
-        Relationships: []
-      }
       bingo_cards: {
         Row: {
           created_at: string
@@ -200,6 +176,30 @@ export type Database = {
           id?: string
           position?: number
           title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      gallery_showcase: {
+        Row: {
+          artwork_id: number
+          created_at: string
+          id: string
+          position: number
+          user_id: string
+        }
+        Insert: {
+          artwork_id: number
+          created_at?: string
+          id?: string
+          position: number
+          user_id: string
+        }
+        Update: {
+          artwork_id?: number
+          created_at?: string
+          id?: string
+          position?: number
           user_id?: string
         }
         Relationships: []
