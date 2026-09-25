@@ -1,8 +1,8 @@
 import { queryOptions } from "@tanstack/react-query";
 import { getGoal, getProfile, listGoals } from "@/lib/goals.functions";
 import {
+  getHabitHistory,
   getHabitStampBonus,
-  getHabitWeek,
   listHabits,
   listHabitStreaks,
 } from "@/lib/habits.functions";
@@ -44,10 +44,10 @@ export const habitStreaksQueryOptions = (today: string) =>
     queryFn: () => listHabitStreaks({ data: { today } }),
   });
 
-export const habitWeekQueryOptions = (habitId: string, weekStart: string) =>
+export const habitHistoryQueryOptions = (habitId: string) =>
   queryOptions({
-    queryKey: ["habit-week", habitId, weekStart],
-    queryFn: () => getHabitWeek({ data: { habitId, weekStart } }),
+    queryKey: ["habit-history", habitId],
+    queryFn: () => getHabitHistory({ data: { habitId } }),
   });
 
 export const winsQueryOptions = queryOptions({

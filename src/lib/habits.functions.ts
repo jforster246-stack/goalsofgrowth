@@ -110,37 +110,66 @@ export const listHabitStreaks = createServerFn({ method: "GET" })
   });
 
 /**
- * Legacy habit reward, now folded into the stamp balance: habits used to earn
- * two "crystals" per completion. Those crystals are counted as stamps, so this
- * returns 2 × the total number of habit completions.
+ * Habit stamps: doing a habit three days in a row earns 2 stamps (each full run
+ * of three consecutive days counts). Shared by the stamp pill and the spendable
+ * balance so both agree.
  */
+export function habitStampBonusFromRows(
+  rows: { habit_id: string; completed_on: string }[],
+): number {
+  const byHabit = new Map<string, string[]>();
+  for (const r of rows) {
+    const arr = byHabit.get(r.habit_id);
+    if (arr) arr.push(r.completed_on);
+    else byHabit.set(r.habit_id, [r.completed_on]);
+  }
+
+  const DAY = 86_400_000;
+  let sets = 0;
+  for (const dates of byHabit.values()) {
+    const uniq = [...new Set(dates)].sort();
+    let run = 0;
+    let prev: number | null = null;
+    for (const d of uniq) {
+      const t = Date.parse(`${d}T00:00:00Z`);
+      if (prev !== null && t - prev === DAY) {
+        run += 1;
+      } else {
+        sets += Math.floor(run / 3);
+        run = 1;
+      }
+      prev = t;
+    }
+    sets += Math.floor(run / 3);
+  }
+  return sets * 2;
+}
+
 export const getHabitStampBonus = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { count, error } = await context.supabase
+    const { data, error } = await context.supabase
       .from("habit_completions")
-      .select("*", { count: "exact", head: true });
+      .select("habit_id, completed_on");
     if (error) throw new Error(error.message);
-    return (count ?? 0) * 2;
+    return habitStampBonusFromRows(data ?? []);
   });
 
 /**
- * The dates a habit was completed on or after `weekStart` (a local YYYY-MM-DD,
- * usually this week's Monday). Used to show the ticked week in the habit sheet.
+ * Every date a habit was completed on (ascending), so the sheet can show the
+ * ticked week and work out three-day runs across week boundaries.
  */
-export const getHabitWeek = createServerFn({ method: "GET" })
+export const getHabitHistory = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) =>
-    z
-      .object({ habitId: z.string().uuid(), weekStart: dateSchema })
-      .parse(data),
+    z.object({ habitId: z.string().uuid() }).parse(data),
   )
   .handler(async ({ data, context }) => {
     const { data: rows, error } = await context.supabase
       .from("habit_completions")
       .select("completed_on")
       .eq("habit_id", data.habitId)
-      .gte("completed_on", data.weekStart);
+      .order("completed_on", { ascending: true });
     if (error) throw new Error(error.message);
     return (rows ?? []).map((r) => r.completed_on);
   });

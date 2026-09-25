@@ -9,9 +9,12 @@ import { cn } from "@/lib/utils";
 export function StampMark({
   children,
   className,
+  outline = false,
 }: {
   children?: React.ReactNode;
   className?: string | undefined;
+  /** Draw just the stamp outline instead of a solid fill. */
+  outline?: boolean;
 }) {
   return (
     <span className={cn("relative inline-grid place-items-center", className)}>
@@ -23,7 +26,10 @@ export function StampMark({
         <path
           d={STAMP_FRAME.d}
           transform={STAMP_FRAME.transform}
-          fill="currentColor"
+          fill={outline ? "none" : "currentColor"}
+          stroke={outline ? "currentColor" : "none"}
+          strokeWidth={outline ? 320 : 0}
+          strokeLinejoin="round"
         />
       </svg>
       {children != null && <span className="relative z-10">{children}</span>}

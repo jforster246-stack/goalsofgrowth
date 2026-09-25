@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { ARTWORK_COST, ARTWORKS } from "@/lib/artworks-data";
+import { habitStampBonusFromRows } from "@/lib/habits.functions";
 
 const artworkIdSchema = z
   .number()
@@ -10,7 +11,7 @@ const artworkIdSchema = z
 
 /**
  * Total stamps earned: the earned ledger, plus any goal complete now but not yet
- * in the ledger, plus the legacy habit bonus (2 per completion). Mirrors the
+ * in the ledger, plus the habit bonus (2 per three-day run). Mirrors the
  * client-side mergeStamps + habit-bonus total.
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -19,7 +20,7 @@ async function earnedStamps(supabase: any): Promise<number> {
     supabase.from("stamps").select("goal_id"),
     supabase.from("goals").select("id"),
     supabase.from("steps").select("goal_id, done"),
-    supabase.from("habit_completions").select("*", { count: "exact", head: true }),
+    supabase.from("habit_completions").select("habit_id, completed_on"),
   ]);
   if (stampsRes.error) throw new Error(stampsRes.error.message);
   if (goalsRes.error) throw new Error(goalsRes.error.message);
@@ -46,7 +47,9 @@ async function earnedStamps(supabase: any): Promise<number> {
     if (complete && !seen.has(g.id)) extraGoals += 1;
   }
 
-  const habitBonus = (habitRes.count ?? 0) * 2;
+  const habitBonus = habitStampBonusFromRows(
+    (habitRes.data ?? []) as { habit_id: string; completed_on: string }[],
+  );
   return ledger.length + extraGoals + habitBonus;
 }
 

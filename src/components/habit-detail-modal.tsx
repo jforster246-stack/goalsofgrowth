@@ -8,7 +8,10 @@ import { useAppShell } from "@/components/app-shell";
 import { localToday } from "@/components/goal-ui";
 import type { HabitTime } from "@/components/home-cards";
 import { toggleHabit, deleteHabit } from "@/lib/habits.functions";
-import { habitStreaksQueryOptions, habitWeekQueryOptions } from "@/lib/goal-queries";
+import {
+  habitHistoryQueryOptions,
+  habitStreaksQueryOptions,
+} from "@/lib/goal-queries";
 import { frequencyLabel } from "@/lib/habit-schedule";
 import { cn } from "@/lib/utils";
 
@@ -75,18 +78,30 @@ export function HabitDetailModal({
   const [editing, setEditing] = useState(false);
 
   const { days, todayYmd } = useMemo(currentWeek, []);
-  const weekStart = days[0] ?? todayYmd;
-  const { data: week } = useQuery(habitWeekQueryOptions(habit.id, weekStart));
+  const { data: history } = useQuery(habitHistoryQueryOptions(habit.id));
   const { data: streaks } = useQuery(habitStreaksQueryOptions(today));
 
-  const doneDays = new Set(week ?? []);
+  const doneDays = useMemo(() => new Set(history ?? []), [history]);
   const weekCount = days.filter((d) => doneDays.has(d)).length;
   const streak = streaks?.find((s) => s.id === habit.id)?.streak ?? 0;
+
+  // How many consecutive days end on `ymd` (0 if not completed). Every third
+  // day in a run fills its stamp; the others just show an outline.
+  const runLenTo = (ymd: string): number => {
+    if (!doneDays.has(ymd)) return 0;
+    let n = 0;
+    const cursor = new Date(`${ymd}T00:00:00Z`);
+    while (doneDays.has(cursor.toISOString().slice(0, 10))) {
+      n += 1;
+      cursor.setUTCDate(cursor.getUTCDate() - 1);
+    }
+    return n;
+  };
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ["habits"] });
     queryClient.invalidateQueries({ queryKey: ["habit-streaks"] });
-    queryClient.invalidateQueries({ queryKey: ["habit-week"] });
+    queryClient.invalidateQueries({ queryKey: ["habit-history"] });
     queryClient.invalidateQueries({ queryKey: ["habit-stamp-bonus"] });
   };
 
@@ -212,6 +227,7 @@ export function HabitDetailModal({
             <div className="mt-3 flex justify-between gap-1">
               {days.map((d, i) => {
                 const ticked = doneDays.has(d);
+                const filled = ticked && runLenTo(d) % 3 === 0;
                 const isToday = d === todayYmd;
                 return (
                   <div key={d} className="flex flex-col items-center gap-1">
@@ -223,9 +239,15 @@ export function HabitDetailModal({
                     >
                       {WEEK_LABELS[i]}
                     </span>
-                    {ticked ? (
+                    {filled ? (
+                      // Every third day in a row — the stamp fills in.
                       <StampMark className="size-9 text-olive">
                         <Check className="size-4 text-white" strokeWidth={3} />
+                      </StampMark>
+                    ) : ticked ? (
+                      // Ticked, but not a full three yet — just the outline.
+                      <StampMark outline className="size-9 text-olive">
+                        <Check className="size-4 text-olive" strokeWidth={3} />
                       </StampMark>
                     ) : (
                       <StampMark
