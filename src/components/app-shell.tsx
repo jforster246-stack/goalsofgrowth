@@ -16,7 +16,6 @@ import {
   ListChecks,
   Repeat,
   Settings,
-  Stamp,
   Target,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -277,7 +276,6 @@ function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
         <SideLink to="/habits" icon={Repeat} label="Habits" />
         <SideLink to="/braindump" icon={Brain} label="Brain dump" />
         <SideLink to="/routines" icon={ListChecks} label="Routines" />
-        <SideLink to="/wins" icon={Stamp} label="Wins stamps" />
         <SideLink to="/gallery" icon={Frame} label="Gallery" />
       </nav>
 

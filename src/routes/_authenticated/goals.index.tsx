@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   useMutation,
+  useQuery,
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
@@ -14,7 +15,13 @@ import {
   type CompletedGoal,
 } from "@/components/goal-complete-prompt";
 import { goalProgress, type GoalWithSteps } from "@/components/goal-ui";
-import { goalsQueryOptions } from "@/lib/goal-queries";
+import { Stamp } from "@/components/stamp";
+import { mergeStamps } from "@/lib/stamp-view";
+import {
+  goalsQueryOptions,
+  habitStampBonusQueryOptions,
+  stampsQueryOptions,
+} from "@/lib/goal-queries";
 import {
   claimUnownedGoals,
   reorderGoals,
@@ -53,6 +60,9 @@ function GoalsListPage() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { data: goals } = useSuspenseQuery(goalsQueryOptions);
+  const { data: stamps } = useQuery(stampsQueryOptions);
+  const { data: habitBonus } = useQuery(habitStampBonusQueryOptions);
+  const stampCount = mergeStamps(stamps, goals).length + (habitBonus ?? 0);
 
   const [showCompleted, setShowCompleted] = useState(false);
 
@@ -89,7 +99,22 @@ function GoalsListPage() {
   };
 
   return (
-    <AppShell title="All goals" hideSettings>
+    <AppShell
+      title="All goals"
+      titleLeft
+      hideSettings
+      right={
+        <Link
+          to="/wins"
+          aria-label={`${stampCount} stamps earned`}
+          title="Stamps earned"
+          className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-sm"
+        >
+          <Stamp icon={null} accent="sea" className="size-5" />
+          <span className="font-mono text-sm text-olive">{stampCount}</span>
+        </Link>
+      }
+    >
       {goals.length === 0 ? (
         <div className="mt-6 rounded-2xl bg-white p-8 text-center shadow-sm">
           <p className="font-heading text-base text-black">No goals yet</p>

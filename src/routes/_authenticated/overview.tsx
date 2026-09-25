@@ -24,9 +24,12 @@ import {
 } from "@/components/goal-complete-prompt";
 import {
   goalsQueryOptions,
+  habitStampBonusQueryOptions,
   habitsQueryOptions,
   profileQueryOptions,
+  stampsQueryOptions,
 } from "@/lib/goal-queries";
+import { mergeStamps } from "@/lib/stamp-view";
 import { deleteStep, setGoalOfDay, toggleStep, updateStep } from "@/lib/goals.functions";
 import { toggleHabit } from "@/lib/habits.functions";
 import { frequencyLabel, isHabitDueToday } from "@/lib/habit-schedule";
@@ -73,6 +76,9 @@ function OverviewPage() {
   const queryClient = useQueryClient();
   const { data: goals } = useSuspenseQuery(goalsQueryOptions);
   const { data: profile } = useQuery(profileQueryOptions);
+  const { data: stamps } = useQuery(stampsQueryOptions);
+  const { data: habitBonus } = useQuery(habitStampBonusQueryOptions);
+  const stampCount = mergeStamps(stamps, goals).length + (habitBonus ?? 0);
 
   const today = localToday();
 
@@ -146,13 +152,12 @@ function OverviewPage() {
       right={
         <Link
           to="/wins"
-          aria-label="Wins"
-          className="flex size-[50px] shrink-0 flex-col items-center justify-center gap-1 rounded-xl bg-white shadow-sm"
+          aria-label={`${stampCount} stamps earned`}
+          title="Stamps earned"
+          className="flex shrink-0 items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-sm"
         >
           <Stamp icon={null} accent="sea" className="size-5" />
-          <span className="font-heading text-[8px] uppercase leading-none text-black">
-            Wins
-          </span>
+          <span className="font-mono text-sm text-olive">{stampCount}</span>
         </Link>
       }
     >
