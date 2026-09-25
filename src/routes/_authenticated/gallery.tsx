@@ -1,6 +1,6 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Check, Plus, X } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { GoldFrame } from "@/components/gold-frame";
@@ -53,11 +53,20 @@ type Win = {
   achieved_on: string;
 };
 
+type GalleryGoal = {
+  id: string;
+  title: string;
+  accent: string;
+  icon: string | null;
+  why: string | null;
+  vision: string | null;
+  steps: { id: string; title: string; done: boolean }[];
+};
+
 const SLOTS = [0, 1, 2, 3, 4];
 
 function GalleryPage() {
   const today = localToday();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const { data: goals } = useQuery(goalsQueryOptions);
@@ -74,13 +83,10 @@ function GalleryPage() {
   } | null>(null);
   const [editingWin, setEditingWin] = useState<EditableWin | null>(null);
   const [infoStamp, setInfoStamp] = useState<StampView | null>(null);
+  const [detailGoal, setDetailGoal] = useState<GalleryGoal | null>(null);
 
   const goalStamps = mergeStamps(stamps, goals);
   const winList = (wins ?? []) as Win[];
-  const liveGoalIds = useMemo(
-    () => new Set((goals ?? []).map((g) => g.id)),
-    [goals],
-  );
   const owned = purchases ?? [];
   const spendable = balance?.balance ?? 0;
 
@@ -116,11 +122,11 @@ function GalleryPage() {
   });
 
   const openGoal = (s: StampView) => {
-    if (s.goalId && liveGoalIds.has(s.goalId)) {
-      navigate({ to: "/goals/$goalId", params: { goalId: s.goalId } });
-    } else {
-      setInfoStamp(s);
-    }
+    const full = s.goalId
+      ? (goals ?? []).find((g) => g.id === s.goalId)
+      : undefined;
+    if (full) setDetailGoal(full as GalleryGoal);
+    else setInfoStamp(s);
   };
 
   const dailyIds = dailyArtworkIds(today);
@@ -274,6 +280,11 @@ function GalleryPage() {
           onClose={() => setDetailArtwork(null)}
           onRemove={() => clearSlot.mutate(detailArtwork.slot)}
         />
+      )}
+
+      {/* Goal details */}
+      {detailGoal && (
+        <GoalInfoModal goal={detailGoal} onClose={() => setDetailGoal(null)} />
       )}
 
       {/* Deleted-goal snapshot */}
@@ -433,6 +444,90 @@ function ArtworkDetailModal({
       >
         Take down from wall
       </button>
+    </ModalShell>
+  );
+}
+
+/** The goal behind a gallery frame: its stamp, why, vision and steps. */
+function GoalInfoModal({
+  goal,
+  onClose,
+}: {
+  goal: GalleryGoal;
+  onClose: () => void;
+}) {
+  const steps = goal.steps ?? [];
+  const doneCount = steps.filter((s) => s.done).length;
+  return (
+    <ModalShell title="Completed goal" onClose={onClose}>
+      <div className="mt-2 flex flex-col items-center gap-3 text-center">
+        <Stamp icon={goal.icon} accent={goal.accent} className="size-24" />
+        <p className="font-display text-2xl leading-tight text-black">
+          {goal.title}
+        </p>
+        <p className="flex items-center gap-1.5 font-serif text-sm text-black/50">
+          <Check className="size-4 text-olive" strokeWidth={2.5} /> Completed
+        </p>
+      </div>
+
+      {goal.why?.trim() && (
+        <section className="mt-5">
+          <p className="font-heading text-sm uppercase text-olive">
+            Why I did this
+          </p>
+          <p className="mt-1 whitespace-pre-wrap font-serif text-sm leading-relaxed text-black/70">
+            {goal.why}
+          </p>
+        </section>
+      )}
+
+      {goal.vision?.trim() && (
+        <section className="mt-4">
+          <p className="font-heading text-sm uppercase text-olive">
+            What it looked like when done
+          </p>
+          <p className="mt-1 whitespace-pre-wrap font-serif text-sm leading-relaxed text-black/70">
+            {goal.vision}
+          </p>
+        </section>
+      )}
+
+      {steps.length > 0 && (
+        <section className="mt-4">
+          <p className="font-heading text-sm uppercase text-olive">
+            Steps
+            <span className="ml-1.5 font-mono text-xs text-olive/50">
+              {doneCount}/{steps.length}
+            </span>
+          </p>
+          <ul className="mt-2 space-y-1.5">
+            {steps.map((st) => (
+              <li key={st.id} className="flex items-center gap-2">
+                <span
+                  className={cn(
+                    "grid size-5 shrink-0 place-items-center rounded-md",
+                    st.done
+                      ? "bg-olive text-white"
+                      : "border-2 border-black/20",
+                  )}
+                >
+                  {st.done && <Check className="size-3" strokeWidth={3} />}
+                </span>
+                <span
+                  className={cn(
+                    "font-serif text-sm",
+                    st.done
+                      ? "text-black/50 line-through decoration-black/30"
+                      : "text-black",
+                  )}
+                >
+                  {st.title}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </ModalShell>
   );
 }
