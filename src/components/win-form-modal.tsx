@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Heart, Trash2, Trophy, X } from "lucide-react";
 import { localToday } from "@/components/goal-ui";
+import { Stamp } from "@/components/stamp";
+import { StampStyleEditor } from "@/components/stamp-style-editor";
 import { createWin, deleteWin, updateWin } from "@/lib/wins.functions";
 import { cn } from "@/lib/utils";
 
@@ -12,12 +14,29 @@ const KINDS: { key: Kind; label: string; Icon: typeof Trophy }[] = [
   { key: "life_event", label: "Life event", Icon: Heart },
 ];
 
+const WIN_DEFAULT: Record<Kind, { icon: string | null; accent: string }> = {
+  achievement: { icon: null, accent: "sea" },
+  life_event: { icon: "m024", accent: "clay" },
+};
+
+/** A win's stamp look, falling back to sensible defaults per kind. */
+export function winStampStyle(
+  kind: string,
+  icon?: string | null,
+  accent?: string | null,
+): { icon: string | null; accent: string } {
+  const def = WIN_DEFAULT[kind === "life_event" ? "life_event" : "achievement"];
+  return { icon: icon ?? def.icon, accent: accent ?? def.accent };
+}
+
 export type EditableWin = {
   id: string;
   title: string;
   kind: string;
   note: string | null;
   achieved_on: string;
+  icon?: string | null;
+  accent?: string | null;
 };
 
 /**
@@ -40,6 +59,9 @@ export function WinFormModal({
   );
   const [achievedOn, setAchievedOn] = useState(win?.achieved_on ?? localToday());
   const [note, setNote] = useState(win?.note ?? "");
+  const initStyle = winStampStyle(win?.kind ?? "achievement", win?.icon, win?.accent);
+  const [icon, setIcon] = useState<string | null>(initStyle.icon);
+  const [accent, setAccent] = useState<string>(initStyle.accent);
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ["wins"] });
@@ -52,6 +74,8 @@ export function WinFormModal({
       kind: Kind;
       achievedOn: string;
       note?: string;
+      icon?: string;
+      accent?: string;
     }) => createWin({ data: input }),
     onSuccess: invalidate,
   });
@@ -62,6 +86,8 @@ export function WinFormModal({
       kind: Kind;
       achievedOn: string;
       note?: string;
+      icon?: string;
+      accent?: string;
     }) => updateWin({ data: input }),
     onSuccess: invalidate,
   });
@@ -80,6 +106,7 @@ export function WinFormModal({
     const value = title.trim();
     if (!value || busy) return;
     const trimmedNote = note.trim();
+    const style = { accent, ...(icon ? { icon } : {}) };
     if (isEdit && win) {
       updateMutation.mutate({
         id: win.id,
@@ -87,6 +114,7 @@ export function WinFormModal({
         kind,
         achievedOn,
         ...(trimmedNote ? { note: trimmedNote } : {}),
+        ...style,
       });
     } else {
       createMutation.mutate({
@@ -94,6 +122,7 @@ export function WinFormModal({
         kind,
         achievedOn,
         ...(trimmedNote ? { note: trimmedNote } : {}),
+        ...style,
       });
     }
   };
@@ -150,6 +179,23 @@ export function WinFormModal({
               </button>
             );
           })}
+        </div>
+
+        {/* Stamp look */}
+        <div className="mt-5 flex items-center gap-4">
+          <Stamp icon={icon} accent={accent} className="size-16 shrink-0" />
+          <p className="font-serif text-sm text-black/50">
+            How this win's stamp looks in your gallery.
+          </p>
+        </div>
+        <div className="mt-3">
+          <StampStyleEditor
+            icon={icon}
+            accent={accent}
+            onIcon={setIcon}
+            onAccent={setAccent}
+            defaultLabel={kind === "life_event" ? "Heart" : "Star"}
+          />
         </div>
 
         <label className="mt-5 block font-heading text-sm uppercase text-olive">

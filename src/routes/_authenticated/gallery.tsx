@@ -7,7 +7,11 @@ import { GoldFrame } from "@/components/gold-frame";
 import { Stamp } from "@/components/stamp";
 import { localToday, type Accent } from "@/components/goal-ui";
 import { StampStyleEditor } from "@/components/stamp-style-editor";
-import { WinFormModal, type EditableWin } from "@/components/win-form-modal";
+import {
+  WinFormModal,
+  winStampStyle,
+  type EditableWin,
+} from "@/components/win-form-modal";
 import {
   goalsQueryOptions,
   purchasesQueryOptions,
@@ -54,6 +58,8 @@ type Win = {
   note: string | null;
   kind: string;
   achieved_on: string;
+  icon: string | null;
+  accent: string | null;
 };
 
 type GalleryGoal = {
@@ -270,7 +276,7 @@ function GalleryPage() {
 
             {/* Wins */}
             {winList.map((w) => {
-              const life = w.kind === "life_event";
+              const style = winStampStyle(w.kind, w.icon, w.accent);
               return (
                 <FrameCell key={w.id} caption={w.title}>
                   <GoldFrame
@@ -282,13 +288,15 @@ function GalleryPage() {
                         kind: w.kind,
                         note: w.note,
                         achieved_on: w.achieved_on,
+                        icon: w.icon,
+                        accent: w.accent,
                       })
                     }
                     mountClassName="bg-[#f4ece0]"
                   >
                     <Stamp
-                      icon={life ? "m024" : null}
-                      accent={life ? "clay" : "sea"}
+                      icon={style.icon}
+                      accent={style.accent}
                       className="w-3/4"
                     />
                   </GoldFrame>

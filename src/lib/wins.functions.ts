@@ -26,6 +26,8 @@ export const createWin = createServerFn({ method: "POST" })
         kind: kindSchema.default("achievement"),
         note: z.string().trim().max(2000).optional(),
         achievedOn: dateSchema.optional(),
+        icon: z.string().trim().max(40).optional(),
+        accent: z.string().trim().max(20).optional(),
       })
       .parse(data),
   )
@@ -37,6 +39,8 @@ export const createWin = createServerFn({ method: "POST" })
         kind: data.kind,
         note: data.note ?? null,
         ...(data.achievedOn ? { achieved_on: data.achievedOn } : {}),
+        icon: data.icon || null,
+        accent: data.accent || null,
         user_id: context.userId,
       })
       .select()
@@ -55,6 +59,8 @@ export const updateWin = createServerFn({ method: "POST" })
         kind: kindSchema,
         note: z.string().trim().max(2000).optional(),
         achievedOn: dateSchema,
+        icon: z.string().trim().max(40).optional(),
+        accent: z.string().trim().max(20).optional(),
       })
       .parse(data),
   )
@@ -66,6 +72,8 @@ export const updateWin = createServerFn({ method: "POST" })
         kind: data.kind,
         note: data.note ?? null,
         achieved_on: data.achievedOn,
+        icon: data.icon || null,
+        accent: data.accent || null,
       })
       .eq("id", data.id)
       .select()

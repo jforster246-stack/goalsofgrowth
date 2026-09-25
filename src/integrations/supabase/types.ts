@@ -414,8 +414,10 @@ export type Database = {
       }
       wins: {
         Row: {
+          accent: string | null
           achieved_on: string
           created_at: string
+          icon: string | null
           id: string
           kind: string
           note: string | null
@@ -423,8 +425,10 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          accent?: string | null
           achieved_on?: string
           created_at?: string
+          icon?: string | null
           id?: string
           kind?: string
           note?: string | null
@@ -432,8 +436,10 @@ export type Database = {
           user_id: string
         }
         Update: {
+          accent?: string | null
           achieved_on?: string
           created_at?: string
+          icon?: string | null
           id?: string
           kind?: string
           note?: string | null

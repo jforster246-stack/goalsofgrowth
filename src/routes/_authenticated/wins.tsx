@@ -8,7 +8,11 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Plus, X } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
-import { WinFormModal, type EditableWin } from "@/components/win-form-modal";
+import {
+  WinFormModal,
+  winStampStyle,
+  type EditableWin,
+} from "@/components/win-form-modal";
 import { Stamp } from "@/components/stamp";
 import {
   goalsQueryOptions,
@@ -41,6 +45,8 @@ type Win = {
   note: string | null;
   kind: string;
   achieved_on: string;
+  icon: string | null;
+  accent: string | null;
 };
 
 function WinsPage() {
@@ -206,7 +212,7 @@ function WinCollection({
 }
 
 function WinStamp({ win, onOpen }: { win: Win; onOpen: () => void }) {
-  const isLifeEvent = win.kind === "life_event";
+  const style = winStampStyle(win.kind, win.icon, win.accent);
   return (
     <button
       type="button"
@@ -214,10 +220,7 @@ function WinStamp({ win, onOpen }: { win: Win; onOpen: () => void }) {
       aria-label={`Open ${win.title}`}
       className="flex w-[76px] flex-col items-center gap-1.5 rounded-xl p-1 text-center transition-colors hover:bg-black/5"
     >
-      <Stamp
-        icon={isLifeEvent ? "m024" : null}
-        accent={isLifeEvent ? "clay" : "sea"}
-      />
+      <Stamp icon={style.icon} accent={style.accent} />
       <span className="font-serif text-[10px] leading-tight text-black/50 [overflow-wrap:anywhere]">
         {win.title}
       </span>
