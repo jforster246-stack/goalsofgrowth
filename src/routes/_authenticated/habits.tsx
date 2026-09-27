@@ -25,6 +25,7 @@ import { mergeStamps } from "@/lib/stamp-view";
 import { toggleHabit } from "@/lib/habits.functions";
 import { frequencyLabel } from "@/lib/habit-schedule";
 import { Loading } from "@/components/loading";
+import { HabitMonthGrid } from "@/components/habit-month-grid";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/habits")({
@@ -229,6 +230,8 @@ function HabitsBody({
           );
         })}
       </div>
+
+      <HabitMonthGrid />
 
       {scheduled.length > 0 && (
         <section>

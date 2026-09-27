@@ -156,6 +156,59 @@ export const getHabitStampBonus = createServerFn({ method: "GET" })
   });
 
 /**
+ * All completions in one calendar month ("YYYY-MM"), grouped per habit, for
+ * the monthly tracker grid on the Habits page.
+ */
+export const listHabitMonth = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) =>
+    z.object({ month: z.string().regex(/^\d{4}-\d{2}$/) }).parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const [year, month] = data.month.split("-").map(Number) as [number, number];
+    const start = `${data.month}-01`;
+    const endDate = new Date(Date.UTC(year, month, 1));
+    const end = endDate.toISOString().slice(0, 10);
+
+    const [habitsResult, completionsResult] = await Promise.all([
+      context.supabase
+        .from("habits")
+        .select("id, name, time_of_day, icon")
+        .order("position", { ascending: true })
+        .order("created_at", { ascending: true }),
+      context.supabase
+        .from("habit_completions")
+        .select("habit_id, completed_on")
+        .gte("completed_on", start)
+        .lt("completed_on", end),
+    ]);
+    if (habitsResult.error) throw new Error(habitsResult.error.message);
+    if (completionsResult.error)
+      throw new Error(completionsResult.error.message);
+
+    const days = new Date(Date.UTC(year, month, 0)).getUTCDate();
+    const byHabit = new Map<string, Set<number>>();
+    for (const c of completionsResult.data ?? []) {
+      const day = Number(c.completed_on.slice(8, 10));
+      const set = byHabit.get(c.habit_id) ?? new Set<number>();
+      set.add(day);
+      byHabit.set(c.habit_id, set);
+    }
+
+    return {
+      month: data.month,
+      days,
+      habits: (habitsResult.data ?? []).map((h) => ({
+        id: h.id,
+        name: h.name,
+        time_of_day: h.time_of_day,
+        icon: h.icon,
+        days: [...(byHabit.get(h.id) ?? [])].sort((a, b) => a - b),
+      })),
+    };
+  });
+
+/**
  * Every date a habit was completed on (ascending), so the sheet can show the
  * ticked week and work out three-day runs across week boundaries.
  */
