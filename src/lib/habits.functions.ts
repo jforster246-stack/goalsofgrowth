@@ -165,7 +165,7 @@ export const listHabitMonth = createServerFn({ method: "GET" })
     z.object({ month: z.string().regex(/^\d{4}-\d{2}$/) }).parse(data),
   )
   .handler(async ({ data, context }) => {
-    const [year, month] = data.month.split("-").map(Number);
+    const [year, month] = data.month.split("-").map(Number) as [number, number];
     const start = `${data.month}-01`;
     const endDate = new Date(Date.UTC(year, month, 1));
     const end = endDate.toISOString().slice(0, 10);
