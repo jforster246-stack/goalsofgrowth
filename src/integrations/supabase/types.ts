@@ -316,6 +316,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          bonus_stamps: number
           created_at: string
           display_name: string | null
           goal_of_day_date: string | null
@@ -326,6 +327,7 @@ export type Database = {
           streak_count: number
         }
         Insert: {
+          bonus_stamps?: number
           created_at?: string
           display_name?: string | null
           goal_of_day_date?: string | null
@@ -336,6 +338,7 @@ export type Database = {
           streak_count?: number
         }
         Update: {
+          bonus_stamps?: number
           created_at?: string
           display_name?: string | null
           goal_of_day_date?: string | null
@@ -414,8 +417,10 @@ export type Database = {
       }
       wins: {
         Row: {
+          accent: string | null
           achieved_on: string
           created_at: string
+          icon: string | null
           id: string
           kind: string
           note: string | null
@@ -423,8 +428,10 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          accent?: string | null
           achieved_on?: string
           created_at?: string
+          icon?: string | null
           id?: string
           kind?: string
           note?: string | null
@@ -432,8 +439,10 @@ export type Database = {
           user_id: string
         }
         Update: {
+          accent?: string | null
           achieved_on?: string
           created_at?: string
+          icon?: string | null
           id?: string
           kind?: string
           note?: string | null
