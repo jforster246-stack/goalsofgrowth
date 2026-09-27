@@ -48,7 +48,7 @@ export function HabitMonthGrid() {
   });
 
   const today = localToday();
-  const [year, mon] = month.split("-").map(Number);
+  const [year, mon] = month.split("-").map(Number) as [number, number];
   const label = `${MONTH_NAMES[mon - 1]} ${year}`;
   const isCurrentMonth = month === today.slice(0, 7);
   const todayDay = isCurrentMonth ? Number(today.slice(8, 10)) : null;
