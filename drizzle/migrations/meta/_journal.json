@@ -204,6 +204,13 @@
       "when": 1791590400000,
       "tag": "0028_add_signin_bonus",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1790480443127,
+      "tag": "0029_apply_win_style_and_signin_bonus",
+      "breakpoints": true
     }
   ]
 }
