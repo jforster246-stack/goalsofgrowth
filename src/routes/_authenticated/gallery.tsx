@@ -262,28 +262,28 @@ function GalleryPage() {
               );
             })}
 
-            {/* Completed goals */}
+            {/* Completed goals — stamp only, no frame */}
             {goalStamps.map((s) => (
               <FrameCell key={s.key} caption={s.title}>
-                <GoldFrame
-                  seed={s.key}
-                  ariaLabel={`Goal: ${s.title}`}
+                <button
+                  type="button"
+                  aria-label={`Goal: ${s.title}`}
                   onClick={() => openGoal(s)}
-                  mountClassName="bg-[#f4ece0]"
+                  className="block w-full transition-transform hover:-translate-y-0.5"
                 >
-                  <Stamp icon={s.icon} accent={s.accent} className="w-2/3" />
-                </GoldFrame>
+                  <Stamp icon={s.icon} accent={s.accent} className="w-full" />
+                </button>
               </FrameCell>
             ))}
 
-            {/* Wins */}
+            {/* Wins — stamp only, no frame */}
             {winList.map((w) => {
               const style = winStampStyle(w.kind, w.icon, w.accent);
               return (
                 <FrameCell key={w.id} caption={w.title}>
-                  <GoldFrame
-                    seed={w.id}
-                    ariaLabel={`Win: ${w.title}`}
+                  <button
+                    type="button"
+                    aria-label={`Win: ${w.title}`}
                     onClick={() =>
                       setEditingWin({
                         id: w.id,
@@ -295,14 +295,14 @@ function GalleryPage() {
                         accent: w.accent,
                       })
                     }
-                    mountClassName="bg-[#f4ece0]"
+                    className="block w-full transition-transform hover:-translate-y-0.5"
                   >
                     <Stamp
                       icon={style.icon}
                       accent={style.accent}
-                      className="w-2/3"
+                      className="w-full"
                     />
-                  </GoldFrame>
+                  </button>
                 </FrameCell>
               );
             })}
