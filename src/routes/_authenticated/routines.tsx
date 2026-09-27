@@ -143,9 +143,10 @@ function collapseKey(id: string) {
 }
 function readCollapsed(id: string) {
   try {
-    return localStorage.getItem(collapseKey(id)) === "1";
+    // Default to collapsed unless the user explicitly expanded it.
+    return localStorage.getItem(collapseKey(id)) !== "0";
   } catch {
-    return false;
+    return true;
   }
 }
 
