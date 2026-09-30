@@ -54,11 +54,23 @@ function weekDates(offset: number): string[] {
 }
 
 /** The habit's icon + name for the left column. */
-function HabitLabel({ icon, name }: { icon: string | null; name: string }) {
+function HabitLabel({
+  icon,
+  name,
+  full = false,
+}: {
+  icon: string | null;
+  name: string;
+  full?: boolean;
+}) {
   return (
-    <span className="flex max-w-32 items-center gap-1.5">
+    <span className={cn("flex items-center gap-1.5", !full && "max-w-32")}>
       {icon ? <Motif id={icon} className="size-4 shrink-0 text-olive" /> : null}
-      <span className="truncate font-serif text-xs text-black/70">{name}</span>
+      <span
+        className={cn("font-serif text-xs text-black/70", !full && "truncate")}
+      >
+        {name}
+      </span>
     </span>
   );
 }
@@ -352,7 +364,7 @@ function WeekView({
                   <th
                     key={date}
                     className={cn(
-                      "text-center font-mono text-[10px] font-normal",
+                      "w-9 text-center font-mono text-[10px] font-normal",
                       date === today ? "text-focus" : "text-black/35",
                     )}
                   >
@@ -372,13 +384,13 @@ function WeekView({
                 const done = new Set(habit.days);
                 return (
                   <tr key={habit.id}>
-                    <td className="sticky left-0 bg-white pr-2">
-                      <HabitLabel icon={habit.icon} name={habit.name} />
+                    <td className="sticky left-0 bg-white pr-3">
+                      <HabitLabel icon={habit.icon} name={habit.name} full />
                     </td>
                     {dates.map((date) => {
                       const isFuture = date > today;
                       return (
-                        <td key={date}>
+                        <td key={date} className="w-9 text-center">
                           <DayDot
                             done={done.has(date)}
                             time={habit.time_of_day}
