@@ -13,6 +13,7 @@ import { Stamp } from "@/components/stamp";
 import { StampMark } from "@/components/stamp-mark";
 import { StampPill } from "@/components/stamp-pill";
 import { HabitDetailModal, type HabitFull } from "@/components/habit-detail-modal";
+import { HabitTally } from "@/components/habit-tally";
 import {
   HabitRow,
   NextStepPortrait,
@@ -180,6 +181,7 @@ function OverviewPage() {
           </div>
 
           <div className="mt-6 border-t border-dashed border-border" />
+          <HabitTally className="mt-6" />
           <TodayHabits />
           <MissedYesterday />
         </div>
@@ -218,8 +220,10 @@ function OverviewPage() {
             </div>
           )}
 
+          <HabitTally className="mt-8" />
+
           {/* Habits + missed yesterday, side by side */}
-          <div className="mt-8 grid grid-cols-2 gap-8 border-t border-border pt-2">
+          <div className="mt-6 grid grid-cols-2 gap-8 border-t border-border pt-2">
             <TodayHabits />
             <div className="border-l border-border pl-8">
               <MissedYesterday variant="column" />

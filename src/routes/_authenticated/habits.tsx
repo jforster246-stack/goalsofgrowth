@@ -11,6 +11,7 @@ import { HabitRow, type HabitTime } from "@/components/home-cards";
 import { Motif, TIME_MOTIF } from "@/components/motif-icons";
 import { HabitFormModal } from "@/components/habit-form-modal";
 import { HabitDetailModal } from "@/components/habit-detail-modal";
+import { HabitTally } from "@/components/habit-tally";
 import { StampPill } from "@/components/stamp-pill";
 import { localToday } from "@/components/goal-ui";
 import { habitsQueryOptions } from "@/lib/goal-queries";
@@ -191,6 +192,8 @@ function HabitsBody({
 
   return (
     <div className="mt-4 space-y-8 pb-4">
+      <HabitTally />
+
       <div className="grid gap-8 md:grid-cols-2 md:items-start lg:grid-cols-3">
         {TIMES.map((time) => {
           const inBucket = habits.filter((h) => h.time_of_day === time.key);
