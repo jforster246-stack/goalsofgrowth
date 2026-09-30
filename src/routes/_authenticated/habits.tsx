@@ -1,6 +1,5 @@
 import {
   createFileRoute,
-  Link,
   useNavigate,
   type SearchSchemaInput,
 } from "@tanstack/react-router";
@@ -12,16 +11,9 @@ import { HabitRow, type HabitTime } from "@/components/home-cards";
 import { Motif, TIME_MOTIF } from "@/components/motif-icons";
 import { HabitFormModal } from "@/components/habit-form-modal";
 import { HabitDetailModal } from "@/components/habit-detail-modal";
-import { Stamp } from "@/components/stamp";
+import { StampPill } from "@/components/stamp-pill";
 import { localToday } from "@/components/goal-ui";
-import {
-  goalsQueryOptions,
-  habitStampBonusQueryOptions,
-  habitsQueryOptions,
-  profileQueryOptions,
-  stampsQueryOptions,
-} from "@/lib/goal-queries";
-import { mergeStamps } from "@/lib/stamp-view";
+import { habitsQueryOptions } from "@/lib/goal-queries";
 import { toggleHabit } from "@/lib/habits.functions";
 import { frequencyLabel } from "@/lib/habit-schedule";
 import { Loading } from "@/components/loading";
@@ -73,14 +65,6 @@ function HabitsPage() {
   const { new: openNew } = Route.useSearch();
   const navigate = useNavigate();
   const { data: habits, isPending } = useQuery(habitsQueryOptions(today));
-  const { data: stamps } = useQuery(stampsQueryOptions);
-  const { data: goals } = useQuery(goalsQueryOptions);
-  const { data: habitBonus } = useQuery(habitStampBonusQueryOptions);
-  const { data: profile } = useQuery(profileQueryOptions);
-  const stampCount =
-    mergeStamps(stamps, goals).length +
-    (habitBonus ?? 0) +
-    (profile?.bonus_stamps ?? 0);
 
   const [adding, setAdding] = useState(false);
   const [selected, setSelected] = useState<Habit | null>(null);
@@ -97,17 +81,7 @@ function HabitsPage() {
       title="Habits"
       titleLeft
       hideSettings
-      right={
-        <Link
-          to="/wins"
-          aria-label={`${stampCount} stamps earned`}
-          title="Stamps earned"
-          className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-sm"
-        >
-          <Stamp icon={null} accent="sea" className="size-5" />
-          <span className="font-mono text-sm text-olive">{stampCount}</span>
-        </Link>
-      }
+      right={<StampPill />}
     >
       {isPending || !habits ? (
         <Loading />

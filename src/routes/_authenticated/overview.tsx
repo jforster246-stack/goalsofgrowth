@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Check, Flame } from "lucide-react";
 import {
   useMutation,
@@ -11,6 +11,7 @@ import { AppShell, useAppShell } from "@/components/app-shell";
 import { goalProgress, localToday } from "@/components/goal-ui";
 import { Stamp } from "@/components/stamp";
 import { StampMark } from "@/components/stamp-mark";
+import { StampPill } from "@/components/stamp-pill";
 import { HabitDetailModal, type HabitFull } from "@/components/habit-detail-modal";
 import {
   HabitRow,
@@ -24,12 +25,9 @@ import {
 } from "@/components/goal-complete-prompt";
 import {
   goalsQueryOptions,
-  habitStampBonusQueryOptions,
   habitsQueryOptions,
   profileQueryOptions,
-  stampsQueryOptions,
 } from "@/lib/goal-queries";
-import { mergeStamps } from "@/lib/stamp-view";
 import { deleteStep, setGoalOfDay, toggleStep, updateStep } from "@/lib/goals.functions";
 import { toggleHabit } from "@/lib/habits.functions";
 import { frequencyLabel, isHabitDueToday } from "@/lib/habit-schedule";
@@ -76,12 +74,6 @@ function OverviewPage() {
   const queryClient = useQueryClient();
   const { data: goals } = useSuspenseQuery(goalsQueryOptions);
   const { data: profile } = useQuery(profileQueryOptions);
-  const { data: stamps } = useQuery(stampsQueryOptions);
-  const { data: habitBonus } = useQuery(habitStampBonusQueryOptions);
-  const stampCount =
-    mergeStamps(stamps, goals).length +
-    (habitBonus ?? 0) +
-    (profile?.bonus_stamps ?? 0);
 
   const today = localToday();
 
@@ -151,19 +143,7 @@ function OverviewPage() {
     : null;
 
   return (
-    <AppShell
-      right={
-        <Link
-          to="/wins"
-          aria-label={`${stampCount} stamps earned`}
-          title="Stamps earned"
-          className="flex shrink-0 items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-sm"
-        >
-          <Stamp icon={null} accent="sea" className="size-5" />
-          <span className="font-mono text-sm text-olive">{stampCount}</span>
-        </Link>
-      }
-    >
+    <AppShell right={<StampPill />}>
       <div className="relative w-full pb-24 pt-2">
         {/* Mobile — the stacked layout */}
         <div className="md:hidden">
