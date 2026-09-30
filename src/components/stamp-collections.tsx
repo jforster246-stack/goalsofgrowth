@@ -10,7 +10,7 @@ import {
 } from "@/components/win-form-modal";
 import {
   goalsQueryOptions,
-  habitStampBonusQueryOptions,
+  stampBalanceQueryOptions,
   stampsQueryOptions,
   winsQueryOptions,
 } from "@/lib/goal-queries";
@@ -42,7 +42,7 @@ export function StampCollections({
 
   const { data: stamps } = useQuery(stampsQueryOptions);
   const { data: goals } = useQuery(goalsQueryOptions);
-  const { data: habitBonus } = useQuery(habitStampBonusQueryOptions);
+  const { data: balance } = useQuery(stampBalanceQueryOptions);
   const { data: wins } = useQuery(winsQueryOptions);
 
   const [adding, setAdding] = useState(defaultAdd);
@@ -50,7 +50,7 @@ export function StampCollections({
   const [snapshot, setSnapshot] = useState<StampView | null>(null);
 
   const stampList = mergeStamps(stamps, goals);
-  const totalStamps = stampList.length + (habitBonus ?? 0);
+  const spendable = balance?.balance ?? 0;
   const winList = (wins ?? []) as Win[];
   const achievements = winList.filter((w) => w.kind === "achievement");
   const lifeEvents = winList.filter((w) => w.kind === "life_event");
@@ -72,11 +72,11 @@ export function StampCollections({
   return (
     <div className="space-y-7">
       <p className="font-serif text-sm text-black/50">
-        You've collected{" "}
+        You have{" "}
         <span className="font-heading text-olive">
-          {totalStamps} star stamp{totalStamps === 1 ? "" : "s"}
+          {spendable} star stamp{spendable === 1 ? "" : "s"}
         </span>{" "}
-        from completed goals and habits. Spend them on artworks for your{" "}
+        to spend on artworks for your{" "}
         <Link
           to="/gallery"
           onClick={() => onNavigate?.()}

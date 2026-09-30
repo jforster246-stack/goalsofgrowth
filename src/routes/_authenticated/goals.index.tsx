@@ -233,6 +233,7 @@ function GoalCardItem({ goal, dragHandle }: { goal: Goal; dragHandle?: ReactNode
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["wins"] });
       queryClient.invalidateQueries({ queryKey: ["stamps"] });
+      queryClient.invalidateQueries({ queryKey: ["stamp-balance"] });
       refresh();
     },
   });

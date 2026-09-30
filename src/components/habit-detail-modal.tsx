@@ -105,6 +105,7 @@ export function HabitDetailModal({
     queryClient.invalidateQueries({ queryKey: ["habit-streaks"] });
     queryClient.invalidateQueries({ queryKey: ["habit-history"] });
     queryClient.invalidateQueries({ queryKey: ["habit-stamp-bonus"] });
+    queryClient.invalidateQueries({ queryKey: ["stamp-balance"] });
   };
 
   const toggle = useMutation({
