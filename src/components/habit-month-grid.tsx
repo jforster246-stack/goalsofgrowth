@@ -28,6 +28,9 @@ const MONTH_ABBR = [
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
 const WEEK_LABELS = ["M", "T", "W", "T", "F", "S", "S"];
+/** Fixed px width of each day column in the week view — the today frame is
+ *  positioned from the right edge using this, so it must match the cells. */
+const WEEK_DAY_W = 38;
 
 type Toggle = UseMutationResult<
   unknown,
@@ -75,11 +78,12 @@ function HabitLabel({
   );
 }
 
-/** A tinted, tappable completion dot. */
+/** A tinted, tappable completion cell — squarish with an 8pt radius. */
 function DayDot({
   done,
   time,
   isToday,
+  big = false,
   disabled,
   onClick,
   label,
@@ -87,6 +91,7 @@ function DayDot({
   done: boolean;
   time: string;
   isToday: boolean;
+  big?: boolean;
   disabled: boolean;
   onClick: () => void;
   label: string;
@@ -101,9 +106,12 @@ function DayDot({
     >
       <span
         className={cn(
-          "size-4 rounded-full transition-colors",
-          done ? (TIME_CELL[time] ?? "bg-olive") : "bg-black/8",
-          isToday && "ring-1 ring-focus ring-offset-1",
+          "transition-colors",
+          big ? "size-7 rounded-lg" : "size-4 rounded-[5px]",
+          done ? (TIME_CELL[time] ?? "bg-olive") : "bg-black/[0.07]",
+          // In the week view today is marked by the column frame, so the small
+          // month dots keep the ring; the big week dots don't.
+          !big && isToday && "ring-1 ring-focus ring-offset-1",
           disabled && !done && "opacity-40",
         )}
       />
@@ -170,8 +178,9 @@ export function HabitMonthGrid() {
       )}
 
       <p className="mt-2 font-serif text-xs text-black/40">
-        Tap any past day to tick it off or undo it. Dots are coloured by time of
-        day — gold morning, clay afternoon, green evening.
+        Tap any past day to tick it off or undo it — today's column is framed.
+        Cells are coloured by time of day: gold morning, clay afternoon, green
+        evening.
       </p>
     </section>
   );
@@ -340,6 +349,11 @@ function WeekView({
       ? `${Number(start.slice(8, 10))}–${Number(end.slice(8, 10))} ${MONTH_ABBR[sm - 1]}`
       : `${Number(start.slice(8, 10))} ${MONTH_ABBR[sm - 1]} – ${Number(end.slice(8, 10))} ${MONTH_ABBR[em - 1]}`;
 
+  const todayIdx = dates.indexOf(today); // -1 when viewing another week
+  const sorted = data
+    ? [...data.habits].sort((a, b) => b.days.length - a.days.length)
+    : [];
+
   return (
     <>
       <NavBar
@@ -348,7 +362,7 @@ function WeekView({
         onNext={() => setOffset((o) => o + 1)}
         nextDisabled={offset >= 0}
       />
-      <div className="mt-3 rounded-2xl bg-white p-4 shadow-sm">
+      <div className="mt-3 rounded-2xl bg-white p-5 shadow-sm">
         {isPending || !data ? (
           <Loading />
         ) : data.habits.length === 0 ? (
@@ -356,66 +370,84 @@ function WeekView({
             No habits to track yet.
           </p>
         ) : (
-          <table className="w-full border-separate border-spacing-1">
-            <thead>
-              <tr>
-                <th className="sticky left-0 bg-white" />
-                {dates.map((date, i) => (
-                  <th
-                    key={date}
-                    className={cn(
-                      "w-9 text-center font-mono text-[10px] font-normal",
-                      date === today ? "text-focus" : "text-black/35",
-                    )}
-                  >
-                    <span className="block font-heading text-[9px] uppercase">
-                      {WEEK_LABELS[i]}
-                    </span>
-                    {Number(date.slice(8, 10))}
-                  </th>
-                ))}
-                <th className="pl-1 text-right font-mono text-[10px] font-normal text-black/35">
-                  Σ
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {[...data.habits].sort((a, b) => b.days.length - a.days.length).map((habit) => {
-                const done = new Set(habit.days);
-                return (
-                  <tr key={habit.id}>
-                    <td className="sticky left-0 bg-white pr-3">
-                      <HabitLabel icon={habit.icon} name={habit.name} full />
-                    </td>
-                    {dates.map((date) => {
-                      const isFuture = date > today;
-                      return (
-                        <td key={date} className="w-9 text-center">
-                          <DayDot
-                            done={done.has(date)}
-                            time={habit.time_of_day}
-                            isToday={date === today}
-                            disabled={isFuture || toggle.isPending}
-                            onClick={() =>
-                              toggle.mutate({
-                                id: habit.id,
-                                date,
-                                done: !done.has(date),
-                              })
-                            }
-                            label={`${habit.name}, ${date}`}
-                          />
-                        </td>
-                      );
-                    })}
-                    <td className="pl-1 text-right font-mono text-[10px] text-black/50">
-                      {habit.days.length}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <div className="relative">
+            {/* Today's column, framed from the header through the last row. */}
+            {todayIdx >= 0 && (
+              <div
+                aria-hidden
+                className="pointer-events-none absolute rounded-full border border-black/70"
+                style={{
+                  top: -6,
+                  bottom: -6,
+                  right: (6 - todayIdx) * WEEK_DAY_W,
+                  width: WEEK_DAY_W,
+                }}
+              />
+            )}
+
+            {/* Header: "Habit" + the weekday initials for this week. */}
+            <div className="flex items-center border-b border-black/10 pb-3">
+              <div className="min-w-0 flex-1 font-serif text-sm text-black/70">
+                Habit
+              </div>
+              {WEEK_LABELS.map((letter, i) => (
+                <div
+                  key={i}
+                  style={{ width: WEEK_DAY_W }}
+                  className={cn(
+                    "text-center font-serif text-xs",
+                    dates[i] === today ? "text-black/80" : "text-black/45",
+                  )}
+                >
+                  {letter}
+                </div>
+              ))}
+            </div>
+
+            {/* One row per habit, separated by a hairline. */}
+            {sorted.map((habit, ri) => {
+              const done = new Set(habit.days);
+              return (
+                <div
+                  key={habit.id}
+                  className={cn(
+                    "flex items-center py-3.5",
+                    ri < sorted.length - 1 && "border-b border-black/10",
+                  )}
+                >
+                  <div className="min-w-0 flex-1 pr-3">
+                    <HabitLabel icon={habit.icon} name={habit.name} full />
+                  </div>
+                  {dates.map((date) => {
+                    const isFuture = date > today;
+                    return (
+                      <div
+                        key={date}
+                        style={{ width: WEEK_DAY_W }}
+                        className="flex justify-center"
+                      >
+                        <DayDot
+                          done={done.has(date)}
+                          time={habit.time_of_day}
+                          isToday={date === today}
+                          big
+                          disabled={isFuture || toggle.isPending}
+                          onClick={() =>
+                            toggle.mutate({
+                              id: habit.id,
+                              date,
+                              done: !done.has(date),
+                            })
+                          }
+                          label={`${habit.name}, ${date}`}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
     </>
