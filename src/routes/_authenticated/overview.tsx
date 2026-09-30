@@ -157,6 +157,8 @@ function OverviewPage() {
 
           <div className="mt-5 border-t border-dashed border-border" />
 
+          <HabitTally className="mt-5" />
+
           <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             What next step will you take today?
           </p>
@@ -181,7 +183,6 @@ function OverviewPage() {
           </div>
 
           <div className="mt-6 border-t border-dashed border-border" />
-          <HabitTally className="mt-6" />
           <TodayHabits />
           <MissedYesterday />
         </div>
@@ -195,6 +196,8 @@ function OverviewPage() {
             </p>
             <StreakBar streak={profile?.streak_count ?? 0} />
           </div>
+
+          <HabitTally className="mt-6" />
 
           {/* Next steps for today — a row of portrait cards */}
           <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -219,8 +222,6 @@ function OverviewPage() {
               ))}
             </div>
           )}
-
-          <HabitTally className="mt-8" />
 
           {/* Habits + missed yesterday, side by side */}
           <div className="mt-6 grid grid-cols-2 gap-8 border-t border-border pt-2">
