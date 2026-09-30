@@ -28,9 +28,6 @@ const MONTH_ABBR = [
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
 const WEEK_LABELS = ["M", "T", "W", "T", "F", "S", "S"];
-/** Fixed px width of each day column in the week view — the today frame is
- *  positioned from the right edge using this, so it must match the cells. */
-const WEEK_DAY_W = 38;
 
 type Toggle = UseMutationResult<
   unknown,
@@ -107,7 +104,7 @@ function DayDot({
       <span
         className={cn(
           "transition-colors",
-          big ? "size-7 rounded-lg" : "size-4 rounded-[5px]",
+          big ? "size-6 rounded-lg sm:size-7" : "size-4 rounded-[5px]",
           done ? (TIME_CELL[time] ?? "bg-olive") : "bg-black/[0.07]",
           // In the week view today is marked by the column frame, so the small
           // month dots keep the ring; the big week dots don't.
@@ -124,7 +121,7 @@ function DayDot({
  * tap any past day to tick it off or undo it.
  */
 export function HabitMonthGrid() {
-  const [view, setView] = useState<"month" | "week">("month");
+  const [view, setView] = useState<"month" | "week">("week");
   const [monthOffset, setMonthOffset] = useState(0);
   const [weekOffset, setWeekOffset] = useState(0);
   const queryClient = useQueryClient();
@@ -155,7 +152,7 @@ export function HabitMonthGrid() {
           <p className="font-heading text-sm uppercase text-olive">Tracker</p>
         </div>
         <div className="flex rounded-full bg-black/5 p-0.5 font-heading text-[11px] uppercase">
-          {(["month", "week"] as const).map((v) => (
+          {(["week", "month"] as const).map((v) => (
             <button
               key={v}
               type="button"
@@ -362,7 +359,7 @@ function WeekView({
         onNext={() => setOffset((o) => o + 1)}
         nextDisabled={offset >= 0}
       />
-      <div className="mt-3 rounded-2xl bg-white p-5 shadow-sm">
+      <div className="mt-3 rounded-2xl bg-white p-4 shadow-sm sm:p-5">
         {isPending || !data ? (
           <Loading />
         ) : data.habits.length === 0 ? (
@@ -371,18 +368,22 @@ function WeekView({
           </p>
         ) : (
           <div className="relative">
-            {/* Today's column, framed from the header through the last row. */}
+            {/* Today's column, framed from the header through the last row.
+                Positioned as a fraction of the (responsive) day strip so it
+                stays aligned at any width. */}
             {todayIdx >= 0 && (
               <div
                 aria-hidden
-                className="pointer-events-none absolute rounded-full border border-black/70"
-                style={{
-                  top: -6,
-                  bottom: -6,
-                  right: (6 - todayIdx) * WEEK_DAY_W,
-                  width: WEEK_DAY_W,
-                }}
-              />
+                className="pointer-events-none absolute inset-y-0 right-0 w-[196px] sm:w-[266px]"
+              >
+                <div
+                  className="absolute -top-1.5 -bottom-1.5 rounded-full border border-black/70"
+                  style={{
+                    left: `${(todayIdx / 7) * 100}%`,
+                    width: `${100 / 7}%`,
+                  }}
+                />
+              </div>
             )}
 
             {/* Header: "Habit" + the weekday initials for this week. */}
@@ -390,18 +391,19 @@ function WeekView({
               <div className="min-w-0 flex-1 font-serif text-sm text-black/70">
                 Habit
               </div>
-              {WEEK_LABELS.map((letter, i) => (
-                <div
-                  key={i}
-                  style={{ width: WEEK_DAY_W }}
-                  className={cn(
-                    "text-center font-serif text-xs",
-                    dates[i] === today ? "text-black/80" : "text-black/45",
-                  )}
-                >
-                  {letter}
-                </div>
-              ))}
+              <div className="grid w-[196px] shrink-0 grid-cols-7 sm:w-[266px]">
+                {WEEK_LABELS.map((letter, i) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      "text-center font-serif text-xs",
+                      dates[i] === today ? "text-black/80" : "text-black/45",
+                    )}
+                  >
+                    {letter}
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* One row per habit, separated by a hairline. */}
@@ -411,39 +413,37 @@ function WeekView({
                 <div
                   key={habit.id}
                   className={cn(
-                    "flex items-center py-3.5",
+                    "flex items-center py-3 sm:py-3.5",
                     ri < sorted.length - 1 && "border-b border-black/10",
                   )}
                 >
                   <div className="min-w-0 flex-1 pr-3">
                     <HabitLabel icon={habit.icon} name={habit.name} full />
                   </div>
-                  {dates.map((date) => {
-                    const isFuture = date > today;
-                    return (
-                      <div
-                        key={date}
-                        style={{ width: WEEK_DAY_W }}
-                        className="flex justify-center"
-                      >
-                        <DayDot
-                          done={done.has(date)}
-                          time={habit.time_of_day}
-                          isToday={date === today}
-                          big
-                          disabled={isFuture || toggle.isPending}
-                          onClick={() =>
-                            toggle.mutate({
-                              id: habit.id,
-                              date,
-                              done: !done.has(date),
-                            })
-                          }
-                          label={`${habit.name}, ${date}`}
-                        />
-                      </div>
-                    );
-                  })}
+                  <div className="grid w-[196px] shrink-0 grid-cols-7 sm:w-[266px]">
+                    {dates.map((date) => {
+                      const isFuture = date > today;
+                      return (
+                        <div key={date} className="flex justify-center">
+                          <DayDot
+                            done={done.has(date)}
+                            time={habit.time_of_day}
+                            isToday={date === today}
+                            big
+                            disabled={isFuture || toggle.isPending}
+                            onClick={() =>
+                              toggle.mutate({
+                                id: habit.id,
+                                date,
+                                done: !done.has(date),
+                              })
+                            }
+                            label={`${habit.name}, ${date}`}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               );
             })}
