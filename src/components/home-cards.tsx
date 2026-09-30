@@ -204,7 +204,7 @@ export function GoalCard({
       {dragHandle}
 
       {/* Ticket stub */}
-      <div className="relative overflow-hidden rounded-3xl bg-white shadow-sm">
+      <div className="relative overflow-hidden rounded-sm bg-white shadow-sm">
         {/* Coloured top — stamp in the corner, title below */}
         <button
           type="button"
@@ -314,6 +314,24 @@ export function GoalCard({
             </button>
           )}
         </div>
+
+        {/* Inverted (concave) corners — matching the side notches */}
+        <span
+          className="pointer-events-none absolute left-0 top-0 size-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-background"
+          aria-hidden
+        />
+        <span
+          className="pointer-events-none absolute right-0 top-0 size-5 -translate-y-1/2 translate-x-1/2 rounded-full bg-background"
+          aria-hidden
+        />
+        <span
+          className="pointer-events-none absolute bottom-0 left-0 size-5 -translate-x-1/2 translate-y-1/2 rounded-full bg-background"
+          aria-hidden
+        />
+        <span
+          className="pointer-events-none absolute bottom-0 right-0 size-5 translate-x-1/2 translate-y-1/2 rounded-full bg-background"
+          aria-hidden
+        />
       </div>
     </div>
   );
