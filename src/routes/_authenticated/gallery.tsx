@@ -233,10 +233,8 @@ function GalleryPage() {
           explore.
         </p>
 
-        <div
-          className="mt-3 -mx-5 overflow-auto px-5 py-6 sm:mx-0 sm:rounded-3xl"
-          style={{ background: "#2c141c" }}
-        >
+        <div className="mt-3 -mx-5 overflow-auto bg-card px-5 py-6 sm:mx-0 sm:rounded-3xl">
+
           <div className="grid w-max gap-5 [grid-template-columns:repeat(4,132px)] sm:w-full sm:[grid-template-columns:repeat(auto-fill,minmax(150px,1fr))]">
             {/* Artwork slots */}
             {SLOTS.map((slot) => {
@@ -324,6 +322,7 @@ function GalleryPage() {
       {detailArtwork && (
         <ArtworkDetailModal
           artwork={detailArtwork.artwork}
+          seed={`slot-${detailArtwork.slot}`}
           onClose={() => setDetailArtwork(null)}
           onRemove={() => clearSlot.mutate(detailArtwork.slot)}
         />
@@ -371,7 +370,7 @@ function FrameCell({
   return (
     <div className="flex flex-col items-center">
       {children}
-      <span className="mt-2 line-clamp-2 text-center font-serif text-[11px] leading-tight text-white/70">
+      <span className="mt-2 line-clamp-2 text-center font-serif text-[11px] leading-tight text-black/55">
         {caption}
       </span>
     </div>
@@ -475,18 +474,22 @@ function SlotPickerModal({
 
 function ArtworkDetailModal({
   artwork,
+  seed,
   onClose,
   onRemove,
 }: {
   artwork: Artwork;
+  seed: string;
   onClose: () => void;
   onRemove: () => void;
 }) {
   return (
     <ModalShell title="Artwork" onClose={onClose}>
-      <div className="mt-3 flex flex-col items-center gap-3 text-center">
-        <div className="aspect-[4/5] w-40 overflow-hidden rounded-2xl shadow">
-          <ArtworkPlacard artwork={artwork} />
+      <div className="mt-3 flex flex-col items-center gap-4 text-center">
+        <div className="w-44">
+          <GoldFrame seed={seed} ariaLabel={artwork.work}>
+            <ArtworkPlacard artwork={artwork} />
+          </GoldFrame>
         </div>
         <div>
           <p className="font-display text-2xl leading-tight text-black">
