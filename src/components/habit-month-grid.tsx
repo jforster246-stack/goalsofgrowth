@@ -261,7 +261,7 @@ function MonthView({
               </tr>
             </thead>
             <tbody>
-              {data.habits.map((habit) => {
+              {[...data.habits].sort((a, b) => b.days.length - a.days.length).map((habit) => {
                 const done = new Set(habit.days);
                 return (
                   <tr key={habit.id}>
@@ -368,7 +368,7 @@ function WeekView({
               </tr>
             </thead>
             <tbody>
-              {data.habits.map((habit) => {
+              {[...data.habits].sort((a, b) => b.days.length - a.days.length).map((habit) => {
                 const done = new Set(habit.days);
                 return (
                   <tr key={habit.id}>

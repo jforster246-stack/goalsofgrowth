@@ -150,7 +150,6 @@ function OverviewPage() {
           {profile && (
             <StreakCard
               streak={profile.streak_count ?? 0}
-              lastActive={profile.last_active_date ?? null}
               name={profile.display_name ?? null}
             />
           )}
@@ -192,10 +191,7 @@ function OverviewPage() {
             <p className="font-heading text-sm uppercase tracking-wide text-foreground">
               {profile?.streak_count ?? 0} day streak
             </p>
-            <StreakBar
-              streak={profile?.streak_count ?? 0}
-              lastActive={profile?.last_active_date ?? null}
-            />
+            <StreakBar streak={profile?.streak_count ?? 0} />
           </div>
 
           {/* Next steps for today — a row of portrait cards */}
@@ -267,80 +263,20 @@ function OverviewPage() {
   );
 }
 
-/** Parses a YYYY-MM-DD string into a local Date (midnight). */
-function parseLocal(s: string) {
-  const [y, m, d] = s.split("-").map(Number);
-  return new Date(y!, (m ?? 1) - 1, d ?? 1);
-}
-function fmtLocal(dt: Date) {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`;
-}
-
 /**
- * The current Monday-first week with each day flagged: `active` if it falls
- * within the streak's run, plus today. Shared by the streak card and bar.
+ * Compact streak strip: seven stamps that fill left-to-right, one per day of
+ * the streak (capped at seven), so the number filled matches the streak count.
  */
-// Sun-first, matching JS getDay().
-const DOW_LETTERS = ["S", "M", "T", "W", "T", "F", "S"];
-
-/**
- * The last seven days (today at the right), each flagged `active` if it falls
- * within the current streak's run. Rolling — not a calendar week — so the number
- * of active days always matches the streak count (capped at seven).
- */
-function streakWeek(streak: number, lastActive: string | null) {
-  const todayStr = localToday();
-  const today = parseLocal(todayStr);
-
-  const lastActiveDate = lastActive ? parseLocal(lastActive) : null;
-  const activeStart =
-    lastActiveDate && streak > 0
-      ? (() => {
-          const a = new Date(lastActiveDate);
-          a.setDate(a.getDate() - (streak - 1));
-          return a;
-        })()
-      : null;
-
-  return Array.from({ length: 7 }, (_, i) => {
-    const dt = new Date(today);
-    dt.setDate(today.getDate() - 6 + i);
-    const active =
-      !!activeStart &&
-      !!lastActiveDate &&
-      dt.getTime() >= activeStart.getTime() &&
-      dt.getTime() <= lastActiveDate.getTime();
-    return {
-      letter: DOW_LETTERS[dt.getDay()]!,
-      dateNum: dt.getDate(),
-      isToday: fmtLocal(dt) === todayStr,
-      active,
-    };
-  });
-}
-
-/** Compact week strip: a dot per day, filled for the days in the streak. */
-function StreakBar({
-  streak,
-  lastActive,
-}: {
-  streak: number;
-  lastActive: string | null;
-}) {
-  const days = streakWeek(streak, lastActive);
+function StreakBar({ streak }: { streak: number }) {
+  const filled = Math.min(streak, 7);
   return (
     <div className="flex items-center gap-1.5">
-      {days.map((d, i) => (
+      {Array.from({ length: 7 }, (_, i) => (
         <StampMark
           key={i}
           className={cn(
             "size-4",
-            d.active
-              ? "text-clay-deep"
-              : d.isToday
-                ? "text-clay-deep/40"
-                : "text-black/15",
+            i < filled ? "text-clay-deep" : "text-black/15",
           )}
         />
       ))}
@@ -355,14 +291,12 @@ function StreakBar({
  */
 function StreakCard({
   streak,
-  lastActive,
   name,
 }: {
   streak: number;
-  lastActive: string | null;
   name: string | null;
 }) {
-  const days = streakWeek(streak, lastActive);
+  const filled = Math.min(streak, 7);
   // Days left in the current run before the next 7-day, 5-stamp reward.
   const untilBonus = streak > 0 ? (7 - (streak % 7)) % 7 : 7;
 
@@ -392,39 +326,15 @@ function StreakCard({
       </span>
 
       <div className="mt-5 grid w-full grid-cols-7 gap-1">
-        {days.map((d, i) => (
-          <div key={i} className="flex flex-col items-center gap-1.5">
-            <span
-              className={cn(
-                "font-heading text-[11px] uppercase",
-                d.isToday ? "text-clay-deep" : "text-black/40",
-              )}
-            >
-              {d.letter}
-            </span>
-            {d.active ? (
-              <StampMark className="size-9 text-clay-deep">
-                <Check className="size-4 text-white" strokeWidth={3} />
-              </StampMark>
-            ) : (
-              <StampMark
-                className={cn(
-                  "size-9",
-                  d.isToday ? "text-clay-deep/25" : "text-black/10",
-                )}
-              >
-                <span
-                  className={cn(
-                    "font-mono text-xs",
-                    d.isToday ? "text-clay-deep" : "text-black/40",
-                  )}
-                >
-                  {d.dateNum}
-                </span>
-              </StampMark>
-            )}
-          </div>
-        ))}
+        {Array.from({ length: 7 }, (_, i) =>
+          i < filled ? (
+            <StampMark key={i} className="mx-auto size-9 text-clay-deep">
+              <Check className="size-4 text-white" strokeWidth={3} />
+            </StampMark>
+          ) : (
+            <StampMark key={i} className="mx-auto size-9 text-black/10" />
+          ),
+        )}
       </div>
     </div>
   );
