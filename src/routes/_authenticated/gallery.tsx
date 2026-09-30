@@ -100,7 +100,6 @@ function GalleryPage() {
   const goalStamps = mergeStamps(stamps, goals);
   const winList = (wins ?? []) as Win[];
   const owned = purchases ?? [];
-  const earned = balance?.earned ?? 0;
   const spendable = balance?.balance ?? 0;
 
   const slotArtwork = (slot: number): Artwork | undefined => {
@@ -176,7 +175,7 @@ function GalleryPage() {
       right={
         <span className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-sm">
           <Stamp icon={null} accent="sea" className="size-5" />
-          <span className="font-mono text-sm text-olive">{earned}</span>
+          <span className="font-mono text-sm text-olive">{spendable}</span>
         </span>
       }
     >
