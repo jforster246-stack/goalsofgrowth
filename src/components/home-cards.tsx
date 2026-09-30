@@ -204,13 +204,13 @@ export function GoalCard({
       {dragHandle}
 
       {/* Ticket stub */}
-      <div className="relative overflow-hidden rounded-sm bg-white shadow-sm">
+      <div className="relative flex h-[410px] flex-col overflow-hidden rounded-sm bg-white shadow-sm">
         {/* Coloured top — stamp in the corner, title below */}
         <button
           type="button"
           onClick={onOpen}
           className={cn(
-            "relative flex min-h-[190px] w-full flex-col justify-end px-6 pb-6 pt-6 text-left",
+            "relative flex h-[230px] w-full shrink-0 flex-col justify-end px-6 pb-6 pt-6 text-left",
             accent.surface,
           )}
         >
@@ -219,13 +219,13 @@ export function GoalCard({
             accent={goal.accent}
             className="absolute right-5 top-5 size-14"
           />
-          <p className="font-serif text-[27px] leading-[1.15] text-white [text-wrap:balance]">
+          <p className="line-clamp-3 font-heading text-2xl leading-[1.15] text-white">
             {goal.title}
           </p>
         </button>
 
         {/* Bottom stub — perforation, notches, next step + actions */}
-        <div className="relative bg-white px-5 pb-5 pt-6">
+        <div className="relative flex flex-1 flex-col bg-white px-5 pb-5 pt-6">
           <div
             className={cn("absolute inset-x-6 top-0 h-[3px] -translate-y-1/2", accent.text)}
             style={{
@@ -238,28 +238,29 @@ export function GoalCard({
             aria-hidden
           />
           <span
-            className="absolute left-0 top-0 size-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-background"
+            className="absolute left-0 top-0 size-6 -translate-x-1/2 -translate-y-1/2 rounded-full bg-background"
             aria-hidden
           />
           <span
-            className="absolute right-0 top-0 size-5 translate-x-1/2 -translate-y-1/2 rounded-full bg-background"
+            className="absolute right-0 top-0 size-6 translate-x-1/2 -translate-y-1/2 rounded-full bg-background"
             aria-hidden
           />
 
           <p className={cn("font-serif text-base italic", accent.text)}>
             {complete ? "Complete" : "Next Step:"}
           </p>
-          <p className="mt-2 font-serif text-sm leading-relaxed text-black">
+          <p className="mt-2 line-clamp-2 font-serif text-sm leading-relaxed text-black">
             {stepText}
           </p>
 
+          <div className="mt-auto pt-4">
           {complete ? (
-            <div className="mt-5 flex flex-col gap-2">
+            <div className="flex flex-col gap-1.5">
               <button
                 type="button"
                 onClick={onAddWin}
                 className={cn(
-                  "flex w-full items-center justify-center gap-2 rounded-xl py-3 font-serif text-sm italic text-white",
+                  "flex w-full items-center justify-center gap-2 rounded-xl py-2.5 font-serif text-sm italic text-white",
                   accent.deep,
                 )}
               >
@@ -269,14 +270,14 @@ export function GoalCard({
               <button
                 type="button"
                 onClick={onArchive}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-black/5 py-3 font-serif text-sm italic text-black/60 transition-colors hover:bg-black/10"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-black/5 py-2.5 font-serif text-sm italic text-black/60 transition-colors hover:bg-black/10"
               >
                 Archive
                 <Archive className="size-5" strokeWidth={2} />
               </button>
             </div>
           ) : hasSteps ? (
-            <div className="mt-5 flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={onFocus}
@@ -305,7 +306,7 @@ export function GoalCard({
               type="button"
               onClick={onAdd}
               className={cn(
-                "mt-5 flex w-full items-center justify-center gap-2 rounded-xl py-3 font-serif text-sm italic text-white",
+                "flex w-full items-center justify-center gap-2 rounded-xl py-3 font-serif text-sm italic text-white",
                 accent.surface,
               )}
             >
@@ -313,23 +314,24 @@ export function GoalCard({
               <Plus className="size-5" strokeWidth={2} />
             </button>
           )}
+          </div>
         </div>
 
         {/* Inverted (concave) corners — matching the side notches */}
         <span
-          className="pointer-events-none absolute left-0 top-0 size-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-background"
+          className="pointer-events-none absolute left-0 top-0 size-6 -translate-x-1/2 -translate-y-1/2 rounded-full bg-background"
           aria-hidden
         />
         <span
-          className="pointer-events-none absolute right-0 top-0 size-5 -translate-y-1/2 translate-x-1/2 rounded-full bg-background"
+          className="pointer-events-none absolute right-0 top-0 size-6 -translate-y-1/2 translate-x-1/2 rounded-full bg-background"
           aria-hidden
         />
         <span
-          className="pointer-events-none absolute bottom-0 left-0 size-5 -translate-x-1/2 translate-y-1/2 rounded-full bg-background"
+          className="pointer-events-none absolute bottom-0 left-0 size-6 -translate-x-1/2 translate-y-1/2 rounded-full bg-background"
           aria-hidden
         />
         <span
-          className="pointer-events-none absolute bottom-0 right-0 size-5 translate-x-1/2 translate-y-1/2 rounded-full bg-background"
+          className="pointer-events-none absolute bottom-0 right-0 size-6 translate-x-1/2 translate-y-1/2 rounded-full bg-background"
           aria-hidden
         />
       </div>
