@@ -50,7 +50,7 @@ export function StampCollections({
   const [snapshot, setSnapshot] = useState<StampView | null>(null);
 
   const stampList = mergeStamps(stamps, goals);
-  const earned = balance?.earned ?? 0;
+  const spendable = balance?.balance ?? 0;
   const winList = (wins ?? []) as Win[];
   const achievements = winList.filter((w) => w.kind === "achievement");
   const lifeEvents = winList.filter((w) => w.kind === "life_event");
@@ -72,11 +72,11 @@ export function StampCollections({
   return (
     <div className="space-y-7">
       <p className="font-serif text-sm text-black/50">
-        You've earned{" "}
+        You have{" "}
         <span className="font-heading text-olive">
-          {earned} star stamp{earned === 1 ? "" : "s"}
+          {spendable} star stamp{spendable === 1 ? "" : "s"}
         </span>{" "}
-        from completed goals and habits. Spend them on artworks for your{" "}
+        left to spend on artworks for your{" "}
         <Link
           to="/gallery"
           onClick={() => onNavigate?.()}

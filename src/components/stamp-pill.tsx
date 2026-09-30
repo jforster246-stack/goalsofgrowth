@@ -12,14 +12,14 @@ import { stampBalanceQueryOptions } from "@/lib/goal-queries";
 export function StampPill() {
   const [open, setOpen] = useState(false);
   const { data: balance } = useQuery(stampBalanceQueryOptions);
-  const count = balance?.earned ?? 0;
+  const count = balance?.balance ?? 0;
 
   return (
     <>
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label={`${count} stamps earned — view collection`}
+        aria-label={`${count} stamps to spend — view collection`}
         title="Your stamps"
         className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-sm transition-transform hover:-translate-y-0.5"
       >

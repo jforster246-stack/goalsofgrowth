@@ -72,7 +72,9 @@ export const getStampBalance = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const earned = await earnedStamps(context.supabase);
     const spent = (await purchaseCount(context.supabase, context.userId)) * ARTWORK_COST;
-    return { earned, spent, balance: earned - spent };
+    // Clamp at 0 — earned can dip below spent if a streak/goal later reverts,
+    // and a negative "to spend" count would be nonsense.
+    return { earned, spent, balance: Math.max(0, earned - spent) };
   });
 
 export const listPurchases = createServerFn({ method: "GET" })
