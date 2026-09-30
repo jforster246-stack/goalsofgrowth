@@ -281,12 +281,17 @@ function fmtLocal(dt: Date) {
  * The current Monday-first week with each day flagged: `active` if it falls
  * within the streak's run, plus today. Shared by the streak card and bar.
  */
+// Sun-first, matching JS getDay().
+const DOW_LETTERS = ["S", "M", "T", "W", "T", "F", "S"];
+
+/**
+ * The last seven days (today at the right), each flagged `active` if it falls
+ * within the current streak's run. Rolling — not a calendar week — so the number
+ * of active days always matches the streak count (capped at seven).
+ */
 function streakWeek(streak: number, lastActive: string | null) {
   const todayStr = localToday();
   const today = parseLocal(todayStr);
-
-  const monday = parseLocal(todayStr);
-  monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
 
   const lastActiveDate = lastActive ? parseLocal(lastActive) : null;
   const activeStart =
@@ -298,17 +303,16 @@ function streakWeek(streak: number, lastActive: string | null) {
         })()
       : null;
 
-  const LETTERS = ["M", "T", "W", "T", "F", "S", "S"];
   return Array.from({ length: 7 }, (_, i) => {
-    const dt = new Date(monday);
-    dt.setDate(monday.getDate() + i);
+    const dt = new Date(today);
+    dt.setDate(today.getDate() - 6 + i);
     const active =
       !!activeStart &&
       !!lastActiveDate &&
       dt.getTime() >= activeStart.getTime() &&
       dt.getTime() <= lastActiveDate.getTime();
     return {
-      letter: LETTERS[i]!,
+      letter: DOW_LETTERS[dt.getDay()]!,
       dateNum: dt.getDate(),
       isToday: fmtLocal(dt) === todayStr,
       active,
