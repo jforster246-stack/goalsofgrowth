@@ -1,35 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import { Reorder, useDragControls } from "framer-motion";
-import {
-  Check,
-  ChevronDown,
-  GripVertical,
-  ListChecks,
-  Plus,
-  RotateCcw,
-  Trash2,
-  X,
-} from "lucide-react";
+import { useState } from "react";
+import { ChevronRight, ListChecks, Plus } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { Loading } from "@/components/loading";
-import { IconPicker } from "@/components/icon-picker";
 import { Motif } from "@/components/motif-icons";
 import { checklistsQueryOptions } from "@/lib/goal-queries";
-import {
-  addChecklistItem,
-  createChecklist,
-  deleteChecklist,
-  deleteChecklistItem,
-  renameChecklist,
-  reorderChecklistItems,
-  resetChecklist,
-  setChecklistIcon,
-  toggleChecklistItem,
-  updateChecklistItem,
-} from "@/lib/checklists.functions";
-import { cn } from "@/lib/utils";
+import { createChecklist } from "@/lib/checklists.functions";
 
 export const Route = createFileRoute("/_authenticated/routines")({
   head: () => ({
@@ -45,21 +22,11 @@ export const Route = createFileRoute("/_authenticated/routines")({
   component: RoutinesPage,
 });
 
-type Item = {
-  id: string;
-  checklist_id: string;
-  text: string;
-  done: boolean;
-  position: number;
-  created_at: string;
-};
+type Item = { id: string; done: boolean };
 type Checklist = {
   id: string;
   title: string;
   icon: string | null;
-  position: number;
-  created_at: string;
-  user_id: string;
   items: Item[];
 };
 
@@ -68,12 +35,9 @@ function RoutinesPage() {
   const { data: lists, isPending } = useQuery(checklistsQueryOptions);
   const [draft, setDraft] = useState("");
 
-  const invalidate = () =>
-    queryClient.invalidateQueries({ queryKey: ["checklists"] });
-
   const createMutation = useMutation({
     mutationFn: (title: string) => createChecklist({ data: { title } }),
-    onSuccess: invalidate,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["checklists"] }),
   });
 
   const add = () => {
@@ -87,8 +51,8 @@ function RoutinesPage() {
     <AppShell title="Routines" hideSettings>
       <div className="mt-4 pb-4">
         <p className="font-serif text-sm text-black/50">
-          Simple checklists for your routines. Tick things off, then reset the
-          list to run it again.
+          Simple checklists for your routines. Open one to tick things off, then
+          reset it to run again.
         </p>
 
         <form
@@ -101,14 +65,14 @@ function RoutinesPage() {
           <input
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder="New checklist… e.g. Morning routine"
+            placeholder="New routine… e.g. Morning routine"
             maxLength={140}
             className="min-w-0 flex-1 rounded-2xl bg-black/5 px-4 py-3 font-serif text-sm placeholder:text-black/40 focus:outline-none focus:ring-1 focus:ring-olive/40"
           />
           <button
             type="submit"
             disabled={!draft.trim()}
-            aria-label="Add checklist"
+            aria-label="Add routine"
             className="grid size-11 shrink-0 place-items-center rounded-2xl bg-olive text-white transition-colors hover:bg-olive/90 disabled:opacity-40"
           >
             <Plus className="size-5" strokeWidth={2} />
@@ -119,16 +83,16 @@ function RoutinesPage() {
           <Loading />
         ) : lists.length === 0 ? (
           <div className="mt-6 rounded-2xl bg-white p-8 text-center shadow-sm">
-            <p className="font-heading text-base text-black">No checklists yet</p>
+            <p className="font-heading text-base text-black">No routines yet</p>
             <p className="mt-2 font-serif text-sm text-black/50">
               Make one for a routine you repeat — a morning ritual, a packing
               list, anything.
             </p>
           </div>
         ) : (
-          <div className="mt-4 grid gap-4 md:grid-cols-2 md:items-start">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {(lists as Checklist[]).map((list) => (
-              <ChecklistCard key={list.id} list={list} />
+              <RoutineCard key={list.id} list={list} />
             ))}
           </div>
         )}
@@ -137,308 +101,43 @@ function RoutinesPage() {
   );
 }
 
-/** Per-card collapse state, remembered across visits. */
-function collapseKey(id: string) {
-  return `gog-routine-collapsed:${id}`;
-}
-function readCollapsed(id: string) {
-  try {
-    // Default to collapsed unless the user explicitly expanded it.
-    return localStorage.getItem(collapseKey(id)) !== "0";
-  } catch {
-    return true;
-  }
-}
-
-function ChecklistCard({ list }: { list: Checklist }) {
-  const queryClient = useQueryClient();
-  const [title, setTitle] = useState(list.title);
-  const [itemDraft, setItemDraft] = useState("");
-  const [iconOpen, setIconOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
-  const [order, setOrder] = useState<Item[]>(list.items);
-
-  // Restore the saved collapse state on mount (client-only, so start expanded).
-  useEffect(() => setCollapsed(readCollapsed(list.id)), [list.id]);
-
-  const toggleCollapsed = () =>
-    setCollapsed((v) => {
-      const next = !v;
-      try {
-        localStorage.setItem(collapseKey(list.id), next ? "1" : "0");
-      } catch {
-        // ignore — collapse is just a convenience
-      }
-      return next;
-    });
-
-  // Keep the local (drag-reorderable) copy in step with the server list.
-  useEffect(() => setOrder(list.items), [list.items]);
-
-  const invalidate = () =>
-    queryClient.invalidateQueries({ queryKey: ["checklists"] });
-
-  const renameMutation = useMutation({
-    mutationFn: (t: string) => renameChecklist({ data: { id: list.id, title: t } }),
-    onSuccess: invalidate,
-  });
-  const iconMutation = useMutation({
-    mutationFn: (icon: string) => setChecklistIcon({ data: { id: list.id, icon } }),
-    onSuccess: invalidate,
-  });
-  const deleteMutation = useMutation({
-    mutationFn: () => deleteChecklist({ data: { id: list.id } }),
-    onSuccess: invalidate,
-  });
-  const resetMutation = useMutation({
-    mutationFn: () => resetChecklist({ data: { id: list.id } }),
-    onSuccess: invalidate,
-  });
-  const addItemMutation = useMutation({
-    mutationFn: (text: string) =>
-      addChecklistItem({ data: { checklistId: list.id, text } }),
-    onSuccess: invalidate,
-  });
-  const toggleMutation = useMutation({
-    mutationFn: (input: { id: string; done: boolean }) =>
-      toggleChecklistItem({ data: input }),
-    onSuccess: invalidate,
-  });
-  const renameItemMutation = useMutation({
-    mutationFn: (input: { id: string; text: string }) =>
-      updateChecklistItem({ data: input }),
-    onSuccess: invalidate,
-  });
-  const deleteItemMutation = useMutation({
-    mutationFn: (id: string) => deleteChecklistItem({ data: { id } }),
-    onSuccess: invalidate,
-  });
-  const reorderMutation = useMutation({
-    mutationFn: (orderedIds: string[]) =>
-      reorderChecklistItems({ data: { orderedIds } }),
-    onSuccess: invalidate,
-  });
-
-  const doneCount = list.items.filter((i) => i.done).length;
-
-  const addItem = () => {
-    const text = itemDraft.trim();
-    if (!text) return;
-    setItemDraft("");
-    addItemMutation.mutate(text);
-  };
-
-  const saveTitle = () => {
-    const t = title.trim();
-    if (t && t !== list.title) renameMutation.mutate(t);
-    else if (!t) setTitle(list.title);
-  };
-
-  const handleReorder = (next: Item[]) => {
-    setOrder(next);
-    reorderMutation.mutate(next.map((i) => i.id));
-  };
+/** A compact routine summary that opens the full routine on its own page. */
+function RoutineCard({ list }: { list: Checklist }) {
+  const total = list.items.length;
+  const done = list.items.filter((i) => i.done).length;
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
 
   return (
-    <div className="rounded-2xl bg-white p-4 shadow-sm">
-      <div className="flex items-center gap-1.5">
-        <button
-          type="button"
-          onClick={toggleCollapsed}
-          aria-label={collapsed ? "Expand checklist" : "Collapse checklist"}
-          aria-expanded={!collapsed}
-          title={collapsed ? "Expand" : "Collapse"}
-          className="grid size-7 shrink-0 place-items-center rounded-lg text-black/40 transition-colors hover:bg-black/5 hover:text-black/70"
-        >
-          <ChevronDown
-            className={cn(
-              "size-4 transition-transform",
-              collapsed && "-rotate-90",
-            )}
-            strokeWidth={2}
-          />
-        </button>
-        <button
-          type="button"
-          onClick={() => setIconOpen((v) => !v)}
-          aria-label="Change icon"
-          title="Change icon"
-          className="grid size-8 shrink-0 place-items-center rounded-lg text-olive transition-colors hover:bg-black/5"
-        >
+    <Link
+      to="/routines/$routineId"
+      params={{ routineId: list.id }}
+      className="group flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm transition-transform hover:-translate-y-0.5"
+    >
+      <div className="flex items-center gap-2.5">
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-black/5 text-olive">
           {list.icon ? (
             <Motif id={list.icon} className="size-5" />
           ) : (
             <ListChecks className="size-5" strokeWidth={2} />
           )}
-        </button>
-        <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          onBlur={saveTitle}
-          onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
-          aria-label="Checklist name"
-          maxLength={140}
-          className="min-w-0 flex-1 rounded-lg bg-transparent font-heading text-base text-black focus:bg-black/5 focus:outline-none focus:ring-1 focus:ring-olive/30"
-        />
-        <span className="shrink-0 font-mono text-xs text-black/40">
-          {doneCount}/{list.items.length}
         </span>
-        <button
-          type="button"
-          onClick={() => resetMutation.mutate()}
-          disabled={doneCount === 0}
-          aria-label="Reset checklist"
-          title="Reset — uncheck all"
-          className="flex shrink-0 items-center gap-1 rounded-full bg-black/5 px-2.5 py-1.5 font-heading text-[11px] uppercase text-black/60 transition-colors hover:bg-black/10 disabled:opacity-40"
-        >
-          <RotateCcw className="size-3.5" strokeWidth={2} />
-          Reset
-        </button>
-        <button
-          type="button"
-          onClick={() => deleteMutation.mutate()}
-          aria-label="Delete checklist"
-          className="grid size-8 shrink-0 place-items-center rounded-full text-black/30 transition-colors hover:bg-black/5 hover:text-clay-deep"
-        >
-          <Trash2 className="size-4" strokeWidth={2} />
-        </button>
+        <span className="min-w-0 flex-1 truncate font-heading text-base text-black">
+          {list.title}
+        </span>
+        <ChevronRight className="size-5 shrink-0 text-black/25 transition-colors group-hover:text-black/50" />
       </div>
 
-      {iconOpen && (
-        <div className="mt-3">
-          <IconPicker
-            value={list.icon ?? null}
-            onChange={(id) => {
-              iconMutation.mutate(id ?? "");
-              setIconOpen(false);
-            }}
-            defaultLabel="Default"
+      <div className="flex items-center gap-2">
+        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-black/10">
+          <div
+            className="h-full rounded-full bg-olive transition-[width] duration-500"
+            style={{ width: `${pct}%` }}
           />
         </div>
-      )}
-
-      {!collapsed && (
-        <>
-          <Reorder.Group
-            as="div"
-            axis="y"
-            values={order}
-            onReorder={handleReorder}
-            className="mt-3 space-y-0.5"
-          >
-            {order.map((item) => (
-              <ChecklistItemRow
-                key={item.id}
-                item={item}
-                onToggle={() =>
-                  toggleMutation.mutate({ id: item.id, done: !item.done })
-                }
-                onRename={(text) =>
-                  renameItemMutation.mutate({ id: item.id, text })
-                }
-                onDelete={() => deleteItemMutation.mutate(item.id)}
-              />
-            ))}
-          </Reorder.Group>
-
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              addItem();
-            }}
-            className="mt-3 flex items-center gap-2"
-          >
-            <input
-              value={itemDraft}
-              onChange={(e) => setItemDraft(e.target.value)}
-              placeholder="Add an item…"
-              maxLength={300}
-              className="min-w-0 flex-1 rounded-xl bg-black/5 px-3 py-2 font-serif text-sm placeholder:text-black/40 focus:outline-none focus:ring-1 focus:ring-olive/40"
-            />
-            <button
-              type="submit"
-              disabled={!itemDraft.trim()}
-              aria-label="Add item"
-              className="grid size-9 shrink-0 place-items-center rounded-xl bg-sage/60 text-white transition-colors hover:bg-sage/80 disabled:opacity-40"
-            >
-              <Plus className="size-4" strokeWidth={2} />
-            </button>
-          </form>
-        </>
-      )}
-    </div>
-  );
-}
-
-/** A draggable, editable checklist item: grip, checkbox, inline text, delete. */
-function ChecklistItemRow({
-  item,
-  onToggle,
-  onRename,
-  onDelete,
-}: {
-  item: Item;
-  onToggle: () => void;
-  onRename: (text: string) => void;
-  onDelete: () => void;
-}) {
-  const controls = useDragControls();
-  const [text, setText] = useState(item.text);
-  useEffect(() => setText(item.text), [item.text]);
-
-  const save = () => {
-    const t = text.trim();
-    if (t && t !== item.text) onRename(t);
-    else if (!t) setText(item.text);
-  };
-
-  return (
-    <Reorder.Item as="div" value={item} dragListener={false} dragControls={controls}>
-      <div className="group flex items-center gap-1">
-        <button
-          type="button"
-          aria-label="Drag to reorder"
-          onPointerDown={(e) => controls.start(e)}
-          className="grid size-7 shrink-0 cursor-grab touch-none place-items-center text-black/20 active:cursor-grabbing"
-        >
-          <GripVertical className="size-4" />
-        </button>
-        <button
-          type="button"
-          onClick={onToggle}
-          aria-label={item.done ? "Mark not done" : "Mark done"}
-          className={cn(
-            "grid size-6 shrink-0 place-items-center rounded-md border-2 transition-colors",
-            item.done
-              ? "border-olive bg-olive text-white"
-              : "border-black/20 text-transparent hover:border-olive/50",
-          )}
-        >
-          <Check className="size-4" strokeWidth={3} />
-        </button>
-        <input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onBlur={save}
-          onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
-          aria-label="Item text"
-          maxLength={300}
-          className={cn(
-            "min-w-0 flex-1 rounded bg-transparent px-1 py-1 font-serif text-sm focus:bg-black/5 focus:outline-none",
-            item.done
-              ? "text-black/40 line-through decoration-black/30"
-              : "text-black",
-          )}
-        />
-        <button
-          type="button"
-          onClick={onDelete}
-          aria-label="Delete item"
-          className="grid size-6 shrink-0 place-items-center rounded-full text-black/25 opacity-0 transition-opacity hover:text-black/60 group-hover:opacity-100"
-        >
-          <X className="size-4" />
-        </button>
+        <span className="shrink-0 font-mono text-[11px] text-black/40">
+          {done}/{total}
+        </span>
       </div>
-    </Reorder.Item>
+    </Link>
   );
 }

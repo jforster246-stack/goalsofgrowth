@@ -60,7 +60,7 @@ export function AppShell({
   children,
 }: {
   right?: ReactNode;
-  backTo?: "/overview" | "/goals";
+  backTo?: "/overview" | "/goals" | "/routines";
   title?: string;
   titleLeft?: boolean;
   hideSettings?: boolean;

@@ -23,6 +23,7 @@ import { Route as AuthenticatedWinsRouteImport } from './routes/_authenticated/w
 import { Route as AuthenticatedGoalsIndexRouteImport } from './routes/_authenticated/goals.index'
 import { Route as AuthenticatedGoalsGoalIdRouteImport } from './routes/_authenticated/goals.$goalId'
 import { Route as AuthenticatedGoalsNewRouteImport } from './routes/_authenticated/goals.new'
+import { Route as AuthenticatedRoutinesRoutineIdRouteImport } from './routes/_authenticated/routines.$routineId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -94,6 +95,12 @@ const AuthenticatedGoalsNewRoute = AuthenticatedGoalsNewRouteImport.update({
   path: '/new',
   getParentRoute: () => AuthenticatedGoalsRoute,
 } as any)
+const AuthenticatedRoutinesRoutineIdRoute =
+  AuthenticatedRoutinesRoutineIdRouteImport.update({
+    id: '/$routineId',
+    path: '/$routineId',
+    getParentRoute: () => AuthenticatedRoutinesRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -103,11 +110,12 @@ export interface FileRoutesByFullPath {
   '/goals': typeof AuthenticatedGoalsRouteWithChildren
   '/habits': typeof AuthenticatedHabitsRoute
   '/overview': typeof AuthenticatedOverviewRoute
-  '/routines': typeof AuthenticatedRoutinesRoute
+  '/routines': typeof AuthenticatedRoutinesRouteWithChildren
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/wins': typeof AuthenticatedWinsRoute
   '/goals/$goalId': typeof AuthenticatedGoalsGoalIdRoute
   '/goals/new': typeof AuthenticatedGoalsNewRoute
+  '/routines/$routineId': typeof AuthenticatedRoutinesRoutineIdRoute
   '/goals/': typeof AuthenticatedGoalsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -117,11 +125,12 @@ export interface FileRoutesByTo {
   '/gallery': typeof AuthenticatedGalleryRoute
   '/habits': typeof AuthenticatedHabitsRoute
   '/overview': typeof AuthenticatedOverviewRoute
-  '/routines': typeof AuthenticatedRoutinesRoute
+  '/routines': typeof AuthenticatedRoutinesRouteWithChildren
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/wins': typeof AuthenticatedWinsRoute
   '/goals/$goalId': typeof AuthenticatedGoalsGoalIdRoute
   '/goals/new': typeof AuthenticatedGoalsNewRoute
+  '/routines/$routineId': typeof AuthenticatedRoutinesRoutineIdRoute
   '/goals': typeof AuthenticatedGoalsIndexRoute
 }
 export interface FileRoutesById {
@@ -134,11 +143,12 @@ export interface FileRoutesById {
   '/_authenticated/goals': typeof AuthenticatedGoalsRouteWithChildren
   '/_authenticated/habits': typeof AuthenticatedHabitsRoute
   '/_authenticated/overview': typeof AuthenticatedOverviewRoute
-  '/_authenticated/routines': typeof AuthenticatedRoutinesRoute
+  '/_authenticated/routines': typeof AuthenticatedRoutinesRouteWithChildren
   '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
   '/_authenticated/wins': typeof AuthenticatedWinsRoute
   '/_authenticated/goals/$goalId': typeof AuthenticatedGoalsGoalIdRoute
   '/_authenticated/goals/new': typeof AuthenticatedGoalsNewRoute
+  '/_authenticated/routines/$routineId': typeof AuthenticatedRoutinesRoutineIdRoute
   '/_authenticated/goals/': typeof AuthenticatedGoalsIndexRoute
 }
 export interface FileRouteTypes {
@@ -156,6 +166,7 @@ export interface FileRouteTypes {
     | '/wins'
     | '/goals/$goalId'
     | '/goals/new'
+    | '/routines/$routineId'
     | '/goals/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -170,6 +181,7 @@ export interface FileRouteTypes {
     | '/wins'
     | '/goals/$goalId'
     | '/goals/new'
+    | '/routines/$routineId'
     | '/goals'
   id:
     | '__root__'
@@ -186,6 +198,7 @@ export interface FileRouteTypes {
     | '/_authenticated/wins'
     | '/_authenticated/goals/$goalId'
     | '/_authenticated/goals/new'
+    | '/_authenticated/routines/$routineId'
     | '/_authenticated/goals/'
   fileRoutesById: FileRoutesById
 }
@@ -295,6 +308,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGoalsNewRouteImport
       parentRoute: typeof AuthenticatedGoalsRoute
     }
+    '/_authenticated/routines/$routineId': {
+      id: '/_authenticated/routines/$routineId'
+      path: '/$routineId'
+      fullPath: '/routines/$routineId'
+      preLoaderRoute: typeof AuthenticatedRoutinesRoutineIdRouteImport
+      parentRoute: typeof AuthenticatedRoutinesRoute
+    }
   }
 }
 
@@ -313,13 +333,26 @@ const AuthenticatedGoalsRouteChildren: AuthenticatedGoalsRouteChildren = {
 const AuthenticatedGoalsRouteWithChildren =
   AuthenticatedGoalsRoute._addFileChildren(AuthenticatedGoalsRouteChildren)
 
+interface AuthenticatedRoutinesRouteChildren {
+  AuthenticatedRoutinesRoutineIdRoute: typeof AuthenticatedRoutinesRoutineIdRoute
+}
+
+const AuthenticatedRoutinesRouteChildren: AuthenticatedRoutinesRouteChildren = {
+  AuthenticatedRoutinesRoutineIdRoute: AuthenticatedRoutinesRoutineIdRoute,
+}
+
+const AuthenticatedRoutinesRouteWithChildren =
+  AuthenticatedRoutinesRoute._addFileChildren(
+    AuthenticatedRoutinesRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedBraindumpRoute: typeof AuthenticatedBraindumpRoute
   AuthenticatedGalleryRoute: typeof AuthenticatedGalleryRoute
   AuthenticatedGoalsRoute: typeof AuthenticatedGoalsRouteWithChildren
   AuthenticatedHabitsRoute: typeof AuthenticatedHabitsRoute
   AuthenticatedOverviewRoute: typeof AuthenticatedOverviewRoute
-  AuthenticatedRoutinesRoute: typeof AuthenticatedRoutinesRoute
+  AuthenticatedRoutinesRoute: typeof AuthenticatedRoutinesRouteWithChildren
   AuthenticatedWelcomeRoute: typeof AuthenticatedWelcomeRoute
   AuthenticatedWinsRoute: typeof AuthenticatedWinsRoute
 }
@@ -330,7 +363,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedGoalsRoute: AuthenticatedGoalsRouteWithChildren,
   AuthenticatedHabitsRoute: AuthenticatedHabitsRoute,
   AuthenticatedOverviewRoute: AuthenticatedOverviewRoute,
-  AuthenticatedRoutinesRoute: AuthenticatedRoutinesRoute,
+  AuthenticatedRoutinesRoute: AuthenticatedRoutinesRouteWithChildren,
   AuthenticatedWelcomeRoute: AuthenticatedWelcomeRoute,
   AuthenticatedWinsRoute: AuthenticatedWinsRoute,
 }
