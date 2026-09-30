@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Brain, Plus, Repeat, Target, Timer, Trophy } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Brain, ListChecks, Plus, Repeat, Target, Timer, Trophy } from "lucide-react";
 import { useAppShell } from "@/components/app-shell";
+import { createChecklist } from "@/lib/checklists.functions";
 import { cn } from "@/lib/utils";
 
 /**
@@ -10,10 +12,19 @@ import { cn } from "@/lib/utils";
  */
 export function AddFab() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { openFocus } = useAppShell();
   const [open, setOpen] = useState(false);
 
   const close = () => setOpen(false);
+
+  const createRoutine = useMutation({
+    mutationFn: () => createChecklist({ data: { title: "New routine" } }),
+    onSuccess: (row) => {
+      queryClient.invalidateQueries({ queryKey: ["checklists"] });
+      navigate({ to: "/routines/$routineId", params: { routineId: row.id } });
+    },
+  });
 
   const items: { label: string; Icon: typeof Plus; onClick: () => void }[] = [
     { label: "Goal", Icon: Target, onClick: () => navigate({ to: "/goals/new" }) },
@@ -21,6 +32,11 @@ export function AddFab() {
       label: "Habit",
       Icon: Repeat,
       onClick: () => navigate({ to: "/habits", search: { new: true } }),
+    },
+    {
+      label: "Routine",
+      Icon: ListChecks,
+      onClick: () => createRoutine.mutate(),
     },
     {
       label: "Brain dump",

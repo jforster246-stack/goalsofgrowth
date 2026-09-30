@@ -2,11 +2,11 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Reorder, useDragControls } from "framer-motion";
-import { Check, GripVertical, ListChecks, Plus, RotateCcw, Trash2, X } from "lucide-react";
+import { Check, GripVertical, Plus, RotateCcw, Trash2, X } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { Loading } from "@/components/loading";
 import { IconPicker } from "@/components/icon-picker";
-import { Motif } from "@/components/motif-icons";
+import { Stamp } from "@/components/stamp";
 import { checklistsQueryOptions } from "@/lib/goal-queries";
 import {
   addChecklistItem,
@@ -150,13 +150,9 @@ function RoutineEditor({ list }: { list: Checklist }) {
           type="button"
           onClick={() => setIconOpen((v) => !v)}
           aria-label="Change icon"
-          className="grid size-11 shrink-0 place-items-center rounded-xl bg-black/5 text-olive transition-colors hover:bg-black/10"
+          className="shrink-0 rounded-xl transition-transform hover:-translate-y-0.5"
         >
-          {list.icon ? (
-            <Motif id={list.icon} className="size-6" />
-          ) : (
-            <ListChecks className="size-6" strokeWidth={2} />
-          )}
+          <Stamp icon={list.icon} accent="mint" className="size-12" />
         </button>
         <input
           value={title}
