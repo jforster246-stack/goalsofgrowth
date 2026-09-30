@@ -24,10 +24,17 @@ const TIMES: { key: HabitTime; label: string; Icon: typeof Sun; activeBg: string
   { key: "evening", label: "Evening", Icon: Moon, activeBg: "bg-olive" },
 ];
 
-type PickFreq = "daily" | "weekdays" | "weekends" | "specific_days" | "interval";
+type PickFreq =
+  | "daily"
+  | "weekly"
+  | "weekdays"
+  | "weekends"
+  | "specific_days"
+  | "interval";
 
 const FREQ_OPTIONS: { key: PickFreq; label: string }[] = [
   { key: "daily", label: "Daily" },
+  { key: "weekly", label: "Weekly" },
   { key: "weekdays", label: "Weekdays" },
   { key: "weekends", label: "Weekends" },
   { key: "specific_days", label: "Specific days" },
@@ -53,7 +60,7 @@ function initialFreq(h?: EditableHabit): {
   if (!h) return { freq: "daily", days: new Set(), interval: 3 };
   switch (h.frequency) {
     case "weekly":
-      return { freq: "interval", days: new Set(), interval: 7 };
+      return { freq: "weekly", days: new Set(), interval: 3 };
     case "fortnightly":
       return { freq: "interval", days: new Set(), interval: 14 };
     case "monthly":

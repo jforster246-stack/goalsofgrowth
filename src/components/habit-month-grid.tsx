@@ -1,8 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ChevronLeft, ChevronRight, Grid3X3 } from "lucide-react";
 import { useState } from "react";
-import { listHabitMonth } from "@/lib/habits.functions";
+import { listHabitMonth, toggleHabit } from "@/lib/habits.functions";
 import { localToday } from "@/components/goal-ui";
 import { Loading } from "@/components/loading";
 import { cn } from "@/lib/utils";
@@ -42,9 +42,27 @@ export function HabitMonthGrid() {
   const [offset, setOffset] = useState(0);
   const month = monthKey(offset);
   const fetchMonth = useServerFn(listHabitMonth);
+  const queryClient = useQueryClient();
   const { data, isPending } = useQuery({
     queryKey: ["habit-month", month],
     queryFn: () => fetchMonth({ data: { month } }),
+  });
+
+  const toggle = useMutation({
+    mutationFn: (v: { id: string; date: string; done: boolean }) =>
+      toggleHabit({ data: { id: v.id, done: v.done, today: v.date } }),
+    onSuccess: () => {
+      for (const key of [
+        ["habit-month"],
+        ["habits"],
+        ["habit-streaks"],
+        ["habit-history"],
+        ["habit-stamp-bonus"],
+        ["stamp-balance"],
+      ]) {
+        queryClient.invalidateQueries({ queryKey: key });
+      }
+    },
   });
 
   const today = localToday();
@@ -126,20 +144,40 @@ export function HabitMonthGrid() {
                       {habit.name}
                     </td>
                     {Array.from({ length: data.days }, (_, i) => i + 1).map(
-                      (day) => (
-                        <td key={day}>
-                          <div
-                            className={cn(
-                              "mx-auto size-4 rounded-full",
-                              done.has(day)
-                                ? (TIME_CELL[habit.time_of_day] ?? "bg-olive")
-                                : "bg-black/8",
-                              day === todayDay &&
-                                "ring-1 ring-focus ring-offset-1",
-                            )}
-                          />
-                        </td>
-                      ),
+                      (day) => {
+                        const isFuture =
+                          isCurrentMonth && todayDay !== null && day > todayDay;
+                        const date = `${month}-${String(day).padStart(2, "0")}`;
+                        return (
+                          <td key={day}>
+                            <button
+                              type="button"
+                              disabled={isFuture || toggle.isPending}
+                              onClick={() =>
+                                toggle.mutate({
+                                  id: habit.id,
+                                  date,
+                                  done: !done.has(day),
+                                })
+                              }
+                              aria-label={`${habit.name}, ${date}${done.has(day) ? " — done" : ""}`}
+                              className="grid place-items-center p-0.5 enabled:cursor-pointer disabled:cursor-default"
+                            >
+                              <span
+                                className={cn(
+                                  "size-4 rounded-full transition-colors",
+                                  done.has(day)
+                                    ? (TIME_CELL[habit.time_of_day] ?? "bg-olive")
+                                    : "bg-black/8",
+                                  day === todayDay &&
+                                    "ring-1 ring-focus ring-offset-1",
+                                  isFuture && "opacity-40",
+                                )}
+                              />
+                            </button>
+                          </td>
+                        );
+                      },
                     )}
                     <td className="pl-1 text-right font-mono text-[10px] text-black/50">
                       {habit.days.length}
@@ -152,8 +190,8 @@ export function HabitMonthGrid() {
         )}
       </div>
       <p className="mt-2 font-serif text-xs text-black/40">
-        Dots are coloured by time of day — gold morning, clay afternoon, green
-        evening.
+        Tap any past day to tick it off or undo it. Dots are coloured by time of
+        day — gold morning, clay afternoon, green evening.
       </p>
     </section>
   );

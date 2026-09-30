@@ -83,8 +83,16 @@ export function isHabitDueToday(h: HabitSchedule, today: Date = new Date()): boo
       );
       return days >= 0 && days % n === 0;
     }
+    case "weekly": {
+      // Once a week, on the weekday it was created.
+      if (!h.created_at) return true;
+      const days = Math.floor(
+        (startOfDay(today) - startOfDay(new Date(h.created_at))) / 86400000,
+      );
+      return days >= 0 && days % 7 === 0;
+    }
     default:
-      // daily + legacy weekly/fortnightly/monthly
+      // daily + legacy fortnightly/monthly
       return true;
   }
 }
