@@ -209,6 +209,50 @@ export const listHabitMonth = createServerFn({ method: "GET" })
   });
 
 /**
+ * Habits with the dates they were completed within [start, end] (inclusive).
+ * Used by the weekly view of the tracker, which spans month boundaries.
+ */
+export const listHabitRange = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) =>
+    z.object({ start: dateSchema, end: dateSchema }).parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const [habitsResult, completionsResult] = await Promise.all([
+      context.supabase
+        .from("habits")
+        .select("id, name, time_of_day, icon")
+        .order("position", { ascending: true })
+        .order("created_at", { ascending: true }),
+      context.supabase
+        .from("habit_completions")
+        .select("habit_id, completed_on")
+        .gte("completed_on", data.start)
+        .lte("completed_on", data.end),
+    ]);
+    if (habitsResult.error) throw new Error(habitsResult.error.message);
+    if (completionsResult.error)
+      throw new Error(completionsResult.error.message);
+
+    const byHabit = new Map<string, Set<string>>();
+    for (const c of completionsResult.data ?? []) {
+      const set = byHabit.get(c.habit_id) ?? new Set<string>();
+      set.add(c.completed_on);
+      byHabit.set(c.habit_id, set);
+    }
+
+    return {
+      habits: (habitsResult.data ?? []).map((h) => ({
+        id: h.id,
+        name: h.name,
+        time_of_day: h.time_of_day,
+        icon: h.icon,
+        days: [...(byHabit.get(h.id) ?? [])],
+      })),
+    };
+  });
+
+/**
  * Every date a habit was completed on (ascending), so the sheet can show the
  * ticked week and work out three-day runs across week boundaries.
  */
