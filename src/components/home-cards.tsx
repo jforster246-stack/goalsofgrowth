@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Archive, Check, Plus, Timer, Trophy, Undo2 } from "lucide-react";
 import { accentOf, goalProgress, STAR_PATH } from "@/components/goal-ui";
 import { Motif, TIME_MOTIF } from "@/components/motif-icons";
+import { Stamp } from "@/components/stamp";
 import { cn } from "@/lib/utils";
 
 /** Minimal goal shape the Home cards need (kept loose so mock + real data both fit). */
@@ -186,13 +187,14 @@ export function GoalCard({
   const hasSteps = goal.steps.length > 0;
   const complete = progress.complete;
 
+  const stepText = complete
+    ? "Every step is done — nice work."
+    : hasSteps
+      ? (progress.nextStep?.title ?? "Every step is done — nice work.")
+      : "Break down this goal into manageable tasks";
+
   return (
-    <div
-      className={cn(
-        "relative w-full rounded-2xl bg-white shadow-sm",
-        isGoalOfDay ? "overflow-visible" : "overflow-hidden",
-      )}
-    >
+    <div className="relative w-full">
       {isGoalOfDay && (
         <span className="absolute left-1/2 top-0 z-10 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-olive px-5 py-2 font-heading text-[13.9px] uppercase leading-none text-white">
           Goal of the day
@@ -201,108 +203,117 @@ export function GoalCard({
 
       {dragHandle}
 
-      {/* Coloured header */}
-      <button
-        type="button"
-        onClick={onOpen}
-        className={cn(
-          "flex w-full flex-col items-center gap-7 rounded-t-2xl px-8 pb-6 pt-8 text-center",
-          accent.surface,
-        )}
-      >
-        <div className="flex w-full flex-col items-center gap-4">
-          <GoalGlyph goal={goal} className="size-[86px] text-white" />
-          <p className="w-full font-heading text-2xl leading-tight text-white">
+      {/* Ticket stub */}
+      <div className="relative overflow-hidden rounded-3xl bg-white shadow-sm">
+        {/* Coloured top — stamp in the corner, title below */}
+        <button
+          type="button"
+          onClick={onOpen}
+          className={cn(
+            "relative flex min-h-[190px] w-full flex-col justify-end px-6 pb-6 pt-6 text-left",
+            accent.surface,
+          )}
+        >
+          <Stamp
+            icon={goal.icon ?? null}
+            accent={goal.accent}
+            className="absolute right-5 top-5 size-14"
+          />
+          <p className="font-serif text-[27px] leading-[1.15] text-white [text-wrap:balance]">
             {goal.title}
           </p>
-        </div>
+        </button>
 
-        <div className="flex w-full flex-col items-end gap-1.5">
-          <div className="h-3 w-full overflow-hidden rounded-full bg-black/15">
-            <div
-              className="h-full rounded-full bg-white/85 transition-[width] duration-500"
-              style={{ width: `${progress.pct}%` }}
-            />
-          </div>
-          <p className="font-mono text-[11.8px] uppercase text-white/60">
-            {progress.pct}%
+        {/* Bottom stub — perforation, notches, next step + actions */}
+        <div className="relative bg-white px-5 pb-5 pt-6">
+          <div
+            className={cn("absolute inset-x-6 top-0 h-[3px] -translate-y-1/2", accent.text)}
+            style={{
+              backgroundImage:
+                "radial-gradient(circle, currentColor 1.5px, transparent 1.6px)",
+              backgroundSize: "11px 100%",
+              backgroundRepeat: "repeat-x",
+              backgroundPosition: "center",
+            }}
+            aria-hidden
+          />
+          <span
+            className="absolute left-0 top-0 size-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-background"
+            aria-hidden
+          />
+          <span
+            className="absolute right-0 top-0 size-5 translate-x-1/2 -translate-y-1/2 rounded-full bg-background"
+            aria-hidden
+          />
+
+          <p className={cn("font-serif text-base italic", accent.text)}>
+            {complete ? "Complete" : "Next Step:"}
           </p>
-        </div>
-      </button>
+          <p className="mt-2 font-serif text-sm leading-relaxed text-black">
+            {stepText}
+          </p>
 
-      {/* Next-step panel */}
-      <div className="flex flex-col items-center gap-6 px-3 py-4">
-        <p className="w-full text-center font-heading text-[14.75px] uppercase text-olive">
-          {complete ? "Complete" : "Next Step:"}
-        </p>
-        <p className="w-full text-center font-serif text-sm text-black">
-          {complete
-            ? "Every step is done — nice work."
-            : hasSteps
-              ? (progress.nextStep?.title ?? "Every step is done — nice work.")
-              : "Break down this goal into manageable tasks"}
-        </p>
-
-        {complete ? (
-          <div className="flex w-full flex-col gap-2">
+          {complete ? (
+            <div className="mt-5 flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={onAddWin}
+                className={cn(
+                  "flex w-full items-center justify-center gap-2 rounded-xl py-3 font-serif text-sm italic text-white",
+                  accent.deep,
+                )}
+              >
+                Add to wins log
+                <Trophy className="size-5" strokeWidth={2} />
+              </button>
+              <button
+                type="button"
+                onClick={onArchive}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-black/5 py-3 font-serif text-sm italic text-black/60 transition-colors hover:bg-black/10"
+              >
+                Archive
+                <Archive className="size-5" strokeWidth={2} />
+              </button>
+            </div>
+          ) : hasSteps ? (
+            <div className="mt-5 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={onFocus}
+                className={cn(
+                  "flex flex-1 items-center justify-center gap-2 rounded-xl py-3 font-serif text-sm italic text-white",
+                  accent.surface,
+                )}
+              >
+                Focus on this
+                <Timer className="size-5" strokeWidth={1.75} />
+              </button>
+              <button
+                type="button"
+                onClick={onComplete}
+                aria-label="Mark next step complete"
+                className={cn(
+                  "grid size-[46px] shrink-0 place-items-center rounded-xl text-white",
+                  accent.deep,
+                )}
+              >
+                <Check className="size-6" strokeWidth={2.5} />
+              </button>
+            </div>
+          ) : (
             <button
               type="button"
-              onClick={onAddWin}
+              onClick={onAdd}
               className={cn(
-                "flex w-full items-center justify-center gap-2 rounded-lg p-2 font-heading text-[12.7px] uppercase text-white",
-                accent.deep,
-              )}
-            >
-              Add to wins log
-              <Trophy className="size-5" strokeWidth={2} />
-            </button>
-            <button
-              type="button"
-              onClick={onArchive}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-black/5 p-2 font-heading text-[12.7px] uppercase text-black/60 transition-colors hover:bg-black/10"
-            >
-              Archive
-              <Archive className="size-5" strokeWidth={2} />
-            </button>
-          </div>
-        ) : hasSteps ? (
-          <div className="flex w-full items-center gap-2">
-            <button
-              type="button"
-              onClick={onFocus}
-              className={cn(
-                "flex flex-1 items-center justify-center gap-2 rounded-lg p-2 font-heading text-[12.7px] uppercase text-white",
-                accent.deep,
-              )}
-            >
-              Focus on this
-              <Timer className="size-6" strokeWidth={1.75} />
-            </button>
-            <button
-              type="button"
-              onClick={onComplete}
-              aria-label="Mark next step complete"
-              className={cn(
-                "flex items-center justify-center rounded-lg p-2 text-white",
+                "mt-5 flex w-full items-center justify-center gap-2 rounded-xl py-3 font-serif text-sm italic text-white",
                 accent.surface,
               )}
             >
-              <Check className="size-6" strokeWidth={2} />
+              Add a step
+              <Plus className="size-5" strokeWidth={2} />
             </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={onAdd}
-            className={cn(
-              "flex w-full items-center justify-center gap-2 rounded p-2 font-heading text-[12.7px] uppercase text-white",
-              accent.surface,
-            )}
-          >
-            Add
-            <Plus className="size-6" strokeWidth={2} />
-          </button>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
