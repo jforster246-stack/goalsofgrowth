@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Check, Plus, X } from "lucide-react";
-import { AppShell } from "@/components/app-shell";
+import { AppShell, useAppShell } from "@/components/app-shell";
 import { GoldFrame } from "@/components/gold-frame";
 import { Stamp } from "@/components/stamp";
 import { localToday, type Accent } from "@/components/goal-ui";
@@ -195,7 +195,6 @@ function GalleryPage() {
             const art = artworkById(id);
             if (!art) return null;
             const isOwned = owned.includes(id);
-            const canBuy = !isOwned && spendable >= ARTWORK_COST;
             return (
               <div key={id} className="flex flex-col">
                 <div className="aspect-[4/5] overflow-hidden rounded-2xl shadow-sm">
@@ -203,22 +202,23 @@ function GalleryPage() {
                 </div>
                 <button
                   type="button"
-                  disabled={!canBuy}
+                  disabled={isOwned}
                   onClick={() => setConfirmBuy(art)}
                   className={cn(
-                    "mt-2 rounded-full py-2 font-heading text-[11px] uppercase transition-colors",
+                    "mt-2 flex items-center justify-center gap-1 rounded-full py-2.5 font-heading text-[11px] uppercase transition-colors",
                     isOwned
                       ? "bg-black/5 text-black/40"
-                      : canBuy
-                        ? "bg-olive text-white hover:bg-olive/90"
-                        : "bg-black/5 text-black/30",
+                      : "bg-olive text-white hover:bg-olive/90",
                   )}
                 >
-                  {isOwned
-                    ? "Owned"
-                    : canBuy
-                      ? `Buy · ${ARTWORK_COST}`
-                      : `${ARTWORK_COST} stamps`}
+                  {isOwned ? (
+                    "Owned"
+                  ) : (
+                    <>
+                      Purchase · {ARTWORK_COST}
+                      <Stamp icon={null} accent="sea" className="size-3.5" />
+                    </>
+                  )}
                 </button>
               </div>
             );
@@ -352,6 +352,7 @@ function GalleryPage() {
         <ConfirmPurchaseModal
           artwork={confirmBuy}
           pending={buy.isPending}
+          canAfford={spendable >= ARTWORK_COST}
           onConfirm={() => buy.mutate(confirmBuy.id)}
           onClose={() => setConfirmBuy(null)}
         />
@@ -512,49 +513,75 @@ function ArtworkDetailModal({
   );
 }
 
-/** Confirm spending stamps on an artwork before it's bought. */
+/** Confirm spending stamps on an artwork before it's bought — or, when the
+ *  balance is short, a gentle "not enough stamps" note. Fires confetti on buy. */
 function ConfirmPurchaseModal({
   artwork,
   pending,
+  canAfford,
   onConfirm,
   onClose,
 }: {
   artwork: Artwork;
   pending: boolean;
+  canAfford: boolean;
   onConfirm: () => void;
   onClose: () => void;
 }) {
+  const { celebrate } = useAppShell();
   return (
-    <ModalShell title="Purchase artwork" onClose={onClose}>
+    <ModalShell title={canAfford ? "Purchase" : "Not enough stamps"} onClose={onClose}>
       <div className="mt-2 flex flex-col items-center gap-4 text-center">
-        <div className="aspect-[4/5] w-32 overflow-hidden rounded-2xl shadow">
-          <ArtworkPlacard artwork={artwork} />
+        <div className="w-40">
+          <GoldFrame seed={`buy-${artwork.id}`} ariaLabel={artwork.work}>
+            <ArtworkPlacard artwork={artwork} />
+          </GoldFrame>
         </div>
-        <p className="font-serif text-base leading-relaxed text-black/80">
-          Purchase{" "}
-          <span className="font-heading text-black">{artwork.work}</span> for{" "}
-          <span className="font-heading text-olive">
-            {ARTWORK_COST} stamps
-          </span>
-          ?
-        </p>
+        {canAfford ? (
+          <p className="font-serif text-base leading-relaxed text-black/80">
+            Ready to purchase{" "}
+            <span className="font-heading text-black">{artwork.work}</span> for{" "}
+            <span className="font-heading text-olive">{ARTWORK_COST} stamps</span>?
+          </p>
+        ) : (
+          <p className="font-serif text-base leading-relaxed text-black/70">
+            Sorry, not this time — you don't have enough stamps yet. Complete a
+            few more goals or habits and come back.
+          </p>
+        )}
       </div>
-      <button
-        type="button"
-        onClick={onConfirm}
-        disabled={pending}
-        className="mt-6 w-full rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
-      >
-        {pending ? "Purchasing…" : "Purchase"}
-      </button>
-      <button
-        type="button"
-        onClick={onClose}
-        disabled={pending}
-        className="mt-2 w-full py-2 font-heading text-sm uppercase text-black/40 transition-colors hover:text-black/70 disabled:opacity-40"
-      >
-        Cancel
-      </button>
+
+      {canAfford ? (
+        <>
+          <button
+            type="button"
+            onClick={() => {
+              celebrate();
+              onConfirm();
+            }}
+            disabled={pending}
+            className="mt-6 w-full rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
+          >
+            {pending ? "Purchasing…" : "Yes"}
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={pending}
+            className="mt-2 w-full py-2 font-heading text-sm uppercase text-black/40 transition-colors hover:text-black/70 disabled:opacity-40"
+          >
+            Not this time
+          </button>
+        </>
+      ) : (
+        <button
+          type="button"
+          onClick={onClose}
+          className="mt-6 w-full rounded-2xl bg-black/5 py-3.5 font-heading text-sm uppercase text-black/60 transition-colors hover:bg-black/10"
+        >
+          Dismiss
+        </button>
+      )}
     </ModalShell>
   );
 }
