@@ -86,6 +86,34 @@ export const setChecklistIcon = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+/** Pins or unpins a routine from the home page (capped at three when pinning). */
+export const setChecklistHome = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) =>
+    z.object({ id: z.string().uuid(), onHome: z.boolean() }).parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const supabase = context.supabase;
+
+    if (data.onHome) {
+      const { count, error: countError } = await supabase
+        .from("checklists")
+        .select("id", { count: "exact", head: true })
+        .eq("on_home", true);
+      if (countError) throw new Error(countError.message);
+      if ((count ?? 0) >= 3) {
+        throw new Error("You can keep up to three routines on the home page.");
+      }
+    }
+
+    const { error } = await supabase
+      .from("checklists")
+      .update({ on_home: data.onHome })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const deleteChecklist = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) => z.object({ id: z.string().uuid() }).parse(data))

@@ -81,6 +81,30 @@ export const touchStreak = createServerFn({ method: "POST" })
     return next;
   });
 
+/** Adds stamps to the current user's bonus balance (manual top-up). */
+export const grantBonusStamps = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) =>
+    z.object({ amount: z.number().int().min(1).max(500) }).parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: profile, error } = await context.supabase
+      .from("profiles")
+      .select(PROFILE_FIELDS)
+      .eq("id", context.userId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+
+    const current = profile ?? emptyProfile(context.userId);
+    const bonus_stamps = (current.bonus_stamps ?? 0) + data.amount;
+
+    const { error: upsertError } = await context.supabase
+      .from("profiles")
+      .upsert({ id: context.userId, bonus_stamps });
+    if (upsertError) throw new Error(upsertError.message);
+    return { bonus_stamps };
+  });
+
 /** Picks the goal to focus on for the given local day. */
 export const setGoalOfDay = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

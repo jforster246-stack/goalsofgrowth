@@ -1,5 +1,5 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Check, Flame } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Check, ChevronRight, Flame, X } from "lucide-react";
 import {
   useMutation,
   useQuery,
@@ -25,11 +25,13 @@ import {
   type CompletedGoal,
 } from "@/components/goal-complete-prompt";
 import {
+  checklistsQueryOptions,
   goalsQueryOptions,
   habitsQueryOptions,
   profileQueryOptions,
 } from "@/lib/goal-queries";
 import { deleteStep, setGoalOfDay, toggleStep, updateStep } from "@/lib/goals.functions";
+import { setChecklistHome } from "@/lib/checklists.functions";
 import { toggleHabit } from "@/lib/habits.functions";
 import { frequencyLabel, isHabitDueToday } from "@/lib/habit-schedule";
 import { StepActionsModal } from "@/components/step-actions-modal";
@@ -185,6 +187,7 @@ function OverviewPage() {
           <div className="mt-6 border-t border-dashed border-border" />
           <TodayHabits />
           <MissedYesterday />
+          <RoutinesHome />
         </div>
 
         {/* Tablet & desktop — the dashboard layout */}
@@ -230,6 +233,8 @@ function OverviewPage() {
               <MissedYesterday variant="column" />
             </div>
           </div>
+
+          <RoutinesHome />
         </div>
 
       </div>
@@ -534,6 +539,205 @@ function MissedYesterday({
         <HabitDetailModal habit={selected} onClose={() => setSelected(null)} />
       )}
     </section>
+  );
+}
+
+type RoutineLite = {
+  id: string;
+  title: string;
+  icon: string | null;
+  on_home: boolean;
+  items: { done: boolean }[];
+};
+
+/**
+ * Home "Routines" section: up to three routines the user has chosen to keep on
+ * the home page, each linking to the full routine. "Choose" opens a picker.
+ */
+function RoutinesHome() {
+  const queryClient = useQueryClient();
+  const { data: lists } = useQuery(checklistsQueryOptions);
+  const [choosing, setChoosing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const setHome = useMutation({
+    mutationFn: (v: { id: string; onHome: boolean }) =>
+      setChecklistHome({ data: v }),
+    onSuccess: () => {
+      setError(null);
+      queryClient.invalidateQueries({ queryKey: ["checklists"] });
+    },
+    onError: (e) => setError(e instanceof Error ? e.message : "Something went wrong."),
+  });
+
+  const all = (lists ?? []) as RoutineLite[];
+  const pinned = all.filter((l) => l.on_home).slice(0, 3);
+
+  // Nothing to pin until there's at least one routine.
+  if (all.length === 0) return null;
+
+  return (
+    <section className="mt-6 border-t border-dashed border-border pt-5">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Routines
+        </p>
+        <button
+          type="button"
+          onClick={() => setChoosing(true)}
+          className="font-heading text-[11px] uppercase text-olive transition-opacity hover:opacity-70"
+        >
+          Choose
+        </button>
+      </div>
+
+      {pinned.length === 0 ? (
+        <button
+          type="button"
+          onClick={() => setChoosing(true)}
+          className="mt-3 w-full rounded-xl border border-dashed border-border bg-card/50 px-4 py-4 text-left font-serif text-sm text-muted-foreground transition-colors hover:bg-card"
+        >
+          Pick up to 3 routines to keep on your home page.
+        </button>
+      ) : (
+        <div className="mt-3 grid gap-3 sm:grid-cols-3">
+          {pinned.map((l) => (
+            <HomeRoutineCard key={l.id} list={l} />
+          ))}
+        </div>
+      )}
+
+      {choosing && (
+        <RoutinePickerModal
+          lists={all}
+          error={error}
+          pending={setHome.isPending}
+          onToggle={(id, onHome) => setHome.mutate({ id, onHome })}
+          onClose={() => {
+            setChoosing(false);
+            setError(null);
+          }}
+        />
+      )}
+    </section>
+  );
+}
+
+/** A compact pinned routine, linking to its full page with a progress bar. */
+function HomeRoutineCard({ list }: { list: RoutineLite }) {
+  const total = list.items.length;
+  const done = list.items.filter((i) => i.done).length;
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  return (
+    <Link
+      to="/routines/$routineId"
+      params={{ routineId: list.id }}
+      className="group flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm transition-transform hover:-translate-y-0.5"
+    >
+      <div className="flex items-center gap-2.5">
+        <Stamp icon={list.icon} accent="mint" className="size-9 shrink-0" />
+        <span className="min-w-0 flex-1 truncate font-heading text-sm text-black">
+          {list.title}
+        </span>
+        <ChevronRight className="size-4 shrink-0 text-black/25 transition-colors group-hover:text-black/50" />
+      </div>
+      <div className="flex items-center gap-2">
+        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-black/10">
+          <div
+            className="h-full rounded-full bg-olive transition-[width] duration-500"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+        <span className="shrink-0 font-mono text-[11px] text-black/40">
+          {done}/{total}
+        </span>
+      </div>
+    </Link>
+  );
+}
+
+/** Pick which routines (up to three) show on the home page. */
+function RoutinePickerModal({
+  lists,
+  error,
+  pending,
+  onToggle,
+  onClose,
+}: {
+  lists: RoutineLite[];
+  error: string | null;
+  pending: boolean;
+  onToggle: (id: string, onHome: boolean) => void;
+  onClose: () => void;
+}) {
+  const pinnedCount = lists.filter((l) => l.on_home).length;
+
+  return (
+    <div
+      className="fixed inset-0 z-40 flex items-end justify-center bg-black/40 sm:items-center"
+      onClick={onClose}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="max-h-[88dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-background p-6 shadow-xl [animation:rise_0.25s_both] sm:rounded-3xl"
+      >
+        <div className="flex items-center justify-between">
+          <h2 className="font-display text-2xl leading-none text-black">
+            Home routines
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="grid size-9 place-items-center rounded-full text-black/50 transition-colors hover:bg-black/5 hover:text-black"
+          >
+            <X className="size-5" />
+          </button>
+        </div>
+        <p className="mt-2 font-serif text-sm text-black/50">
+          Choose up to 3 routines to keep on your home page ({pinnedCount}/3).
+        </p>
+        {error && (
+          <p className="mt-3 rounded-xl bg-clay-deep/10 px-3 py-2 font-serif text-sm text-clay-deep">
+            {error}
+          </p>
+        )}
+
+        <div className="mt-4 space-y-2">
+          {lists.map((l) => {
+            const atLimit = !l.on_home && pinnedCount >= 3;
+            return (
+              <button
+                key={l.id}
+                type="button"
+                disabled={pending || atLimit}
+                onClick={() => onToggle(l.id, !l.on_home)}
+                className={cn(
+                  "flex w-full items-center gap-3 rounded-2xl bg-white px-3 py-3 text-left shadow-sm transition-colors",
+                  atLimit ? "opacity-40" : "hover:bg-white/70",
+                )}
+              >
+                <Stamp icon={l.icon} accent="mint" className="size-8 shrink-0" />
+                <span className="min-w-0 flex-1 truncate font-heading text-sm text-black">
+                  {l.title}
+                </span>
+                <span
+                  className={cn(
+                    "grid size-6 shrink-0 place-items-center rounded-full border-2 transition-colors",
+                    l.on_home
+                      ? "border-olive bg-olive text-white"
+                      : "border-black/20 text-transparent",
+                  )}
+                >
+                  <Check className="size-3.5" strokeWidth={3} />
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
   );
 }
 

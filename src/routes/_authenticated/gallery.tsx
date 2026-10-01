@@ -26,7 +26,7 @@ import {
   setShowcaseSlot,
 } from "@/lib/artworks.functions";
 import { updateStamp } from "@/lib/stamps.functions";
-import { updateGoalDetails } from "@/lib/goals.functions";
+import { grantBonusStamps, updateGoalDetails } from "@/lib/goals.functions";
 import {
   ARTWORK_COST,
   ARTWORKS,
@@ -110,6 +110,15 @@ function GalleryPage() {
     (showcase ?? []).map((s) => s.artwork_id),
   );
 
+  // Temporary manual top-up — tap once to add 50 stamps to your balance.
+  const grant = useMutation({
+    mutationFn: () => grantBonusStamps({ data: { amount: 50 } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["stamp-balance"] });
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+    },
+  });
+
   const buy = useMutation({
     mutationFn: (artworkId: number) => buyArtwork({ data: { artworkId } }),
     onSuccess: () => {
@@ -185,9 +194,19 @@ function GalleryPage() {
           <p className="font-heading text-sm uppercase text-olive">
             Today's artworks
           </p>
-          <span className="font-serif text-xs text-black/50">
-            {ARTWORK_COST} stamps each
-          </span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => grant.mutate()}
+              disabled={grant.isPending}
+              className="rounded-full border border-dashed border-olive/40 px-2.5 py-0.5 font-heading text-[10px] uppercase text-olive/70 transition-colors hover:bg-olive/5 disabled:opacity-40"
+            >
+              {grant.isPending ? "…" : "+50"}
+            </button>
+            <span className="font-serif text-xs text-black/50">
+              {ARTWORK_COST} stamps each
+            </span>
+          </div>
         </div>
         <div className="mt-3 grid grid-cols-3 gap-3">
           {dailyIds.map((id) => {
