@@ -397,8 +397,23 @@ function FrameCell({
   );
 }
 
-/** Museum placard: work, artist, year on a soft canvas (we don't ship images). */
+/**
+ * How an artwork fills its frame: a public-domain image when we have one,
+ * otherwise a museum placard (work, artist, year on a soft canvas) — used for
+ * works still under copyright, whose images we don't reproduce.
+ */
 function ArtworkPlacard({ artwork }: { artwork: Artwork }) {
+  if (artwork.image) {
+    return (
+      <img
+        src={artwork.image}
+        alt={`${artwork.work} by ${artwork.artist}`}
+        loading="lazy"
+        className="size-full object-cover"
+        style={{ background: artworkTint(artwork.id) }}
+      />
+    );
+  }
   return (
     <div
       className="flex size-full flex-col items-center justify-center gap-1.5 px-2 text-center"
