@@ -5,7 +5,7 @@ import { Reorder, useDragControls } from "framer-motion";
 import { GripVertical, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AppShell, useAppShell } from "@/components/app-shell";
-import { accentOf } from "@/components/goal-ui";
+import { accentOf, localToday } from "@/components/goal-ui";
 import { GoalEditModal } from "@/components/goal-edit-modal";
 import { GoalHero, StepRow, type HomeGoal } from "@/components/home-cards";
 import {
@@ -148,7 +148,8 @@ function GoalDetailBody({
     onSuccess: refresh,
   });
   const toggleStepMutation = useMutation({
-    mutationFn: (input: { id: string; done: boolean }) => toggleStep({ data: input }),
+    mutationFn: (input: { id: string; done: boolean }) =>
+      toggleStep({ data: { ...input, today: localToday() } }),
     onSuccess: refresh,
   });
   const deleteStepMutation = useMutation({

@@ -14,6 +14,7 @@ import { StampMark } from "@/components/stamp-mark";
 import { StampPill } from "@/components/stamp-pill";
 import { HabitDetailModal, type HabitFull } from "@/components/habit-detail-modal";
 import { HabitTally } from "@/components/habit-tally";
+import { GoalTally } from "@/components/goal-tally";
 import {
   HabitRow,
   NextStepPortrait,
@@ -111,7 +112,8 @@ function OverviewPage() {
   const [promptGoal, setPromptGoal] = useState<CompletedGoal | null>(null);
 
   const completeStepMutation = useMutation({
-    mutationFn: (stepId: string) => toggleStep({ data: { id: stepId, done: true } }),
+    mutationFn: (stepId: string) =>
+      toggleStep({ data: { id: stepId, done: true, today } }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["goals"] });
       queryClient.invalidateQueries({ queryKey: ["goal"] });
@@ -166,6 +168,8 @@ function OverviewPage() {
 
           <div className="mt-6 border-t border-dashed border-border" />
 
+          <GoalTally className="mt-6" />
+
           <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             What next step will you take today?
           </p>
@@ -212,8 +216,10 @@ function OverviewPage() {
             </div>
           </div>
 
+          <GoalTally className="mt-8" />
+
           {/* Next steps for today — a row of portrait cards */}
-          <p className="mt-8 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Next steps for today
           </p>
           {upcoming.length === 0 ? (

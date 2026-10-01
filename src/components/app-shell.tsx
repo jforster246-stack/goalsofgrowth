@@ -109,7 +109,7 @@ export function AppShell({
 
   const toggleStepMutation = useMutation({
     mutationFn: (input: { id: string; done: boolean }) =>
-      toggleStep({ data: input }),
+      toggleStep({ data: { ...input, today: localToday() } }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["goals"] });
       queryClient.invalidateQueries({ queryKey: ["goal"] });

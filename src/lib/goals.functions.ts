@@ -339,12 +339,22 @@ export const updateStep = createServerFn({ method: "POST" })
 export const toggleStep = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) =>
-    z.object({ id: z.string().uuid(), done: z.boolean() }).parse(data),
+    z
+      .object({
+        id: z.string().uuid(),
+        done: z.boolean(),
+        // Local day the tick happened, so per-day task tallies are correct.
+        today: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+      })
+      .parse(data),
   )
   .handler(async ({ data, context }) => {
+    const completed_on = data.done
+      ? (data.today ?? new Date().toISOString().slice(0, 10))
+      : null;
     const { error } = await context.supabase
       .from("steps")
-      .update({ done: data.done })
+      .update({ done: data.done, completed_on })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };

@@ -13,8 +13,9 @@ import {
   GoalCompletePrompt,
   type CompletedGoal,
 } from "@/components/goal-complete-prompt";
-import { goalProgress, type GoalWithSteps } from "@/components/goal-ui";
+import { goalProgress, localToday, type GoalWithSteps } from "@/components/goal-ui";
 import { StampPill } from "@/components/stamp-pill";
+import { GoalTally } from "@/components/goal-tally";
 import { goalsQueryOptions } from "@/lib/goal-queries";
 import {
   claimUnownedGoals,
@@ -112,7 +113,8 @@ function GoalsListPage() {
           </button>
         </div>
       ) : (
-        <div className="mt-4 pb-4">
+        <div className="mt-4 space-y-4 pb-4">
+          <GoalTally />
           <Reorder.Group
             as="div"
             values={order}
@@ -210,7 +212,8 @@ function GoalCardItem({ goal, dragHandle }: { goal: Goal; dragHandle?: ReactNode
   };
 
   const completeMutation = useMutation({
-    mutationFn: (stepId: string) => toggleStep({ data: { id: stepId, done: true } }),
+    mutationFn: (stepId: string) =>
+      toggleStep({ data: { id: stepId, done: true, today: localToday() } }),
     onSuccess: refresh,
   });
   // "Add to wins log" both records the win and files the goal away under

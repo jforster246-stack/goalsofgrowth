@@ -232,6 +232,13 @@
       "when": 1790824000000,
       "tag": "0032_create_finance",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1790824100000,
+      "tag": "0033_add_step_completed_on",
+      "breakpoints": true
     }
   ]
 }

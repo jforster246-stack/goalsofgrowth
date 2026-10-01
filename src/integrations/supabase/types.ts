@@ -415,6 +415,7 @@ export type Database = {
       }
       steps: {
         Row: {
+          completed_on: string | null
           created_at: string
           done: boolean
           goal_id: string
@@ -423,6 +424,7 @@ export type Database = {
           title: string
         }
         Insert: {
+          completed_on?: string | null
           created_at?: string
           done?: boolean
           goal_id: string
@@ -431,6 +433,7 @@ export type Database = {
           title: string
         }
         Update: {
+          completed_on?: string | null
           created_at?: string
           done?: boolean
           goal_id?: string
