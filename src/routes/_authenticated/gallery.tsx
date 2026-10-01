@@ -218,6 +218,14 @@ function GalleryPage() {
                 <div className="aspect-[4/5] overflow-hidden rounded-2xl shadow-sm">
                   <ArtworkPlacard artwork={art} />
                 </div>
+                <div className="mt-2 text-center">
+                  <p className="truncate font-display text-[13px] font-medium leading-tight text-black/80">
+                    {art.work}
+                  </p>
+                  <p className="truncate font-serif text-[10px] italic leading-tight text-black/55">
+                    {art.artist} · {art.year}
+                  </p>
+                </div>
                 <button
                   type="button"
                   disabled={isOwned}
@@ -259,7 +267,11 @@ function GalleryPage() {
             {SLOTS.map((slot) => {
               const art = slotArtwork(slot);
               return (
-                <FrameCell key={`slot-${slot}`} caption={art ? art.work : "Add artwork"}>
+                <FrameCell
+                  key={`slot-${slot}`}
+                  caption={art ? art.work : "Add artwork"}
+                  subtitle={art ? `${art.artist} · ${art.year}` : undefined}
+                >
                   <GoldFrame
                     seed={`slot-${slot}`}
                     ariaLabel={art ? `Artwork: ${art.work}` : "Add an artwork"}
@@ -379,12 +391,14 @@ function GalleryPage() {
   );
 }
 
-/** A gold frame with a caption underneath, hung with a slight tilt. */
+/** A gold frame with a caption (and optional subtitle) underneath. */
 function FrameCell({
   caption,
+  subtitle,
   children,
 }: {
   caption: string;
+  subtitle?: string | undefined;
   children: React.ReactNode;
 }) {
   return (
@@ -393,6 +407,11 @@ function FrameCell({
       <span className="mt-2 line-clamp-2 text-center font-serif text-[11px] leading-tight text-black/55">
         {caption}
       </span>
+      {subtitle && (
+        <span className="line-clamp-1 text-center font-serif text-[10px] italic leading-tight text-black/40">
+          {subtitle}
+        </span>
+      )}
     </div>
   );
 }
