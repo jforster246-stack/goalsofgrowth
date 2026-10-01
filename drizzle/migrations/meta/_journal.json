@@ -239,6 +239,13 @@
       "when": 1790824100000,
       "tag": "0033_add_step_completed_on",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1790824200000,
+      "tag": "0034_create_awa",
+      "breakpoints": true
     }
   ]
 }

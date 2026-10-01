@@ -10,6 +10,11 @@ import { listWins } from "@/lib/wins.functions";
 import { listBrainDump } from "@/lib/braindump.functions";
 import { listChecklists } from "@/lib/checklists.functions";
 import { listFinance } from "@/lib/finance.functions";
+import {
+  listAwaHobbies,
+  listAwaLogs,
+  listAwaWishlist,
+} from "@/lib/awa.functions";
 import { listStamps } from "@/lib/stamps.functions";
 import {
   getShowcase,
@@ -69,6 +74,21 @@ export const checklistsQueryOptions = queryOptions({
 export const financeQueryOptions = queryOptions({
   queryKey: ["finance"],
   queryFn: () => listFinance(),
+});
+
+export const awaHobbiesQueryOptions = queryOptions({
+  queryKey: ["awa-hobbies"],
+  queryFn: () => listAwaHobbies(),
+});
+
+export const awaLogsQueryOptions = queryOptions({
+  queryKey: ["awa-logs"],
+  queryFn: () => listAwaLogs(),
+});
+
+export const awaWishlistQueryOptions = queryOptions({
+  queryKey: ["awa-wishlist"],
+  queryFn: () => listAwaWishlist(),
 });
 
 export const stampsQueryOptions = queryOptions({

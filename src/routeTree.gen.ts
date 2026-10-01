@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedAwaRouteImport } from './routes/_authenticated/awa'
 import { Route as AuthenticatedBraindumpRouteImport } from './routes/_authenticated/braindump'
 import { Route as AuthenticatedFinanceRouteImport } from './routes/_authenticated/finance'
 import { Route as AuthenticatedGalleryRouteImport } from './routes/_authenticated/gallery'
@@ -40,6 +41,11 @@ const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAwaRoute = AuthenticatedAwaRouteImport.update({
+  id: '/awa',
+  path: '/awa',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedBraindumpRoute = AuthenticatedBraindumpRouteImport.update({
   id: '/braindump',
@@ -118,6 +124,7 @@ const AuthenticatedRoutinesRoutineIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/awa': typeof AuthenticatedAwaRoute
   '/braindump': typeof AuthenticatedBraindumpRoute
   '/finance': typeof AuthenticatedFinanceRoute
   '/gallery': typeof AuthenticatedGalleryRoute
@@ -136,6 +143,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/awa': typeof AuthenticatedAwaRoute
   '/braindump': typeof AuthenticatedBraindumpRoute
   '/finance': typeof AuthenticatedFinanceRoute
   '/gallery': typeof AuthenticatedGalleryRoute
@@ -154,6 +162,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/awa': typeof AuthenticatedAwaRoute
   '/_authenticated/braindump': typeof AuthenticatedBraindumpRoute
   '/_authenticated/finance': typeof AuthenticatedFinanceRoute
   '/_authenticated/gallery': typeof AuthenticatedGalleryRoute
@@ -174,6 +183,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/awa'
     | '/braindump'
     | '/finance'
     | '/gallery'
@@ -192,6 +202,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/awa'
     | '/braindump'
     | '/finance'
     | '/gallery'
@@ -209,6 +220,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/awa'
     | '/_authenticated/braindump'
     | '/_authenticated/finance'
     | '/_authenticated/gallery'
@@ -253,6 +265,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/awa': {
+      id: '/_authenticated/awa'
+      path: '/awa'
+      fullPath: '/awa'
+      preLoaderRoute: typeof AuthenticatedAwaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/braindump': {
       id: '/_authenticated/braindump'
@@ -386,6 +405,7 @@ const AuthenticatedRoutinesRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAwaRoute: typeof AuthenticatedAwaRoute
   AuthenticatedBraindumpRoute: typeof AuthenticatedBraindumpRoute
   AuthenticatedFinanceRoute: typeof AuthenticatedFinanceRoute
   AuthenticatedGalleryRoute: typeof AuthenticatedGalleryRoute
@@ -398,6 +418,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAwaRoute: AuthenticatedAwaRoute,
   AuthenticatedBraindumpRoute: AuthenticatedBraindumpRoute,
   AuthenticatedFinanceRoute: AuthenticatedFinanceRoute,
   AuthenticatedGalleryRoute: AuthenticatedGalleryRoute,

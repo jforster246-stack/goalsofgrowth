@@ -9,8 +9,10 @@ import {
   type ReactNode,
 } from "react";
 import {
+  Armchair,
   Brain,
   Check,
+  Ellipsis,
   Frame,
   House,
   ListChecks,
@@ -282,6 +284,7 @@ function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
         <SideLink to="/routines" icon={ListChecks} label="Routines" />
         <SideLink to="/braindump" icon={Brain} label="Brain dump" />
         <SideLink to="/finance" icon={Wallet} label="Finance planner" />
+        <SideLink to="/awa" icon={Armchair} label="A While Away" />
       </nav>
 
       <button
@@ -319,36 +322,83 @@ function SideLink({
   );
 }
 
-const BOTTOM_NAV: { to: string; icon: typeof House; label: string }[] = [
+type NavItem = { to: string; icon: typeof House; label: string };
+
+// First five get a direct tab; the rest live behind "More".
+const BOTTOM_PRIMARY: NavItem[] = [
   { to: "/overview", icon: House, label: "Home" },
   { to: "/gallery", icon: Frame, label: "Gallery" },
   { to: "/habits", icon: Repeat, label: "Habits" },
   { to: "/goals", icon: Target, label: "Goals" },
   { to: "/routines", icon: ListChecks, label: "Routines" },
-  { to: "/braindump", icon: Brain, label: "Brain" },
-  { to: "/finance", icon: Wallet, label: "Finance" },
+];
+const BOTTOM_MORE: NavItem[] = [
+  { to: "/braindump", icon: Brain, label: "Brain dump" },
+  { to: "/finance", icon: Wallet, label: "Finance planner" },
+  { to: "/awa", icon: Armchair, label: "A While Away" },
 ];
 
 function BottomNav() {
+  const [moreOpen, setMoreOpen] = useState(false);
   const itemClass =
     "flex flex-1 flex-col items-center justify-center gap-1 py-3 text-[9px] font-semibold uppercase tracking-wide transition-colors";
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-10 bg-gradient-to-t from-background via-background/95 to-transparent px-3 pb-4 pt-8 lg:hidden">
-      <nav className="mx-auto flex max-w-md items-stretch rounded-2xl bg-card px-1 shadow-lg ring-1 ring-border">
-        {BOTTOM_NAV.map(({ to, icon: Icon, label }) => (
-          <Link
-            key={to}
-            to={to}
+    <>
+      <div className="fixed inset-x-0 bottom-0 z-10 bg-gradient-to-t from-background via-background/95 to-transparent px-3 pb-4 pt-8 lg:hidden">
+        <nav className="mx-auto flex max-w-md items-stretch rounded-2xl bg-card px-1 shadow-lg ring-1 ring-border">
+          {BOTTOM_PRIMARY.map(({ to, icon: Icon, label }) => (
+            <Link
+              key={to}
+              to={to}
+              className={`${itemClass} text-muted-foreground`}
+              activeProps={{ className: `${itemClass} text-foreground` }}
+            >
+              <Icon className="size-5" strokeWidth={2} />
+              {label}
+            </Link>
+          ))}
+          <button
+            type="button"
+            onClick={() => setMoreOpen(true)}
             className={`${itemClass} text-muted-foreground`}
-            activeProps={{ className: `${itemClass} text-foreground` }}
           >
-            <Icon className="size-5" strokeWidth={2} />
-            {label}
-          </Link>
-        ))}
-      </nav>
-    </div>
+            <Ellipsis className="size-5" strokeWidth={2} />
+            More
+          </button>
+        </nav>
+      </div>
+
+      {moreOpen && (
+        <div
+          className="fixed inset-0 z-40 flex items-end justify-center bg-black/40 lg:hidden"
+          onClick={() => setMoreOpen(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full rounded-t-3xl bg-background p-5 pb-8 shadow-xl [animation:rise_0.25s_both]"
+          >
+            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-black/15" />
+            <div className="grid grid-cols-3 gap-3">
+              {BOTTOM_MORE.map(({ to, icon: Icon, label }) => (
+                <Link
+                  key={to}
+                  to={to}
+                  onClick={() => setMoreOpen(false)}
+                  className="flex flex-col items-center gap-2 rounded-2xl bg-card px-2 py-4 text-center shadow-sm ring-1 ring-border"
+                  activeProps={{ className: "ring-olive" }}
+                >
+                  <Icon className="size-6 text-olive" strokeWidth={2} />
+                  <span className="font-heading text-[10px] uppercase tracking-wide text-foreground">
+                    {label}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
