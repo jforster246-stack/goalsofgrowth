@@ -225,6 +225,13 @@
       "when": 1790813371624,
       "tag": "0031_apply_checklist_home",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1790824000000,
+      "tag": "0032_create_finance",
+      "breakpoints": true
     }
   ]
 }

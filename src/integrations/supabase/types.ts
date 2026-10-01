@@ -183,6 +183,36 @@ export type Database = {
         }
         Relationships: []
       }
+      finance_entries: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          kind: string
+          label: string
+          position: number
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          kind?: string
+          label: string
+          position?: number
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          kind?: string
+          label?: string
+          position?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       gallery_showcase: {
         Row: {
           artwork_id: number

@@ -17,6 +17,7 @@ import {
   Repeat,
   Settings,
   Target,
+  Wallet,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getTheme, setTheme, THEMES, type ThemeId } from "@/lib/theme";
@@ -275,11 +276,12 @@ function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
 
       <nav className="mt-9 flex flex-col gap-1.5">
         <SideLink to="/overview" icon={House} label="Home" />
-        <SideLink to="/goals" icon={Target} label="Goals" />
-        <SideLink to="/habits" icon={Repeat} label="Habits" />
-        <SideLink to="/braindump" icon={Brain} label="Brain dump" />
-        <SideLink to="/routines" icon={ListChecks} label="Routines" />
         <SideLink to="/gallery" icon={Frame} label="Gallery" />
+        <SideLink to="/habits" icon={Repeat} label="Habits" />
+        <SideLink to="/goals" icon={Target} label="Goals" />
+        <SideLink to="/routines" icon={ListChecks} label="Routines" />
+        <SideLink to="/braindump" icon={Brain} label="Brain dump" />
+        <SideLink to="/finance" icon={Wallet} label="Finance planner" />
       </nav>
 
       <button
@@ -317,53 +319,34 @@ function SideLink({
   );
 }
 
+const BOTTOM_NAV: { to: string; icon: typeof House; label: string }[] = [
+  { to: "/overview", icon: House, label: "Home" },
+  { to: "/gallery", icon: Frame, label: "Gallery" },
+  { to: "/habits", icon: Repeat, label: "Habits" },
+  { to: "/goals", icon: Target, label: "Goals" },
+  { to: "/routines", icon: ListChecks, label: "Routines" },
+  { to: "/braindump", icon: Brain, label: "Brain" },
+  { to: "/finance", icon: Wallet, label: "Finance" },
+];
+
 function BottomNav() {
   const itemClass =
-    "flex flex-1 flex-col items-center justify-center gap-1 py-3.5 text-[11px] font-semibold uppercase tracking-wide transition-colors";
+    "flex flex-1 flex-col items-center justify-center gap-1 py-3 text-[9px] font-semibold uppercase tracking-wide transition-colors";
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-10 bg-gradient-to-t from-background via-background/95 to-transparent px-5 pb-4 pt-8 lg:hidden">
-      <nav className="mx-auto flex max-w-md items-stretch rounded-2xl bg-card shadow-lg ring-1 ring-border">
-        <Link
-          to="/overview"
-          className={`${itemClass} text-muted-foreground`}
-          activeProps={{ className: `${itemClass} text-foreground` }}
-        >
-          <House className="size-5" strokeWidth={2} />
-          Home
-        </Link>
-        <Link
-          to="/goals"
-          className={`${itemClass} text-muted-foreground`}
-          activeProps={{ className: `${itemClass} text-foreground` }}
-        >
-          <Target className="size-5" strokeWidth={2} />
-          Goals
-        </Link>
-        <Link
-          to="/habits"
-          className={`${itemClass} text-muted-foreground`}
-          activeProps={{ className: `${itemClass} text-foreground` }}
-        >
-          <Repeat className="size-5" strokeWidth={2} />
-          Habits
-        </Link>
-        <Link
-          to="/braindump"
-          className={`${itemClass} text-muted-foreground`}
-          activeProps={{ className: `${itemClass} text-foreground` }}
-        >
-          <Brain className="size-5" strokeWidth={2} />
-          Brain
-        </Link>
-        <Link
-          to="/routines"
-          className={`${itemClass} text-muted-foreground`}
-          activeProps={{ className: `${itemClass} text-foreground` }}
-        >
-          <ListChecks className="size-5" strokeWidth={2} />
-          Routines
-        </Link>
+    <div className="fixed inset-x-0 bottom-0 z-10 bg-gradient-to-t from-background via-background/95 to-transparent px-3 pb-4 pt-8 lg:hidden">
+      <nav className="mx-auto flex max-w-md items-stretch rounded-2xl bg-card px-1 shadow-lg ring-1 ring-border">
+        {BOTTOM_NAV.map(({ to, icon: Icon, label }) => (
+          <Link
+            key={to}
+            to={to}
+            className={`${itemClass} text-muted-foreground`}
+            activeProps={{ className: `${itemClass} text-foreground` }}
+          >
+            <Icon className="size-5" strokeWidth={2} />
+            {label}
+          </Link>
+        ))}
       </nav>
     </div>
   );

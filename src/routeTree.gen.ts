@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedBraindumpRouteImport } from './routes/_authenticated/braindump'
+import { Route as AuthenticatedFinanceRouteImport } from './routes/_authenticated/finance'
 import { Route as AuthenticatedGalleryRouteImport } from './routes/_authenticated/gallery'
 import { Route as AuthenticatedGoalsRouteImport } from './routes/_authenticated/goals'
 import { Route as AuthenticatedHabitsRouteImport } from './routes/_authenticated/habits'
@@ -43,6 +44,11 @@ const AuthRoute = AuthRouteImport.update({
 const AuthenticatedBraindumpRoute = AuthenticatedBraindumpRouteImport.update({
   id: '/braindump',
   path: '/braindump',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedFinanceRoute = AuthenticatedFinanceRouteImport.update({
+  id: '/finance',
+  path: '/finance',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedGalleryRoute = AuthenticatedGalleryRouteImport.update({
@@ -113,6 +119,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/braindump': typeof AuthenticatedBraindumpRoute
+  '/finance': typeof AuthenticatedFinanceRoute
   '/gallery': typeof AuthenticatedGalleryRoute
   '/goals': typeof AuthenticatedGoalsRouteWithChildren
   '/habits': typeof AuthenticatedHabitsRoute
@@ -130,6 +137,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/braindump': typeof AuthenticatedBraindumpRoute
+  '/finance': typeof AuthenticatedFinanceRoute
   '/gallery': typeof AuthenticatedGalleryRoute
   '/habits': typeof AuthenticatedHabitsRoute
   '/overview': typeof AuthenticatedOverviewRoute
@@ -147,6 +155,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/braindump': typeof AuthenticatedBraindumpRoute
+  '/_authenticated/finance': typeof AuthenticatedFinanceRoute
   '/_authenticated/gallery': typeof AuthenticatedGalleryRoute
   '/_authenticated/goals': typeof AuthenticatedGoalsRouteWithChildren
   '/_authenticated/habits': typeof AuthenticatedHabitsRoute
@@ -166,6 +175,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/braindump'
+    | '/finance'
     | '/gallery'
     | '/goals'
     | '/habits'
@@ -183,6 +193,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/braindump'
+    | '/finance'
     | '/gallery'
     | '/habits'
     | '/overview'
@@ -199,6 +210,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/braindump'
+    | '/_authenticated/finance'
     | '/_authenticated/gallery'
     | '/_authenticated/goals'
     | '/_authenticated/habits'
@@ -247,6 +259,13 @@ declare module '@tanstack/react-router' {
       path: '/braindump'
       fullPath: '/braindump'
       preLoaderRoute: typeof AuthenticatedBraindumpRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/finance': {
+      id: '/_authenticated/finance'
+      path: '/finance'
+      fullPath: '/finance'
+      preLoaderRoute: typeof AuthenticatedFinanceRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/gallery': {
@@ -368,6 +387,7 @@ const AuthenticatedRoutinesRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedBraindumpRoute: typeof AuthenticatedBraindumpRoute
+  AuthenticatedFinanceRoute: typeof AuthenticatedFinanceRoute
   AuthenticatedGalleryRoute: typeof AuthenticatedGalleryRoute
   AuthenticatedGoalsRoute: typeof AuthenticatedGoalsRouteWithChildren
   AuthenticatedHabitsRoute: typeof AuthenticatedHabitsRoute
@@ -379,6 +399,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedBraindumpRoute: AuthenticatedBraindumpRoute,
+  AuthenticatedFinanceRoute: AuthenticatedFinanceRoute,
   AuthenticatedGalleryRoute: AuthenticatedGalleryRoute,
   AuthenticatedGoalsRoute: AuthenticatedGoalsRouteWithChildren,
   AuthenticatedHabitsRoute: AuthenticatedHabitsRoute,

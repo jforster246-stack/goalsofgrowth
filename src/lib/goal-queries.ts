@@ -9,6 +9,7 @@ import {
 import { listWins } from "@/lib/wins.functions";
 import { listBrainDump } from "@/lib/braindump.functions";
 import { listChecklists } from "@/lib/checklists.functions";
+import { listFinance } from "@/lib/finance.functions";
 import { listStamps } from "@/lib/stamps.functions";
 import {
   getShowcase,
@@ -63,6 +64,11 @@ export const brainDumpQueryOptions = queryOptions({
 export const checklistsQueryOptions = queryOptions({
   queryKey: ["checklists"],
   queryFn: () => listChecklists(),
+});
+
+export const financeQueryOptions = queryOptions({
+  queryKey: ["finance"],
+  queryFn: () => listFinance(),
 });
 
 export const stampsQueryOptions = queryOptions({
