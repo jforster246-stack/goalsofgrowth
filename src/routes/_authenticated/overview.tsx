@@ -161,6 +161,11 @@ function OverviewPage() {
 
           <HabitTally className="mt-5" />
 
+          <TodayHabits />
+          <MissedYesterday />
+
+          <div className="mt-6 border-t border-dashed border-border" />
+
           <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             What next step will you take today?
           </p>
@@ -184,9 +189,6 @@ function OverviewPage() {
             ))}
           </div>
 
-          <div className="mt-6 border-t border-dashed border-border" />
-          <TodayHabits />
-          <MissedYesterday />
           <RoutinesHome />
         </div>
 
@@ -202,8 +204,16 @@ function OverviewPage() {
 
           <HabitTally className="mt-6" />
 
+          {/* Habits + missed yesterday, side by side */}
+          <div className="mt-6 grid grid-cols-2 gap-8 border-t border-border pt-5">
+            <TodayHabits />
+            <div className="border-l border-border pl-8">
+              <MissedYesterday variant="column" />
+            </div>
+          </div>
+
           {/* Next steps for today — a row of portrait cards */}
-          <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <p className="mt-8 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Next steps for today
           </p>
           {upcoming.length === 0 ? (
@@ -225,14 +235,6 @@ function OverviewPage() {
               ))}
             </div>
           )}
-
-          {/* Habits + missed yesterday, side by side */}
-          <div className="mt-6 grid grid-cols-2 gap-8 border-t border-border pt-2">
-            <TodayHabits />
-            <div className="border-l border-border pl-8">
-              <MissedYesterday variant="column" />
-            </div>
-          </div>
 
           <RoutinesHome />
         </div>
