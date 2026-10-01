@@ -38,7 +38,12 @@ function NewGoalPage() {
 
 export function NewGoalForm({
   initialTitle,
-}: { initialTitle?: string | undefined } = {}) {
+  onCreated,
+}: {
+  initialTitle?: string | undefined;
+  /** When set (modal use), called on success instead of navigating to the goal. */
+  onCreated?: (() => void) | undefined;
+} = {}) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -68,7 +73,8 @@ export function NewGoalForm({
     },
     onSuccess: (goal) => {
       queryClient.invalidateQueries({ queryKey: ["goals"] });
-      navigate({ to: "/goals/$goalId", params: { goalId: goal.id }, replace: true });
+      if (onCreated) onCreated();
+      else navigate({ to: "/goals/$goalId", params: { goalId: goal.id }, replace: true });
     },
   });
 

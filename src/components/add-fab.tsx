@@ -1,55 +1,38 @@
 import { useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Brain, ListChecks, Plus, Repeat, Target, Timer, Trophy } from "lucide-react";
 import { useAppShell } from "@/components/app-shell";
-import { createChecklist } from "@/lib/checklists.functions";
+import { HabitFormModal } from "@/components/habit-form-modal";
+import { WinFormModal } from "@/components/win-form-modal";
+import {
+  BrainDumpQuickModal,
+  GoalFormModal,
+  RoutineFormModal,
+} from "@/components/create-modals";
 import { cn } from "@/lib/utils";
 
+type Create = "goal" | "habit" | "routine" | "braindump" | "win";
+
 /**
- * Floating "+" that expands into a speed-dial of things you can create:
- * Goal, Habit, Routine, Focus session, Win.
+ * Floating "+" that expands into a speed-dial of things you can create. Each
+ * one opens its create flow as a popup in place — no navigating away.
  */
 export function AddFab() {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const { openFocus } = useAppShell();
   const [open, setOpen] = useState(false);
+  const [creating, setCreating] = useState<Create | null>(null);
 
   const close = () => setOpen(false);
 
-  const createRoutine = useMutation({
-    mutationFn: () => createChecklist({ data: { title: "New routine" } }),
-    onSuccess: (row) => {
-      queryClient.invalidateQueries({ queryKey: ["checklists"] });
-      navigate({ to: "/routines/$routineId", params: { routineId: row.id } });
-    },
-  });
-
   const items: { label: string; Icon: typeof Plus; onClick: () => void }[] = [
-    { label: "Goal", Icon: Target, onClick: () => navigate({ to: "/goals/new" }) },
-    {
-      label: "Habit",
-      Icon: Repeat,
-      onClick: () => navigate({ to: "/habits", search: { new: true } }),
-    },
-    {
-      label: "Routine",
-      Icon: ListChecks,
-      onClick: () => createRoutine.mutate(),
-    },
-    {
-      label: "Brain dump",
-      Icon: Brain,
-      onClick: () => navigate({ to: "/braindump" }),
-    },
+    { label: "Goal", Icon: Target, onClick: () => setCreating("goal") },
+    { label: "Habit", Icon: Repeat, onClick: () => setCreating("habit") },
+    { label: "Routine", Icon: ListChecks, onClick: () => setCreating("routine") },
+    { label: "Brain dump", Icon: Brain, onClick: () => setCreating("braindump") },
     { label: "Focus session", Icon: Timer, onClick: () => openFocus() },
-    {
-      label: "Win",
-      Icon: Trophy,
-      onClick: () => navigate({ to: "/wins", search: { new: true } }),
-    },
+    { label: "Win", Icon: Trophy, onClick: () => setCreating("win") },
   ];
+
+  const dismiss = () => setCreating(null);
 
   return (
     <>
@@ -100,6 +83,13 @@ export function AddFab() {
           <Plus className="size-6" strokeWidth={2} />
         </button>
       </div>
+
+      {/* Create flows — each pops up in place instead of navigating. */}
+      {creating === "goal" && <GoalFormModal onClose={dismiss} />}
+      {creating === "habit" && <HabitFormModal onClose={dismiss} />}
+      {creating === "routine" && <RoutineFormModal onClose={dismiss} />}
+      {creating === "braindump" && <BrainDumpQuickModal onClose={dismiss} />}
+      {creating === "win" && <WinFormModal onClose={dismiss} />}
     </>
   );
 }
