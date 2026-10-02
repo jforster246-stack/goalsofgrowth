@@ -227,6 +227,7 @@ function LogModal({
   const [hobbyId, setHobbyId] = useState<string | null>(hobbies[0]?.id ?? null);
   const [minutes, setMinutes] = useState("");
   const [note, setNote] = useState(prefillNote ?? "");
+  const [saveErr, setSaveErr] = useState<string | null>(null);
 
   const selected = hobbies.find((h) => h.id === hobbyId);
   const mins = Math.max(0, Math.round(parseFloat(minutes.replace(/[^0-9.]/g, "")) || 0));
@@ -247,6 +248,8 @@ function LogModal({
       queryClient.invalidateQueries({ queryKey: ["awa-logs"] });
       onClose();
     },
+    onError: (e) =>
+      setSaveErr(e instanceof Error ? e.message : "Couldn't save that activity."),
   });
 
   const canSave = !!selected && mins > 0 && !save.isPending;
@@ -335,6 +338,11 @@ function LogModal({
               className="mt-2 w-full resize-y rounded-2xl bg-black/5 px-4 py-3 font-serif text-sm leading-relaxed placeholder:text-black/40 focus:outline-none focus:ring-1 focus:ring-olive/40"
             />
 
+            {saveErr && (
+              <p className="mt-4 rounded-xl bg-clay-deep/10 px-3 py-2 font-serif text-sm text-clay-deep">
+                {saveErr}
+              </p>
+            )}
             <button
               type="button"
               onClick={() => canSave && save.mutate()}
@@ -361,6 +369,7 @@ function HobbiesTab() {
   const [icon, setIcon] = useState("");
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
+  const [err, setErr] = useState<string | null>(null);
 
   const add = useMutation({
     mutationFn: () =>
@@ -375,8 +384,11 @@ function HobbiesTab() {
       setIcon("");
       setName("");
       setCategory("");
+      setErr(null);
       invalidate();
     },
+    onError: (e) =>
+      setErr(e instanceof Error ? e.message : "Couldn't add that hobby."),
   });
   const remove = useMutation({
     mutationFn: (id: string) => deleteAwaHobby({ data: { id } }),
@@ -425,6 +437,11 @@ function HobbiesTab() {
             Add
           </button>
         </div>
+        {err && (
+          <p className="mt-3 rounded-xl bg-clay-deep/10 px-3 py-2 font-serif text-sm text-clay-deep">
+            {err}
+          </p>
+        )}
       </div>
 
       {isPending ? (
