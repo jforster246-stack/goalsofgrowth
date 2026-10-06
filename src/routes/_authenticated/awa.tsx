@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { Clock, Plus, X } from "lucide-react";
+import { useMemo, useState } from "react";
+import { ChevronLeft, ChevronRight, Clock, Plus, X } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { Loading } from "@/components/loading";
 import { localToday } from "@/components/goal-ui";
@@ -28,16 +28,23 @@ export const Route = createFileRoute("/_authenticated/awa")({
       {
         name: "description",
         content:
-          "A calm hobby and activity tracker — log how you spend your free time and keep a wishlist of things to try.",
+          "A calm hobby tracker — a shelf of the things you like to do, logged whenever you spend a while away, shown on a simple calendar.",
       },
     ],
   }),
   component: AwaPage,
 });
 
-type Hobby = { id: string; name: string; icon: string | null; category: string | null };
+type Hobby = {
+  id: string;
+  name: string;
+  icon: string | null;
+  category: string | null;
+  created_at: string;
+};
 type Log = {
   id: string;
+  hobby_id: string | null;
   hobby_name: string;
   hobby_icon: string | null;
   minutes: number;
@@ -46,25 +53,35 @@ type Log = {
 };
 type Wish = { id: string; title: string; done: boolean };
 
-type Tab = "today" | "hobbies" | "want" | "history";
+type Tab = "shelf" | "calendar" | "want";
 const TABS: { key: Tab; label: string }[] = [
-  { key: "today", label: "Today" },
-  { key: "hobbies", label: "Hobbies" },
+  { key: "shelf", label: "Shelf" },
+  { key: "calendar", label: "Calendar" },
   { key: "want", label: "Want to do" },
-  { key: "history", label: "History" },
+];
+
+const WEEK_LABELS = ["M", "T", "W", "T", "F", "S", "S"];
+const MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
 ];
 
 function fmtMins(mins: number): string {
-  if (mins <= 0) return "0m";
+  if (mins <= 0) return "";
   const h = Math.floor(mins / 60);
   const m = mins % 60;
-  return [h ? `${h}h` : "", m ? `${m}m` : ""].filter(Boolean).join(" ") || "0m";
+  return [h ? `${h}h` : "", m ? `${m}m` : ""].filter(Boolean).join(" ");
+}
+function pad(n: number) {
+  return String(n).padStart(2, "0");
 }
 
 function AwaPage() {
-  const [tab, setTab] = useState<Tab>("today");
-  // Opening the log sheet, optionally prefilled from a wishlist item.
-  const [logPrefill, setLogPrefill] = useState<{ note?: string } | null>(null);
+  const [tab, setTab] = useState<Tab>("shelf");
+  // Opening the log sheet: optionally preselect a hobby and/or prefill a note.
+  const [logState, setLogState] = useState<{ hobbyId?: string; note?: string } | null>(
+    null,
+  );
 
   const { data: hobbies } = useQuery(awaHobbiesQueryOptions);
 
@@ -75,15 +92,14 @@ function AwaPage() {
           Time outside of work and everyday things — enjoyed, not optimised.
         </p>
 
-        {/* Internal tabs */}
-        <div className="mt-4 flex gap-1.5 overflow-x-auto rounded-full bg-black/5 p-1">
+        <div className="mt-4 flex gap-1.5 rounded-full bg-black/5 p-1">
           {TABS.map((t) => (
             <button
               key={t.key}
               type="button"
               onClick={() => setTab(t.key)}
               className={cn(
-                "whitespace-nowrap rounded-full px-4 py-1.5 font-heading text-[11px] uppercase tracking-wide transition-colors",
+                "flex-1 whitespace-nowrap rounded-full px-3 py-1.5 font-heading text-[11px] uppercase tracking-wide transition-colors",
                 tab === t.key ? "bg-white text-olive shadow-sm" : "text-black/45",
               )}
             >
@@ -93,276 +109,45 @@ function AwaPage() {
         </div>
 
         <div className="mt-6">
-          {tab === "today" && <TodayTab onLog={() => setLogPrefill({})} />}
-          {tab === "hobbies" && <HobbiesTab />}
-          {tab === "want" && (
-            <WantTab onLogItem={(title) => setLogPrefill({ note: title })} />
+          {tab === "shelf" && (
+            <ShelfTab onLog={(h) => setLogState({ hobbyId: h.id })} />
           )}
-          {tab === "history" && <HistoryTab />}
+          {tab === "calendar" && <CalendarTab />}
+          {tab === "want" && (
+            <WantTab onLogItem={(title) => setLogState({ note: title })} />
+          )}
         </div>
       </div>
 
-      {logPrefill && (
+      {logState && (
         <LogModal
           hobbies={(hobbies ?? []) as Hobby[]}
-          prefillNote={logPrefill.note}
+          initialHobbyId={logState.hobbyId}
+          prefillNote={logState.note}
           onAddHobby={() => {
-            setLogPrefill(null);
-            setTab("hobbies");
+            setLogState(null);
+            setTab("shelf");
           }}
-          onClose={() => setLogPrefill(null)}
+          onClose={() => setLogState(null)}
         />
       )}
     </AppShell>
   );
 }
 
-/* --------------------------------- Today -------------------------------- */
+/* --------------------------------- Shelf -------------------------------- */
 
-function TodayTab({ onLog }: { onLog: () => void }) {
-  const today = localToday();
-  const { data: logs, isPending } = useQuery(awaLogsQueryOptions);
+type Sort = "recent" | "oldest" | "most";
+const SORTS: { key: Sort; label: string }[] = [
+  { key: "recent", label: "Newest" },
+  { key: "oldest", label: "Oldest" },
+  { key: "most", label: "Most done" },
+];
 
-  const todayLogs = ((logs ?? []) as Log[]).filter((l) => l.logged_on === today);
-  const total = todayLogs.reduce((s, l) => s + l.minutes, 0);
-
-  const dateLabel = new Date(`${today}T00:00:00`).toLocaleDateString(undefined, {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  });
-
-  return (
-    <div className="space-y-6">
-      <div className="rounded-3xl bg-white p-6 text-center shadow-sm">
-        <p className="font-heading text-[11px] uppercase tracking-wide text-black/40">
-          {dateLabel}
-        </p>
-        <p className="mt-3 font-display text-2xl leading-tight text-black">
-          What did you do a while away today?
-        </p>
-        <button
-          type="button"
-          onClick={onLog}
-          className="mt-5 inline-flex items-center gap-1.5 rounded-2xl bg-olive px-5 py-3 font-heading text-sm uppercase text-white transition-colors hover:bg-olive/90"
-        >
-          <Plus className="size-4" strokeWidth={2} />
-          Log an activity
-        </button>
-      </div>
-
-      {isPending ? (
-        <Loading />
-      ) : todayLogs.length === 0 ? (
-        <p className="rounded-2xl bg-white/60 px-4 py-6 text-center font-serif text-sm text-black/40">
-          Nothing logged yet today. Whenever you spend a while away, pop it in.
-        </p>
-      ) : (
-        <section>
-          <div className="flex items-center justify-between">
-            <p className="font-heading text-sm uppercase text-olive">Today</p>
-            <span className="inline-flex items-center gap-1 font-mono text-xs text-black/50">
-              <Clock className="size-3.5" /> {fmtMins(total)}
-            </span>
-          </div>
-          <div className="mt-3 space-y-2">
-            {todayLogs.map((l) => (
-              <LogRow key={l.id} log={l} />
-            ))}
-          </div>
-        </section>
-      )}
-    </div>
-  );
-}
-
-function LogRow({ log }: { log: Log }) {
-  const queryClient = useQueryClient();
-  const remove = useMutation({
-    mutationFn: () => deleteAwaLog({ data: { id: log.id } }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["awa-logs"] }),
-  });
-  return (
-    <div className="flex items-start gap-3 rounded-2xl bg-white px-4 py-3 shadow-sm">
-      <span className="grid size-9 shrink-0 place-items-center rounded-full bg-sage/20 text-lg">
-        {log.hobby_icon || "🌿"}
-      </span>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between gap-2">
-          <p className="truncate font-heading text-sm text-black">{log.hobby_name}</p>
-          <span className="shrink-0 font-mono text-xs text-black/50">
-            {fmtMins(log.minutes)}
-          </span>
-        </div>
-        {log.note && (
-          <p className="mt-0.5 font-serif text-sm italic text-black/55">{log.note}</p>
-        )}
-      </div>
-      <button
-        type="button"
-        onClick={() => remove.mutate()}
-        aria-label="Delete log"
-        className="grid size-7 shrink-0 place-items-center rounded-full text-black/25 transition-colors hover:bg-black/5 hover:text-clay-deep"
-      >
-        <X className="size-4" />
-      </button>
-    </div>
-  );
-}
-
-/* --------------------------------- Log modal ---------------------------- */
-
-function LogModal({
-  hobbies,
-  prefillNote,
-  onAddHobby,
-  onClose,
-}: {
-  hobbies: Hobby[];
-  prefillNote?: string | undefined;
-  onAddHobby: () => void;
-  onClose: () => void;
-}) {
-  const queryClient = useQueryClient();
-  const [hobbyId, setHobbyId] = useState<string | null>(hobbies[0]?.id ?? null);
-  const [minutes, setMinutes] = useState("");
-  const [note, setNote] = useState(prefillNote ?? "");
-  const [saveErr, setSaveErr] = useState<string | null>(null);
-
-  const selected = hobbies.find((h) => h.id === hobbyId);
-  const mins = Math.max(0, Math.round(parseFloat(minutes.replace(/[^0-9.]/g, "")) || 0));
-
-  const save = useMutation({
-    mutationFn: () =>
-      addAwaLog({
-        data: {
-          ...(selected ? { hobbyId: selected.id } : {}),
-          hobbyName: selected?.name ?? "Activity",
-          ...(selected?.icon ? { hobbyIcon: selected.icon } : {}),
-          minutes: mins,
-          ...(note.trim() ? { note: note.trim() } : {}),
-          loggedOn: localToday(),
-        },
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["awa-logs"] });
-      onClose();
-    },
-    onError: (e) =>
-      setSaveErr(e instanceof Error ? e.message : "Couldn't save that activity."),
-  });
-
-  const canSave = !!selected && mins > 0 && !save.isPending;
-
-  return (
-    <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/40 sm:items-center">
-      <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-background p-6 shadow-xl [animation:rise_0.25s_both] sm:rounded-3xl">
-        <div className="flex items-center justify-between">
-          <h2 className="font-display text-2xl leading-none text-black">Log an activity</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="grid size-9 place-items-center rounded-full text-black/50 transition-colors hover:bg-black/5 hover:text-black"
-          >
-            <X className="size-5" />
-          </button>
-        </div>
-
-        {hobbies.length === 0 ? (
-          <div className="mt-6 text-center">
-            <p className="font-serif text-sm text-black/50">
-              Add a hobby first, then you can log time against it.
-            </p>
-            <button
-              type="button"
-              onClick={onAddHobby}
-              className="mt-4 rounded-2xl bg-olive px-5 py-3 font-heading text-sm uppercase text-white transition-colors hover:bg-olive/90"
-            >
-              Add a hobby
-            </button>
-          </div>
-        ) : (
-          <>
-            <p className="mt-6 font-heading text-sm uppercase text-olive">Hobby</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {hobbies.map((h) => (
-                <button
-                  key={h.id}
-                  type="button"
-                  onClick={() => setHobbyId(h.id)}
-                  className={cn(
-                    "inline-flex items-center gap-1.5 rounded-full px-3 py-2 font-serif text-sm transition-colors",
-                    hobbyId === h.id
-                      ? "bg-olive text-white"
-                      : "bg-white text-black/70 shadow-sm hover:bg-white/70",
-                  )}
-                >
-                  <span>{h.icon || "🌿"}</span>
-                  {h.name}
-                </button>
-              ))}
-            </div>
-
-            <p className="mt-6 font-heading text-sm uppercase text-olive">Time spent</p>
-            <div className="mt-2 flex items-center gap-2">
-              <input
-                value={minutes}
-                onChange={(e) => setMinutes(e.target.value)}
-                inputMode="numeric"
-                placeholder="Minutes"
-                className="w-28 rounded-2xl bg-black/5 px-4 py-3 font-serif text-base placeholder:text-black/40 focus:outline-none focus:ring-1 focus:ring-olive/40"
-              />
-              <span className="font-serif text-sm text-black/40">minutes</span>
-            </div>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {[15, 30, 45, 60, 90].map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => setMinutes(String(m))}
-                  className="rounded-full bg-white px-3 py-1 font-mono text-xs text-black/60 shadow-sm transition-colors hover:bg-white/70"
-                >
-                  {fmtMins(m)}
-                </button>
-              ))}
-            </div>
-
-            <p className="mt-6 font-heading text-sm uppercase text-olive">Note</p>
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              rows={2}
-              maxLength={1000}
-              placeholder="How was it? (optional)"
-              className="mt-2 w-full resize-y rounded-2xl bg-black/5 px-4 py-3 font-serif text-sm leading-relaxed placeholder:text-black/40 focus:outline-none focus:ring-1 focus:ring-olive/40"
-            />
-
-            {saveErr && (
-              <p className="mt-4 rounded-xl bg-clay-deep/10 px-3 py-2 font-serif text-sm text-clay-deep">
-                {saveErr}
-              </p>
-            )}
-            <button
-              type="button"
-              onClick={() => canSave && save.mutate()}
-              disabled={!canSave}
-              className="mt-6 w-full rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
-            >
-              {save.isPending ? "Saving…" : "Save activity"}
-            </button>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* -------------------------------- Hobbies ------------------------------- */
-
-function HobbiesTab() {
+function ShelfTab({ onLog }: { onLog: (hobby: Hobby) => void }) {
   const queryClient = useQueryClient();
   const { data: hobbies, isPending } = useQuery(awaHobbiesQueryOptions);
+  const { data: logs } = useQuery(awaLogsQueryOptions);
   const invalidate = () =>
     queryClient.invalidateQueries({ queryKey: ["awa-hobbies"] });
 
@@ -370,6 +155,7 @@ function HobbiesTab() {
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [err, setErr] = useState<string | null>(null);
+  const [sort, setSort] = useState<Sort>("recent");
 
   const add = useMutation({
     mutationFn: () =>
@@ -395,13 +181,33 @@ function HobbiesTab() {
     onSuccess: invalidate,
   });
 
-  const list = (hobbies ?? []) as Hobby[];
+  // Count logs per hobby.
+  const counts = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const l of (logs ?? []) as Log[]) {
+      if (l.hobby_id) m.set(l.hobby_id, (m.get(l.hobby_id) ?? 0) + 1);
+    }
+    return m;
+  }, [logs]);
+
+  const list = useMemo(() => {
+    const arr = [...((hobbies ?? []) as Hobby[])];
+    arr.sort((a, b) => {
+      if (sort === "most") return (counts.get(b.id) ?? 0) - (counts.get(a.id) ?? 0);
+      const at = a.created_at;
+      const bt = b.created_at;
+      return sort === "oldest" ? (at < bt ? -1 : 1) : at < bt ? 1 : -1;
+    });
+    return arr;
+  }, [hobbies, sort, counts]);
+
   const canAdd = name.trim().length > 0 && !add.isPending;
 
   return (
     <div className="space-y-6">
+      {/* Add a hobby to the shelf */}
       <div className="rounded-2xl bg-white p-4 shadow-sm">
-        <p className="font-heading text-sm uppercase text-olive">New hobby</p>
+        <p className="font-heading text-sm uppercase text-olive">Add to your shelf</p>
         <div className="mt-3 flex items-center gap-2">
           <input
             value={icon}
@@ -448,30 +254,449 @@ function HobbiesTab() {
         <Loading />
       ) : list.length === 0 ? (
         <p className="rounded-2xl bg-white/60 px-4 py-6 text-center font-serif text-sm text-black/40">
-          No hobbies yet. Add the things you like to spend time on.
+          Your shelf is empty. Add the things you like to spend time on, then tap
+          one whenever you do it.
         </p>
       ) : (
-        <div className="grid gap-2 sm:grid-cols-2">
-          {list.map((h) => (
-            <div
-              key={h.id}
-              className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 shadow-sm"
+        <section>
+          <div className="flex items-center justify-between">
+            <p className="font-heading text-sm uppercase text-olive">Your shelf</p>
+            <div className="flex gap-1 rounded-full bg-black/5 p-0.5">
+              {SORTS.map((s) => (
+                <button
+                  key={s.key}
+                  type="button"
+                  onClick={() => setSort(s.key)}
+                  className={cn(
+                    "rounded-full px-2.5 py-1 font-heading text-[10px] uppercase transition-colors",
+                    sort === s.key ? "bg-white text-olive shadow-sm" : "text-black/45",
+                  )}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <p className="mt-1 font-serif text-xs text-black/40">
+            Tap a hobby to log that you did it.
+          </p>
+
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            {list.map((h) => {
+              const count = counts.get(h.id) ?? 0;
+              return (
+                <div
+                  key={h.id}
+                  className="group flex items-center gap-3 rounded-2xl bg-white px-3 py-3 shadow-sm"
+                >
+                  <button
+                    type="button"
+                    onClick={() => onLog(h)}
+                    className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                    aria-label={`Log ${h.name}`}
+                  >
+                    <span className="grid size-11 shrink-0 place-items-center rounded-full bg-sage/20 text-xl transition-colors group-hover:bg-sage/35">
+                      {h.icon || "🌿"}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-heading text-sm text-black">{h.name}</p>
+                      <p className="truncate font-serif text-xs text-black/45">
+                        {count === 0
+                          ? "Not logged yet"
+                          : `${count} ${count === 1 ? "time" : "times"}`}
+                        {h.category ? ` · ${h.category}` : ""}
+                      </p>
+                    </div>
+                    <span className="grid size-8 shrink-0 place-items-center rounded-full bg-olive/10 text-olive transition-colors group-hover:bg-olive group-hover:text-white">
+                      <Plus className="size-4" strokeWidth={2.5} />
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => remove.mutate(h.id)}
+                    aria-label={`Delete ${h.name}`}
+                    className="grid size-7 shrink-0 place-items-center rounded-full text-black/20 transition-colors hover:bg-black/5 hover:text-clay-deep"
+                  >
+                    <X className="size-4" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}
+
+/* -------------------------------- Log sheet ----------------------------- */
+
+function LogModal({
+  hobbies,
+  initialHobbyId,
+  prefillNote,
+  onAddHobby,
+  onClose,
+}: {
+  hobbies: Hobby[];
+  initialHobbyId?: string | undefined;
+  prefillNote?: string | undefined;
+  onAddHobby: () => void;
+  onClose: () => void;
+}) {
+  const queryClient = useQueryClient();
+  const [hobbyId, setHobbyId] = useState<string | null>(
+    initialHobbyId ?? hobbies[0]?.id ?? null,
+  );
+  const [date, setDate] = useState(localToday());
+  const [minutes, setMinutes] = useState("");
+  const [note, setNote] = useState(prefillNote ?? "");
+  const [saveErr, setSaveErr] = useState<string | null>(null);
+
+  const selected = hobbies.find((h) => h.id === hobbyId);
+  const mins = Math.max(0, Math.round(parseFloat(minutes.replace(/[^0-9.]/g, "")) || 0));
+  const validDate = /^\d{4}-\d{2}-\d{2}$/.test(date);
+
+  const save = useMutation({
+    mutationFn: () =>
+      addAwaLog({
+        data: {
+          ...(selected ? { hobbyId: selected.id } : {}),
+          hobbyName: selected?.name ?? "Activity",
+          ...(selected?.icon ? { hobbyIcon: selected.icon } : {}),
+          minutes: mins,
+          ...(note.trim() ? { note: note.trim() } : {}),
+          loggedOn: date,
+        },
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["awa-logs"] });
+      onClose();
+    },
+    onError: (e) =>
+      setSaveErr(e instanceof Error ? e.message : "Couldn't save that activity."),
+  });
+
+  const canSave = !!selected && validDate && !save.isPending;
+
+  return (
+    <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/40 sm:items-center">
+      <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-background p-6 shadow-xl [animation:rise_0.25s_both] sm:rounded-3xl">
+        <div className="flex items-center justify-between">
+          <h2 className="font-display text-2xl leading-none text-black">Log it</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="grid size-9 place-items-center rounded-full text-black/50 transition-colors hover:bg-black/5 hover:text-black"
+          >
+            <X className="size-5" />
+          </button>
+        </div>
+
+        {hobbies.length === 0 ? (
+          <div className="mt-6 text-center">
+            <p className="font-serif text-sm text-black/50">
+              Add a hobby to your shelf first, then you can log it.
+            </p>
+            <button
+              type="button"
+              onClick={onAddHobby}
+              className="mt-4 rounded-2xl bg-olive px-5 py-3 font-heading text-sm uppercase text-white transition-colors hover:bg-olive/90"
             >
-              <span className="grid size-10 shrink-0 place-items-center rounded-full bg-sage/20 text-xl">
-                {h.icon || "🌿"}
+              Go to shelf
+            </button>
+          </div>
+        ) : (
+          <>
+            <p className="mt-6 font-heading text-sm uppercase text-olive">Hobby</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {hobbies.map((h) => (
+                <button
+                  key={h.id}
+                  type="button"
+                  onClick={() => setHobbyId(h.id)}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-full px-3 py-2 font-serif text-sm transition-colors",
+                    hobbyId === h.id
+                      ? "bg-olive text-white"
+                      : "bg-white text-black/70 shadow-sm hover:bg-white/70",
+                  )}
+                >
+                  <span>{h.icon || "🌿"}</span>
+                  {h.name}
+                </button>
+              ))}
+            </div>
+
+            <p className="mt-6 font-heading text-sm uppercase text-olive">Date</p>
+            <input
+              type="date"
+              value={date}
+              max={localToday()}
+              onChange={(e) => setDate(e.target.value)}
+              className="mt-2 w-full rounded-2xl bg-black/5 px-4 py-3 font-serif text-base focus:outline-none focus:ring-1 focus:ring-olive/40"
+            />
+
+            <p className="mt-6 font-heading text-sm uppercase text-olive">
+              Time <span className="text-black/35">(optional)</span>
+            </p>
+            <div className="mt-2 flex items-center gap-2">
+              <input
+                value={minutes}
+                onChange={(e) => setMinutes(e.target.value)}
+                inputMode="numeric"
+                placeholder="Minutes"
+                className="w-28 rounded-2xl bg-black/5 px-4 py-3 font-serif text-base placeholder:text-black/40 focus:outline-none focus:ring-1 focus:ring-olive/40"
+              />
+              <span className="font-serif text-sm text-black/40">minutes</span>
+            </div>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {[15, 30, 45, 60, 90].map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setMinutes(String(m))}
+                  className="rounded-full bg-white px-3 py-1 font-mono text-xs text-black/60 shadow-sm transition-colors hover:bg-white/70"
+                >
+                  {fmtMins(m)}
+                </button>
+              ))}
+            </div>
+
+            <p className="mt-6 font-heading text-sm uppercase text-olive">
+              Note <span className="text-black/35">(optional)</span>
+            </p>
+            <textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              rows={2}
+              maxLength={1000}
+              placeholder="What did you do?"
+              className="mt-2 w-full resize-y rounded-2xl bg-black/5 px-4 py-3 font-serif text-sm leading-relaxed placeholder:text-black/40 focus:outline-none focus:ring-1 focus:ring-olive/40"
+            />
+
+            {saveErr && (
+              <p className="mt-4 rounded-xl bg-clay-deep/10 px-3 py-2 font-serif text-sm text-clay-deep">
+                {saveErr}
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={() => canSave && save.mutate()}
+              disabled={!canSave}
+              className="mt-6 w-full rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
+            >
+              {save.isPending ? "Saving…" : "Save"}
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* -------------------------------- Calendar ------------------------------ */
+
+function CalendarTab() {
+  const [offset, setOffset] = useState(0);
+  const { data: logs, isPending } = useQuery(awaLogsQueryOptions);
+  const [dayView, setDayView] = useState<string | null>(null);
+
+  const now = new Date();
+  const base = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+  const year = base.getFullYear();
+  const month = base.getMonth(); // 0-11
+  const monthKey = `${year}-${pad(month + 1)}`;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDow = (new Date(year, month, 1).getDay() + 6) % 7; // Mon = 0
+  const today = localToday();
+
+  // Logs for this month, grouped by day-of-month.
+  const byDay = useMemo(() => {
+    const m = new Map<number, Log[]>();
+    for (const l of (logs ?? []) as Log[]) {
+      if (l.logged_on.slice(0, 7) !== monthKey) continue;
+      const day = Number(l.logged_on.slice(8, 10));
+      const arr = m.get(day) ?? [];
+      arr.push(l);
+      m.set(day, arr);
+    }
+    return m;
+  }, [logs, monthKey]);
+
+  const monthLogs = [...byDay.values()].flat();
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="font-heading text-sm uppercase text-olive">
+          {MONTHS[month]} {year}
+        </p>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            aria-label="Previous month"
+            onClick={() => setOffset((o) => o - 1)}
+            className="grid size-8 place-items-center rounded-full bg-white shadow-sm transition-colors hover:bg-white/70"
+          >
+            <ChevronLeft className="size-4 text-olive" strokeWidth={2} />
+          </button>
+          <button
+            type="button"
+            aria-label="Next month"
+            disabled={offset >= 0}
+            onClick={() => setOffset((o) => o + 1)}
+            className="grid size-8 place-items-center rounded-full bg-white shadow-sm transition-colors hover:bg-white/70 disabled:opacity-40"
+          >
+            <ChevronRight className="size-4 text-olive" strokeWidth={2} />
+          </button>
+        </div>
+      </div>
+
+      {isPending ? (
+        <Loading />
+      ) : (
+        <>
+          <div className="rounded-2xl bg-white p-3 shadow-sm">
+            <div className="grid grid-cols-7 gap-1">
+              {WEEK_LABELS.map((l, i) => (
+                <div
+                  key={i}
+                  className="pb-1 text-center font-serif text-[10px] text-black/35"
+                >
+                  {l}
+                </div>
+              ))}
+              {Array.from({ length: firstDow }, (_, i) => (
+                <div key={`blank-${i}`} />
+              ))}
+              {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
+                const date = `${monthKey}-${pad(day)}`;
+                const dayLogs = byDay.get(day) ?? [];
+                const isToday = date === today;
+                return (
+                  <button
+                    key={day}
+                    type="button"
+                    onClick={() => dayLogs.length > 0 && setDayView(date)}
+                    className={cn(
+                      "flex aspect-square flex-col items-center rounded-lg p-1 transition-colors",
+                      dayLogs.length > 0 ? "bg-sage/15 hover:bg-sage/25" : "",
+                      isToday && "ring-1 ring-focus",
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "font-mono text-[10px]",
+                        isToday ? "text-focus" : "text-black/40",
+                      )}
+                    >
+                      {day}
+                    </span>
+                    <div className="mt-0.5 flex flex-wrap justify-center gap-px leading-none">
+                      {dayLogs.slice(0, 3).map((l, i) => (
+                        <span key={i} className="text-[11px]">
+                          {l.hobby_icon || "•"}
+                        </span>
+                      ))}
+                      {dayLogs.length > 3 && (
+                        <span className="text-[8px] text-black/40">
+                          +{dayLogs.length - 3}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <p className="text-center font-serif text-xs text-black/40">
+            {monthLogs.length === 0
+              ? "Nothing logged this month yet."
+              : `${monthLogs.length} ${monthLogs.length === 1 ? "activity" : "activities"} this month. Tap a day to see what you did.`}
+          </p>
+        </>
+      )}
+
+      {dayView && (
+        <DayModal date={dayView} logs={byDay.get(Number(dayView.slice(8, 10))) ?? []} onClose={() => setDayView(null)} />
+      )}
+    </div>
+  );
+}
+
+function DayModal({
+  date,
+  logs,
+  onClose,
+}: {
+  date: string;
+  logs: Log[];
+  onClose: () => void;
+}) {
+  const queryClient = useQueryClient();
+  const remove = useMutation({
+    mutationFn: (id: string) => deleteAwaLog({ data: { id } }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["awa-logs"] }),
+  });
+  const label = new Date(`${date}T00:00:00`).toLocaleDateString(undefined, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+
+  return (
+    <div
+      className="fixed inset-0 z-40 flex items-end justify-center bg-black/40 sm:items-center"
+      onClick={onClose}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="max-h-[88dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-background p-6 shadow-xl [animation:rise_0.25s_both] sm:rounded-3xl"
+      >
+        <div className="flex items-center justify-between">
+          <h2 className="font-display text-2xl leading-none text-black">{label}</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="grid size-9 place-items-center rounded-full text-black/50 transition-colors hover:bg-black/5 hover:text-black"
+          >
+            <X className="size-5" />
+          </button>
+        </div>
+        <div className="mt-4 space-y-2">
+          {logs.map((l) => (
+            <div
+              key={l.id}
+              className="flex items-start gap-3 rounded-2xl bg-white px-4 py-3 shadow-sm"
+            >
+              <span className="grid size-9 shrink-0 place-items-center rounded-full bg-sage/20 text-lg">
+                {l.hobby_icon || "🌿"}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate font-heading text-sm text-black">{h.name}</p>
-                {h.category && (
-                  <p className="truncate font-serif text-xs text-black/45">
-                    {h.category}
+                <div className="flex items-center justify-between gap-2">
+                  <p className="truncate font-heading text-sm text-black">
+                    {l.hobby_name}
+                  </p>
+                  {l.minutes > 0 && (
+                    <span className="inline-flex shrink-0 items-center gap-1 font-mono text-xs text-black/50">
+                      <Clock className="size-3" /> {fmtMins(l.minutes)}
+                    </span>
+                  )}
+                </div>
+                {l.note && (
+                  <p className="mt-0.5 font-serif text-sm italic text-black/55">
+                    {l.note}
                   </p>
                 )}
               </div>
               <button
                 type="button"
-                onClick={() => remove.mutate(h.id)}
-                aria-label={`Delete ${h.name}`}
+                onClick={() => remove.mutate(l.id)}
+                aria-label="Delete log"
                 className="grid size-7 shrink-0 place-items-center rounded-full text-black/25 transition-colors hover:bg-black/5 hover:text-clay-deep"
               >
                 <X className="size-4" />
@@ -479,7 +704,7 @@ function HobbiesTab() {
             </div>
           ))}
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -588,109 +813,6 @@ function WantTab({ onLogItem }: { onLogItem: (title: string) => void }) {
             </div>
           ))}
         </div>
-      )}
-    </div>
-  );
-}
-
-/* -------------------------------- History ------------------------------- */
-
-function HistoryTab() {
-  const { data: logs, isPending } = useQuery(awaLogsQueryOptions);
-  const list = (logs ?? []) as Log[];
-  const month = localToday().slice(0, 7);
-
-  const monthLogs = list.filter((l) => l.logged_on.slice(0, 7) === month);
-  const monthTotal = monthLogs.reduce((s, l) => s + l.minutes, 0);
-  const perHobby = new Map<string, number>();
-  for (const l of monthLogs) {
-    perHobby.set(l.hobby_name, (perHobby.get(l.hobby_name) ?? 0) + l.minutes);
-  }
-  const perHobbyList = [...perHobby.entries()].sort((a, b) => b[1] - a[1]);
-
-  const monthLabel = new Date(`${month}-01T00:00:00`).toLocaleDateString(undefined, {
-    month: "long",
-    year: "numeric",
-  });
-
-  // Group all logs by day for the timeline.
-  const byDay = new Map<string, Log[]>();
-  for (const l of list) {
-    const arr = byDay.get(l.logged_on) ?? [];
-    arr.push(l);
-    byDay.set(l.logged_on, arr);
-  }
-  const days = [...byDay.keys()].sort((a, b) => (a < b ? 1 : -1));
-
-  if (isPending) return <Loading />;
-
-  return (
-    <div className="space-y-6">
-      {/* Monthly summary */}
-      <div className="rounded-3xl bg-white p-5 shadow-sm">
-        <p className="font-heading text-sm uppercase text-olive">{monthLabel}</p>
-        <div className="mt-3 flex gap-6">
-          <div>
-            <p className="font-heading text-2xl leading-none text-black">
-              {fmtMins(monthTotal)}
-            </p>
-            <p className="mt-1 font-serif text-xs text-black/45">time away</p>
-          </div>
-          <div>
-            <p className="font-heading text-2xl leading-none text-black">
-              {monthLogs.length}
-            </p>
-            <p className="mt-1 font-serif text-xs text-black/45">
-              {monthLogs.length === 1 ? "activity" : "activities"}
-            </p>
-          </div>
-        </div>
-        {perHobbyList.length > 0 && (
-          <div className="mt-4 space-y-2">
-            {perHobbyList.map(([hobby, mins]) => (
-              <div key={hobby} className="flex items-center gap-3">
-                <span className="w-24 shrink-0 truncate font-serif text-sm text-black/70">
-                  {hobby}
-                </span>
-                <div className="h-2 flex-1 overflow-hidden rounded-full bg-black/5">
-                  <div
-                    className="h-full rounded-full bg-sage"
-                    style={{
-                      width: `${monthTotal ? Math.round((mins / monthTotal) * 100) : 0}%`,
-                    }}
-                  />
-                </div>
-                <span className="w-14 shrink-0 text-right font-mono text-xs text-black/50">
-                  {fmtMins(mins)}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Timeline */}
-      {days.length === 0 ? (
-        <p className="rounded-2xl bg-white/60 px-4 py-6 text-center font-serif text-sm text-black/40">
-          Your logged activities will appear here.
-        </p>
-      ) : (
-        days.map((day) => (
-          <section key={day}>
-            <p className="font-heading text-xs uppercase tracking-wide text-black/40">
-              {new Date(`${day}T00:00:00`).toLocaleDateString(undefined, {
-                weekday: "short",
-                day: "numeric",
-                month: "short",
-              })}
-            </p>
-            <div className="mt-2 space-y-2">
-              {byDay.get(day)!.map((l) => (
-                <LogRow key={l.id} log={l} />
-              ))}
-            </div>
-          </section>
-        ))
       )}
     </div>
   );
