@@ -26,6 +26,27 @@ export function formatAwaTime(t: string | null): string {
   return `${h}:${min} ${ampm}`;
 }
 
+const MINUTES = ["00", "05", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55"];
+
+/** "18:30" -> { h12: "6", min: "30", ampm: "PM" }; empty -> a sensible default. */
+function parseTime(t: string | null): { h12: string; min: string; ampm: "AM" | "PM" } {
+  const m = /^(\d{1,2}):(\d{2})/.exec(t ?? "");
+  if (!m) return { h12: "", min: "00", ampm: "PM" };
+  let h = Number(m[1]);
+  const ampm: "AM" | "PM" = h >= 12 ? "PM" : "AM";
+  h = h % 12 || 12;
+  const min = MINUTES.includes(m[2]!) ? m[2]! : "00";
+  return { h12: String(h), min, ampm };
+}
+
+/** h12/min/ampm -> "HH:MM" (24h), or "" when no hour is chosen. */
+function toTime24(h12: string, min: string, ampm: "AM" | "PM"): string {
+  if (!h12) return "";
+  let h = Number(h12) % 12;
+  if (ampm === "PM") h += 12;
+  return `${String(h).padStart(2, "0")}:${min}`;
+}
+
 /**
  * Log (or edit) a hobby activity. With `editLog` it updates; otherwise it adds.
  * `lockHobby` hides the hobby picker (used from a single hobby's view).
@@ -52,7 +73,11 @@ export function AwaLogModal({
     editLog?.hobby_id ?? initialHobbyId ?? hobbies[0]?.id ?? null,
   );
   const [date, setDate] = useState(editLog?.logged_on ?? localToday());
-  const [time, setTime] = useState(editLog?.activity_time ?? "");
+  const initTime = parseTime(editLog?.activity_time ?? null);
+  const [h12, setH12] = useState(initTime.h12);
+  const [min, setMin] = useState(initTime.min);
+  const [ampm, setAmpm] = useState<"AM" | "PM">(initTime.ampm);
+  const time = toTime24(h12, min, ampm);
   const [note, setNote] = useState(editLog?.note ?? prefillNote ?? "");
   const [err, setErr] = useState<string | null>(null);
 
@@ -164,12 +189,54 @@ export function AwaLogModal({
             <p className="mt-6 font-heading text-sm uppercase text-olive">
               Time <span className="text-black/35">(optional)</span>
             </p>
-            <input
-              type="time"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              className="mt-2 w-full rounded-2xl bg-black/5 px-4 py-3 font-serif text-base focus:outline-none focus:ring-1 focus:ring-olive/40"
-            />
+            <div className="mt-2 flex items-center gap-2">
+              <select
+                value={h12}
+                onChange={(e) => setH12(e.target.value)}
+                aria-label="Hour"
+                className="rounded-2xl bg-black/5 px-3 py-3 font-serif text-base focus:outline-none focus:ring-1 focus:ring-olive/40"
+              >
+                <option value="">—</option>
+                {Array.from({ length: 12 }, (_, i) => String(i + 1)).map((h) => (
+                  <option key={h} value={h}>
+                    {h}
+                  </option>
+                ))}
+              </select>
+              <span className="font-serif text-black/40">:</span>
+              <select
+                value={min}
+                onChange={(e) => setMin(e.target.value)}
+                disabled={!h12}
+                aria-label="Minute"
+                className="rounded-2xl bg-black/5 px-3 py-3 font-serif text-base focus:outline-none focus:ring-1 focus:ring-olive/40 disabled:opacity-40"
+              >
+                {MINUTES.map((m) => (
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={ampm}
+                onChange={(e) => setAmpm(e.target.value as "AM" | "PM")}
+                disabled={!h12}
+                aria-label="AM or PM"
+                className="rounded-2xl bg-black/5 px-3 py-3 font-serif text-base focus:outline-none focus:ring-1 focus:ring-olive/40 disabled:opacity-40"
+              >
+                <option value="AM">AM</option>
+                <option value="PM">PM</option>
+              </select>
+              {h12 && (
+                <button
+                  type="button"
+                  onClick={() => setH12("")}
+                  className="ml-auto font-heading text-[11px] uppercase text-black/40 transition-colors hover:text-black/70"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
 
             <p className="mt-6 font-heading text-sm uppercase text-olive">
               What did you do? <span className="text-black/35">(optional)</span>
