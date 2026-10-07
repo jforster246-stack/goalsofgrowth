@@ -91,102 +91,6 @@ export type Database = {
           },
         ]
       }
-      awa_hobbies: {
-        Row: {
-          category: string | null
-          created_at: string
-          icon: string | null
-          id: string
-          name: string
-          position: number
-          user_id: string
-        }
-        Insert: {
-          category?: string | null
-          created_at?: string
-          icon?: string | null
-          id?: string
-          name: string
-          position?: number
-          user_id: string
-        }
-        Update: {
-          category?: string | null
-          created_at?: string
-          icon?: string | null
-          id?: string
-          name?: string
-          position?: number
-          user_id?: string
-        }
-        Relationships: []
-      }
-      awa_logs: {
-        Row: {
-          activity_time: string | null
-          created_at: string
-          hobby_icon: string | null
-          hobby_id: string | null
-          hobby_name: string
-          id: string
-          logged_on: string
-          minutes: number
-          note: string | null
-          user_id: string
-        }
-        Insert: {
-          activity_time?: string | null
-          created_at?: string
-          hobby_icon?: string | null
-          hobby_id?: string | null
-          hobby_name?: string
-          id?: string
-          logged_on?: string
-          minutes?: number
-          note?: string | null
-          user_id: string
-        }
-        Update: {
-          activity_time?: string | null
-          created_at?: string
-          hobby_icon?: string | null
-          hobby_id?: string | null
-          hobby_name?: string
-          id?: string
-          logged_on?: string
-          minutes?: number
-          note?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
-      awa_wishlist: {
-        Row: {
-          created_at: string
-          done: boolean
-          id: string
-          position: number
-          title: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          done?: boolean
-          id?: string
-          position?: number
-          title: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          done?: boolean
-          id?: string
-          position?: number
-          title?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       brain_dump_items: {
         Row: {
           created_at: string
@@ -275,36 +179,6 @@ export type Database = {
           on_home?: boolean
           position?: number
           title?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      finance_entries: {
-        Row: {
-          amount: number
-          created_at: string
-          id: string
-          kind: string
-          label: string
-          position: number
-          user_id: string
-        }
-        Insert: {
-          amount?: number
-          created_at?: string
-          id?: string
-          kind?: string
-          label: string
-          position?: number
-          user_id: string
-        }
-        Update: {
-          amount?: number
-          created_at?: string
-          id?: string
-          kind?: string
-          label?: string
-          position?: number
           user_id?: string
         }
         Relationships: []
@@ -511,7 +385,6 @@ export type Database = {
       }
       steps: {
         Row: {
-          completed_on: string | null
           created_at: string
           done: boolean
           goal_id: string
@@ -520,7 +393,6 @@ export type Database = {
           title: string
         }
         Insert: {
-          completed_on?: string | null
           created_at?: string
           done?: boolean
           goal_id: string
@@ -529,7 +401,6 @@ export type Database = {
           title: string
         }
         Update: {
-          completed_on?: string | null
           created_at?: string
           done?: boolean
           goal_id?: string
