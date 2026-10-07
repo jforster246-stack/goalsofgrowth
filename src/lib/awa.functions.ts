@@ -84,7 +84,7 @@ export const addAwaLog = createServerFn({ method: "POST" })
         hobbyId: z.string().uuid().optional(),
         hobbyName: z.string().trim().min(1).max(80),
         hobbyIcon: z.string().trim().max(8).optional(),
-        minutes: z.number().int().min(0).max(100000),
+        activityTime: z.string().trim().max(10).optional(),
         note: z.string().trim().max(1000).optional(),
         loggedOn: dateSchema,
       })
@@ -97,7 +97,7 @@ export const addAwaLog = createServerFn({ method: "POST" })
         hobby_id: data.hobbyId ?? null,
         hobby_name: data.hobbyName,
         hobby_icon: data.hobbyIcon || null,
-        minutes: data.minutes,
+        activity_time: data.activityTime || null,
         note: data.note || null,
         logged_on: data.loggedOn,
         user_id: context.userId,
@@ -106,6 +106,35 @@ export const addAwaLog = createServerFn({ method: "POST" })
       .single();
     if (error) throw new Error(error.message);
     return log;
+  });
+
+export const updateAwaLog = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        loggedOn: dateSchema,
+        activityTime: z.string().trim().max(10).nullable().optional(),
+        note: z.string().trim().max(1000).nullable().optional(),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const patch: {
+      logged_on: string;
+      activity_time?: string | null;
+      note?: string | null;
+    } = { logged_on: data.loggedOn };
+    if (data.activityTime !== undefined) patch.activity_time = data.activityTime || null;
+    if (data.note !== undefined) patch.note = data.note || null;
+
+    const { error } = await context.supabase
+      .from("awa_logs")
+      .update(patch)
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
 
 export const deleteAwaLog = createServerFn({ method: "POST" })

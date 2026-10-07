@@ -246,6 +246,13 @@
       "when": 1790824200000,
       "tag": "0034_create_awa",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1791330000000,
+      "tag": "0035_add_awa_activity_time",
+      "breakpoints": true
     }
   ]
 }

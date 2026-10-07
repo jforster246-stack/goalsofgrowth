@@ -123,6 +123,7 @@ export type Database = {
       }
       awa_logs: {
         Row: {
+          activity_time: string | null
           created_at: string
           hobby_icon: string | null
           hobby_id: string | null
@@ -134,6 +135,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          activity_time?: string | null
           created_at?: string
           hobby_icon?: string | null
           hobby_id?: string | null
@@ -145,6 +147,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          activity_time?: string | null
           created_at?: string
           hobby_icon?: string | null
           hobby_id?: string | null

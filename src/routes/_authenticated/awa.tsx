@@ -1,10 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Clock, Plus, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, Pencil, Plus, X } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { Loading } from "@/components/loading";
 import { localToday } from "@/components/goal-ui";
+import {
+  AwaLogModal,
+  formatAwaTime,
+  type AwaEditLog,
+} from "@/components/awa-log-modal";
 import {
   awaHobbiesQueryOptions,
   awaLogsQueryOptions,
@@ -12,7 +17,6 @@ import {
 } from "@/lib/goal-queries";
 import {
   addAwaHobby,
-  addAwaLog,
   addAwaWishlistItem,
   deleteAwaHobby,
   deleteAwaLog,
@@ -28,7 +32,7 @@ export const Route = createFileRoute("/_authenticated/awa")({
       {
         name: "description",
         content:
-          "A calm hobby tracker — a shelf of the things you like to do, logged whenever you spend a while away, shown on a simple calendar.",
+          "A warm little shelf of the hobbies you love — log what you actually did, and look back on it.",
       },
     ],
   }),
@@ -47,7 +51,7 @@ type Log = {
   hobby_id: string | null;
   hobby_name: string;
   hobby_icon: string | null;
-  minutes: number;
+  activity_time: string | null;
   note: string | null;
   logged_on: string;
 };
@@ -66,22 +70,20 @@ const MONTHS = [
   "July", "August", "September", "October", "November", "December",
 ];
 
-function fmtMins(mins: number): string {
-  if (mins <= 0) return "";
-  const h = Math.floor(mins / 60);
-  const m = mins % 60;
-  return [h ? `${h}h` : "", m ? `${m}m` : ""].filter(Boolean).join(" ");
-}
 function pad(n: number) {
   return String(n).padStart(2, "0");
+}
+function shortDate(d: string): string {
+  return new Date(`${d}T00:00:00`).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+  });
 }
 
 function AwaPage() {
   const [tab, setTab] = useState<Tab>("shelf");
-  // Opening the log sheet: optionally preselect a hobby and/or prefill a note.
-  const [logState, setLogState] = useState<{ hobbyId?: string; note?: string } | null>(
-    null,
-  );
+  const [detailHobby, setDetailHobby] = useState<Hobby | null>(null);
+  const [quickLog, setQuickLog] = useState<{ note?: string } | null>(null);
 
   const { data: hobbies } = useQuery(awaHobbiesQueryOptions);
 
@@ -89,7 +91,7 @@ function AwaPage() {
     <AppShell title="A While Away" hideSettings>
       <div className="mt-2 pb-4">
         <p className="font-serif text-sm italic text-black/45">
-          Time outside of work and everyday things — enjoyed, not optimised.
+          Look at all the little things you've made, tried and enjoyed.
         </p>
 
         <div className="mt-4 flex gap-1.5 rounded-full bg-black/5 p-1">
@@ -109,26 +111,26 @@ function AwaPage() {
         </div>
 
         <div className="mt-6">
-          {tab === "shelf" && (
-            <ShelfTab onLog={(h) => setLogState({ hobbyId: h.id })} />
-          )}
+          {tab === "shelf" && <ShelfTab onOpen={setDetailHobby} />}
           {tab === "calendar" && <CalendarTab />}
           {tab === "want" && (
-            <WantTab onLogItem={(title) => setLogState({ note: title })} />
+            <WantTab onLogItem={(note) => setQuickLog({ note })} />
           )}
         </div>
       </div>
 
-      {logState && (
-        <LogModal
+      {detailHobby && (
+        <HobbyDetailModal hobby={detailHobby} onClose={() => setDetailHobby(null)} />
+      )}
+      {quickLog && (
+        <AwaLogModal
           hobbies={(hobbies ?? []) as Hobby[]}
-          initialHobbyId={logState.hobbyId}
-          prefillNote={logState.note}
+          prefillNote={quickLog.note}
           onAddHobby={() => {
-            setLogState(null);
+            setQuickLog(null);
             setTab("shelf");
           }}
-          onClose={() => setLogState(null)}
+          onClose={() => setQuickLog(null)}
         />
       )}
     </AppShell>
@@ -137,14 +139,25 @@ function AwaPage() {
 
 /* --------------------------------- Shelf -------------------------------- */
 
-type Sort = "recent" | "oldest" | "most";
+type Sort =
+  | "recent"
+  | "oldest"
+  | "most"
+  | "least"
+  | "recentDone"
+  | "az"
+  | "za";
 const SORTS: { key: Sort; label: string }[] = [
-  { key: "recent", label: "Newest" },
-  { key: "oldest", label: "Oldest" },
+  { key: "recent", label: "Recently added" },
+  { key: "oldest", label: "Oldest added" },
   { key: "most", label: "Most done" },
+  { key: "least", label: "Least done" },
+  { key: "recentDone", label: "Recently done" },
+  { key: "az", label: "Name A–Z" },
+  { key: "za", label: "Name Z–A" },
 ];
 
-function ShelfTab({ onLog }: { onLog: (hobby: Hobby) => void }) {
+function ShelfTab({ onOpen }: { onOpen: (hobby: Hobby) => void }) {
   const queryClient = useQueryClient();
   const { data: hobbies, isPending } = useQuery(awaHobbiesQueryOptions);
   const { data: logs } = useQuery(awaLogsQueryOptions);
@@ -181,25 +194,45 @@ function ShelfTab({ onLog }: { onLog: (hobby: Hobby) => void }) {
     onSuccess: invalidate,
   });
 
-  // Count logs per hobby.
-  const counts = useMemo(() => {
-    const m = new Map<string, number>();
+  // Per-hobby count + most recent activity date.
+  const stats = useMemo(() => {
+    const count = new Map<string, number>();
+    const last = new Map<string, string>();
     for (const l of (logs ?? []) as Log[]) {
-      if (l.hobby_id) m.set(l.hobby_id, (m.get(l.hobby_id) ?? 0) + 1);
+      if (!l.hobby_id) continue;
+      count.set(l.hobby_id, (count.get(l.hobby_id) ?? 0) + 1);
+      const prev = last.get(l.hobby_id);
+      if (!prev || l.logged_on > prev) last.set(l.hobby_id, l.logged_on);
     }
-    return m;
+    return { count, last };
   }, [logs]);
 
   const list = useMemo(() => {
     const arr = [...((hobbies ?? []) as Hobby[])];
+    const c = (id: string) => stats.count.get(id) ?? 0;
     arr.sort((a, b) => {
-      if (sort === "most") return (counts.get(b.id) ?? 0) - (counts.get(a.id) ?? 0);
-      const at = a.created_at;
-      const bt = b.created_at;
-      return sort === "oldest" ? (at < bt ? -1 : 1) : at < bt ? 1 : -1;
+      switch (sort) {
+        case "most":
+          return c(b.id) - c(a.id);
+        case "least":
+          return c(a.id) - c(b.id);
+        case "oldest":
+          return a.created_at < b.created_at ? -1 : 1;
+        case "az":
+          return a.name.localeCompare(b.name);
+        case "za":
+          return b.name.localeCompare(a.name);
+        case "recentDone": {
+          const la = stats.last.get(a.id) ?? "";
+          const lb = stats.last.get(b.id) ?? "";
+          return la < lb ? 1 : la > lb ? -1 : 0;
+        }
+        default: // recent
+          return a.created_at < b.created_at ? 1 : -1;
+      }
     });
     return arr;
-  }, [hobbies, sort, counts]);
+  }, [hobbies, sort, stats]);
 
   const canAdd = name.trim().length > 0 && !add.isPending;
 
@@ -254,62 +287,54 @@ function ShelfTab({ onLog }: { onLog: (hobby: Hobby) => void }) {
         <Loading />
       ) : list.length === 0 ? (
         <p className="rounded-2xl bg-white/60 px-4 py-6 text-center font-serif text-sm text-black/40">
-          Your shelf is empty. Add the things you like to spend time on, then tap
-          one whenever you do it.
+          Your shelf is empty. Add the things you like to spend time on, then open
+          one to log that you did it.
         </p>
       ) : (
         <section>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             <p className="font-heading text-sm uppercase text-olive">Your shelf</p>
-            <div className="flex gap-1 rounded-full bg-black/5 p-0.5">
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as Sort)}
+              aria-label="Sort hobbies"
+              className="rounded-full bg-white px-3 py-1.5 font-heading text-[11px] uppercase text-black/60 shadow-sm focus:outline-none focus:ring-1 focus:ring-olive/40"
+            >
               {SORTS.map((s) => (
-                <button
-                  key={s.key}
-                  type="button"
-                  onClick={() => setSort(s.key)}
-                  className={cn(
-                    "rounded-full px-2.5 py-1 font-heading text-[10px] uppercase transition-colors",
-                    sort === s.key ? "bg-white text-olive shadow-sm" : "text-black/45",
-                  )}
-                >
+                <option key={s.key} value={s.key}>
                   {s.label}
-                </button>
+                </option>
               ))}
-            </div>
+            </select>
           </div>
-          <p className="mt-1 font-serif text-xs text-black/40">
-            Tap a hobby to log that you did it.
-          </p>
 
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
             {list.map((h) => {
-              const count = counts.get(h.id) ?? 0;
+              const count = stats.count.get(h.id) ?? 0;
+              const last = stats.last.get(h.id);
               return (
                 <div
                   key={h.id}
-                  className="group flex items-center gap-3 rounded-2xl bg-white px-3 py-3 shadow-sm"
+                  className="group flex items-center gap-3 rounded-2xl bg-white px-3 py-3 shadow-sm transition-transform hover:-translate-y-0.5"
                 >
                   <button
                     type="button"
-                    onClick={() => onLog(h)}
+                    onClick={() => onOpen(h)}
                     className="flex min-w-0 flex-1 items-center gap-3 text-left"
-                    aria-label={`Log ${h.name}`}
+                    aria-label={`Open ${h.name}`}
                   >
-                    <span className="grid size-11 shrink-0 place-items-center rounded-full bg-sage/20 text-xl transition-colors group-hover:bg-sage/35">
+                    <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-sage/20 text-2xl">
                       {h.icon || "🌿"}
                     </span>
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-heading text-sm text-black">{h.name}</p>
-                      <p className="truncate font-serif text-xs text-black/45">
-                        {count === 0
-                          ? "Not logged yet"
-                          : `${count} ${count === 1 ? "time" : "times"}`}
-                        {h.category ? ` · ${h.category}` : ""}
+                      <p className="font-serif text-xs text-olive">
+                        {count === 0 ? "Not logged yet" : `${count} ${count === 1 ? "time" : "times"}`}
+                      </p>
+                      <p className="truncate font-serif text-[11px] text-black/40">
+                        {last ? `Last done ${shortDate(last)}` : h.category || "Tap to log"}
                       </p>
                     </div>
-                    <span className="grid size-8 shrink-0 place-items-center rounded-full bg-olive/10 text-olive transition-colors group-hover:bg-olive group-hover:text-white">
-                      <Plus className="size-4" strokeWidth={2.5} />
-                    </span>
                   </button>
                   <button
                     type="button"
@@ -329,61 +354,54 @@ function ShelfTab({ onLog }: { onLog: (hobby: Hobby) => void }) {
   );
 }
 
-/* -------------------------------- Log sheet ----------------------------- */
+/* ----------------------------- Hobby detail ----------------------------- */
 
-function LogModal({
-  hobbies,
-  initialHobbyId,
-  prefillNote,
-  onAddHobby,
+function HobbyDetailModal({
+  hobby,
   onClose,
 }: {
-  hobbies: Hobby[];
-  initialHobbyId?: string | undefined;
-  prefillNote?: string | undefined;
-  onAddHobby: () => void;
+  hobby: Hobby;
   onClose: () => void;
 }) {
   const queryClient = useQueryClient();
-  const [hobbyId, setHobbyId] = useState<string | null>(
-    initialHobbyId ?? hobbies[0]?.id ?? null,
-  );
-  const [date, setDate] = useState(localToday());
-  const [minutes, setMinutes] = useState("");
-  const [note, setNote] = useState(prefillNote ?? "");
-  const [saveErr, setSaveErr] = useState<string | null>(null);
+  const { data: logs } = useQuery(awaLogsQueryOptions);
+  const [logging, setLogging] = useState(false);
+  const [editLog, setEditLog] = useState<Log | null>(null);
 
-  const selected = hobbies.find((h) => h.id === hobbyId);
-  const mins = Math.max(0, Math.round(parseFloat(minutes.replace(/[^0-9.]/g, "")) || 0));
-  const validDate = /^\d{4}-\d{2}-\d{2}$/.test(date);
-
-  const save = useMutation({
-    mutationFn: () =>
-      addAwaLog({
-        data: {
-          ...(selected ? { hobbyId: selected.id } : {}),
-          hobbyName: selected?.name ?? "Activity",
-          ...(selected?.icon ? { hobbyIcon: selected.icon } : {}),
-          minutes: mins,
-          ...(note.trim() ? { note: note.trim() } : {}),
-          loggedOn: date,
-        },
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["awa-logs"] });
-      onClose();
-    },
-    onError: (e) =>
-      setSaveErr(e instanceof Error ? e.message : "Couldn't save that activity."),
+  const remove = useMutation({
+    mutationFn: (id: string) => deleteAwaLog({ data: { id } }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["awa-logs"] }),
   });
 
-  const canSave = !!selected && validDate && !save.isPending;
+  const history = ((logs ?? []) as Log[])
+    .filter((l) => l.hobby_id === hobby.id)
+    .sort((a, b) => (a.logged_on < b.logged_on ? 1 : a.logged_on > b.logged_on ? -1 : 0));
 
   return (
-    <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/40 sm:items-center">
-      <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-background p-6 shadow-xl [animation:rise_0.25s_both] sm:rounded-3xl">
-        <div className="flex items-center justify-between">
-          <h2 className="font-display text-2xl leading-none text-black">Log it</h2>
+    <div
+      className="fixed inset-0 z-40 flex items-end justify-center bg-black/40 sm:items-center"
+      onClick={onClose}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-background p-6 shadow-xl [animation:rise_0.25s_both] sm:rounded-3xl"
+      >
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-3">
+            <span className="grid size-14 place-items-center rounded-2xl bg-sage/20 text-3xl">
+              {hobby.icon || "🌿"}
+            </span>
+            <div>
+              <h2 className="font-display text-2xl leading-tight text-black">
+                {hobby.name}
+              </h2>
+              <p className="font-serif text-sm text-olive">
+                {history.length === 0
+                  ? "Not logged yet"
+                  : `${history.length} ${history.length === 1 ? "time" : "times"}`}
+              </p>
+            </div>
+          </div>
           <button
             type="button"
             onClick={onClose}
@@ -394,109 +412,85 @@ function LogModal({
           </button>
         </div>
 
-        {hobbies.length === 0 ? (
-          <div className="mt-6 text-center">
-            <p className="font-serif text-sm text-black/50">
-              Add a hobby to your shelf first, then you can log it.
-            </p>
-            <button
-              type="button"
-              onClick={onAddHobby}
-              className="mt-4 rounded-2xl bg-olive px-5 py-3 font-heading text-sm uppercase text-white transition-colors hover:bg-olive/90"
-            >
-              Go to shelf
-            </button>
-          </div>
+        <button
+          type="button"
+          onClick={() => setLogging(true)}
+          className="mt-5 flex w-full items-center justify-center gap-1.5 rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90"
+        >
+          <Plus className="size-4" strokeWidth={2.5} />
+          Log activity
+        </button>
+
+        <p className="mt-6 font-heading text-sm uppercase text-olive">History</p>
+        {history.length === 0 ? (
+          <p className="mt-3 rounded-2xl bg-white/60 px-4 py-5 text-center font-serif text-sm text-black/40">
+            Nothing here yet — log it the next time you do it.
+          </p>
         ) : (
-          <>
-            <p className="mt-6 font-heading text-sm uppercase text-olive">Hobby</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {hobbies.map((h) => (
-                <button
-                  key={h.id}
-                  type="button"
-                  onClick={() => setHobbyId(h.id)}
-                  className={cn(
-                    "inline-flex items-center gap-1.5 rounded-full px-3 py-2 font-serif text-sm transition-colors",
-                    hobbyId === h.id
-                      ? "bg-olive text-white"
-                      : "bg-white text-black/70 shadow-sm hover:bg-white/70",
+          <div className="mt-3 space-y-2">
+            {history.map((l) => (
+              <div
+                key={l.id}
+                className="flex items-start gap-3 rounded-2xl bg-white px-4 py-3 shadow-sm"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-heading text-xs uppercase tracking-wide text-black/60">
+                      {shortDate(l.logged_on)}
+                    </span>
+                    {l.activity_time && (
+                      <span className="inline-flex items-center gap-1 font-mono text-[11px] text-black/40">
+                        <Clock className="size-3" /> {formatAwaTime(l.activity_time)}
+                      </span>
+                    )}
+                  </div>
+                  {l.note && (
+                    <p className="mt-0.5 font-serif text-sm text-black/70">{l.note}</p>
                   )}
-                >
-                  <span>{h.icon || "🌿"}</span>
-                  {h.name}
-                </button>
-              ))}
-            </div>
-
-            <p className="mt-6 font-heading text-sm uppercase text-olive">Date</p>
-            <input
-              type="date"
-              value={date}
-              max={localToday()}
-              onChange={(e) => setDate(e.target.value)}
-              className="mt-2 w-full rounded-2xl bg-black/5 px-4 py-3 font-serif text-base focus:outline-none focus:ring-1 focus:ring-olive/40"
-            />
-
-            <p className="mt-6 font-heading text-sm uppercase text-olive">
-              Time <span className="text-black/35">(optional)</span>
-            </p>
-            <div className="mt-2 flex items-center gap-2">
-              <input
-                value={minutes}
-                onChange={(e) => setMinutes(e.target.value)}
-                inputMode="numeric"
-                placeholder="Minutes"
-                className="w-28 rounded-2xl bg-black/5 px-4 py-3 font-serif text-base placeholder:text-black/40 focus:outline-none focus:ring-1 focus:ring-olive/40"
-              />
-              <span className="font-serif text-sm text-black/40">minutes</span>
-            </div>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {[15, 30, 45, 60, 90].map((m) => (
+                </div>
                 <button
-                  key={m}
                   type="button"
-                  onClick={() => setMinutes(String(m))}
-                  className="rounded-full bg-white px-3 py-1 font-mono text-xs text-black/60 shadow-sm transition-colors hover:bg-white/70"
+                  onClick={() => setEditLog(l)}
+                  aria-label="Edit"
+                  className="grid size-7 shrink-0 place-items-center rounded-full text-black/30 transition-colors hover:bg-black/5 hover:text-olive"
                 >
-                  {fmtMins(m)}
+                  <Pencil className="size-3.5" />
                 </button>
-              ))}
-            </div>
-
-            <p className="mt-6 font-heading text-sm uppercase text-olive">
-              Note <span className="text-black/35">(optional)</span>
-            </p>
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              rows={2}
-              maxLength={1000}
-              placeholder="What did you do?"
-              className="mt-2 w-full resize-y rounded-2xl bg-black/5 px-4 py-3 font-serif text-sm leading-relaxed placeholder:text-black/40 focus:outline-none focus:ring-1 focus:ring-olive/40"
-            />
-
-            {saveErr && (
-              <p className="mt-4 rounded-xl bg-clay-deep/10 px-3 py-2 font-serif text-sm text-clay-deep">
-                {saveErr}
-              </p>
-            )}
-            <button
-              type="button"
-              onClick={() => canSave && save.mutate()}
-              disabled={!canSave}
-              className="mt-6 w-full rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
-            >
-              {save.isPending ? "Saving…" : "Save"}
-            </button>
-          </>
+                <button
+                  type="button"
+                  onClick={() => remove.mutate(l.id)}
+                  aria-label="Delete"
+                  className="grid size-7 shrink-0 place-items-center rounded-full text-black/30 transition-colors hover:bg-black/5 hover:text-clay-deep"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+            ))}
+          </div>
         )}
       </div>
+
+      {logging && (
+        <AwaLogModal
+          hobbies={[hobby]}
+          initialHobbyId={hobby.id}
+          lockHobby
+          onClose={() => setLogging(false)}
+        />
+      )}
+      {editLog && (
+        <AwaLogModal
+          hobbies={[hobby]}
+          lockHobby
+          editLog={editLog as AwaEditLog}
+          onClose={() => setEditLog(null)}
+        />
+      )}
     </div>
   );
 }
 
-/* -------------------------------- Calendar ------------------------------ */
+/* -------------------------- Calendar / overall -------------------------- */
 
 function CalendarTab() {
   const [offset, setOffset] = useState(0);
@@ -506,13 +500,12 @@ function CalendarTab() {
   const now = new Date();
   const base = new Date(now.getFullYear(), now.getMonth() + offset, 1);
   const year = base.getFullYear();
-  const month = base.getMonth(); // 0-11
+  const month = base.getMonth();
   const monthKey = `${year}-${pad(month + 1)}`;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const firstDow = (new Date(year, month, 1).getDay() + 6) % 7; // Mon = 0
+  const firstDow = (new Date(year, month, 1).getDay() + 6) % 7;
   const today = localToday();
 
-  // Logs for this month, grouped by day-of-month.
   const byDay = useMemo(() => {
     const m = new Map<number, Log[]>();
     for (const l of (logs ?? []) as Log[]) {
@@ -526,9 +519,37 @@ function CalendarTab() {
   }, [logs, monthKey]);
 
   const monthLogs = [...byDay.values()].flat();
+  const differentHobbies = new Set(
+    monthLogs.map((l) => l.hobby_id ?? l.hobby_name),
+  ).size;
 
   return (
     <div className="space-y-4">
+      {/* Overall summary */}
+      <div className="rounded-3xl bg-white p-5 shadow-sm">
+        <p className="font-heading text-sm uppercase text-olive">
+          {MONTHS[month]} {offset === 0 ? "so far" : year}
+        </p>
+        <div className="mt-2 flex gap-6">
+          <div>
+            <p className="font-heading text-2xl leading-none text-black">
+              {monthLogs.length}
+            </p>
+            <p className="mt-1 font-serif text-xs text-black/45">
+              hobby {monthLogs.length === 1 ? "session" : "sessions"}
+            </p>
+          </div>
+          <div>
+            <p className="font-heading text-2xl leading-none text-black">
+              {differentHobbies}
+            </p>
+            <p className="mt-1 font-serif text-xs text-black/45">
+              different {differentHobbies === 1 ? "hobby" : "hobbies"}
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div className="flex items-center justify-between">
         <p className="font-heading text-sm uppercase text-olive">
           {MONTHS[month]} {year}
@@ -557,71 +578,62 @@ function CalendarTab() {
       {isPending ? (
         <Loading />
       ) : (
-        <>
-          <div className="rounded-2xl bg-white p-3 shadow-sm">
-            <div className="grid grid-cols-7 gap-1">
-              {WEEK_LABELS.map((l, i) => (
-                <div
-                  key={i}
-                  className="pb-1 text-center font-serif text-[10px] text-black/35"
+        <div className="rounded-2xl bg-white p-3 shadow-sm">
+          <div className="grid grid-cols-7 gap-1">
+            {WEEK_LABELS.map((l, i) => (
+              <div key={i} className="pb-1 text-center font-serif text-[10px] text-black/35">
+                {l}
+              </div>
+            ))}
+            {Array.from({ length: firstDow }, (_, i) => (
+              <div key={`blank-${i}`} />
+            ))}
+            {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
+              const date = `${monthKey}-${pad(day)}`;
+              const dayLogs = byDay.get(day) ?? [];
+              const isToday = date === today;
+              return (
+                <button
+                  key={day}
+                  type="button"
+                  onClick={() => dayLogs.length > 0 && setDayView(date)}
+                  className={cn(
+                    "flex aspect-square flex-col items-center rounded-lg p-1 transition-colors",
+                    dayLogs.length > 0 ? "bg-sage/15 hover:bg-sage/25" : "",
+                    isToday && "ring-1 ring-focus",
+                  )}
                 >
-                  {l}
-                </div>
-              ))}
-              {Array.from({ length: firstDow }, (_, i) => (
-                <div key={`blank-${i}`} />
-              ))}
-              {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
-                const date = `${monthKey}-${pad(day)}`;
-                const dayLogs = byDay.get(day) ?? [];
-                const isToday = date === today;
-                return (
-                  <button
-                    key={day}
-                    type="button"
-                    onClick={() => dayLogs.length > 0 && setDayView(date)}
+                  <span
                     className={cn(
-                      "flex aspect-square flex-col items-center rounded-lg p-1 transition-colors",
-                      dayLogs.length > 0 ? "bg-sage/15 hover:bg-sage/25" : "",
-                      isToday && "ring-1 ring-focus",
+                      "font-mono text-[10px]",
+                      isToday ? "text-focus" : "text-black/40",
                     )}
                   >
-                    <span
-                      className={cn(
-                        "font-mono text-[10px]",
-                        isToday ? "text-focus" : "text-black/40",
-                      )}
-                    >
-                      {day}
-                    </span>
-                    <div className="mt-0.5 flex flex-wrap justify-center gap-px leading-none">
-                      {dayLogs.slice(0, 3).map((l, i) => (
-                        <span key={i} className="text-[11px]">
-                          {l.hobby_icon || "•"}
-                        </span>
-                      ))}
-                      {dayLogs.length > 3 && (
-                        <span className="text-[8px] text-black/40">
-                          +{dayLogs.length - 3}
-                        </span>
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
+                    {day}
+                  </span>
+                  <div className="mt-0.5 flex flex-wrap justify-center gap-px leading-none">
+                    {dayLogs.slice(0, 3).map((l, i) => (
+                      <span key={i} className="text-[11px]">
+                        {l.hobby_icon || "•"}
+                      </span>
+                    ))}
+                    {dayLogs.length > 3 && (
+                      <span className="text-[8px] text-black/40">+{dayLogs.length - 3}</span>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
           </div>
-
-          <p className="text-center font-serif text-xs text-black/40">
-            {monthLogs.length === 0
-              ? "Nothing logged this month yet."
-              : `${monthLogs.length} ${monthLogs.length === 1 ? "activity" : "activities"} this month. Tap a day to see what you did.`}
-          </p>
-        </>
+        </div>
       )}
 
       {dayView && (
-        <DayModal date={dayView} logs={byDay.get(Number(dayView.slice(8, 10))) ?? []} onClose={() => setDayView(null)} />
+        <DayModal
+          date={dayView}
+          logs={byDay.get(Number(dayView.slice(8, 10))) ?? []}
+          onClose={() => setDayView(null)}
+        />
       )}
     </div>
   );
@@ -637,6 +649,7 @@ function DayModal({
   onClose: () => void;
 }) {
   const queryClient = useQueryClient();
+  const [editLog, setEditLog] = useState<Log | null>(null);
   const remove = useMutation({
     mutationFn: (id: string) => deleteAwaLog({ data: { id } }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["awa-logs"] }),
@@ -678,21 +691,25 @@ function DayModal({
               </span>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="truncate font-heading text-sm text-black">
-                    {l.hobby_name}
-                  </p>
-                  {l.minutes > 0 && (
+                  <p className="truncate font-heading text-sm text-black">{l.hobby_name}</p>
+                  {l.activity_time && (
                     <span className="inline-flex shrink-0 items-center gap-1 font-mono text-xs text-black/50">
-                      <Clock className="size-3" /> {fmtMins(l.minutes)}
+                      <Clock className="size-3" /> {formatAwaTime(l.activity_time)}
                     </span>
                   )}
                 </div>
                 {l.note && (
-                  <p className="mt-0.5 font-serif text-sm italic text-black/55">
-                    {l.note}
-                  </p>
+                  <p className="mt-0.5 font-serif text-sm italic text-black/55">{l.note}</p>
                 )}
               </div>
+              <button
+                type="button"
+                onClick={() => setEditLog(l)}
+                aria-label="Edit"
+                className="grid size-7 shrink-0 place-items-center rounded-full text-black/30 transition-colors hover:bg-black/5 hover:text-olive"
+              >
+                <Pencil className="size-3.5" />
+              </button>
               <button
                 type="button"
                 onClick={() => remove.mutate(l.id)}
@@ -705,6 +722,15 @@ function DayModal({
           ))}
         </div>
       </div>
+
+      {editLog && (
+        <AwaLogModal
+          hobbies={[]}
+          lockHobby
+          editLog={editLog as AwaEditLog}
+          onClose={() => setEditLog(null)}
+        />
+      )}
     </div>
   );
 }

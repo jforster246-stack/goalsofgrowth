@@ -15,6 +15,7 @@ import { StampPill } from "@/components/stamp-pill";
 import { HabitDetailModal, type HabitFull } from "@/components/habit-detail-modal";
 import { HabitTally } from "@/components/habit-tally";
 import { GoalTally } from "@/components/goal-tally";
+import { AwaQuickLog } from "@/components/awa-quick-log";
 import {
   HabitRow,
   NextStepPortrait,
@@ -159,6 +160,8 @@ function OverviewPage() {
             />
           )}
 
+          <AwaQuickLog className="mt-5" />
+
           <div className="mt-5 border-t border-dashed border-border" />
 
           <HabitTally className="mt-5" />
@@ -205,6 +208,8 @@ function OverviewPage() {
             </p>
             <StreakBar streak={profile?.streak_count ?? 0} />
           </div>
+
+          <AwaQuickLog className="mt-6" />
 
           <HabitTally className="mt-6" />
 
