@@ -269,6 +269,17 @@
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
+/*
+ * Modern font style — swapped by the settings picker via a data-font attribute
+ * on <html>. Everything becomes clean sans-serif; the "Traditional" style is
+ * the @theme default above. (Mono is left alone for tabular numbers.)
+ */
+:root[data-font="modern"] {
+  --font-display: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-heading: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-serif: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
 @layer base {
   h1,
   h2,

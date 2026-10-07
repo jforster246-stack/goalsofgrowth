@@ -128,11 +128,11 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
-        {/* Apply the saved colour theme before first paint to avoid a flash. */}
+        {/* Apply the saved colour theme + font style before first paint. */}
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "try{var t=localStorage.getItem('gog-theme');document.documentElement.setAttribute('data-theme',t||'natural');}catch(e){}",
+              "try{var t=localStorage.getItem('gog-theme');document.documentElement.setAttribute('data-theme',t||'natural');var f=localStorage.getItem('gog-font');document.documentElement.setAttribute('data-font',f||'traditional');}catch(e){}",
           }}
         />
       </head>

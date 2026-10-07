@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getTheme, setTheme, THEMES, type ThemeId } from "@/lib/theme";
+import { FONTS, getFont, setFont, type FontStyle } from "@/lib/font";
 import { cn } from "@/lib/utils";
 import { localToday } from "@/components/goal-ui";
 import { quoteOfTheDay } from "@/lib/quotes";
@@ -433,6 +434,11 @@ function ProfileSheet({
     setTheme(id);
     setThemeState(id);
   };
+  const [font, setFontState] = useState<FontStyle>(() => getFont());
+  const chooseFont = (id: FontStyle) => {
+    setFont(id);
+    setFontState(id);
+  };
 
   return (
     <div className="fixed inset-0 z-30 flex flex-col bg-background [animation:rise_0.25s_both]">
@@ -532,6 +538,45 @@ function ProfileSheet({
                       <Check className="size-4" strokeWidth={3} />
                     </span>
                   )}
+                </button>
+              );
+            })}
+          </div>
+
+          <p className="mt-6 font-heading text-sm uppercase tracking-wide text-olive">
+            Font style
+          </p>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            {FONTS.map((f) => {
+              const active = font === f.id;
+              return (
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => chooseFont(f.id)}
+                  aria-pressed={active}
+                  className={cn(
+                    "rounded-2xl bg-card p-3 text-left ring-1 transition-colors",
+                    active ? "ring-olive" : "ring-border hover:bg-muted/50",
+                  )}
+                >
+                  <span
+                    className="block text-2xl leading-none text-foreground"
+                    style={{
+                      fontFamily:
+                        f.id === "modern"
+                          ? "Inter, ui-sans-serif, system-ui, sans-serif"
+                          : "'Pinyon Script', cursive",
+                    }}
+                  >
+                    Aa
+                  </span>
+                  <span className="mt-2 block font-heading text-sm text-foreground">
+                    {f.label}
+                  </span>
+                  <span className="mt-0.5 block font-serif text-xs text-muted-foreground">
+                    {f.blurb}
+                  </span>
                 </button>
               );
             })}
