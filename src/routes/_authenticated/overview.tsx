@@ -11,7 +11,6 @@ import { AppShell, useAppShell } from "@/components/app-shell";
 import { goalProgress, localToday } from "@/components/goal-ui";
 import { Stamp } from "@/components/stamp";
 import { StampMark } from "@/components/stamp-mark";
-import { StampPill } from "@/components/stamp-pill";
 import { HabitDetailModal, type HabitFull } from "@/components/habit-detail-modal";
 import { HabitTally } from "@/components/habit-tally";
 import { GoalTally } from "@/components/goal-tally";
@@ -149,86 +148,32 @@ function OverviewPage() {
     : null;
 
   return (
-    <AppShell right={<StampPill />}>
-      <div className="relative w-full pb-24 pt-2">
-        {/* Mobile — the stacked layout */}
-        <div className="md:hidden">
-          {profile && (
-            <StreakCard
-              streak={profile.streak_count ?? 0}
-              name={profile.display_name ?? null}
-            />
-          )}
+    <AppShell>
+      {/* Bento dashboard — cards of varying sizes that reflow on mobile. */}
+      <div className="mt-6 grid grid-cols-2 gap-3 pb-4 lg:grid-cols-4 lg:gap-4">
+        {profile && (
+          <StreakCard
+            streak={profile.streak_count ?? 0}
+            name={profile.display_name ?? null}
+            className="col-span-2 lg:col-span-2"
+          />
+        )}
 
-          <AwaQuickLog className="mt-5" />
+        <AwaQuickLog className="col-span-2 self-start lg:col-span-2" />
 
-          <div className="mt-5 border-t border-dashed border-border" />
+        <HabitTally className="col-span-1 self-start lg:col-span-2" />
+        <GoalTally className="col-span-1 self-start lg:col-span-2" />
 
-          <HabitTally className="mt-5" />
+        <TodayHabits className="col-span-2 lg:col-span-4" />
+        <MissedYesterday className="col-span-2 lg:col-span-4" />
 
-          <TodayHabits />
-          <MissedYesterday />
-
-          <div className="mt-6 border-t border-dashed border-border" />
-
-          <GoalTally className="mt-6" />
-
-          <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        {/* Next steps — the goal cards for today */}
+        <section className="col-span-2 rounded-3xl bg-white p-5 shadow-sm lg:col-span-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             What next step will you take today?
           </p>
-
-          <div className="mt-3 space-y-2.5">
-            {upcoming.length === 0 && (
-              <p className="rounded-xl bg-card px-3 py-3 text-sm text-muted-foreground shadow-sm ring-1 ring-border">
-                {goals.length === 0
-                  ? "Add a goal to see your next steps here."
-                  : "You're all caught up — nice work."}
-              </p>
-            )}
-
-            {upcoming.map(({ goal, next }) => (
-              <NextStepCard
-                key={goal.id}
-                goal={goal}
-                step={next!}
-                onComplete={() => handleComplete(goal.id, next!.title, next!.id)}
-              />
-            ))}
-          </div>
-
-          <RoutinesHome />
-        </div>
-
-        {/* Tablet & desktop — the dashboard layout */}
-        <div className="hidden md:block">
-          {/* Streak bar */}
-          <div className="flex items-center justify-between gap-4 border-y border-border py-4">
-            <p className="font-heading text-sm uppercase tracking-wide text-foreground">
-              {profile?.streak_count ?? 0} day streak
-            </p>
-            <StreakBar streak={profile?.streak_count ?? 0} />
-          </div>
-
-          <AwaQuickLog className="mt-6" />
-
-          <HabitTally className="mt-6" />
-
-          {/* Habits + missed yesterday, side by side */}
-          <div className="mt-6 grid grid-cols-2 gap-8 border-t border-border pt-5">
-            <TodayHabits />
-            <div className="border-l border-border pl-8">
-              <MissedYesterday variant="column" />
-            </div>
-          </div>
-
-          <GoalTally className="mt-8" />
-
-          {/* Next steps for today — a row of portrait cards */}
-          <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Next steps for today
-          </p>
           {upcoming.length === 0 ? (
-            <p className="mt-4 rounded-xl bg-card px-4 py-4 text-sm text-muted-foreground shadow-sm ring-1 ring-border">
+            <p className="mt-3 rounded-2xl bg-background px-4 py-4 text-sm text-muted-foreground">
               {goals.length === 0
                 ? "Add a goal to see your next steps here."
                 : "You're all caught up — nice work."}
@@ -246,10 +191,9 @@ function OverviewPage() {
               ))}
             </div>
           )}
+        </section>
 
-          <RoutinesHome />
-        </div>
-
+        <RoutinesHome className="col-span-2 lg:col-span-4" />
       </div>
 
       {/* "Nice work" popup after completing a step (when the goal isn't finished yet) */}
@@ -287,27 +231,6 @@ function OverviewPage() {
 }
 
 /**
- * Compact streak strip: seven stamps that fill left-to-right, one per day of
- * the streak (capped at seven), so the number filled matches the streak count.
- */
-function StreakBar({ streak }: { streak: number }) {
-  const filled = Math.min(streak, 7);
-  return (
-    <div className="flex items-center gap-1.5">
-      {Array.from({ length: 7 }, (_, i) => (
-        <StampMark
-          key={i}
-          className={cn(
-            "size-4",
-            i < filled ? "text-clay-deep" : "text-black/15",
-          )}
-        />
-      ))}
-    </div>
-  );
-}
-
-/**
  * The sign-in streak as a flame count plus the current week, so the run of
  * connected days reads at a glance: active days show a tick, the rest show
  * their date, and today is highlighted.
@@ -315,16 +238,23 @@ function StreakBar({ streak }: { streak: number }) {
 function StreakCard({
   streak,
   name,
+  className,
 }: {
   streak: number;
   name: string | null;
+  className?: string;
 }) {
   const filled = Math.min(streak, 7);
   // Days left in the current run before the next 7-day, 5-stamp reward.
   const untilBonus = streak > 0 ? (7 - (streak % 7)) % 7 : 7;
 
   return (
-    <div className="mt-1 flex flex-col items-center rounded-3xl bg-white px-5 py-6 text-center shadow-sm">
+    <div
+      className={cn(
+        "flex flex-col items-center rounded-3xl bg-white px-5 py-6 text-center shadow-sm",
+        className,
+      )}
+    >
       <div className="grid size-16 place-items-center rounded-full bg-clay/15">
         <Flame className="size-8 text-clay-deep" strokeWidth={2} fill="currentColor" />
       </div>
@@ -473,11 +403,7 @@ function yesterdayKey(today: string): string {
  * Habits that were due yesterday but never ticked off, so they can be caught up
  * today. Ticking one marks it done for today, which removes it from the list.
  */
-function MissedYesterday({
-  variant = "stack",
-}: {
-  variant?: "stack" | "column";
-}) {
+function MissedYesterday({ className }: { className?: string }) {
   const today = localToday();
   const yKey = yesterdayKey(today);
   const yDate = new Date(`${yKey}T00:00:00`);
@@ -508,16 +434,14 @@ function MissedYesterday({
     (h) => isHabitDueToday(h, yDate) && !h.done && !doneToday.has(h.id),
   );
 
-  // In the mobile stack we hide the whole block when there's nothing missed;
-  // as a desktop column we keep the heading so the two columns stay balanced.
-  if (missed.length === 0 && variant === "stack") return null;
+  // Nothing missed — don't show the card at all.
+  if (missed.length === 0) return null;
 
   return (
-    <section>
-      {variant === "stack" && (
-        <div className="mt-6 border-t border-dashed border-border" />
-      )}
-      <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+    <section
+      className={cn("rounded-3xl bg-white p-5 shadow-sm", className)}
+    >
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         Missed yesterday
       </p>
       <p className="mt-1 text-sm text-muted-foreground">
@@ -567,7 +491,7 @@ type RoutineLite = {
  * Home "Routines" section: up to three routines the user has chosen to keep on
  * the home page, each linking to the full routine. "Choose" opens a picker.
  */
-function RoutinesHome() {
+function RoutinesHome({ className }: { className?: string }) {
   const queryClient = useQueryClient();
   const { data: lists } = useQuery(checklistsQueryOptions);
   const [choosing, setChoosing] = useState(false);
@@ -590,7 +514,7 @@ function RoutinesHome() {
   if (all.length === 0) return null;
 
   return (
-    <section className="mt-6 border-t border-dashed border-border pt-5">
+    <section className={cn("rounded-3xl bg-white p-5 shadow-sm", className)}>
       <div className="flex items-center justify-between">
         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Routines
@@ -755,7 +679,7 @@ function RoutinePickerModal({
 }
 
 /** The current time-of-day's habits, shown on Home in place of the goal list. */
-function TodayHabits() {
+function TodayHabits({ className }: { className?: string }) {
   const today = localToday();
   const bucket = currentBucket();
   const queryClient = useQueryClient();
@@ -783,8 +707,8 @@ function TodayHabits() {
   const active = inBucket.filter((h) => !h.done);
 
   return (
-    <section>
-      <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+    <section className={cn("rounded-3xl bg-white p-5 shadow-sm", className)}>
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         {BUCKET_LABEL[bucket]}
       </p>
       <div className="mt-3 space-y-2">
