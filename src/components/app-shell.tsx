@@ -28,7 +28,8 @@ import { cn } from "@/lib/utils";
 import { localToday } from "@/components/goal-ui";
 import { quoteOfTheDay } from "@/lib/quotes";
 import { FocusMode } from "@/components/focus-mode";
-import { AddFab } from "@/components/add-fab";
+import { AddMenu } from "@/components/add-fab";
+import { StampPill } from "@/components/stamp-pill";
 import { Confetti } from "@/components/confetti";
 import { goalsQueryOptions, profileQueryOptions } from "@/lib/goal-queries";
 import {
@@ -134,78 +135,9 @@ export function AppShell({
   };
 
   return (
-    <div className="relative min-h-dvh bg-background font-body text-foreground antialiased lg:pl-60">
+    <div className="relative min-h-dvh bg-background font-body text-foreground antialiased lg:pl-64">
       <Sidebar onOpenSettings={() => setProfileOpen(true)} />
       <div className="relative z-[1] mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 pb-28 pt-6 md:max-w-3xl lg:max-w-5xl lg:pb-12">
-        <header className="flex items-center justify-between gap-2">
-          <div
-            className={cn(
-              "size-10 shrink-0",
-              titleLeft && hideSettings && !backTo && "hidden",
-            )}
-          >
-            {backTo ? (
-              <button
-                type="button"
-                aria-label="Back"
-                onClick={() => {
-                  if (window.history.length > 1) router.history.back();
-                  else navigate({ to: backTo });
-                }}
-                className="grid size-10 place-items-center rounded-full bg-focus text-white shadow-md transition-colors hover:bg-focus/90"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="size-5"
-                >
-                  <path d="M15 18l-6-6 6-6" />
-                </svg>
-              </button>
-            ) : hideSettings ? null : (
-              <button
-                onClick={() => setProfileOpen(true)}
-                aria-label="Open settings"
-                className="grid size-10 place-items-center rounded-full bg-card text-muted-foreground shadow-sm ring-1 ring-border transition-colors hover:bg-muted lg:hidden"
-              >
-                <Settings className="size-4" strokeWidth={2} />
-              </button>
-            )}
-          </div>
-
-          {title ? (
-            <h1
-              className={cn(
-                "min-w-0 flex-1 truncate font-heading text-lg tracking-tight",
-                titleLeft ? "text-left" : "text-center",
-              )}
-            >
-              {title}
-            </h1>
-          ) : (
-            <h1 className="min-w-0 flex-1 text-center font-display text-2xl font-normal leading-[1.15] tracking-tight md:text-left md:text-3xl">
-              <span className="block truncate md:inline">
-                {profile?.display_name ? `${profile.display_name}'s ` : "Your "}
-              </span>
-              <span className="block truncate md:inline">Goals of Growth</span>
-            </h1>
-          )}
-
-          <div className="flex shrink-0 items-center justify-end">
-            {right ?? <div className="size-10" />}
-          </div>
-        </header>
-
-        {!title && (
-          <p className="mt-2 text-center text-sm italic text-muted-foreground md:text-left">
-            "{quoteOfTheDay(localToday())}"
-          </p>
-        )}
-
         <AppShellContext.Provider
           value={{
             openFocus: (stepId) => {
@@ -221,11 +153,69 @@ export function AppShell({
             celebrate: () => setConfettiKey((k) => k + 1),
           }}
         >
-          {children}
-          <AddFab />
-        </AppShellContext.Provider>
+          {/* Top utility bar: stamps on the left, add on the right. */}
+          <header className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              {backTo && (
+                <button
+                  type="button"
+                  aria-label="Back"
+                  onClick={() => {
+                    if (window.history.length > 1) router.history.back();
+                    else navigate({ to: backTo });
+                  }}
+                  className="grid size-10 place-items-center rounded-full bg-focus text-white shadow-md transition-colors hover:bg-focus/90"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="size-5"
+                  >
+                    <path d="M15 18l-6-6 6-6" />
+                  </svg>
+                </button>
+              )}
+              <StampPill />
+            </div>
 
-        <BottomNav />
+            <div className="flex items-center gap-2">
+              {!hideSettings && (
+                <button
+                  onClick={() => setProfileOpen(true)}
+                  aria-label="Open settings"
+                  className="grid size-10 place-items-center rounded-full bg-card text-muted-foreground shadow-sm ring-1 ring-border transition-colors hover:bg-muted lg:hidden"
+                >
+                  <Settings className="size-4" strokeWidth={2} />
+                </button>
+              )}
+              <AddMenu />
+            </div>
+          </header>
+
+          {/* Page heading, beneath the utility bar. */}
+          {title ? (
+            <h1 className="mt-5 font-heading text-2xl tracking-tight text-foreground">
+              {title}
+            </h1>
+          ) : (
+            <>
+              <h1 className="mt-5 font-display text-3xl font-normal leading-[1.1] tracking-tight md:text-4xl">
+                {profile?.display_name ? `${profile.display_name}'s ` : "Your "}
+                Goals of Growth
+              </h1>
+              <p className="mt-2 text-sm italic text-muted-foreground">
+                "{quoteOfTheDay(localToday())}"
+              </p>
+            </>
+          )}
+
+          {children}
+
+          <BottomNav />
 
         {confettiKey > 0 && <Confetti key={confettiKey} />}
 
@@ -264,6 +254,7 @@ export function AppShell({
             onClose={() => setProfileOpen(false)}
           />
         )}
+        </AppShellContext.Provider>
       </div>
     </div>
   );
@@ -272,7 +263,7 @@ export function AppShell({
 /** Desktop-only left rail: app identity, primary nav, and settings. */
 function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
   return (
-    <aside className="fixed inset-y-0 left-0 z-20 hidden w-60 flex-col border-r border-border bg-card px-4 py-7 lg:flex">
+    <aside className="fixed inset-y-3 left-3 z-20 hidden w-56 flex-col rounded-3xl bg-card px-4 py-6 shadow-xl ring-1 ring-border lg:flex">
       <p className="px-2 font-display text-[26px] leading-tight text-foreground">
         Goals of Growth
       </p>
