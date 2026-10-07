@@ -253,6 +253,13 @@
       "when": 1791330000000,
       "tag": "0035_add_awa_activity_time",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1791332261195,
+      "tag": "0036_finance_awa_step_tally",
+      "breakpoints": true
     }
   ]
 }
