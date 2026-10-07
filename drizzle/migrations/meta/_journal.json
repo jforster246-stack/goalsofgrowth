@@ -267,6 +267,13 @@
       "when": 1791332391313,
       "tag": "0037_apply_finance_awa_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1791332487689,
+      "tag": "0038_create_finance_entries_only",
+      "breakpoints": true
     }
   ]
 }
