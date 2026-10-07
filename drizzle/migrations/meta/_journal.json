@@ -260,6 +260,13 @@
       "when": 1791332261195,
       "tag": "0036_finance_awa_step_tally",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1791332391313,
+      "tag": "0037_apply_finance_awa_tables",
+      "breakpoints": true
     }
   ]
 }
