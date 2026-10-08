@@ -30,6 +30,7 @@ export type SavingsGoal = {
   target: number;
   saved: number;
   per_pay: number;
+  target_date?: string | null;
 };
 
 export const CYCLE_WORD: Record<PayCycle, string> = {
@@ -166,14 +167,57 @@ export function paysInMonths(
 ) {
   if (cycle === "monthly") return months;
   if (!anchor) return Math.round((months * PAYS_PER_YEAR[cycle]) / 12);
-  const step = stepDays(cycle);
+  const end = new Date(from.getFullYear(), from.getMonth() + months, from.getDate());
+  return paysUntil(cycle, anchor, end, from);
+}
+
+/** Paydays after today, up to and including `end` (a Date or yyyy-mm-dd). */
+export function paysUntil(
+  cycle: PayCycle,
+  anchor: string | null,
+  end: Date | string,
+  from = new Date(),
+) {
   const start = Date.UTC(from.getFullYear(), from.getMonth(), from.getDate());
-  const end = Date.UTC(from.getFullYear(), from.getMonth() + months, from.getDate());
+  const endMs =
+    typeof end === "string"
+      ? anchorUtc(end)
+      : Date.UTC(end.getFullYear(), end.getMonth(), end.getDate());
+  if (endMs <= start) return 0;
+  if (cycle === "monthly") {
+    // Whole calendar months between today and the end date.
+    const e = new Date(endMs);
+    const months =
+      (e.getUTCFullYear() - from.getFullYear()) * 12 +
+      (e.getUTCMonth() - from.getMonth()) -
+      (e.getUTCDate() < from.getDate() ? 1 : 0);
+    return Math.max(0, months);
+  }
+  if (!anchor) {
+    const perDay = PAYS_PER_YEAR[cycle] / 365.25;
+    return Math.max(0, Math.floor(((endMs - start) / DAY_MS) * perDay));
+  }
+  const step = stepDays(cycle);
   const a = anchorUtc(anchor);
-  // Paydays strictly after today, up to and including the end date.
   const first = Math.floor((start - a) / DAY_MS / step) + 1;
-  const last = Math.floor((end - a) / DAY_MS / step);
+  const last = Math.floor((endMs - a) / DAY_MS / step);
   return Math.max(0, last - first + 1);
+}
+
+/** The date of the nth payday from today (n >= 1), or an estimate. */
+export function nthPayday(cycle: PayCycle, anchor: string | null, n: number, from = new Date()) {
+  const next = nextPayday(cycle, anchor, from);
+  if (next && cycle !== "monthly") {
+    const today = Date.UTC(from.getFullYear(), from.getMonth(), from.getDate());
+    // nextPayday can be today; we only count paydays after today.
+    const firstAfter =
+      next.getTime() > today ? next.getTime() : next.getTime() + stepDays(cycle) * DAY_MS;
+    return new Date(firstAfter + (n - 1) * stepDays(cycle) * DAY_MS);
+  }
+  const d = new Date(Date.UTC(from.getFullYear(), from.getMonth(), from.getDate()));
+  if (cycle === "monthly") d.setUTCMonth(d.getUTCMonth() + n);
+  else d.setUTCDate(d.getUTCDate() + n * stepDays(cycle));
+  return d;
 }
 
 export function todayIso() {

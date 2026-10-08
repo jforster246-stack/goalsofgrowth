@@ -262,6 +262,10 @@ const savingsGoalFields = {
   saved: amountSchema,
   perPay: amountSchema,
   icon: z.string().max(40).nullish(),
+  targetDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .nullish(),
 };
 
 export const addSavingsGoal = createServerFn({ method: "POST" })
@@ -280,6 +284,8 @@ export const addSavingsGoal = createServerFn({ method: "POST" })
       target: data.target,
       saved: data.saved,
       per_pay: data.perPay,
+      // Only sent when set, so goals still save before migration 0043 lands.
+      ...(data.targetDate ? { target_date: data.targetDate } : {}),
       icon: data.icon ?? null,
       position,
       user_id: context.userId,
@@ -293,7 +299,14 @@ export const updateSavingsGoal = createServerFn({ method: "POST" })
   .inputValidator((data) =>
     z
       .object({ id: z.string().uuid(), ...savingsGoalFields })
-      .partial({ name: true, target: true, saved: true, perPay: true, icon: true })
+      .partial({
+        name: true,
+        target: true,
+        saved: true,
+        perPay: true,
+        icon: true,
+        targetDate: true,
+      })
       .parse(data),
   )
   .handler(async ({ data, context }) => {
@@ -302,12 +315,14 @@ export const updateSavingsGoal = createServerFn({ method: "POST" })
       target?: number;
       saved?: number;
       per_pay?: number;
+      target_date?: string | null;
       icon?: string | null;
     } = {};
     if (data.name !== undefined) patch.name = data.name;
     if (data.target !== undefined) patch.target = data.target;
     if (data.saved !== undefined) patch.saved = data.saved;
     if (data.perPay !== undefined) patch.per_pay = data.perPay;
+    if (data.targetDate !== undefined) patch.target_date = data.targetDate ?? null;
     if (data.icon !== undefined) patch.icon = data.icon ?? null;
 
     const { error } = await context.supabase.from("savings_goals").update(patch).eq("id", data.id);

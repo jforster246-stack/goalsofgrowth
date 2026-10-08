@@ -20,6 +20,7 @@ import {
   extraPayMonths,
   fmtWhole,
   nextPayday,
+  nthPayday,
   paysInMonths,
   type BucketGroup,
   type FinanceEntry,
@@ -119,7 +120,11 @@ function FinancePage() {
                   onEditIncome={(entry) => setSheet({ kind: "entry", entry })}
                 />
 
-                <SavingsGoals cycle={cycle} onOpen={(goal) => setSheet({ kind: "goal", goal })} />
+                <SavingsGoals
+                  cycle={cycle}
+                  anchor={anchor}
+                  onOpen={(goal) => setSheet({ kind: "goal", goal })}
+                />
 
                 <PlanStatus buckets={buckets} payTotal={payTotal} left={left} />
 
@@ -198,7 +203,7 @@ function FinancePage() {
         />
       )}
       {sheet?.kind === "goal" && (
-        <SavingsGoalModal onClose={close} goal={sheet.goal} cycle={cycle} />
+        <SavingsGoalModal onClose={close} goal={sheet.goal} cycle={cycle} anchor={anchor} />
       )}
     </AppShell>
   );
@@ -539,9 +544,11 @@ function ExtraPayMonths({ cycle, anchor }: { cycle: PayCycle; anchor: string | n
 
 function SavingsGoals({
   cycle,
+  anchor,
   onOpen,
 }: {
   cycle: PayCycle;
+  anchor: string | null;
   onOpen: (goal?: SavingsGoal) => void;
 }) {
   const { data: goals } = useQuery({ ...savingsGoalsQueryOptions, retry: 1 });
@@ -551,7 +558,13 @@ function SavingsGoals({
       <SectionTitle Icon={PiggyBank} title="Savings goals" />
       <div className="mt-3 space-y-2">
         {list.map((g) => (
-          <SavingsGoalCard key={g.id} goal={g} cycle={cycle} onClick={() => onOpen(g)} />
+          <SavingsGoalCard
+            key={g.id}
+            goal={g}
+            cycle={cycle}
+            anchor={anchor}
+            onClick={() => onOpen(g)}
+          />
         ))}
         <AddButton label="Add a savings goal" onClick={() => onOpen()} />
       </div>
@@ -562,10 +575,12 @@ function SavingsGoals({
 function SavingsGoalCard({
   goal,
   cycle,
+  anchor,
   onClick,
 }: {
   goal: SavingsGoal;
   cycle: PayCycle;
+  anchor: string | null;
   onClick: () => void;
 }) {
   const t = Number(goal.target);
@@ -574,14 +589,25 @@ function SavingsGoalCard({
   const pct = t > 0 ? Math.min(1, s / t) : 0;
   const remaining = Math.max(0, t - s);
   const done = t > 0 && remaining === 0;
-  const pays = p > 0 ? Math.ceil(remaining / p) : null;
+  const pays = p > 0 && remaining > 0 ? Math.ceil(remaining / p) : null;
+  const reach = pays ? nthPayday(cycle, anchor, pays) : null;
+  const monthYear = (d: Date) =>
+    d.toLocaleDateString(undefined, { month: "short", year: "numeric", timeZone: "UTC" });
+  const by = goal.target_date ? new Date(`${goal.target_date}T00:00:00Z`) : null;
+  const late = !!(reach && by && reach.getTime() > by.getTime());
 
-  let eta: string | null = null;
-  if (pays !== null && pays > 0) {
-    const date = new Date();
-    if (cycle === "monthly") date.setMonth(date.getMonth() + pays);
-    else date.setDate(date.getDate() + pays * (cycle === "weekly" ? 7 : 14));
-    eta = `around ${date.toLocaleDateString(undefined, { month: "short", year: "numeric" })}`;
+  let line: string;
+  if (done) line = "Goal reached!";
+  else if (!reach) {
+    line = by
+      ? `${fmtWhole(remaining)} to go by ${monthYear(by)} · tap to set how much each ${CYCLE_WORD[cycle]}`
+      : `${fmtWhole(remaining)} to go · tap to add how much you'll put in each ${CYCLE_WORD[cycle]}`;
+  } else if (by) {
+    line = late
+      ? `${fmtWhole(p)} each ${CYCLE_WORD[cycle]} · aiming for ${monthYear(by)}, on track for ${monthYear(reach)}`
+      : `${fmtWhole(p)} each ${CYCLE_WORD[cycle]} · on track for ${monthYear(by)}`;
+  } else {
+    line = `${fmtWhole(p)} each ${CYCLE_WORD[cycle]} · ${fmtWhole(remaining)} to go, around ${monthYear(reach)}`;
   }
 
   return (
@@ -602,13 +628,7 @@ function SavingsGoalCard({
           style={{ width: `${pct * 100}%` }}
         />
       </span>
-      <span className="mt-2 block font-serif text-xs text-black/50">
-        {done
-          ? "Goal reached!"
-          : eta
-            ? `${fmtWhole(p)} each ${CYCLE_WORD[cycle]} · ${fmtWhole(remaining)} to go, ${eta}`
-            : `${fmtWhole(remaining)} to go · tap to add how much you'll put in each ${CYCLE_WORD[cycle]}`}
-      </span>
+      <span className="mt-2 block font-serif text-xs text-black/50">{line}</span>
     </button>
   );
 }

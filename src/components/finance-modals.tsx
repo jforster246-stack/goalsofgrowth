@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import {
@@ -13,7 +13,10 @@ import {
 import {
   CYCLE_WORD,
   bucketGroup,
+  fmtWhole,
+  nthPayday,
   parseAmount,
+  paysUntil,
   todayIso,
   type BucketGroup,
   type FinanceEntry,
@@ -372,14 +375,28 @@ export function EntryModal({
 
 /* ---------------------------------------------------------------- */
 
+function monthYear(d: Date | string) {
+  const date = typeof d === "string" ? new Date(`${d}T00:00:00Z`) : d;
+  return date.toLocaleDateString(undefined, { month: "long", year: "numeric", timeZone: "UTC" });
+}
+
+function tomorrowIso() {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
 export function SavingsGoalModal({
   onClose,
   goal,
   cycle,
+  anchor,
 }: {
   onClose: () => void;
   goal?: SavingsGoal | undefined;
   cycle: PayCycle;
+  anchor: string | null;
 }) {
   const queryClient = useQueryClient();
   const editing = !!goal;
@@ -387,6 +404,46 @@ export function SavingsGoalModal({
   const [target, setTarget] = useState(goal ? String(Number(goal.target)) : "");
   const [saved, setSaved] = useState(goal ? String(Number(goal.saved)) : "");
   const [perPay, setPerPay] = useState(goal ? String(Number(goal.per_pay)) : "");
+  const [targetDate, setTargetDate] = useState(goal?.target_date ?? "");
+
+  const word = CYCLE_WORD[cycle];
+  const remaining = Math.max(0, parseAmount(target) - parseAmount(saved));
+  const paysLeft = targetDate ? paysUntil(cycle, anchor, targetDate) : 0;
+  const suggested =
+    targetDate && remaining > 0 && paysLeft > 0 ? Math.ceil(remaining / paysLeft) : null;
+
+  // Changing the date or amounts recalculates the per-pay amount; editing the
+  // per-pay amount yourself is left alone. Skip the first run so opening an
+  // existing goal keeps what was saved.
+  const firstRun = useRef(true);
+  useEffect(() => {
+    if (firstRun.current) {
+      firstRun.current = false;
+      return;
+    }
+    if (suggested !== null) setPerPay(String(suggested));
+  }, [suggested]);
+
+  const perPayValue = parseAmount(perPay);
+  const paysAtChosen = perPayValue > 0 && remaining > 0 ? Math.ceil(remaining / perPayValue) : null;
+  const reachDate = paysAtChosen ? nthPayday(cycle, anchor, paysAtChosen) : null;
+  const reachIso = reachDate ? reachDate.toISOString().slice(0, 10) : null;
+
+  let perPayHelp = "Used to estimate when you'll reach it.";
+  if (remaining === 0 && parseAmount(target) > 0) {
+    perPayHelp = "You've already got there.";
+  } else if (targetDate && paysLeft === 0) {
+    perPayHelp = "Pick a date with at least one payday before it.";
+  } else if (suggested !== null) {
+    perPayHelp = `To reach ${fmtWhole(parseAmount(target))} by ${monthYear(targetDate)} (${paysLeft} ${paysLeft === 1 ? "pay" : "pays"}), put in about ${fmtWhole(suggested)} each ${word}.`;
+    if (reachDate && reachIso && perPayValue > 0 && perPayValue < suggested) {
+      perPayHelp += ` At ${fmtWhole(perPayValue)} you'd get there around ${monthYear(reachDate)} instead.`;
+    } else if (reachDate && perPayValue > suggested) {
+      perPayHelp += ` At ${fmtWhole(perPayValue)} you'd get there early, around ${monthYear(reachDate)}.`;
+    }
+  } else if (reachDate) {
+    perPayHelp = `At this amount you'd get there around ${monthYear(reachDate)}.`;
+  }
 
   const done = async () => {
     await queryClient.invalidateQueries({ queryKey: ["finance", "savings-goals"] });
@@ -399,6 +456,8 @@ export function SavingsGoalModal({
         target: parseAmount(target),
         saved: parseAmount(saved),
         perPay: parseAmount(perPay),
+        // Only send the date when it's set or being cleared.
+        ...(targetDate || goal?.target_date ? { targetDate: targetDate || null } : {}),
       };
       return editing
         ? updateSavingsGoal({ data: { id: goal!.id, ...fields } })
@@ -436,11 +495,28 @@ export function SavingsGoalModal({
       <Field label="Saved so far" optional>
         <MoneyInput value={saved} onChange={setSaved} />
       </Field>
-      <Field
-        label={`Put in each ${CYCLE_WORD[cycle]}`}
-        optional
-        help="Used to estimate when you'll reach it."
-      >
+      <Field label="Reach it by" optional help="Pick a date and we'll work out what to put in.">
+        <span className="mt-2 flex items-center gap-2">
+          <input
+            type="date"
+            aria-label="Reach it by"
+            value={targetDate}
+            min={tomorrowIso()}
+            onChange={(e) => setTargetDate(e.target.value)}
+            className={cn(fieldClass, "mt-0 flex-1 font-mono")}
+          />
+          {targetDate && (
+            <button
+              type="button"
+              onClick={() => setTargetDate("")}
+              className="shrink-0 px-2 font-heading text-[11px] uppercase text-black/45 hover:text-black/70"
+            >
+              Clear
+            </button>
+          )}
+        </span>
+      </Field>
+      <Field label={`Put in each ${word}`} optional help={perPayHelp}>
         <MoneyInput value={perPay} onChange={setPerPay} />
       </Field>
       <Actions

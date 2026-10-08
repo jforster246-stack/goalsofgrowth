@@ -534,6 +534,7 @@ export type Database = {
           position: number
           saved: number
           target: number
+          target_date: string | null
           user_id: string
         }
         Insert: {
@@ -545,6 +546,7 @@ export type Database = {
           position?: number
           saved?: number
           target?: number
+          target_date?: string | null
           user_id: string
         }
         Update: {
@@ -556,6 +558,7 @@ export type Database = {
           position?: number
           saved?: number
           target?: number
+          target_date?: string | null
           user_id?: string
         }
         Relationships: []
