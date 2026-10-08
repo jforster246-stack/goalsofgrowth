@@ -18,22 +18,38 @@ export const listBrainDump = createServerFn({ method: "GET" })
 export const createBrainDumpItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) =>
-    z.object({ text: z.string().trim().min(1).max(500) }).parse(data),
+    z
+      .object({
+        // The page makes the id itself so a new line can be typed into straight away.
+        id: z.string().uuid().optional(),
+        text: z.string().max(500),
+        position: z.number().int().min(0).optional(),
+        indent: z.number().int().min(0).max(2).optional(),
+      })
+      .parse(data),
   )
   .handler(async ({ data, context }) => {
     const supabase = context.supabase;
 
-    const { data: existing, error: existingError } = await supabase
-      .from("brain_dump_items")
-      .select("position");
-    if (existingError) throw new Error(existingError.message);
-
-    const position =
-      (existing ?? []).reduce((max, i) => Math.max(max, i.position), 0) + 1;
+    let position = data.position;
+    if (position === undefined) {
+      const { data: existing, error: existingError } = await supabase
+        .from("brain_dump_items")
+        .select("position");
+      if (existingError) throw new Error(existingError.message);
+      position = (existing ?? []).reduce((max, i) => Math.max(max, i.position), 0) + 1;
+    }
 
     const { data: item, error } = await supabase
       .from("brain_dump_items")
-      .insert({ text: data.text, position, user_id: context.userId })
+      .insert({
+        ...(data.id ? { id: data.id } : {}),
+        text: data.text,
+        position,
+        // Only sent when indented, so plain lines still save before migration 0046.
+        ...(data.indent ? { indent: data.indent } : {}),
+        user_id: context.userId,
+      })
       .select()
       .single();
     if (error) throw new Error(error.message);
@@ -44,13 +60,20 @@ export const updateBrainDumpItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) =>
     z
-      .object({ id: z.string().uuid(), text: z.string().trim().min(1).max(500) })
+      .object({
+        id: z.string().uuid(),
+        text: z.string().max(500).optional(),
+        indent: z.number().int().min(0).max(2).optional(),
+      })
       .parse(data),
   )
   .handler(async ({ data, context }) => {
+    const patch: { text?: string; indent?: number } = {};
+    if (data.text !== undefined) patch.text = data.text;
+    if (data.indent !== undefined) patch.indent = data.indent;
     const { error } = await context.supabase
       .from("brain_dump_items")
-      .update({ text: data.text })
+      .update(patch)
       .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -58,9 +81,7 @@ export const updateBrainDumpItem = createServerFn({ method: "POST" })
 
 export const reorderBrainDump = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data) =>
-    z.object({ orderedIds: z.array(z.string().uuid()).min(1) }).parse(data),
-  )
+  .inputValidator((data) => z.object({ orderedIds: z.array(z.string().uuid()).min(1) }).parse(data))
   .handler(async ({ data, context }) => {
     const supabase = context.supabase;
     // RLS scopes updates to the user's own items.
@@ -74,9 +95,7 @@ export const reorderBrainDump = createServerFn({ method: "POST" })
 
 export const toggleBrainDumpItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data) =>
-    z.object({ id: z.string().uuid(), done: z.boolean() }).parse(data),
-  )
+  .inputValidator((data) => z.object({ id: z.string().uuid(), done: z.boolean() }).parse(data))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("brain_dump_items")
@@ -90,10 +109,7 @@ export const deleteBrainDumpItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase
-      .from("brain_dump_items")
-      .delete()
-      .eq("id", data.id);
+    const { error } = await context.supabase.from("brain_dump_items").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
