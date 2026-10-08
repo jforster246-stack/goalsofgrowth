@@ -4,7 +4,7 @@ import { Check, Flame, Pencil, Timer, Trash2, X } from "lucide-react";
 import { Motif, TIME_MOTIF } from "@/components/motif-icons";
 import { StampMark } from "@/components/stamp-mark";
 import { HabitFormModal, type EditableHabit } from "@/components/habit-form-modal";
-import { useAppShell } from "@/components/app-shell";
+import { useAppShell } from "@/components/app-shell-context";
 import { localToday } from "@/components/goal-ui";
 import type { HabitTime } from "@/components/home-cards";
 import { toggleHabit, deleteHabit } from "@/lib/habits.functions";

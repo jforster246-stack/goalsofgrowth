@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Brain, ListChecks, Plus, Repeat, Target, Timer, Trophy } from "lucide-react";
-import { useAppShell } from "@/components/app-shell";
+import { useAppShell } from "@/components/app-shell-context";
 import { HabitFormModal } from "@/components/habit-form-modal";
 import { WinFormModal } from "@/components/win-form-modal";
 import {

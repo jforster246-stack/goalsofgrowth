@@ -39,9 +39,9 @@ export type Database = {
         Row: {
           accent: string | null
           archived_at: string | null
-          description: string | null
           category: string | null
           created_at: string
+          description: string | null
           icon: string | null
           id: string
           name: string
@@ -51,9 +51,9 @@ export type Database = {
         Insert: {
           accent?: string | null
           archived_at?: string | null
-          description?: string | null
           category?: string | null
           created_at?: string
+          description?: string | null
           icon?: string | null
           id?: string
           name: string
@@ -63,9 +63,9 @@ export type Database = {
         Update: {
           accent?: string | null
           archived_at?: string | null
-          description?: string | null
           category?: string | null
           created_at?: string
+          description?: string | null
           icon?: string | null
           id?: string
           name?: string
@@ -76,10 +76,9 @@ export type Database = {
       }
       awa_logs: {
         Row: {
-          duration: string | null
-          photo_path: string | null
           activity_time: string | null
           created_at: string
+          duration: string | null
           hobby_icon: string | null
           hobby_id: string | null
           hobby_name: string
@@ -87,13 +86,13 @@ export type Database = {
           logged_on: string
           minutes: number
           note: string | null
+          photo_path: string | null
           user_id: string
         }
         Insert: {
-          duration?: string | null
-          photo_path?: string | null
           activity_time?: string | null
           created_at?: string
+          duration?: string | null
           hobby_icon?: string | null
           hobby_id?: string | null
           hobby_name?: string
@@ -101,13 +100,13 @@ export type Database = {
           logged_on?: string
           minutes?: number
           note?: string | null
+          photo_path?: string | null
           user_id: string
         }
         Update: {
-          duration?: string | null
-          photo_path?: string | null
           activity_time?: string | null
           created_at?: string
+          duration?: string | null
           hobby_icon?: string | null
           hobby_id?: string | null
           hobby_name?: string
@@ -115,6 +114,7 @@ export type Database = {
           logged_on?: string
           minutes?: number
           note?: string | null
+          photo_path?: string | null
           user_id?: string
         }
         Relationships: []

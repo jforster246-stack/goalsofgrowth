@@ -39,23 +39,13 @@ import {
   updateDisplayName,
 } from "@/lib/goals.functions";
 
-type CustomFocus = {
-  title: string;
-  subtitle?: string;
-  onComplete?: () => void;
-};
+import {
+  AppShellContext,
+  useAppShell,
+  type CustomFocus,
+} from "@/components/app-shell-context";
 
-const AppShellContext = createContext<{
-  openFocus: (stepId?: string) => void;
-  openTimer: (target: CustomFocus) => void;
-  celebrate: () => void;
-} | null>(null);
-
-export function useAppShell() {
-  const context = useContext(AppShellContext);
-  if (!context) throw new Error("useAppShell must be used inside AppShell");
-  return context;
-}
+export { useAppShell };
 
 export function AppShell({
   right,
