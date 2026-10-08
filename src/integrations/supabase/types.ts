@@ -207,7 +207,6 @@ export type Database = {
           created_at: string
           done: boolean
           id: string
-          indent: number
           position: number
           text: string
           user_id: string
@@ -216,7 +215,6 @@ export type Database = {
           created_at?: string
           done?: boolean
           id?: string
-          indent?: number
           position?: number
           text: string
           user_id: string
@@ -225,7 +223,6 @@ export type Database = {
           created_at?: string
           done?: boolean
           id?: string
-          indent?: number
           position?: number
           text?: string
           user_id?: string
