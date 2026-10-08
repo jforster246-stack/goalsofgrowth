@@ -16,6 +16,7 @@ import {
   Frame,
   House,
   ListChecks,
+  NotebookPen,
   Repeat,
   Settings,
   Target,
