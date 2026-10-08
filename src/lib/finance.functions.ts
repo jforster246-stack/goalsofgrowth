@@ -47,8 +47,10 @@ export const addFinanceEntry = createServerFn({ method: "POST" })
         label: data.label,
         amount: data.amount,
         kind: data.kind,
-        account: data.account || null,
-        note: data.note || null,
+        // Only send the newer columns when set, so adding a line still
+        // works on a database that hasn't had migration 0039 yet.
+        ...(data.account ? { account: data.account } : {}),
+        ...(data.note ? { note: data.note } : {}),
         position,
         user_id: context.userId,
       })

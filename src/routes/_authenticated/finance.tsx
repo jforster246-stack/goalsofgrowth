@@ -87,7 +87,12 @@ const fmtWhole = (n: number) =>
 
 function FinancePage() {
   const { data: entries, isPending } = useQuery(financeQueryOptions);
-  const { data: settings, isPending: settingsPending } = useQuery(financeSettingsQueryOptions);
+  // Settings live in a newer table; if it isn't there yet, fall back to
+  // monthly instead of blocking the page.
+  const { data: settings, isError: settingsMissing } = useQuery({
+    ...financeSettingsQueryOptions,
+    retry: 1,
+  });
 
   const list = (entries ?? []) as Entry[];
   const income = list.filter((e) => e.kind === "income");
@@ -105,13 +110,21 @@ function FinancePage() {
           Give every dollar of your pay a job. Split it into buckets until nothing's left over.
         </p>
 
-        {isPending || settingsPending || !entries || !settings ? (
+        {isPending || !entries ? (
           <Loading />
         ) : (
           <>
-            <PaySettings cycle={cycle} anchor={settings.payAnchor} />
+            <PaySettings cycle={cycle} anchor={settings?.payAnchor ?? null} />
 
-            {list.length === 0 && <TemplateCard />}
+            {settingsMissing ? (
+              <div className="rounded-2xl bg-clay/10 px-4 py-3 font-serif text-sm text-clay-deep">
+                The planner's latest database update hasn't been applied yet, so pay settings, the
+                template and savings goals won't save. Ask Lovable to apply the pending migration
+                (0039_finance_buckets_goals), then refresh.
+              </div>
+            ) : (
+              list.length === 0 && <TemplateCard />
+            )}
 
             {/* Summary */}
             <div className="grid grid-cols-3 gap-3">
@@ -159,7 +172,7 @@ function FinancePage() {
               incomeTotal={incomeTotal}
             />
 
-            <ExtraPayMonths cycle={cycle} anchor={settings.payAnchor} />
+            <ExtraPayMonths cycle={cycle} anchor={settings?.payAnchor ?? null} />
 
             <SavingsGoals cycle={cycle} />
           </>
@@ -564,7 +577,7 @@ function ExtraPayMonths({ cycle, anchor }: { cycle: PayCycle; anchor: string | n
 
 function SavingsGoals({ cycle }: { cycle: PayCycle }) {
   const queryClient = useQueryClient();
-  const { data: goals } = useQuery(savingsGoalsQueryOptions);
+  const { data: goals } = useQuery({ ...savingsGoalsQueryOptions, retry: 1 });
   const invalidate = () =>
     queryClient.invalidateQueries({ queryKey: ["finance", "savings-goals"] });
 
