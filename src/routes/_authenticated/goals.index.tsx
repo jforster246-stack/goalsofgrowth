@@ -1,18 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import {
-  useMutation,
-  useQueryClient,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Reorder, useDragControls } from "framer-motion";
 import { GripVertical, Plus } from "lucide-react";
 import { AppShell, useAppShell } from "@/components/app-shell";
 import { GoalCard } from "@/components/home-cards";
-import {
-  GoalCompletePrompt,
-  type CompletedGoal,
-} from "@/components/goal-complete-prompt";
+import { GoalCompletePrompt, type CompletedGoal } from "@/components/goal-complete-prompt";
 import { goalProgress, localToday, type GoalWithSteps } from "@/components/goal-ui";
 import { StampPill } from "@/components/stamp-pill";
 import { GoalTally } from "@/components/goal-tally";
@@ -33,8 +26,7 @@ export const Route = createFileRoute("/_authenticated/goals/")({
       { title: "Your goals — Goals of Growth" },
       {
         name: "description",
-        content:
-          "Every goal you're growing, with its progress and the very next small step.",
+        content: "Every goal you're growing, with its progress and the very next small step.",
       },
     ],
   }),
@@ -65,16 +57,12 @@ function GoalsListPage() {
     claimed.current = true;
     claimUnownedGoals()
       .then((r) => {
-        if (r.claimed > 0)
-          queryClient.invalidateQueries({ queryKey: ["goals"] });
+        if (r.claimed > 0) queryClient.invalidateQueries({ queryKey: ["goals"] });
       })
       .catch(() => {});
   }, [queryClient]);
 
-  const active = useMemo(
-    () => (goals as Goal[]).filter((g) => !g.archived_at),
-    [goals],
-  );
+  const active = useMemo(() => (goals as Goal[]).filter((g) => !g.archived_at), [goals]);
   const archived = (goals as Goal[]).filter((g) => g.archived_at);
 
   // Local, drag-reorderable copy of the active goals.
@@ -91,12 +79,7 @@ function GoalsListPage() {
   };
 
   return (
-    <AppShell
-      title="All goals"
-      titleLeft
-      hideSettings
-      right={<StampPill />}
-    >
+    <AppShell title="All goals" titleLeft hideSettings right={<StampPill />}>
       {goals.length === 0 ? (
         <div className="mt-6 rounded-2xl bg-white p-8 text-center shadow-sm">
           <p className="font-heading text-base text-black">No goals yet</p>
@@ -168,7 +151,7 @@ function DraggableGoalCard({ goal }: { goal: Goal }) {
             type="button"
             aria-label="Drag to reorder"
             onPointerDown={(e) => controls.start(e)}
-            className="absolute left-2 top-2 z-20 grid size-8 cursor-grab touch-none place-items-center rounded-full bg-white/25 text-white backdrop-blur transition-colors hover:bg-white/40 active:cursor-grabbing"
+            className="absolute left-2 top-2 z-20 grid size-8 cursor-grab touch-none place-items-center rounded-full bg-white/25 text-white backdrop-blur transition-colors hover:bg-white/40 active:cursor-grabbing modern:left-auto modern:right-3 modern:top-3 modern:bg-transparent modern:text-black/30 modern:backdrop-blur-none modern:hover:bg-black/5"
           >
             <GripVertical className="size-4" strokeWidth={2} />
           </button>
@@ -200,9 +183,7 @@ function GoalCardItem({ goal, dragHandle }: { goal: Goal; dragHandle?: ReactNode
     const prev = queryClient.getQueryData<Goal[]>(["goals"]);
     queryClient.setQueryData<Goal[]>(["goals"], (old) =>
       (old ?? []).map((g) =>
-        g.id === goal.id
-          ? { ...g, archived_at: archived ? new Date().toISOString() : null }
-          : g,
+        g.id === goal.id ? { ...g, archived_at: archived ? new Date().toISOString() : null } : g,
       ),
     );
     return { prev };
@@ -247,8 +228,7 @@ function GoalCardItem({ goal, dragHandle }: { goal: Goal; dragHandle?: ReactNode
     onSettled: refresh,
   });
 
-  const open = () =>
-    navigate({ to: "/goals/$goalId", params: { goalId: goal.id } });
+  const open = () => navigate({ to: "/goals/$goalId", params: { goalId: goal.id } });
 
   return (
     <>
@@ -273,9 +253,10 @@ function GoalCardItem({ goal, dragHandle }: { goal: Goal; dragHandle?: ReactNode
       {(winMutation.isError || archiveMutation.isError) && (
         <p className="mt-2 rounded-xl bg-clay/10 px-3 py-2 font-mono text-[11px] leading-snug text-clay-deep">
           Couldn't save:{" "}
-          {String(
-            (winMutation.error ?? archiveMutation.error) as unknown,
-          ).replace(/^Error:\s*/, "")}
+          {String((winMutation.error ?? archiveMutation.error) as unknown).replace(
+            /^Error:\s*/,
+            "",
+          )}
         </p>
       )}
       <GoalCompletePrompt goal={promptGoal} onClose={() => setPromptGoal(null)} />

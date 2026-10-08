@@ -3,6 +3,8 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
+/* `modern:` styles apply when the Modern style is picked in settings. */
+@custom-variant modern (&:where([data-font="modern"], [data-font="modern"] *));
 
 /*
  * Design system definition.

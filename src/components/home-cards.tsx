@@ -57,9 +57,7 @@ export function NextStepRow({
       >
         <GoalGlyph goal={goal} className={cn("size-10 shrink-0", accent.text)} />
         <span className="flex min-w-0 flex-col">
-          <span className="font-serif text-sm text-black">
-            {step.title}
-          </span>
+          <span className="font-serif text-sm text-black">{step.title}</span>
           <span className={cn("truncate font-serif text-[10px] italic", accent.text)}>
             {goal.title}
           </span>
@@ -71,10 +69,7 @@ export function NextStepRow({
           type="button"
           onClick={onStartTimer}
           aria-label="Start a focus timer for this step"
-          className={cn(
-            "flex items-center justify-center rounded-lg p-2 text-white",
-            accent.deep,
-          )}
+          className={cn("flex items-center justify-center rounded-lg p-2 text-white", accent.deep)}
         >
           <Timer className="size-6" strokeWidth={1.75} />
         </button>
@@ -124,9 +119,7 @@ export function NextStepPortrait({
         <span className="font-serif text-sm leading-snug text-black [overflow-wrap:anywhere]">
           {step.title}
         </span>
-        <span className={cn("font-serif text-[10px] italic", accent.text)}>
-          {goal.title}
-        </span>
+        <span className={cn("font-serif text-[10px] italic", accent.text)}>{goal.title}</span>
       </button>
 
       <div className="mt-3 flex items-center gap-2">
@@ -203,8 +196,46 @@ export function GoalCard({
 
       {dragHandle}
 
-      {/* Ticket stub */}
-      <div className="relative flex h-[410px] flex-col overflow-hidden rounded-sm bg-white shadow-sm">
+      {/* Modern style: a plain, quiet card */}
+      <div className="hidden min-h-[260px] flex-col rounded-2xl bg-white p-5 shadow-sm ring-1 ring-black/5 modern:flex">
+        <button type="button" onClick={onOpen} className="flex items-start gap-3 text-left">
+          <GoalGlyph goal={goal} className={cn("mt-0.5 size-6 shrink-0", accent.text)} />
+          <span className="line-clamp-2 min-w-0 flex-1 pr-8 text-lg font-medium leading-snug text-black">
+            {goal.title}
+          </span>
+        </button>
+        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-black/5">
+          <div
+            className={cn("h-full rounded-full transition-[width] duration-500", accent.bar)}
+            style={{ width: `${progress.pct}%` }}
+          />
+        </div>
+        <p className="mt-1.5 text-xs text-black/45">
+          {hasSteps
+            ? `${progress.pct}% · ${progress.done} of ${progress.total} steps`
+            : "No steps yet"}
+        </p>
+        <p className="mt-5 text-[11px] font-medium uppercase tracking-wide text-black/40">
+          {complete ? "Complete" : "Next step"}
+        </p>
+        <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-black">{stepText}</p>
+        <div className="mt-auto pt-5">
+          <GoalCardActions
+            variant="modern"
+            accent={accent}
+            complete={complete}
+            hasSteps={hasSteps}
+            onFocus={onFocus}
+            onComplete={onComplete}
+            onAdd={onAdd}
+            onAddWin={onAddWin}
+            onArchive={onArchive}
+          />
+        </div>
+      </div>
+
+      {/* Traditional style: the ticket stub */}
+      <div className="relative flex h-[410px] flex-col overflow-hidden rounded-sm bg-white shadow-sm modern:hidden">
         {/* Coloured top — stamp in the corner, title below */}
         <button
           type="button"
@@ -229,8 +260,7 @@ export function GoalCard({
           <div
             className={cn("absolute inset-x-6 top-0 h-[3px] -translate-y-1/2", accent.text)}
             style={{
-              backgroundImage:
-                "radial-gradient(circle, currentColor 1.5px, transparent 1.6px)",
+              backgroundImage: "radial-gradient(circle, currentColor 1.5px, transparent 1.6px)",
               backgroundSize: "11px 100%",
               backgroundRepeat: "repeat-x",
               backgroundPosition: "center",
@@ -254,66 +284,17 @@ export function GoalCard({
           </p>
 
           <div className="mt-auto pt-4">
-          {complete ? (
-            <div className="flex flex-col gap-1.5">
-              <button
-                type="button"
-                onClick={onAddWin}
-                className={cn(
-                  "flex w-full items-center justify-center gap-2 rounded-xl py-2.5 font-serif text-sm italic text-white",
-                  accent.deep,
-                )}
-              >
-                Add to wins log
-                <Trophy className="size-5" strokeWidth={2} />
-              </button>
-              <button
-                type="button"
-                onClick={onArchive}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-black/5 py-2.5 font-serif text-sm italic text-black/60 transition-colors hover:bg-black/10"
-              >
-                Archive
-                <Archive className="size-5" strokeWidth={2} />
-              </button>
-            </div>
-          ) : hasSteps ? (
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={onFocus}
-                className={cn(
-                  "flex flex-1 items-center justify-center gap-2 rounded-xl py-3 font-serif text-sm italic text-white",
-                  accent.surface,
-                )}
-              >
-                Focus on this
-                <Timer className="size-5" strokeWidth={1.75} />
-              </button>
-              <button
-                type="button"
-                onClick={onComplete}
-                aria-label="Mark next step complete"
-                className={cn(
-                  "grid size-[46px] shrink-0 place-items-center rounded-xl text-white",
-                  accent.deep,
-                )}
-              >
-                <Check className="size-6" strokeWidth={2.5} />
-              </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={onAdd}
-              className={cn(
-                "flex w-full items-center justify-center gap-2 rounded-xl py-3 font-serif text-sm italic text-white",
-                accent.surface,
-              )}
-            >
-              Add a step
-              <Plus className="size-5" strokeWidth={2} />
-            </button>
-          )}
+            <GoalCardActions
+              variant="ticket"
+              accent={accent}
+              complete={complete}
+              hasSteps={hasSteps}
+              onFocus={onFocus}
+              onComplete={onComplete}
+              onAdd={onAdd}
+              onAddWin={onAddWin}
+              onArchive={onArchive}
+            />
           </div>
         </div>
 
@@ -339,17 +320,140 @@ export function GoalCard({
   );
 }
 
+/** The buttons under a goal card, styled for the ticket or the modern card. */
+function GoalCardActions({
+  variant,
+  accent,
+  complete,
+  hasSteps,
+  onFocus,
+  onComplete,
+  onAdd,
+  onAddWin,
+  onArchive,
+}: {
+  variant: "ticket" | "modern";
+  accent: ReturnType<typeof accentOf>;
+  complete: boolean;
+  hasSteps: boolean;
+  onFocus?: (() => void) | undefined;
+  onComplete?: (() => void) | undefined;
+  onAdd?: (() => void) | undefined;
+  onAddWin?: (() => void) | undefined;
+  onArchive?: (() => void) | undefined;
+}) {
+  if (variant === "modern") {
+    const primary =
+      "flex flex-1 items-center justify-center gap-2 rounded-xl bg-focus py-2.5 text-sm font-medium text-white transition-colors hover:bg-focus/90";
+    const quiet =
+      "flex w-full items-center justify-center gap-2 rounded-xl bg-black/5 py-2.5 text-sm font-medium text-black/60 transition-colors hover:bg-black/10";
+    if (complete) {
+      return (
+        <div className="flex flex-col gap-1.5">
+          <button type="button" onClick={onAddWin} className={primary}>
+            <Trophy className="size-4" strokeWidth={2} />
+            Add to wins log
+          </button>
+          <button type="button" onClick={onArchive} className={quiet}>
+            <Archive className="size-4" strokeWidth={2} />
+            Archive
+          </button>
+        </div>
+      );
+    }
+    if (hasSteps) {
+      return (
+        <div className="flex items-center gap-2">
+          <button type="button" onClick={onFocus} className={primary}>
+            <Timer className="size-4" strokeWidth={2} />
+            Focus on this
+          </button>
+          <button
+            type="button"
+            onClick={onComplete}
+            aria-label="Mark next step complete"
+            className="grid size-[42px] shrink-0 place-items-center rounded-xl text-black/55 ring-1 ring-black/10 transition-colors hover:bg-black/5 hover:text-black"
+          >
+            <Check className="size-5" strokeWidth={2.25} />
+          </button>
+        </div>
+      );
+    }
+    return (
+      <button type="button" onClick={onAdd} className={quiet}>
+        <Plus className="size-4" strokeWidth={2} />
+        Add a step
+      </button>
+    );
+  }
+
+  return complete ? (
+    <div className="flex flex-col gap-1.5">
+      <button
+        type="button"
+        onClick={onAddWin}
+        className={cn(
+          "flex w-full items-center justify-center gap-2 rounded-xl py-2.5 font-serif text-sm italic text-white",
+          accent.deep,
+        )}
+      >
+        Add to wins log
+        <Trophy className="size-5" strokeWidth={2} />
+      </button>
+      <button
+        type="button"
+        onClick={onArchive}
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-black/5 py-2.5 font-serif text-sm italic text-black/60 transition-colors hover:bg-black/10"
+      >
+        Archive
+        <Archive className="size-5" strokeWidth={2} />
+      </button>
+    </div>
+  ) : hasSteps ? (
+    <div className="flex items-center gap-2">
+      <button
+        type="button"
+        onClick={onFocus}
+        className={cn(
+          "flex flex-1 items-center justify-center gap-2 rounded-xl py-3 font-serif text-sm italic text-white",
+          accent.surface,
+        )}
+      >
+        Focus on this
+        <Timer className="size-5" strokeWidth={1.75} />
+      </button>
+      <button
+        type="button"
+        onClick={onComplete}
+        aria-label="Mark next step complete"
+        className={cn(
+          "grid size-[46px] shrink-0 place-items-center rounded-xl text-white",
+          accent.deep,
+        )}
+      >
+        <Check className="size-6" strokeWidth={2.5} />
+      </button>
+    </div>
+  ) : (
+    <button
+      type="button"
+      onClick={onAdd}
+      className={cn(
+        "flex w-full items-center justify-center gap-2 rounded-xl py-3 font-serif text-sm italic text-white",
+        accent.surface,
+      )}
+    >
+      Add a step
+      <Plus className="size-5" strokeWidth={2} />
+    </button>
+  );
+}
+
 /* ------------------------------------------------------------------ */
 /* Goal hero — the standalone coloured card on the Goal Detail screen  */
 /* ------------------------------------------------------------------ */
 
-export function GoalHero({
-  goal,
-  children,
-}: {
-  goal: HomeGoal;
-  children: ReactNode;
-}) {
+export function GoalHero({ goal, children }: { goal: HomeGoal; children: ReactNode }) {
   const accent = accentOf(goal);
   const { pct } = goalProgress(goal);
 

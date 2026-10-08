@@ -127,36 +127,49 @@ export function AppShell({
             celebrate: () => setConfettiKey((k) => k + 1),
           }}
         >
-          {/* Top utility bar: stamps on the left, add on the right. */}
-          <header className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              {backTo && (
-                <button
-                  type="button"
-                  aria-label="Back"
-                  onClick={() => {
-                    if (window.history.length > 1) router.history.back();
-                    else navigate({ to: backTo });
-                  }}
-                  className="grid size-10 place-items-center rounded-full bg-focus text-white shadow-md transition-colors hover:bg-focus/90"
+          {/* Header: page heading on the left, stamps + add lined up on the right. */}
+          <header className="flex items-center gap-3">
+            {backTo && (
+              <button
+                type="button"
+                aria-label="Back"
+                onClick={() => {
+                  if (window.history.length > 1) router.history.back();
+                  else navigate({ to: backTo });
+                }}
+                className="grid size-10 shrink-0 place-items-center rounded-full bg-focus text-white shadow-md transition-colors hover:bg-focus/90"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="size-5"
                 >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="size-5"
-                  >
-                    <path d="M15 18l-6-6 6-6" />
-                  </svg>
-                </button>
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+              </button>
+            )}
+
+            <div className="min-w-0 flex-1">
+              {title ? (
+                <h1 className="font-heading text-2xl tracking-tight text-foreground">{title}</h1>
+              ) : (
+                <>
+                  <h1 className="font-display text-3xl font-normal leading-[1.1] tracking-tight md:text-4xl">
+                    {profile?.display_name ? `${profile.display_name}'s ` : "Your "}
+                    Goals of Growth
+                  </h1>
+                  <p className="mt-2 text-sm italic text-muted-foreground">
+                    "{quoteOfTheDay(localToday())}"
+                  </p>
+                </>
               )}
-              <StampPill />
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex shrink-0 items-center gap-2">
               {!hideSettings && (
                 <button
                   onClick={() => setProfileOpen(true)}
@@ -166,24 +179,10 @@ export function AppShell({
                   <Settings className="size-4" strokeWidth={2} />
                 </button>
               )}
+              <StampPill />
               <AddMenu />
             </div>
           </header>
-
-          {/* Page heading, beneath the utility bar. */}
-          {title ? (
-            <h1 className="mt-5 font-heading text-2xl tracking-tight text-foreground">{title}</h1>
-          ) : (
-            <>
-              <h1 className="mt-5 font-display text-3xl font-normal leading-[1.1] tracking-tight md:text-4xl">
-                {profile?.display_name ? `${profile.display_name}'s ` : "Your "}
-                Goals of Growth
-              </h1>
-              <p className="mt-2 text-sm italic text-muted-foreground">
-                "{quoteOfTheDay(localToday())}"
-              </p>
-            </>
-          )}
 
           {children}
 
