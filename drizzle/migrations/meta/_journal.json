@@ -309,6 +309,20 @@
       "when": 1791443506653,
       "tag": "0043_savings_goal_target_date",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1791443716267,
+      "tag": "0044_0042_finance_bucket_group",
+      "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1791443731375,
+      "tag": "0045_0043_savings_goal_target_date",
+      "breakpoints": true
     }
   ]
 }
