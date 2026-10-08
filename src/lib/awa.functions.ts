@@ -3,6 +3,13 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+const accentSchema = z.enum(["mint", "sea", "clay", "plum", "rose", "sky"]);
+const durationSchema = z.enum(["little", "hour", "afternoon", "day"]);
+// Photos are stored at {user_id}/{file}.jpg in the private awa-photos bucket.
+const photoPathSchema = z
+  .string()
+  .max(200)
+  .regex(/^[0-9a-f-]{36}\/[A-Za-z0-9._-]+$/);
 
 /* ----------------------------- Hobbies ----------------------------- */
 
@@ -26,14 +33,15 @@ export const addAwaHobby = createServerFn({ method: "POST" })
         name: z.string().trim().min(1).max(80),
         icon: z.string().trim().max(8).optional(),
         category: z.string().trim().max(60).optional(),
+        description: z.string().trim().max(200).optional(),
+        accent: accentSchema.optional(),
       })
       .parse(data),
   )
   .handler(async ({ data, context }) => {
     const supabase = context.supabase;
     const { data: existing } = await supabase.from("awa_hobbies").select("position");
-    const position =
-      (existing ?? []).reduce((m, h) => Math.max(m, h.position), 0) + 1;
+    const position = (existing ?? []).reduce((m, h) => Math.max(m, h.position), 0) + 1;
 
     const { data: hobby, error } = await supabase
       .from("awa_hobbies")
@@ -41,6 +49,8 @@ export const addAwaHobby = createServerFn({ method: "POST" })
         name: data.name,
         icon: data.icon || null,
         category: data.category || null,
+        description: data.description || null,
+        accent: data.accent ?? null,
         position,
         user_id: context.userId,
       })
@@ -50,14 +60,73 @@ export const addAwaHobby = createServerFn({ method: "POST" })
     return hobby;
   });
 
+export const updateAwaHobby = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        name: z.string().trim().min(1).max(80),
+        icon: z.string().trim().max(8).nullable(),
+        description: z.string().trim().max(200).nullable(),
+        accent: accentSchema.nullable(),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("awa_hobbies")
+      .update({
+        name: data.name,
+        icon: data.icon || null,
+        description: data.description || null,
+        accent: data.accent,
+      })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    // Keep the name/icon copied onto past entries in step.
+    const { error: logsError } = await context.supabase
+      .from("awa_logs")
+      .update({ hobby_name: data.name, hobby_icon: data.icon || null })
+      .eq("hobby_id", data.id);
+    if (logsError) throw new Error(logsError.message);
+    return { ok: true };
+  });
+
+/** "Put away" hides a hobby from the shelf but keeps all its memories. */
+export const setAwaHobbyPutAway = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) => z.object({ id: z.string().uuid(), putAway: z.boolean() }).parse(data))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("awa_hobbies")
+      .update({ archived_at: data.putAway ? new Date().toISOString() : null })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const reorderAwaHobbies = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) =>
+    z.object({ orderedIds: z.array(z.string().uuid()).min(1).max(200) }).parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const supabase = context.supabase;
+    // RLS scopes updates to the user's own hobbies.
+    await Promise.all(
+      data.orderedIds.map((id, index) =>
+        supabase.from("awa_hobbies").update({ position: index }).eq("id", id),
+      ),
+    );
+    return { ok: true };
+  });
+
 export const deleteAwaHobby = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase
-      .from("awa_hobbies")
-      .delete()
-      .eq("id", data.id);
+    const { error } = await context.supabase.from("awa_hobbies").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -86,6 +155,8 @@ export const addAwaLog = createServerFn({ method: "POST" })
         hobbyIcon: z.string().trim().max(8).optional(),
         activityTime: z.string().trim().max(10).optional(),
         note: z.string().trim().max(1000).optional(),
+        duration: durationSchema.optional(),
+        photoPath: photoPathSchema.optional(),
         loggedOn: dateSchema,
       })
       .parse(data),
@@ -99,6 +170,8 @@ export const addAwaLog = createServerFn({ method: "POST" })
         hobby_icon: data.hobbyIcon || null,
         activity_time: data.activityTime || null,
         note: data.note || null,
+        duration: data.duration ?? null,
+        photo_path: data.photoPath ?? null,
         logged_on: data.loggedOn,
         user_id: context.userId,
       })
@@ -117,6 +190,8 @@ export const updateAwaLog = createServerFn({ method: "POST" })
         loggedOn: dateSchema,
         activityTime: z.string().trim().max(10).nullable().optional(),
         note: z.string().trim().max(1000).nullable().optional(),
+        duration: durationSchema.nullable().optional(),
+        photoPath: photoPathSchema.nullable().optional(),
       })
       .parse(data),
   )
@@ -125,14 +200,15 @@ export const updateAwaLog = createServerFn({ method: "POST" })
       logged_on: string;
       activity_time?: string | null;
       note?: string | null;
+      duration?: string | null;
+      photo_path?: string | null;
     } = { logged_on: data.loggedOn };
     if (data.activityTime !== undefined) patch.activity_time = data.activityTime || null;
     if (data.note !== undefined) patch.note = data.note || null;
+    if (data.duration !== undefined) patch.duration = data.duration;
+    if (data.photoPath !== undefined) patch.photo_path = data.photoPath;
 
-    const { error } = await context.supabase
-      .from("awa_logs")
-      .update(patch)
-      .eq("id", data.id);
+    const { error } = await context.supabase.from("awa_logs").update(patch).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -141,10 +217,7 @@ export const deleteAwaLog = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase
-      .from("awa_logs")
-      .delete()
-      .eq("id", data.id);
+    const { error } = await context.supabase.from("awa_logs").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -166,14 +239,11 @@ export const listAwaWishlist = createServerFn({ method: "GET" })
 
 export const addAwaWishlistItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data) =>
-    z.object({ title: z.string().trim().min(1).max(140) }).parse(data),
-  )
+  .inputValidator((data) => z.object({ title: z.string().trim().min(1).max(140) }).parse(data))
   .handler(async ({ data, context }) => {
     const supabase = context.supabase;
     const { data: existing } = await supabase.from("awa_wishlist").select("position");
-    const position =
-      (existing ?? []).reduce((m, w) => Math.max(m, w.position), 0) + 1;
+    const position = (existing ?? []).reduce((m, w) => Math.max(m, w.position), 0) + 1;
 
     const { data: item, error } = await supabase
       .from("awa_wishlist")
@@ -186,9 +256,7 @@ export const addAwaWishlistItem = createServerFn({ method: "POST" })
 
 export const toggleAwaWishlistItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data) =>
-    z.object({ id: z.string().uuid(), done: z.boolean() }).parse(data),
-  )
+  .inputValidator((data) => z.object({ id: z.string().uuid(), done: z.boolean() }).parse(data))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("awa_wishlist")
@@ -202,10 +270,7 @@ export const deleteAwaWishlistItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase
-      .from("awa_wishlist")
-      .delete()
-      .eq("id", data.id);
+    const { error } = await context.supabase.from("awa_wishlist").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

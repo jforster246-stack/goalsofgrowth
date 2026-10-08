@@ -22,6 +22,8 @@ import { Route as AuthenticatedOverviewRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedRoutinesRouteImport } from './routes/_authenticated/routines'
 import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated/welcome'
 import { Route as AuthenticatedWinsRouteImport } from './routes/_authenticated/wins'
+import { Route as AuthenticatedAwaIndexRouteImport } from './routes/_authenticated/awa.index'
+import { Route as AuthenticatedAwaHobbyIdRouteImport } from './routes/_authenticated/awa.$hobbyId'
 import { Route as AuthenticatedGoalsIndexRouteImport } from './routes/_authenticated/goals.index'
 import { Route as AuthenticatedGoalsGoalIdRouteImport } from './routes/_authenticated/goals.$goalId'
 import { Route as AuthenticatedGoalsNewRouteImport } from './routes/_authenticated/goals.new'
@@ -92,6 +94,16 @@ const AuthenticatedWinsRoute = AuthenticatedWinsRouteImport.update({
   path: '/wins',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAwaIndexRoute = AuthenticatedAwaIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedAwaRoute,
+} as any)
+const AuthenticatedAwaHobbyIdRoute = AuthenticatedAwaHobbyIdRouteImport.update({
+  id: '/$hobbyId',
+  path: '/$hobbyId',
+  getParentRoute: () => AuthenticatedAwaRoute,
+} as any)
 const AuthenticatedGoalsIndexRoute = AuthenticatedGoalsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -124,7 +136,7 @@ const AuthenticatedRoutinesRoutineIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/awa': typeof AuthenticatedAwaRoute
+  '/awa': typeof AuthenticatedAwaRouteWithChildren
   '/braindump': typeof AuthenticatedBraindumpRoute
   '/finance': typeof AuthenticatedFinanceRoute
   '/gallery': typeof AuthenticatedGalleryRoute
@@ -134,16 +146,17 @@ export interface FileRoutesByFullPath {
   '/routines': typeof AuthenticatedRoutinesRouteWithChildren
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/wins': typeof AuthenticatedWinsRoute
+  '/awa/$hobbyId': typeof AuthenticatedAwaHobbyIdRoute
   '/goals/$goalId': typeof AuthenticatedGoalsGoalIdRoute
   '/goals/new': typeof AuthenticatedGoalsNewRoute
   '/routines/$routineId': typeof AuthenticatedRoutinesRoutineIdRoute
+  '/awa/': typeof AuthenticatedAwaIndexRoute
   '/goals/': typeof AuthenticatedGoalsIndexRoute
   '/routines/': typeof AuthenticatedRoutinesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/awa': typeof AuthenticatedAwaRoute
   '/braindump': typeof AuthenticatedBraindumpRoute
   '/finance': typeof AuthenticatedFinanceRoute
   '/gallery': typeof AuthenticatedGalleryRoute
@@ -151,9 +164,11 @@ export interface FileRoutesByTo {
   '/overview': typeof AuthenticatedOverviewRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/wins': typeof AuthenticatedWinsRoute
+  '/awa/$hobbyId': typeof AuthenticatedAwaHobbyIdRoute
   '/goals/$goalId': typeof AuthenticatedGoalsGoalIdRoute
   '/goals/new': typeof AuthenticatedGoalsNewRoute
   '/routines/$routineId': typeof AuthenticatedRoutinesRoutineIdRoute
+  '/awa': typeof AuthenticatedAwaIndexRoute
   '/goals': typeof AuthenticatedGoalsIndexRoute
   '/routines': typeof AuthenticatedRoutinesIndexRoute
 }
@@ -162,7 +177,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/_authenticated/awa': typeof AuthenticatedAwaRoute
+  '/_authenticated/awa': typeof AuthenticatedAwaRouteWithChildren
   '/_authenticated/braindump': typeof AuthenticatedBraindumpRoute
   '/_authenticated/finance': typeof AuthenticatedFinanceRoute
   '/_authenticated/gallery': typeof AuthenticatedGalleryRoute
@@ -172,9 +187,11 @@ export interface FileRoutesById {
   '/_authenticated/routines': typeof AuthenticatedRoutinesRouteWithChildren
   '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
   '/_authenticated/wins': typeof AuthenticatedWinsRoute
+  '/_authenticated/awa/$hobbyId': typeof AuthenticatedAwaHobbyIdRoute
   '/_authenticated/goals/$goalId': typeof AuthenticatedGoalsGoalIdRoute
   '/_authenticated/goals/new': typeof AuthenticatedGoalsNewRoute
   '/_authenticated/routines/$routineId': typeof AuthenticatedRoutinesRoutineIdRoute
+  '/_authenticated/awa/': typeof AuthenticatedAwaIndexRoute
   '/_authenticated/goals/': typeof AuthenticatedGoalsIndexRoute
   '/_authenticated/routines/': typeof AuthenticatedRoutinesIndexRoute
 }
@@ -193,16 +210,17 @@ export interface FileRouteTypes {
     | '/routines'
     | '/welcome'
     | '/wins'
+    | '/awa/$hobbyId'
     | '/goals/$goalId'
     | '/goals/new'
     | '/routines/$routineId'
+    | '/awa/'
     | '/goals/'
     | '/routines/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
-    | '/awa'
     | '/braindump'
     | '/finance'
     | '/gallery'
@@ -210,9 +228,11 @@ export interface FileRouteTypes {
     | '/overview'
     | '/welcome'
     | '/wins'
+    | '/awa/$hobbyId'
     | '/goals/$goalId'
     | '/goals/new'
     | '/routines/$routineId'
+    | '/awa'
     | '/goals'
     | '/routines'
   id:
@@ -230,9 +250,11 @@ export interface FileRouteTypes {
     | '/_authenticated/routines'
     | '/_authenticated/welcome'
     | '/_authenticated/wins'
+    | '/_authenticated/awa/$hobbyId'
     | '/_authenticated/goals/$goalId'
     | '/_authenticated/goals/new'
     | '/_authenticated/routines/$routineId'
+    | '/_authenticated/awa/'
     | '/_authenticated/goals/'
     | '/_authenticated/routines/'
   fileRoutesById: FileRoutesById
@@ -336,6 +358,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWinsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/awa/': {
+      id: '/_authenticated/awa/'
+      path: '/'
+      fullPath: '/awa/'
+      preLoaderRoute: typeof AuthenticatedAwaIndexRouteImport
+      parentRoute: typeof AuthenticatedAwaRoute
+    }
+    '/_authenticated/awa/$hobbyId': {
+      id: '/_authenticated/awa/$hobbyId'
+      path: '/$hobbyId'
+      fullPath: '/awa/$hobbyId'
+      preLoaderRoute: typeof AuthenticatedAwaHobbyIdRouteImport
+      parentRoute: typeof AuthenticatedAwaRoute
+    }
     '/_authenticated/goals/': {
       id: '/_authenticated/goals/'
       path: '/'
@@ -374,6 +410,19 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedAwaRouteChildren {
+  AuthenticatedAwaHobbyIdRoute: typeof AuthenticatedAwaHobbyIdRoute
+  AuthenticatedAwaIndexRoute: typeof AuthenticatedAwaIndexRoute
+}
+
+const AuthenticatedAwaRouteChildren: AuthenticatedAwaRouteChildren = {
+  AuthenticatedAwaHobbyIdRoute: AuthenticatedAwaHobbyIdRoute,
+  AuthenticatedAwaIndexRoute: AuthenticatedAwaIndexRoute,
+}
+
+const AuthenticatedAwaRouteWithChildren =
+  AuthenticatedAwaRoute._addFileChildren(AuthenticatedAwaRouteChildren)
+
 interface AuthenticatedGoalsRouteChildren {
   AuthenticatedGoalsGoalIdRoute: typeof AuthenticatedGoalsGoalIdRoute
   AuthenticatedGoalsNewRoute: typeof AuthenticatedGoalsNewRoute
@@ -405,7 +454,7 @@ const AuthenticatedRoutinesRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAwaRoute: typeof AuthenticatedAwaRoute
+  AuthenticatedAwaRoute: typeof AuthenticatedAwaRouteWithChildren
   AuthenticatedBraindumpRoute: typeof AuthenticatedBraindumpRoute
   AuthenticatedFinanceRoute: typeof AuthenticatedFinanceRoute
   AuthenticatedGalleryRoute: typeof AuthenticatedGalleryRoute
@@ -418,7 +467,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAwaRoute: AuthenticatedAwaRoute,
+  AuthenticatedAwaRoute: AuthenticatedAwaRouteWithChildren,
   AuthenticatedBraindumpRoute: AuthenticatedBraindumpRoute,
   AuthenticatedFinanceRoute: AuthenticatedFinanceRoute,
   AuthenticatedGalleryRoute: AuthenticatedGalleryRoute,

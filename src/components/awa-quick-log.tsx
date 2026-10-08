@@ -13,7 +13,8 @@ import { cn } from "@/lib/utils";
 export function AwaQuickLog({ className }: { className?: string }) {
   const { data: hobbies } = useQuery(awaHobbiesQueryOptions);
   const [open, setOpen] = useState(false);
-  const list = (hobbies ?? []) as AwaHobby[];
+  // Put-away hobbies stay off the quick log.
+  const list = ((hobbies ?? []) as AwaHobby[]).filter((h) => !h.archived_at);
 
   return (
     <>
@@ -28,9 +29,7 @@ export function AwaQuickLog({ className }: { className?: string }) {
         </span>
         <div className="min-w-0 flex-1">
           <p className="font-heading text-sm text-black">What did you do today?</p>
-          <p className="font-serif text-xs text-black/45">
-            Log a hobby in a few seconds.
-          </p>
+          <p className="font-serif text-xs text-black/45">Keep a little record of it.</p>
         </div>
         {list.length > 0 ? (
           <button
