@@ -11,7 +11,7 @@ export type Artwork = {
 };
 
 /** Price of any artwork, in stamps. */
-export const ARTWORK_COST = 15;
+export const ARTWORK_COST = 10;
 
 /**
  * The 50 most famous artworks. Shown three-at-a-time as daily picks you can buy

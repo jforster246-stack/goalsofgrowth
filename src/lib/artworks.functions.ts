@@ -16,18 +16,22 @@ const artworkIdSchema = z
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 async function earnedStamps(supabase: any): Promise<number> {
-  const [stampsRes, goalsRes, stepsRes, habitRes, profileRes] =
+  const [stampsRes, goalsRes, stepsRes, habitRes, habitDefRes, profileRes] =
     await Promise.all([
       supabase.from("stamps").select("goal_id"),
       supabase.from("goals").select("id"),
       supabase.from("steps").select("goal_id, done"),
       supabase.from("habit_completions").select("habit_id, completed_on"),
+      supabase
+        .from("habits")
+        .select("id, time_of_day, frequency, days_of_week, interval_days, created_at"),
       supabase.from("profiles").select("bonus_stamps").maybeSingle(),
     ]);
   if (stampsRes.error) throw new Error(stampsRes.error.message);
   if (goalsRes.error) throw new Error(goalsRes.error.message);
   if (stepsRes.error) throw new Error(stepsRes.error.message);
   if (habitRes.error) throw new Error(habitRes.error.message);
+  if (habitDefRes.error) throw new Error(habitDefRes.error.message);
   if (profileRes.error) throw new Error(profileRes.error.message);
 
   const ledger = (stampsRes.data ?? []) as { goal_id: string | null }[];
@@ -52,6 +56,14 @@ async function earnedStamps(supabase: any): Promise<number> {
 
   const habitBonus = habitStampBonusFromRows(
     (habitRes.data ?? []) as { habit_id: string; completed_on: string }[],
+    (habitDefRes.data ?? []) as {
+      id: string;
+      time_of_day: string;
+      frequency: string;
+      days_of_week: string | null;
+      interval_days: number | null;
+      created_at: string;
+    }[],
   );
   const signinBonus = (profileRes.data?.bonus_stamps as number | undefined) ?? 0;
   return ledger.length + extraGoals + habitBonus + signinBonus;

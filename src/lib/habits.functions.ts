@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { isHabitDueToday } from "@/lib/habit-schedule";
 
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const timeOfDaySchema = z.enum(["morning", "afternoon", "evening"]);
@@ -114,45 +115,67 @@ export const listHabitStreaks = createServerFn({ method: "GET" })
  * of three consecutive days counts). Shared by the stamp pill and the spendable
  * balance so both agree.
  */
+type HabitForBonus = {
+  id: string;
+  time_of_day: string;
+  frequency: string;
+  days_of_week: string | null;
+  interval_days: number | null;
+  created_at: string;
+};
+
+const DAY_SECTIONS = ["morning", "afternoon", "evening"] as const;
+
+/**
+ * Stamps earned from habits, recomputed from the completion history. Per day:
+ *  - 2 stamps for every 3 habits you tick off, and
+ *  - 5 stamps for finishing a whole part of the day (every habit that was due
+ *    that morning / afternoon / evening is ticked off).
+ */
 export function habitStampBonusFromRows(
-  rows: { habit_id: string; completed_on: string }[],
+  completions: { habit_id: string; completed_on: string }[],
+  habits: HabitForBonus[] = [],
 ): number {
-  const byHabit = new Map<string, string[]>();
-  for (const r of rows) {
-    const arr = byHabit.get(r.habit_id);
-    if (arr) arr.push(r.completed_on);
-    else byHabit.set(r.habit_id, [r.completed_on]);
+  // completed habit ids per day
+  const byDay = new Map<string, Set<string>>();
+  for (const c of completions) {
+    const set = byDay.get(c.completed_on) ?? new Set<string>();
+    set.add(c.habit_id);
+    byDay.set(c.completed_on, set);
   }
 
-  const DAY = 86_400_000;
-  let sets = 0;
-  for (const dates of byHabit.values()) {
-    const uniq = [...new Set(dates)].sort();
-    let run = 0;
-    let prev: number | null = null;
-    for (const d of uniq) {
-      const t = Date.parse(`${d}T00:00:00Z`);
-      if (prev !== null && t - prev === DAY) {
-        run += 1;
-      } else {
-        sets += Math.floor(run / 3);
-        run = 1;
-      }
-      prev = t;
+  let stamps = 0;
+  for (const [day, done] of byDay) {
+    // 2 stamps for every 3 habits done that day.
+    stamps += Math.floor(done.size / 3) * 2;
+
+    // 5 stamps for each part of the day where everything due got done.
+    const date = new Date(`${day}T00:00:00`);
+    for (const section of DAY_SECTIONS) {
+      const due = habits.filter(
+        (h) =>
+          h.time_of_day === section &&
+          h.created_at.slice(0, 10) <= day &&
+          isHabitDueToday(h, date),
+      );
+      if (due.length > 0 && due.every((h) => done.has(h.id))) stamps += 5;
     }
-    sets += Math.floor(run / 3);
   }
-  return sets * 2;
+  return stamps;
 }
 
 export const getHabitStampBonus = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
-      .from("habit_completions")
-      .select("habit_id, completed_on");
-    if (error) throw new Error(error.message);
-    return habitStampBonusFromRows(data ?? []);
+    const [compRes, habitRes] = await Promise.all([
+      context.supabase.from("habit_completions").select("habit_id, completed_on"),
+      context.supabase
+        .from("habits")
+        .select("id, time_of_day, frequency, days_of_week, interval_days, created_at"),
+    ]);
+    if (compRes.error) throw new Error(compRes.error.message);
+    if (habitRes.error) throw new Error(habitRes.error.message);
+    return habitStampBonusFromRows(compRes.data ?? [], habitRes.data ?? []);
   });
 
 /**

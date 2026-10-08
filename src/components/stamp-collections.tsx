@@ -15,6 +15,7 @@ import {
   winsQueryOptions,
 } from "@/lib/goal-queries";
 import { mergeStamps, type StampView } from "@/lib/stamp-view";
+import { ARTWORK_COST } from "@/lib/artworks-data";
 
 type Win = {
   id: string;
@@ -86,6 +87,33 @@ export function StampCollections({
         </Link>
         .
       </p>
+
+      {/* How to earn stamps */}
+      <section className="rounded-2xl bg-white/60 p-4">
+        <p className="font-heading text-sm uppercase text-olive">How to earn stamps</p>
+        <ul className="mt-3 space-y-2 font-serif text-sm text-black/60">
+          <li className="flex items-baseline gap-2">
+            <span className="font-heading text-olive">+5</span>
+            <span>finish a whole part of your day — all your morning, afternoon or evening habits</span>
+          </li>
+          <li className="flex items-baseline gap-2">
+            <span className="font-heading text-olive">+2</span>
+            <span>every 3 habits you tick off in a day</span>
+          </li>
+          <li className="flex items-baseline gap-2">
+            <span className="font-heading text-olive">+1</span>
+            <span>finish a goal</span>
+          </li>
+          <li className="flex items-baseline gap-2">
+            <span className="font-heading text-olive">+5</span>
+            <span>sign in 7 days in a row</span>
+          </li>
+        </ul>
+        <p className="mt-3 border-t border-black/5 pt-3 font-serif text-sm text-black/50">
+          Each artwork in the gallery costs{" "}
+          <span className="font-heading text-olive">{ARTWORK_COST} stamps</span>.
+        </p>
+      </section>
 
       {/* Completed goals */}
       <section>
