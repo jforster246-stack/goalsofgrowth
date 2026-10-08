@@ -298,7 +298,6 @@ export type Database = {
         Row: {
           account: string | null
           amount: number
-          bucket_group: string | null
           created_at: string
           id: string
           kind: string
@@ -310,7 +309,6 @@ export type Database = {
         Insert: {
           account?: string | null
           amount?: number
-          bucket_group?: string | null
           created_at?: string
           id?: string
           kind?: string
@@ -322,7 +320,6 @@ export type Database = {
         Update: {
           account?: string | null
           amount?: number
-          bucket_group?: string | null
           created_at?: string
           id?: string
           kind?: string
@@ -534,7 +531,6 @@ export type Database = {
           position: number
           saved: number
           target: number
-          target_date: string | null
           user_id: string
         }
         Insert: {
@@ -546,7 +542,6 @@ export type Database = {
           position?: number
           saved?: number
           target?: number
-          target_date?: string | null
           user_id: string
         }
         Update: {
@@ -558,7 +553,6 @@ export type Database = {
           position?: number
           saved?: number
           target?: number
-          target_date?: string | null
           user_id?: string
         }
         Relationships: []
