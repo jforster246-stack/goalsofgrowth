@@ -87,7 +87,7 @@ function HabitLabel({
   );
 }
 
-/** A tinted, tappable completion cell — squarish with an 8pt radius. */
+/** A tinted, tappable completion cell — a tall vertical pill. */
 function DayDot({
   done,
   time,
@@ -111,15 +111,15 @@ function DayDot({
       disabled={disabled}
       onClick={onClick}
       aria-label={label}
-      className="grid place-items-center p-0.5 enabled:cursor-pointer disabled:cursor-default"
+      className="grid place-items-center p-px enabled:cursor-pointer disabled:cursor-default"
     >
       <span
         className={cn(
-          "transition-colors",
-          big ? "size-6 rounded-lg sm:size-7" : "size-4 rounded-[5px]",
+          "rounded-full transition-colors",
+          big ? "h-8 w-3.5 sm:h-9 sm:w-4" : "h-5 w-2.5",
           done ? (TIME_CELL[time] ?? "bg-olive") : "bg-black/[0.07]",
           // In the week view today is marked by the column frame, so the small
-          // month dots keep the ring; the big week dots don't.
+          // month pills keep the ring; the big week pills don't.
           !big && isToday && "ring-1 ring-focus ring-offset-1",
           disabled && !done && "opacity-40",
         )}
@@ -269,7 +269,7 @@ function MonthView({
             No habits to track yet.
           </p>
         ) : (
-          <table className="w-full border-separate border-spacing-1">
+          <table className="w-full border-separate border-spacing-x-0.5 border-spacing-y-1">
             <thead>
               <tr>
                 <th className="sticky left-0 bg-white" />
@@ -277,7 +277,7 @@ function MonthView({
                   <th
                     key={day}
                     className={cn(
-                      "min-w-5 text-center font-mono text-[10px] font-normal",
+                      "min-w-4 text-center font-mono text-[10px] font-normal",
                       day === todayDay ? "text-focus" : "text-black/35",
                     )}
                   >
@@ -397,7 +397,7 @@ function WeekView({
             )}
 
             {/* Header: "Habit" + the weekday initials for this week. */}
-            <div className="flex items-center border-b border-black/10 pb-3">
+            <div className="flex items-center border-b border-black/10 pb-2">
               <div className="min-w-0 flex-1 font-serif text-sm text-black/70">Habit</div>
               <div className="grid w-[196px] shrink-0 grid-cols-7 sm:w-[266px]">
                 {WEEK_LABELS.map((letter, i) => (
@@ -421,7 +421,7 @@ function WeekView({
                 <div
                   key={habit.id}
                   className={cn(
-                    "flex items-center py-3 sm:py-3.5",
+                    "flex items-center py-1.5 sm:py-2",
                     ri < sorted.length - 1 && "border-b border-black/10",
                   )}
                 >
@@ -554,7 +554,7 @@ function WeekStrip() {
               <span
                 title={`${count} of ${total} habits`}
                 className={cn(
-                  "relative grid size-8 place-items-center overflow-hidden rounded-full bg-black/[0.06] font-mono text-[11px]",
+                  "relative grid h-11 w-6 place-items-center overflow-hidden rounded-full bg-black/[0.06] font-mono text-[11px]",
                   isToday && "ring-2 ring-focus ring-offset-1",
                   future && "opacity-40",
                 )}
