@@ -1,24 +1,28 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, type KeyboardEvent } from "react";
-import { CalendarDays, PiggyBank, Plus, TrendingUp, Wallet, X } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { CalendarDays, ChevronRight, PiggyBank, Plus, Wallet } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { Loading } from "@/components/loading";
+import { FinanceSetup } from "@/components/finance-setup";
+import { EntryModal, PayModal, SavingsGoalModal } from "@/components/finance-modals";
 import {
   financeQueryOptions,
   financeSettingsQueryOptions,
   savingsGoalsQueryOptions,
 } from "@/lib/goal-queries";
 import {
-  addFinanceEntry,
-  addSavingsGoal,
-  applyFinanceTemplate,
-  deleteFinanceEntry,
-  deleteSavingsGoal,
-  saveFinanceSettings,
-  updateFinanceEntry,
-  updateSavingsGoal,
-} from "@/lib/finance.functions";
+  BUCKET_COLOURS,
+  CYCLE_PHRASE,
+  CYCLE_WORD,
+  PAYS_PER_YEAR,
+  extraPayMonths,
+  fmtWhole,
+  nextPayday,
+  type FinanceEntry,
+  type PayCycle,
+  type SavingsGoal,
+} from "@/lib/finance-plan";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/finance")({
@@ -35,55 +39,15 @@ export const Route = createFileRoute("/_authenticated/finance")({
   component: FinancePage,
 });
 
-type Entry = {
-  id: string;
-  label: string;
-  amount: number;
-  kind: string;
-  account: string | null;
-  note: string | null;
-};
-
-type SavingsGoal = {
-  id: string;
-  name: string;
-  target: number;
-  saved: number;
-  per_pay: number;
-};
-
-type PayCycle = "weekly" | "fortnightly" | "monthly";
-
-const CYCLE_WORD: Record<PayCycle, string> = {
-  weekly: "week",
-  fortnightly: "fortnight",
-  monthly: "month",
-};
-const PAYS_PER_YEAR: Record<PayCycle, number> = {
-  weekly: 52,
-  fortnightly: 26,
-  monthly: 12,
-};
-
-/** Rotating brand colours for the bucket meter + row dots. */
-const BUCKET_COLOURS = [
-  "bg-olive",
-  "bg-gold",
-  "bg-clay",
-  "bg-sky",
-  "bg-sage",
-  "bg-plum",
-  "bg-gold-deep",
-  "bg-rose",
-];
-
-const fmt = (n: number) =>
-  `$${n.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
-const fmtWhole = (n: number) =>
-  `$${Math.round(n).toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+type Sheet =
+  | { kind: "setup" }
+  | { kind: "pay" }
+  | {
+      kind: "entry";
+      entry?: FinanceEntry | undefined;
+      entryKind?: "income" | "expense";
+    }
+  | { kind: "goal"; goal?: SavingsGoal | undefined };
 
 function FinancePage() {
   const { data: entries, isPending } = useQuery(financeQueryOptions);
@@ -93,549 +57,378 @@ function FinancePage() {
     ...financeSettingsQueryOptions,
     retry: 1,
   });
+  const [sheet, setSheet] = useState<Sheet | null>(null);
+  const close = () => setSheet(null);
 
-  const list = (entries ?? []) as Entry[];
-  const income = list.filter((e) => e.kind === "income");
+  const list = (entries ?? []) as FinanceEntry[];
+  const incomes = list.filter((e) => e.kind === "income");
+  const mainIncome = incomes[0] ?? null;
+  const otherIncomes = incomes.slice(1);
   const buckets = list.filter((e) => e.kind === "expense");
-  const incomeTotal = income.reduce((s, e) => s + Number(e.amount), 0);
-  const allocated = buckets.reduce((s, e) => s + Number(e.amount), 0);
-  const unallocated = incomeTotal - allocated;
+  const payTotal = incomes.reduce((s, e) => s + Number(e.amount), 0);
+  const planned = buckets.reduce((s, e) => s + Number(e.amount), 0);
+  const left = payTotal - planned;
   const cycle = (settings?.payCycle ?? "monthly") as PayCycle;
-  const perMonth = (n: number) => (n * PAYS_PER_YEAR[cycle]) / 12;
+  const anchor = settings?.payAnchor ?? null;
+  const isEmpty = list.length === 0;
 
   return (
     <AppShell title="Finance planner" hideSettings>
       <div className="mt-4 w-full space-y-8 pb-4">
-        <p className="font-serif text-sm text-black/50">
-          Give every dollar of your pay a job. Split it into buckets until nothing's left over.
-        </p>
-
         {isPending || !entries ? (
           <Loading />
         ) : (
           <>
-            <PaySettings cycle={cycle} anchor={settings?.payAnchor ?? null} />
-
-            {settingsMissing ? (
+            {settingsMissing && (
               <div className="rounded-2xl bg-clay/10 px-4 py-3 font-serif text-sm text-clay-deep">
-                The planner's latest database update hasn't been applied yet, so pay settings, the
-                template and savings goals won't save. Ask Lovable to apply the pending migration
-                (0039_finance_buckets_goals), then refresh.
+                The planner's latest database update hasn't been applied yet, so some changes won't
+                save. Ask Lovable to apply the pending finance migration, then refresh.
+              </div>
+            )}
+
+            {isEmpty ? (
+              <div className="rounded-3xl bg-white px-6 py-8 text-center shadow-sm">
+                <Wallet className="mx-auto size-8 text-olive" strokeWidth={1.75} />
+                <h2 className="mt-3 font-display text-3xl leading-tight text-black">
+                  Let's plan your pay
+                </h2>
+                <p className="mx-auto mt-2 max-w-xs font-serif text-sm text-black/55">
+                  A few quick questions to split your pay into buckets, so every dollar has a job.
+                  Takes about two minutes.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setSheet({ kind: "setup" })}
+                  className="mt-6 w-full rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90"
+                >
+                  Start setup
+                </button>
               </div>
             ) : (
-              list.length === 0 && <TemplateCard />
+              <>
+                <PayCard
+                  total={payTotal}
+                  cycle={cycle}
+                  anchor={anchor}
+                  otherIncomes={otherIncomes}
+                  onEdit={() => setSheet({ kind: "pay" })}
+                  onEditIncome={(entry) => setSheet({ kind: "entry", entry })}
+                />
+
+                <PlanStatus buckets={buckets} payTotal={payTotal} left={left} />
+
+                <section>
+                  <SectionTitle Icon={Wallet} title="Your buckets" />
+                  <p className="mt-1 font-serif text-xs text-black/45">
+                    Tap a bucket to change it. Amounts are per {CYCLE_WORD[cycle]}.
+                  </p>
+                  <div className="mt-3 space-y-2">
+                    {buckets.map((b, i) => (
+                      <BucketCard
+                        key={b.id}
+                        bucket={b}
+                        dot={BUCKET_COLOURS[i % BUCKET_COLOURS.length]!}
+                        share={payTotal > 0 ? Number(b.amount) / payTotal : 0}
+                        onClick={() => setSheet({ kind: "entry", entry: b })}
+                      />
+                    ))}
+                    <AddButton
+                      label="Add a bucket"
+                      onClick={() => setSheet({ kind: "entry", entryKind: "expense" })}
+                    />
+                  </div>
+                </section>
+
+                <ExtraPayMonths cycle={cycle} anchor={anchor} />
+              </>
             )}
 
-            {/* Summary */}
-            <div className="grid grid-cols-3 gap-3">
-              <SummaryCard
-                label={`Pay / ${CYCLE_WORD[cycle]}`}
-                value={fmtWhole(incomeTotal)}
-                tone="income"
-              />
-              <SummaryCard label="Allocated" value={fmtWhole(allocated)} tone="net" />
-              <SummaryCard
-                label={unallocated >= 0 ? "Unallocated" : "Over by"}
-                value={fmtWhole(Math.abs(unallocated))}
-                tone={
-                  unallocated < 0
-                    ? "expense"
-                    : unallocated === 0 && incomeTotal > 0
-                      ? "income"
-                      : "net"
-                }
-              />
-            </div>
-
-            <BucketMeter buckets={buckets} incomeTotal={incomeTotal} unallocated={unallocated} />
-
-            {cycle !== "monthly" && incomeTotal > 0 && (
-              <p className="-mt-5 font-serif text-xs text-black/45">
-                About {fmtWhole(perMonth(incomeTotal))} a month on average ({PAYS_PER_YEAR[cycle]}{" "}
-                pays a year).
-              </p>
+            {!isEmpty && (
+              <SavingsGoals cycle={cycle} onOpen={(goal) => setSheet({ kind: "goal", goal })} />
             )}
 
-            <FinanceSection
-              kind="income"
-              title="Income"
-              Icon={TrendingUp}
-              entries={income}
-              cycle={cycle}
-            />
-            <FinanceSection
-              kind="expense"
-              title="Buckets"
-              Icon={Wallet}
-              entries={buckets}
-              cycle={cycle}
-              incomeTotal={incomeTotal}
-            />
-
-            <ExtraPayMonths cycle={cycle} anchor={settings?.payAnchor ?? null} />
-
-            <SavingsGoals cycle={cycle} />
+            {!isEmpty && (
+              <div className="flex flex-col items-center gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setSheet({ kind: "entry", entryKind: "income" })}
+                  className="font-heading text-xs uppercase text-black/40 transition-colors hover:text-olive"
+                >
+                  Add another income
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSheet({ kind: "setup" })}
+                  className="font-heading text-xs uppercase text-black/40 transition-colors hover:text-olive"
+                >
+                  Redo guided setup
+                </button>
+              </div>
+            )}
           </>
         )}
       </div>
+
+      {sheet?.kind === "setup" && (
+        <FinanceSetup
+          onClose={close}
+          cycle={settings && !isEmpty ? cycle : null}
+          anchor={anchor}
+          income={mainIncome}
+          buckets={buckets}
+        />
+      )}
+      {sheet?.kind === "pay" && (
+        <PayModal onClose={close} cycle={cycle} anchor={anchor} income={mainIncome} />
+      )}
+      {sheet?.kind === "entry" && (
+        <EntryModal
+          onClose={close}
+          entry={sheet.entry}
+          kind={sheet.entryKind ?? "expense"}
+          cycle={cycle}
+        />
+      )}
+      {sheet?.kind === "goal" && (
+        <SavingsGoalModal onClose={close} goal={sheet.goal} cycle={cycle} />
+      )}
     </AppShell>
   );
 }
 
 /* ---------------------------------------------------------------- */
 
-function PaySettings({ cycle, anchor }: { cycle: PayCycle; anchor: string | null }) {
-  const queryClient = useQueryClient();
-  const save = useMutation({
-    mutationFn: (next: { payCycle: PayCycle; payAnchor: string | null }) =>
-      saveFinanceSettings({ data: next }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["finance", "settings"] }),
-  });
-
+function SectionTitle({ Icon, title }: { Icon: typeof Wallet; title: string }) {
   return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-2xl bg-white px-4 py-3 shadow-sm">
-      <div className="flex items-center gap-2">
-        <span className="font-heading text-[10px] uppercase tracking-wide text-black/40">Paid</span>
-        <div className="flex rounded-full bg-black/5 p-0.5">
-          {(["weekly", "fortnightly", "monthly"] as PayCycle[]).map((c) => (
-            <button
-              key={c}
-              type="button"
-              onClick={() => save.mutate({ payCycle: c, payAnchor: anchor })}
-              className={cn(
-                "rounded-full px-2.5 py-1 font-heading text-[11px] capitalize transition-colors",
-                c === cycle ? "bg-olive text-white" : "text-black/50 hover:text-black",
-              )}
-            >
-              {c}
-            </button>
-          ))}
-        </div>
-      </div>
-      {cycle !== "monthly" && (
-        <label className="flex items-center gap-2">
-          <span className="font-heading text-[10px] uppercase tracking-wide text-black/40">
-            A recent payday
-          </span>
-          <input
-            type="date"
-            value={anchor ?? ""}
-            onChange={(e) => save.mutate({ payCycle: cycle, payAnchor: e.target.value || null })}
-            className="rounded-lg bg-black/5 px-2 py-1 font-mono text-xs text-black focus:outline-none"
-          />
-        </label>
-      )}
+    <div className="flex items-center gap-1.5">
+      <Icon className="size-4 text-olive" strokeWidth={2} />
+      <p className="font-heading text-sm uppercase text-olive">{title}</p>
     </div>
   );
 }
 
-function TemplateCard() {
-  const queryClient = useQueryClient();
-  const apply = useMutation({
-    mutationFn: () => applyFinanceTemplate(),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["finance"] }),
-  });
+function AddButton({ label, onClick }: { label: string; onClick: () => void }) {
   return (
-    <div className="rounded-2xl border border-dashed border-olive/40 bg-white/60 p-5 text-center">
-      <p className="font-heading text-sm text-olive">Start from a template</p>
-      <p className="mx-auto mt-1 max-w-xs font-serif text-sm text-black/55">
-        Sets you up with a fortnightly pay line and seven buckets (shared account, bills, savings,
-        spending, goals and more). You fill in the amounts.
-      </p>
-      <button
-        type="button"
-        onClick={() => apply.mutate()}
-        disabled={apply.isPending}
-        className="mt-4 rounded-full bg-olive px-5 py-2 font-heading text-xs text-white transition-colors hover:bg-olive/90 disabled:opacity-40"
-      >
-        {apply.isPending ? "Setting up…" : "Use template"}
-      </button>
-      <p className="mt-3 font-serif text-xs text-black/40">Or add your own lines below.</p>
-    </div>
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-olive/35 py-3 font-heading text-xs uppercase text-olive transition-colors hover:bg-olive/5"
+    >
+      <Plus className="size-4" strokeWidth={2.5} />
+      {label}
+    </button>
   );
 }
 
-function SummaryCard({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: string;
-  tone: "income" | "expense" | "net";
-}) {
-  const color =
-    tone === "income" ? "text-olive" : tone === "expense" ? "text-clay-deep" : "text-black";
-  return (
-    <div className="rounded-2xl bg-white p-4 text-center shadow-sm">
-      <p className="font-heading text-[10px] uppercase tracking-wide text-black/40">{label}</p>
-      <p className={cn("mt-1 font-mono text-lg leading-tight", color)}>{value}</p>
-    </div>
-  );
-}
-
-/** Stacked bar: each bucket's share of pay, plus whatever is unallocated. */
-function BucketMeter({
-  buckets,
-  incomeTotal,
-  unallocated,
-}: {
-  buckets: Entry[];
-  incomeTotal: number;
-  unallocated: number;
-}) {
-  const allocated = incomeTotal - unallocated;
-  const whole = Math.max(incomeTotal, allocated);
-  if (whole <= 0) return null;
-  return (
-    <div>
-      <div className="flex h-3 w-full overflow-hidden rounded-full bg-black/5">
-        {buckets.map((b, i) =>
-          Number(b.amount) > 0 ? (
-            <div
-              key={b.id}
-              title={`${b.label}: ${fmt(Number(b.amount))}`}
-              className={cn("h-full", BUCKET_COLOURS[i % BUCKET_COLOURS.length])}
-              style={{ width: `${(Number(b.amount) / whole) * 100}%` }}
-            />
-          ) : null,
-        )}
-      </div>
-      <p
-        className={cn(
-          "mt-2 font-serif text-xs",
-          unallocated < 0 ? "text-clay-deep" : "text-black/45",
-        )}
-      >
-        {unallocated > 0
-          ? `${fmt(unallocated)} still needs a job.`
-          : unallocated < 0
-            ? `Your buckets are ${fmt(-unallocated)} more than your pay.`
-            : "Every dollar has a job."}
-      </p>
-    </div>
-  );
-}
-
-/* ---------------------------------------------------------------- */
-
-function FinanceSection({
-  kind,
-  title,
-  Icon,
-  entries,
+function PayCard({
+  total,
   cycle,
-  incomeTotal,
+  anchor,
+  otherIncomes,
+  onEdit,
+  onEditIncome,
 }: {
-  kind: "income" | "expense";
-  title: string;
-  Icon: typeof TrendingUp;
-  entries: Entry[];
+  total: number;
   cycle: PayCycle;
-  incomeTotal?: number;
+  anchor: string | null;
+  otherIncomes: FinanceEntry[];
+  onEdit: () => void;
+  onEditIncome: (entry: FinanceEntry) => void;
 }) {
-  const queryClient = useQueryClient();
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ["finance"] });
-
-  const [label, setLabel] = useState("");
-  const [amount, setAmount] = useState("");
-
-  const add = useMutation({
-    mutationFn: () =>
-      addFinanceEntry({
-        data: { label: label.trim(), amount: parseAmount(amount), kind },
-      }),
-    onSuccess: () => {
-      setLabel("");
-      setAmount("");
-      invalidate();
-    },
-  });
-
-  const canAdd = label.trim().length > 0 && !add.isPending;
-
+  const next = nextPayday(cycle, anchor);
   return (
-    <section>
-      <div className="flex items-center gap-1.5">
-        <Icon className="size-4 text-olive" strokeWidth={2} />
-        <p className="font-heading text-sm uppercase text-olive">{title}</p>
-        <span className="ml-auto font-serif text-xs text-black/40">per {CYCLE_WORD[cycle]}</span>
-      </div>
-
-      <div className="mt-3 space-y-2">
-        {entries.map((entry, i) => (
-          <EntryRow
-            key={entry.id}
-            entry={entry}
-            onChanged={invalidate}
-            dot={kind === "expense" ? BUCKET_COLOURS[i % BUCKET_COLOURS.length] : undefined}
-            share={
-              kind === "expense" && incomeTotal ? Number(entry.amount) / incomeTotal : undefined
-            }
-          />
-        ))}
-
-        {/* Add row */}
-        <div className="flex items-center gap-2 rounded-2xl bg-white/60 px-3 py-2 shadow-sm">
-          <input
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && canAdd && add.mutate()}
-            placeholder={kind === "income" ? "Add income…" : "Add a bucket…"}
-            maxLength={140}
-            className="min-w-0 flex-1 bg-transparent font-serif text-sm placeholder:text-black/40 focus:outline-none"
-          />
-          <div className="flex items-center gap-1 text-black/40">
-            <span className="font-serif text-sm">$</span>
-            <input
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && canAdd && add.mutate()}
-              inputMode="decimal"
-              placeholder="0"
-              className="w-16 bg-transparent text-right font-mono text-sm text-black placeholder:text-black/30 focus:outline-none"
-            />
-          </div>
-          <button
-            type="button"
-            onClick={() => canAdd && add.mutate()}
-            disabled={!canAdd}
-            aria-label={`Add ${kind === "income" ? "income" : "bucket"}`}
-            className="grid size-8 shrink-0 place-items-center rounded-full bg-olive text-white transition-colors hover:bg-olive/90 disabled:opacity-30"
-          >
-            <Plus className="size-4" strokeWidth={2.5} />
-          </button>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/** A saved line — label, amount, account and note all edit inline (save on blur). */
-function EntryRow({
-  entry,
-  onChanged,
-  dot,
-  share,
-}: {
-  entry: Entry;
-  onChanged: () => void;
-  dot?: string | undefined;
-  share?: number | undefined;
-}) {
-  const [label, setLabel] = useState(entry.label);
-  const [amount, setAmount] = useState(String(entry.amount));
-  const [account, setAccount] = useState(entry.account ?? "");
-  const [note, setNote] = useState(entry.note ?? "");
-  const isBucket = dot !== undefined;
-
-  const save = useMutation({
-    mutationFn: (patch: {
-      label?: string;
-      amount?: number;
-      account?: string | null;
-      note?: string | null;
-    }) => updateFinanceEntry({ data: { id: entry.id, ...patch } }),
-    onSuccess: onChanged,
-  });
-  const remove = useMutation({
-    mutationFn: () => deleteFinanceEntry({ data: { id: entry.id } }),
-    onSuccess: onChanged,
-  });
-
-  const saveLabel = () => {
-    const v = label.trim();
-    if (v && v !== entry.label) save.mutate({ label: v });
-    else setLabel(entry.label);
-  };
-  const saveAmount = () => {
-    const v = parseAmount(amount);
-    if (v !== Number(entry.amount)) save.mutate({ amount: v });
-    setAmount(String(v));
-  };
-  const saveText = (field: "account" | "note", value: string) => {
-    const v = value.trim();
-    if (v !== (entry[field] ?? "")) save.mutate({ [field]: v || null });
-  };
-  const blurOnEnter = (e: KeyboardEvent<HTMLInputElement>) =>
-    e.key === "Enter" && e.currentTarget.blur();
-
-  return (
-    <div className="rounded-2xl bg-white px-3 py-2.5 shadow-sm">
-      <div className="flex items-center gap-2">
-        {dot && <span className={cn("size-2.5 shrink-0 rounded-full", dot)} />}
-        <input
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          onBlur={saveLabel}
-          onKeyDown={blurOnEnter}
-          maxLength={140}
-          className="min-w-0 flex-1 bg-transparent font-serif text-sm text-black focus:outline-none"
-        />
-        {share !== undefined && share > 0 && (
-          <span className="font-mono text-[11px] text-black/35">{Math.round(share * 100)}%</span>
-        )}
-        <div className="flex items-center gap-1">
-          <span className="font-serif text-sm text-black/40">$</span>
-          <input
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            onBlur={saveAmount}
-            onKeyDown={blurOnEnter}
-            inputMode="decimal"
-            className="w-16 bg-transparent text-right font-mono text-sm text-black focus:outline-none"
-          />
+    <div className="rounded-3xl bg-olive px-5 py-5 text-white shadow-sm">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="font-heading text-[11px] uppercase tracking-wide text-white/60">Your pay</p>
+          <p className="mt-1 font-mono text-4xl leading-none">{fmtWhole(total)}</p>
+          <p className="mt-2 font-serif text-sm text-white/75">{CYCLE_PHRASE[cycle]}</p>
         </div>
         <button
           type="button"
-          onClick={() => remove.mutate()}
-          aria-label={`Remove ${entry.label}`}
-          className="grid size-8 shrink-0 place-items-center rounded-full text-black/30 transition-colors hover:bg-black/5 hover:text-clay-deep"
+          onClick={onEdit}
+          className="rounded-full bg-white/15 px-4 py-2 font-heading text-xs uppercase text-white transition-colors hover:bg-white/25"
         >
-          <X className="size-4" />
+          Edit
         </button>
       </div>
-      {isBucket && (
-        <div className="mt-1 space-y-0.5 pl-[18px] pr-10">
-          <input
-            value={account}
-            onChange={(e) => setAccount(e.target.value)}
-            onBlur={() => saveText("account", account)}
-            onKeyDown={blurOnEnter}
-            placeholder="Which account?"
-            maxLength={140}
-            className="w-full bg-transparent font-heading text-[10px] uppercase tracking-wide text-olive/70 placeholder:text-black/25 focus:outline-none"
-          />
-          <input
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            onBlur={() => saveText("note", note)}
-            onKeyDown={blurOnEnter}
-            placeholder="What it covers"
-            maxLength={500}
-            className="w-full bg-transparent font-serif text-xs text-black/50 placeholder:text-black/25 focus:outline-none"
-          />
+      {otherIncomes.length > 0 && (
+        <div className="mt-3 space-y-1 border-t border-white/15 pt-3">
+          {otherIncomes.map((e) => (
+            <button
+              key={e.id}
+              type="button"
+              onClick={() => onEditIncome(e)}
+              className="flex w-full items-center justify-between font-serif text-sm text-white/80"
+            >
+              <span>incl. {e.label}</span>
+              <span className="font-mono">{fmtWhole(Number(e.amount))}</span>
+            </button>
+          ))}
+        </div>
+      )}
+      <p className="mt-3 border-t border-white/15 pt-3 font-serif text-xs text-white/65">
+        {next
+          ? `Next payday: ${next.toLocaleDateString(undefined, {
+              weekday: "short",
+              day: "numeric",
+              month: "short",
+              timeZone: "UTC",
+            })}`
+          : cycle === "monthly"
+            ? "Paid monthly"
+            : "Add your last payday to see the next one"}
+        {cycle !== "monthly" && total > 0
+          ? ` · about ${fmtWhole((total * PAYS_PER_YEAR[cycle]) / 12)} a month`
+          : ""}
+      </p>
+    </div>
+  );
+}
+
+/** Stacked bar of the buckets plus one plain sentence about what's left. */
+function PlanStatus({
+  buckets,
+  payTotal,
+  left,
+}: {
+  buckets: FinanceEntry[];
+  payTotal: number;
+  left: number;
+}) {
+  const whole = Math.max(payTotal, payTotal - left);
+  return (
+    <div
+      className={cn(
+        "rounded-2xl px-4 py-3",
+        left === 0 ? "bg-olive/10" : left > 0 ? "bg-gold/15" : "bg-clay/10",
+      )}
+    >
+      <p
+        className={cn(
+          "font-heading text-sm",
+          left === 0 ? "text-olive" : left > 0 ? "text-gold-deep" : "text-clay-deep",
+        )}
+      >
+        {left === 0
+          ? "Every dollar has a job"
+          : left > 0
+            ? `${fmtWhole(left)} still needs a bucket`
+            : `${fmtWhole(-left)} over your pay`}
+      </p>
+      <p className="mt-0.5 font-serif text-xs text-black/50">
+        {left === 0
+          ? "Your whole pay is planned."
+          : left > 0
+            ? "Add it to a bucket below, or start a new one."
+            : "Lower a bucket or two until this reaches $0."}
+      </p>
+      {whole > 0 && (
+        <div className="mt-3 flex h-2.5 w-full overflow-hidden rounded-full bg-white/70">
+          {buckets.map((b, i) =>
+            Number(b.amount) > 0 ? (
+              <div
+                key={b.id}
+                className={cn("h-full", BUCKET_COLOURS[i % BUCKET_COLOURS.length])}
+                style={{ width: `${(Number(b.amount) / whole) * 100}%` }}
+              />
+            ) : null,
+          )}
         </div>
       )}
     </div>
   );
 }
 
-/* ---------------------------------------------------------------- */
-
-/** Months in the next year that get an extra pay (3 fortnightly / 5 weekly). */
-function extraPayMonths(cycle: PayCycle, anchor: string | null, from = new Date()) {
-  if (cycle === "monthly" || !anchor) return [];
-  const step = cycle === "weekly" ? 7 : 14;
-  const normal = cycle === "weekly" ? 4 : 2;
-  const [y = 0, m = 1, d = 1] = anchor.split("-").map(Number);
-  const anchorMs = Date.UTC(y, m - 1, d);
-  const day = 86_400_000;
-  const months: Date[] = [];
-  for (let i = 0; i < 12; i++) {
-    const start = Date.UTC(from.getFullYear(), from.getMonth() + i, 1);
-    const end = Date.UTC(from.getFullYear(), from.getMonth() + i + 1, 0);
-    const first = Math.ceil((start - anchorMs) / day / step);
-    const last = Math.floor((end - anchorMs) / day / step);
-    if (last - first + 1 > normal) months.push(new Date(start));
-  }
-  return months;
+function BucketCard({
+  bucket,
+  dot,
+  share,
+  onClick,
+}: {
+  bucket: FinanceEntry;
+  dot: string;
+  share: number;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex w-full items-center gap-3 rounded-2xl bg-white px-4 py-3.5 text-left shadow-sm transition-colors hover:bg-white/80"
+    >
+      <span className={cn("size-3 shrink-0 rounded-full", dot)} />
+      <span className="min-w-0 flex-1">
+        <span className="block font-heading text-sm text-black">{bucket.label}</span>
+        {bucket.note && (
+          <span className="block font-serif text-xs text-black/50">{bucket.note}</span>
+        )}
+        {bucket.account && (
+          <span className="mt-0.5 block font-heading text-[10px] uppercase tracking-wide text-olive/70">
+            → {bucket.account}
+          </span>
+        )}
+      </span>
+      <span className="text-right">
+        <span className="block font-mono text-base text-black">
+          {fmtWhole(Number(bucket.amount))}
+        </span>
+        {share > 0 && (
+          <span className="block font-mono text-[11px] text-black/35">
+            {Math.round(share * 100)}%
+          </span>
+        )}
+      </span>
+      <ChevronRight className="size-4 shrink-0 text-black/25" />
+    </button>
+  );
 }
 
 function ExtraPayMonths({ cycle, anchor }: { cycle: PayCycle; anchor: string | null }) {
-  if (cycle === "monthly") return null;
+  if (cycle === "monthly" || !anchor) return null;
   const months = extraPayMonths(cycle, anchor);
+  if (months.length === 0) return null;
   const extra = cycle === "weekly" ? "fifth" : "third";
   return (
     <section className="rounded-2xl bg-gold/15 px-4 py-3">
       <div className="flex items-center gap-1.5">
         <CalendarDays className="size-4 text-gold-deep" strokeWidth={2} />
-        <p className="font-heading text-sm uppercase text-gold-deep">Extra pay months</p>
+        <p className="font-heading text-sm uppercase text-gold-deep">Bonus pay months</p>
       </div>
       <p className="mt-1.5 font-serif text-sm text-black/65">
-        {!anchor
-          ? "Add a recent payday above to see which months get an extra pay."
-          : months.length === 0
-            ? "No extra pays in the next 12 months."
-            : `${months
-                .map((d) =>
-                  d.toLocaleDateString(undefined, {
-                    month: "long",
-                    year: "numeric",
-                    timeZone: "UTC",
-                  }),
-                )
-                .join(
-                  " and ",
-                )} ${months.length === 1 ? "has" : "have"} a ${extra} pay. Your budget already runs without it, so send the whole thing to a savings goal.`}
+        {months
+          .map((d) =>
+            d.toLocaleDateString(undefined, {
+              month: "long",
+              year: "numeric",
+              timeZone: "UTC",
+            }),
+          )
+          .join(" and ")}{" "}
+        {months.length === 1 ? "has" : "have"} a {extra} pay. Your plan already works without it, so
+        put the whole thing towards a savings goal.
       </p>
     </section>
   );
 }
 
-/* ---------------------------------------------------------------- */
-
-function SavingsGoals({ cycle }: { cycle: PayCycle }) {
-  const queryClient = useQueryClient();
+function SavingsGoals({
+  cycle,
+  onOpen,
+}: {
+  cycle: PayCycle;
+  onOpen: (goal?: SavingsGoal) => void;
+}) {
   const { data: goals } = useQuery({ ...savingsGoalsQueryOptions, retry: 1 });
-  const invalidate = () =>
-    queryClient.invalidateQueries({ queryKey: ["finance", "savings-goals"] });
-
-  const [name, setName] = useState("");
-  const [target, setTarget] = useState("");
-  const add = useMutation({
-    mutationFn: () =>
-      addSavingsGoal({
-        data: { name: name.trim(), target: parseAmount(target), saved: 0, perPay: 0 },
-      }),
-    onSuccess: () => {
-      setName("");
-      setTarget("");
-      invalidate();
-    },
-  });
-  const canAdd = name.trim().length > 0 && !add.isPending;
-
+  const list = (goals ?? []) as SavingsGoal[];
   return (
     <section>
-      <div className="flex items-center gap-1.5">
-        <PiggyBank className="size-4 text-olive" strokeWidth={2} />
-        <p className="font-heading text-sm uppercase text-olive">Savings goals</p>
-      </div>
+      <SectionTitle Icon={PiggyBank} title="Savings goals" />
       <div className="mt-3 space-y-2">
-        {((goals ?? []) as SavingsGoal[]).map((g) => (
-          <SavingsGoalCard key={g.id} goal={g} cycle={cycle} onChanged={invalidate} />
+        {list.map((g) => (
+          <SavingsGoalCard key={g.id} goal={g} cycle={cycle} onClick={() => onOpen(g)} />
         ))}
-        <div className="flex items-center gap-2 rounded-2xl bg-white/60 px-3 py-2 shadow-sm">
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && canAdd && add.mutate()}
-            placeholder="Add a savings goal…"
-            maxLength={140}
-            className="min-w-0 flex-1 bg-transparent font-serif text-sm placeholder:text-black/40 focus:outline-none"
-          />
-          <div className="flex items-center gap-1 text-black/40">
-            <span className="font-serif text-sm">$</span>
-            <input
-              value={target}
-              onChange={(e) => setTarget(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && canAdd && add.mutate()}
-              inputMode="decimal"
-              placeholder="target"
-              className="w-16 bg-transparent text-right font-mono text-sm text-black placeholder:text-black/30 focus:outline-none"
-            />
-          </div>
-          <button
-            type="button"
-            onClick={() => canAdd && add.mutate()}
-            disabled={!canAdd}
-            aria-label="Add savings goal"
-            className="grid size-8 shrink-0 place-items-center rounded-full bg-olive text-white transition-colors hover:bg-olive/90 disabled:opacity-30"
-          >
-            <Plus className="size-4" strokeWidth={2.5} />
-          </button>
-        </div>
+        <AddButton label="Add a savings goal" onClick={() => onOpen()} />
       </div>
     </section>
   );
@@ -644,40 +437,12 @@ function SavingsGoals({ cycle }: { cycle: PayCycle }) {
 function SavingsGoalCard({
   goal,
   cycle,
-  onChanged,
+  onClick,
 }: {
   goal: SavingsGoal;
   cycle: PayCycle;
-  onChanged: () => void;
+  onClick: () => void;
 }) {
-  const [name, setName] = useState(goal.name);
-  const [target, setTarget] = useState(String(goal.target));
-  const [saved, setSaved] = useState(String(goal.saved));
-  const [perPay, setPerPay] = useState(String(goal.per_pay));
-
-  const save = useMutation({
-    mutationFn: (patch: { name?: string; target?: number; saved?: number; perPay?: number }) =>
-      updateSavingsGoal({ data: { id: goal.id, ...patch } }),
-    onSuccess: onChanged,
-  });
-  const remove = useMutation({
-    mutationFn: () => deleteSavingsGoal({ data: { id: goal.id } }),
-    onSuccess: onChanged,
-  });
-
-  const saveNumber = (
-    field: "target" | "saved" | "perPay",
-    raw: string,
-    current: number,
-    set: (v: string) => void,
-  ) => {
-    const v = parseAmount(raw);
-    if (v !== Number(current)) save.mutate({ [field]: v });
-    set(String(v));
-  };
-  const blurOnEnter = (e: KeyboardEvent<HTMLInputElement>) =>
-    e.key === "Enter" && e.currentTarget.blur();
-
   const t = Number(goal.target);
   const s = Number(goal.saved);
   const p = Number(goal.per_pay);
@@ -691,116 +456,34 @@ function SavingsGoalCard({
     const date = new Date();
     if (cycle === "monthly") date.setMonth(date.getMonth() + pays);
     else date.setDate(date.getDate() + pays * (cycle === "weekly" ? 7 : 14));
-    eta = `${pays} ${CYCLE_WORD[cycle]}${pays === 1 ? "" : "s"} to go - around ${date.toLocaleDateString(
-      undefined,
-      { month: "short", year: "numeric" },
-    )}`;
+    eta = `around ${date.toLocaleDateString(undefined, { month: "short", year: "numeric" })}`;
   }
 
   return (
-    <div className="rounded-2xl bg-white px-4 py-3 shadow-sm">
-      <div className="flex items-center gap-2">
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          onBlur={() => {
-            const v = name.trim();
-            if (v && v !== goal.name) save.mutate({ name: v });
-            else setName(goal.name);
-          }}
-          onKeyDown={blurOnEnter}
-          maxLength={140}
-          className="min-w-0 flex-1 bg-transparent font-heading text-sm text-black focus:outline-none"
-        />
-        <span className="font-mono text-xs text-black/40">{Math.round(pct * 100)}%</span>
-        <button
-          type="button"
-          onClick={() => remove.mutate()}
-          aria-label={`Remove ${goal.name}`}
-          className="grid size-7 shrink-0 place-items-center rounded-full text-black/30 transition-colors hover:bg-black/5 hover:text-clay-deep"
-        >
-          <X className="size-4" />
-        </button>
-      </div>
-
-      <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-black/5">
-        <div
-          className={cn("h-full rounded-full", done ? "bg-olive" : "bg-gold")}
+    <button
+      type="button"
+      onClick={onClick}
+      className="block w-full rounded-2xl bg-white px-4 py-3.5 text-left shadow-sm transition-colors hover:bg-white/80"
+    >
+      <span className="flex items-baseline justify-between gap-2">
+        <span className="font-heading text-sm text-black">{goal.name}</span>
+        <span className="font-mono text-sm text-black">
+          {fmtWhole(s)} <span className="text-black/35">/ {fmtWhole(t)}</span>
+        </span>
+      </span>
+      <span className="mt-2 block h-2 w-full overflow-hidden rounded-full bg-black/5">
+        <span
+          className={cn("block h-full rounded-full", done ? "bg-olive" : "bg-gold")}
           style={{ width: `${pct * 100}%` }}
         />
-      </div>
-
-      <div className="mt-3 grid grid-cols-3 gap-2">
-        <GoalNumber
-          label="Saved"
-          value={saved}
-          onChange={setSaved}
-          onBlur={() => saveNumber("saved", saved, goal.saved, setSaved)}
-          onKeyDown={blurOnEnter}
-        />
-        <GoalNumber
-          label="Target"
-          value={target}
-          onChange={setTarget}
-          onBlur={() => saveNumber("target", target, goal.target, setTarget)}
-          onKeyDown={blurOnEnter}
-        />
-        <GoalNumber
-          label="Per pay"
-          value={perPay}
-          onChange={setPerPay}
-          onBlur={() => saveNumber("perPay", perPay, goal.per_pay, setPerPay)}
-          onKeyDown={blurOnEnter}
-        />
-      </div>
-
-      <p className="mt-2 font-serif text-xs text-black/50">
+      </span>
+      <span className="mt-2 block font-serif text-xs text-black/50">
         {done
           ? "Goal reached!"
           : eta
-            ? `${fmtWhole(remaining)} left · ${eta}`
-            : `${fmtWhole(remaining)} left · add an amount per ${CYCLE_WORD[cycle]} to see when you'll get there`}
-      </p>
-    </div>
-  );
-}
-
-function GoalNumber({
-  label,
-  value,
-  onChange,
-  onBlur,
-  onKeyDown,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  onBlur: () => void;
-  onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => void;
-}) {
-  return (
-    <label className="rounded-xl bg-black/[0.03] px-2.5 py-1.5">
-      <span className="block font-heading text-[9px] uppercase tracking-wide text-black/40">
-        {label}
+            ? `${fmtWhole(p)} each ${CYCLE_WORD[cycle]} · ${fmtWhole(remaining)} to go, ${eta}`
+            : `${fmtWhole(remaining)} to go · tap to add how much you'll put in each ${CYCLE_WORD[cycle]}`}
       </span>
-      <span className="flex items-center gap-0.5">
-        <span className="font-serif text-xs text-black/40">$</span>
-        <input
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onBlur={onBlur}
-          onKeyDown={onKeyDown}
-          inputMode="decimal"
-          className="w-full min-w-0 bg-transparent font-mono text-sm text-black focus:outline-none"
-        />
-      </span>
-    </label>
+    </button>
   );
-}
-
-/** Parse a user-typed amount into a clamped, 2dp number. */
-function parseAmount(raw: string): number {
-  const n = parseFloat(raw.replace(/[^0-9.]/g, ""));
-  if (!Number.isFinite(n) || n < 0) return 0;
-  return Math.round(n * 100) / 100;
 }
