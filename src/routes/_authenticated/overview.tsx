@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Check, ChevronRight, Flame, X } from "lucide-react";
+import { Check, ChevronRight, X } from "lucide-react";
 import {
   useMutation,
   useQuery,
@@ -149,51 +149,55 @@ function OverviewPage() {
 
   return (
     <AppShell>
-      {/* Bento dashboard — cards of varying sizes that reflow on mobile. */}
-      <div className="mt-6 grid grid-cols-2 gap-3 pb-4 lg:grid-cols-4 lg:gap-4">
-        {profile && (
-          <StreakCard
-            streak={profile.streak_count ?? 0}
-            name={profile.display_name ?? null}
-            className="col-span-2 lg:col-span-2"
-          />
-        )}
-
-        <AwaQuickLog className="col-span-2 self-start lg:col-span-2" />
-
-        <HabitTally className="col-span-1 self-start lg:col-span-2" />
-        <GoalTally className="col-span-1 self-start lg:col-span-2" />
-
-        <TodayHabits className="col-span-2 lg:col-span-4" />
-        <MissedYesterday className="col-span-2 lg:col-span-4" />
-
-        {/* Next steps — the goal cards for today */}
-        <section className="col-span-2 rounded-3xl bg-white p-5 shadow-sm lg:col-span-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            What next step will you take today?
-          </p>
-          {upcoming.length === 0 ? (
-            <p className="mt-3 rounded-2xl bg-background px-4 py-4 text-sm text-muted-foreground">
-              {goals.length === 0
-                ? "Add a goal to see your next steps here."
-                : "You're all caught up — nice work."}
-            </p>
-          ) : (
-            <div className="mt-4 flex flex-wrap items-stretch gap-4">
-              {upcoming.map(({ goal, next }) => (
-                <NextStepCard
-                  key={goal.id}
-                  goal={goal}
-                  step={next!}
-                  portrait
-                  onComplete={() => handleComplete(goal.id, next!.title, next!.id)}
-                />
-              ))}
-            </div>
+      {/* Two-column dashboard: goals on the left, habits/log rail on the right. */}
+      <div className="mt-6 grid gap-4 pb-4 lg:grid-cols-3">
+        {/* Main column */}
+        <div className="space-y-4 lg:col-span-2">
+          {profile && (
+            <StreakCard
+              streak={profile.streak_count ?? 0}
+              name={profile.display_name ?? null}
+            />
           )}
-        </section>
 
-        <RoutinesHome className="col-span-2 lg:col-span-4" />
+          <GoalTally />
+
+          {/* Next steps — the goal cards for today */}
+          <section className="rounded-3xl bg-white p-5 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              What next step will you take today?
+            </p>
+            {upcoming.length === 0 ? (
+              <p className="mt-3 rounded-2xl bg-background px-4 py-4 text-sm text-muted-foreground">
+                {goals.length === 0
+                  ? "Add a goal to see your next steps here."
+                  : "You're all caught up — nice work."}
+              </p>
+            ) : (
+              <div className="mt-4 flex flex-wrap items-stretch gap-4">
+                {upcoming.map(({ goal, next }) => (
+                  <NextStepCard
+                    key={goal.id}
+                    goal={goal}
+                    step={next!}
+                    portrait
+                    onComplete={() => handleComplete(goal.id, next!.title, next!.id)}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+
+          <RoutinesHome />
+        </div>
+
+        {/* Right rail */}
+        <div className="space-y-4">
+          <AwaQuickLog />
+          <HabitTally />
+          <TodayHabits />
+          <MissedYesterday />
+        </div>
       </div>
 
       {/* "Nice work" popup after completing a step (when the goal isn't finished yet) */}
@@ -251,23 +255,31 @@ function StreakCard({
   return (
     <div
       className={cn(
-        "flex flex-col items-center rounded-3xl bg-white px-5 py-6 text-center shadow-sm",
+        "flex flex-wrap items-center gap-x-4 gap-y-3 rounded-3xl bg-white px-5 py-4 shadow-sm",
         className,
       )}
     >
-      <div className="grid size-16 place-items-center rounded-full bg-clay/15">
-        <Flame className="size-8 text-clay-deep" strokeWidth={2} fill="currentColor" />
+      <span className="font-heading text-3xl leading-none text-black">{streak}</span>
+
+      <div className="flex items-center gap-1.5">
+        {Array.from({ length: 7 }, (_, i) =>
+          i < filled ? (
+            <StampMark key={i} className="size-7 text-clay-deep">
+              <Check className="size-3.5 text-white" strokeWidth={3} />
+            </StampMark>
+          ) : (
+            <StampMark key={i} className="size-7 text-black/10" />
+          ),
+        )}
       </div>
-      <p className="mt-3 font-heading text-4xl leading-none text-black">{streak}</p>
-      <p className="mt-1 font-heading text-sm uppercase tracking-wide text-olive">
-        Day streak
-      </p>
-      <p className="mt-1 font-serif text-xs italic text-black/50">
+
+      <p className="min-w-0 flex-1 font-serif text-sm italic text-black/50">
         {streak > 0
           ? `You are doing really great${name ? `, ${name}` : ""}!`
           : "Check in each day to start your streak."}
       </p>
-      <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-clay/10 px-3 py-1.5">
+
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-clay/10 px-3 py-1.5">
         <Stamp icon={null} accent="clay" className="size-4" />
         <span className="font-heading text-[11px] uppercase text-clay-deep">
           {streak === 0
@@ -277,18 +289,6 @@ function StreakCard({
               : `${untilBonus} more day${untilBonus === 1 ? "" : "s"} for 5 stamps`}
         </span>
       </span>
-
-      <div className="mt-5 grid w-full grid-cols-7 gap-1">
-        {Array.from({ length: 7 }, (_, i) =>
-          i < filled ? (
-            <StampMark key={i} className="mx-auto size-9 text-clay-deep">
-              <Check className="size-4 text-white" strokeWidth={3} />
-            </StampMark>
-          ) : (
-            <StampMark key={i} className="mx-auto size-9 text-black/10" />
-          ),
-        )}
-      </div>
     </div>
   );
 }
