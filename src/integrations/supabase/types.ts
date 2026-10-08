@@ -37,8 +37,11 @@ export type Database = {
       }
       awa_hobbies: {
         Row: {
+          accent: string | null
+          archived_at: string | null
           category: string | null
           created_at: string
+          description: string | null
           icon: string | null
           id: string
           name: string
@@ -46,8 +49,11 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          accent?: string | null
+          archived_at?: string | null
           category?: string | null
           created_at?: string
+          description?: string | null
           icon?: string | null
           id?: string
           name: string
@@ -55,8 +61,11 @@ export type Database = {
           user_id: string
         }
         Update: {
+          accent?: string | null
+          archived_at?: string | null
           category?: string | null
           created_at?: string
+          description?: string | null
           icon?: string | null
           id?: string
           name?: string
@@ -69,6 +78,7 @@ export type Database = {
         Row: {
           activity_time: string | null
           created_at: string
+          duration: string | null
           hobby_icon: string | null
           hobby_id: string | null
           hobby_name: string
@@ -76,11 +86,13 @@ export type Database = {
           logged_on: string
           minutes: number
           note: string | null
+          photo_path: string | null
           user_id: string
         }
         Insert: {
           activity_time?: string | null
           created_at?: string
+          duration?: string | null
           hobby_icon?: string | null
           hobby_id?: string | null
           hobby_name?: string
@@ -88,11 +100,13 @@ export type Database = {
           logged_on?: string
           minutes?: number
           note?: string | null
+          photo_path?: string | null
           user_id: string
         }
         Update: {
           activity_time?: string | null
           created_at?: string
+          duration?: string | null
           hobby_icon?: string | null
           hobby_id?: string | null
           hobby_name?: string
@@ -100,6 +114,7 @@ export type Database = {
           logged_on?: string
           minutes?: number
           note?: string | null
+          photo_path?: string | null
           user_id?: string
         }
         Relationships: []
