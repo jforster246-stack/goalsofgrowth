@@ -284,7 +284,7 @@ function BrainDumpList({ initial }: { initial: Item[] }) {
           onClick={() => insertAfter(items.length - 1)}
           className="flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-black/[0.03]"
         >
-          <span className="size-[18px] shrink-0 rounded-[5px] border-[1.5px] border-black/15" />
+          <span className="size-5 shrink-0 rounded-md border-2 border-black/15" />
           <span className="font-serif text-[15px] text-black/30">
             {items.length === 0 ? "Start typing your first idea…" : "To-do"}
           </span>
@@ -292,7 +292,7 @@ function BrainDumpList({ initial }: { initial: Item[] }) {
       </div>
 
       <p className="mt-3 text-center font-serif text-xs text-black/35">
-        Enter for a new line · Tab to indent · ⋯ to make it a goal or habit
+        Enter for a new line · Tab to indent · ⋯ for more
       </p>
 
       {habitPrefill !== null && (
@@ -355,11 +355,11 @@ function Row({
         aria-label={item.done ? "Untick" : "Tick"}
         aria-pressed={item.done}
         className={cn(
-          "mt-[5px] grid size-[18px] shrink-0 place-items-center rounded-[5px] border-[1.5px] transition-colors",
-          item.done ? "border-olive bg-olive text-white" : "border-black/30 hover:border-black/50",
+          "mt-[3px] grid size-5 shrink-0 place-items-center rounded-md border-2 transition-colors",
+          item.done ? "border-olive bg-olive text-white" : "border-black/30 hover:border-olive/60",
         )}
       >
-        {item.done && <Check className="size-3" strokeWidth={3} />}
+        {item.done && <Check className="size-3.5" strokeWidth={3} />}
       </button>
 
       <textarea
@@ -379,6 +379,27 @@ function Row({
           item.done ? "text-black/35 line-through" : "text-black",
         )}
       />
+
+      <div className="flex shrink-0 items-center">
+        <button
+          type="button"
+          onClick={onMakeGoal}
+          aria-label="Make it a goal"
+          title="Make it a goal"
+          className="grid size-8 place-items-center rounded-lg text-olive transition-colors hover:bg-black/5"
+        >
+          <Target className="size-4" strokeWidth={2} />
+        </button>
+        <button
+          type="button"
+          onClick={onMakeHabit}
+          aria-label="Make it a habit"
+          title="Make it a habit"
+          className="grid size-8 place-items-center rounded-lg text-olive transition-colors hover:bg-black/5"
+        >
+          <Repeat className="size-4" strokeWidth={2} />
+        </button>
+      </div>
 
       <button
         type="button"
@@ -402,23 +423,7 @@ function Row({
             className="fixed inset-0 z-30 cursor-default"
             onClick={onCloseMenu}
           />
-          <div className="absolute right-2 top-9 z-40 w-52 overflow-hidden rounded-xl bg-white py-1 shadow-lg ring-1 ring-black/10">
-            <MenuItem
-              Icon={Target}
-              label="Make it a goal"
-              onClick={() => {
-                onCloseMenu();
-                onMakeGoal();
-              }}
-            />
-            <MenuItem
-              Icon={Repeat}
-              label="Make it a habit"
-              onClick={() => {
-                onCloseMenu();
-                onMakeHabit();
-              }}
-            />
+          <div className="absolute right-2 top-9 z-40 w-44 overflow-hidden rounded-xl bg-white py-1 shadow-lg ring-1 ring-black/10">
             {indent < MAX_INDENT && (
               <MenuItem
                 Icon={IndentIncrease}
