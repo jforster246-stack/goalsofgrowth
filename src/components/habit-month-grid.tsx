@@ -20,20 +20,36 @@ const TIME_CELL: Record<string, string> = {
 };
 
 const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 const MONTH_ABBR = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
 ];
 const WEEK_LABELS = ["M", "T", "W", "T", "F", "S", "S"];
 
-type Toggle = UseMutationResult<
-  unknown,
-  unknown,
-  { id: string; date: string; done: boolean }
->;
+type Toggle = UseMutationResult<unknown, unknown, { id: string; date: string; done: boolean }>;
 
 function pad(n: number) {
   return String(n).padStart(2, "0");
@@ -66,11 +82,7 @@ function HabitLabel({
   return (
     <span className={cn("flex items-center gap-1.5", !full && "max-w-32")}>
       {icon ? <Motif id={icon} className="size-4 shrink-0 text-olive" /> : null}
-      <span
-        className={cn("font-serif text-xs text-black/70", !full && "truncate")}
-      >
-        {name}
-      </span>
+      <span className={cn("font-serif text-xs text-black/70", !full && "truncate")}>{name}</span>
     </span>
   );
 }
@@ -175,9 +187,8 @@ export function HabitMonthGrid() {
       )}
 
       <p className="mt-2 font-serif text-xs text-black/40">
-        Tap any past day to tick it off or undo it — today's column is framed.
-        Cells are coloured by time of day: gold morning, clay afternoon, green
-        evening.
+        Tap any past day to tick it off or undo it — today's column is framed. Cells are coloured by
+        time of day: gold morning, clay afternoon, green evening.
       </p>
     </section>
   );
@@ -279,38 +290,39 @@ function MonthView({
               </tr>
             </thead>
             <tbody>
-              {[...data.habits].sort((a, b) => b.days.length - a.days.length).map((habit) => {
-                const done = new Set(habit.days);
-                return (
-                  <tr key={habit.id}>
-                    <td className="sticky left-0 bg-white pr-2">
-                      <HabitLabel icon={habit.icon} name={habit.name} />
-                    </td>
-                    {Array.from({ length: data.days }, (_, i) => i + 1).map((day) => {
-                      const isFuture =
-                        isCurrentMonth && todayDay !== null && day > todayDay;
-                      const date = `${month}-${pad(day)}`;
-                      return (
-                        <td key={day}>
-                          <DayDot
-                            done={done.has(day)}
-                            time={habit.time_of_day}
-                            isToday={day === todayDay}
-                            disabled={isFuture || toggle.isPending}
-                            onClick={() =>
-                              toggle.mutate({ id: habit.id, date, done: !done.has(day) })
-                            }
-                            label={`${habit.name}, ${date}`}
-                          />
-                        </td>
-                      );
-                    })}
-                    <td className="pl-1 text-right font-mono text-[10px] text-black/50">
-                      {habit.days.length}
-                    </td>
-                  </tr>
-                );
-              })}
+              {[...data.habits]
+                .sort((a, b) => b.days.length - a.days.length)
+                .map((habit) => {
+                  const done = new Set(habit.days);
+                  return (
+                    <tr key={habit.id}>
+                      <td className="sticky left-0 bg-white pr-2">
+                        <HabitLabel icon={habit.icon} name={habit.name} />
+                      </td>
+                      {Array.from({ length: data.days }, (_, i) => i + 1).map((day) => {
+                        const isFuture = isCurrentMonth && todayDay !== null && day > todayDay;
+                        const date = `${month}-${pad(day)}`;
+                        return (
+                          <td key={day}>
+                            <DayDot
+                              done={done.has(day)}
+                              time={habit.time_of_day}
+                              isToday={day === todayDay}
+                              disabled={isFuture || toggle.isPending}
+                              onClick={() =>
+                                toggle.mutate({ id: habit.id, date, done: !done.has(day) })
+                              }
+                              label={`${habit.name}, ${date}`}
+                            />
+                          </td>
+                        );
+                      })}
+                      <td className="pl-1 text-right font-mono text-[10px] text-black/50">
+                        {habit.days.length}
+                      </td>
+                    </tr>
+                  );
+                })}
             </tbody>
           </table>
         )}
@@ -347,9 +359,7 @@ function WeekView({
       : `${Number(start.slice(8, 10))} ${MONTH_ABBR[sm - 1]} – ${Number(end.slice(8, 10))} ${MONTH_ABBR[em - 1]}`;
 
   const todayIdx = dates.indexOf(today); // -1 when viewing another week
-  const sorted = data
-    ? [...data.habits].sort((a, b) => b.days.length - a.days.length)
-    : [];
+  const sorted = data ? [...data.habits].sort((a, b) => b.days.length - a.days.length) : [];
 
   return (
     <>
@@ -388,9 +398,7 @@ function WeekView({
 
             {/* Header: "Habit" + the weekday initials for this week. */}
             <div className="flex items-center border-b border-black/10 pb-3">
-              <div className="min-w-0 flex-1 font-serif text-sm text-black/70">
-                Habit
-              </div>
+              <div className="min-w-0 flex-1 font-serif text-sm text-black/70">Habit</div>
               <div className="grid w-[196px] shrink-0 grid-cols-7 sm:w-[266px]">
                 {WEEK_LABELS.map((letter, i) => (
                   <div
@@ -451,5 +459,125 @@ function WeekView({
         )}
       </div>
     </>
+  );
+}
+
+const TRACKER_OPEN_KEY = "gog-habit-tracker-open";
+
+/**
+ * The compact tracker: one row of this week's days, each filling up as habits
+ * are ticked off. "See full tracker" opens the per-habit week/month grid.
+ */
+export function HabitTracker() {
+  const [open, setOpen] = useState(() => {
+    try {
+      return localStorage.getItem(TRACKER_OPEN_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
+  const toggleOpen = () => {
+    setOpen((o) => {
+      try {
+        localStorage.setItem(TRACKER_OPEN_KEY, o ? "0" : "1");
+      } catch {
+        /* private mode - just don't remember */
+      }
+      return !o;
+    });
+  };
+
+  return (
+    <section>
+      <WeekStrip />
+      <div className="mt-2 text-center">
+        <button
+          type="button"
+          onClick={toggleOpen}
+          aria-expanded={open}
+          className="font-heading text-[11px] uppercase text-black/45 transition-colors hover:text-olive"
+        >
+          {open ? "Hide full tracker" : "See full tracker"}
+        </button>
+      </div>
+      {open && (
+        <div className="mt-4">
+          <HabitMonthGrid />
+        </div>
+      )}
+    </section>
+  );
+}
+
+function WeekStrip() {
+  const dates = useMemo(() => weekDates(0), []);
+  const start = dates[0]!;
+  const end = dates[6]!;
+  const today = localToday();
+  const fetchRange = useServerFn(listHabitRange);
+  // Same key as the full tracker's current week, so they share one fetch.
+  const { data } = useQuery({
+    queryKey: ["habit-range", start, end],
+    queryFn: () => fetchRange({ data: { start, end } }),
+  });
+
+  const habits = data?.habits ?? [];
+  const total = habits.length;
+  const counts = dates.map(
+    (date) => habits.filter((h) => (h.days as string[]).includes(date)).length,
+  );
+
+  return (
+    <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
+      <div className="flex items-center justify-between px-1">
+        <p className="font-heading text-xs uppercase text-olive">This week</p>
+        <p className="font-mono text-[11px] text-black/40">
+          {counts.reduce((a, b) => a + b, 0)} ticked
+        </p>
+      </div>
+      <div className="mt-2 grid grid-cols-7 gap-1">
+        {dates.map((date, i) => {
+          const count = counts[i] ?? 0;
+          const frac = total > 0 ? count / total : 0;
+          const isToday = date === today;
+          const future = date > today;
+          return (
+            <div key={date} className="flex flex-col items-center gap-1">
+              <span
+                className={cn(
+                  "font-serif text-[11px]",
+                  isToday ? "text-black/80" : "text-black/40",
+                )}
+              >
+                {WEEK_LABELS[i]}
+              </span>
+              <span
+                title={`${count} of ${total} habits`}
+                className={cn(
+                  "relative grid size-8 place-items-center overflow-hidden rounded-full bg-black/[0.06] font-mono text-[11px]",
+                  isToday && "ring-2 ring-focus ring-offset-1",
+                  future && "opacity-40",
+                )}
+              >
+                {/* Fills from the bottom as more habits are ticked off that day. */}
+                <span
+                  aria-hidden
+                  className="absolute inset-x-0 bottom-0 bg-olive transition-[height] duration-500"
+                  style={{ height: `${frac * 100}%` }}
+                />
+                <span
+                  className={cn(
+                    "relative",
+                    frac >= 0.5 ? "text-white" : count > 0 ? "text-olive" : "text-black/30",
+                  )}
+                >
+                  {future ? "" : count}
+                </span>
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 }

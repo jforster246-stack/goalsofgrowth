@@ -1,24 +1,19 @@
-import {
-  createFileRoute,
-  useNavigate,
-  type SearchSchemaInput,
-} from "@tanstack/react-router";
+import { createFileRoute, useNavigate, type SearchSchemaInput } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { CalendarClock, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { AppShell, useAppShell } from "@/components/app-shell";
 import { HabitRow, type HabitTime } from "@/components/home-cards";
 import { Motif, TIME_MOTIF } from "@/components/motif-icons";
 import { HabitFormModal } from "@/components/habit-form-modal";
 import { HabitDetailModal } from "@/components/habit-detail-modal";
 import { HabitTally } from "@/components/habit-tally";
-import { StampPill } from "@/components/stamp-pill";
 import { localToday } from "@/components/goal-ui";
 import { habitsQueryOptions } from "@/lib/goal-queries";
 import { toggleHabit } from "@/lib/habits.functions";
 import { frequencyLabel } from "@/lib/habit-schedule";
 import { Loading } from "@/components/loading";
-import { HabitMonthGrid } from "@/components/habit-month-grid";
+import { HabitTracker } from "@/components/habit-month-grid";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/habits")({
@@ -30,8 +25,7 @@ export const Route = createFileRoute("/_authenticated/habits")({
       { title: "Habits — Goals of Growth" },
       {
         name: "description",
-        content:
-          "Your daily habits by time of day — tick each one off and it resets for tomorrow.",
+        content: "Your daily habits by time of day — tick each one off and it resets for tomorrow.",
       },
     ],
   }),
@@ -82,7 +76,7 @@ function HabitsPage() {
       title="Habits"
       titleLeft
       hideSettings
-      right={<StampPill />}
+      subtitle={habits && habits.length > 0 ? <HabitTally compact /> : undefined}
     >
       {isPending || !habits ? (
         <Loading />
@@ -95,9 +89,7 @@ function HabitsPage() {
         />
       )}
 
-      {selected && (
-        <HabitDetailModal habit={selected} onClose={() => setSelected(null)} />
-      )}
+      {selected && <HabitDetailModal habit={selected} onClose={() => setSelected(null)} />}
       {showAdd && <HabitFormModal onClose={closeModal} />}
     </AppShell>
   );
@@ -157,9 +149,7 @@ function HabitsBody({
         })
       }
       onToggle={() =>
-        habit.done
-          ? toggleMutation.mutate({ id: habit.id, done: false })
-          : complete(habit)
+        habit.done ? toggleMutation.mutate({ id: habit.id, done: false }) : complete(habit)
       }
     />
   );
@@ -183,17 +173,12 @@ function HabitsBody({
     );
   }
 
-  // "Special" habits: anything on a custom cadence (every N days, certain days,
-  // weekdays/weekends). They still appear in their time-of-day section above;
-  // this is just a place to see them all at a glance.
-  const timeLabel = (t: HabitTime) =>
-    TIMES.find((x) => x.key === t)?.label ?? "";
-  const scheduled = habits.filter((h) => frequencyLabel(h) !== "Daily");
+  // Which part of the day it is now, matching the Home page.
+  const hour = new Date().getHours();
+  const now: HabitTime = hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening";
 
   return (
-    <div className="mt-4 space-y-8 pb-4">
-      <HabitTally />
-
+    <div className="mt-5 space-y-8 pb-4">
       <div className="grid gap-8 md:grid-cols-2 md:items-start lg:grid-cols-3">
         {TIMES.map((time) => {
           const inBucket = habits.filter((h) => h.time_of_day === time.key);
@@ -202,6 +187,7 @@ function HabitsBody({
             <HabitSection
               key={time.key}
               time={time}
+              isNow={time.key === now}
               habits={inBucket}
               renderHabit={(h) => renderHabit(h, time.label)}
             />
@@ -209,23 +195,7 @@ function HabitsBody({
         })}
       </div>
 
-      <HabitMonthGrid />
-
-      {scheduled.length > 0 && (
-        <section>
-          <div className="flex items-center gap-1.5">
-            <CalendarClock className="size-4 text-olive" strokeWidth={2} />
-            <p className="font-heading text-sm uppercase text-olive">Scheduled</p>
-          </div>
-          <p className="mt-1 font-serif text-xs text-black/40">
-            Habits on a custom cadence — they also show under their time of day
-            above.
-          </p>
-          <div className="mt-4 space-y-2">
-            {scheduled.map((h) => renderHabit(h, timeLabel(h.time_of_day)))}
-          </div>
-        </section>
-      )}
+      <HabitTracker />
     </div>
   );
 }
@@ -234,10 +204,12 @@ function HabitsBody({
  *  and a reveal for the ones already ticked off today (so a mistap is undoable). */
 function HabitSection({
   time,
+  isNow,
   habits,
   renderHabit,
 }: {
   time: (typeof TIMES)[number];
+  isNow: boolean;
   habits: Habit[];
   renderHabit: (habit: Habit) => React.ReactNode;
 }) {
@@ -250,8 +222,21 @@ function HabitSection({
       <div className="flex items-center gap-1.5">
         <Motif id={TIME_MOTIF[time.key]} className={cn("size-4", time.color)} />
         <p className="font-heading text-sm uppercase text-olive">{time.label}</p>
-        <span className="ml-1 font-mono text-xs text-olive/50">
-          {completed.length}/{habits.length}
+        {isNow && (
+          <span className="rounded-full bg-olive px-2 py-0.5 font-heading text-[9px] uppercase tracking-wide text-white">
+            Now
+          </span>
+        )}
+        <span className="ml-auto flex items-center gap-2">
+          <span className="h-1.5 w-14 overflow-hidden rounded-full bg-black/[0.07]">
+            <span
+              className="block h-full rounded-full bg-olive transition-[width] duration-500"
+              style={{ width: `${habits.length ? (completed.length / habits.length) * 100 : 0}%` }}
+            />
+          </span>
+          <span className="font-mono text-xs text-olive/60">
+            {completed.length}/{habits.length}
+          </span>
         </span>
       </div>
 
@@ -273,9 +258,7 @@ function HabitSection({
           >
             {showDone ? "Hide done" : `Done today (${completed.length})`}
           </button>
-          {showDone && (
-            <div className="mt-2 space-y-2">{completed.map(renderHabit)}</div>
-          )}
+          {showDone && <div className="mt-2 space-y-2">{completed.map(renderHabit)}</div>}
         </div>
       )}
     </section>

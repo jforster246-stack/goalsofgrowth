@@ -34,6 +34,7 @@ export { useAppShell };
 
 export function AppShell({
   right,
+  subtitle,
   backTo,
   title,
   titleLeft,
@@ -41,6 +42,8 @@ export function AppShell({
   children,
 }: {
   right?: ReactNode;
+  /** A short line under the page title (e.g. the habits tally). */
+  subtitle?: ReactNode;
   backTo?: "/overview" | "/goals" | "/routines" | "/awa";
   title?: string;
   titleLeft?: boolean;
@@ -155,7 +158,10 @@ export function AppShell({
 
             <div className="min-w-0 flex-1">
               {title ? (
-                <h1 className="font-heading text-2xl tracking-tight text-foreground">{title}</h1>
+                <>
+                  <h1 className="font-heading text-2xl tracking-tight text-foreground">{title}</h1>
+                  {subtitle && <div className="mt-1">{subtitle}</div>}
+                </>
               ) : (
                 <>
                   <h1 className="font-display text-3xl font-normal leading-[1.1] tracking-tight md:text-4xl">

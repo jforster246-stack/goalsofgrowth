@@ -14,7 +14,14 @@ function yesterdayOf(today: string): string {
  * "You did N habits yesterday, you're up to M today" — a nudge to keep the day
  * going. Counts the habits ticked off on each day.
  */
-export function HabitTally({ className }: { className?: string }) {
+export function HabitTally({
+  className,
+  compact = false,
+}: {
+  className?: string;
+  /** One short line, e.g. "4 today · 6 yesterday", for the Habits heading. */
+  compact?: boolean;
+}) {
   const today = localToday();
   const yesterday = yesterdayOf(today);
   const { data: todayHabits } = useQuery(habitsQueryOptions(today));
@@ -25,6 +32,16 @@ export function HabitTally({ className }: { className?: string }) {
 
   const plural = (n: number) => (n === 1 ? "habit" : "habits");
 
+  if (compact) {
+    return (
+      <p className={cn("font-serif text-sm text-black/50", className)}>
+        <span className="font-heading text-olive">{doneToday}</span> today ·{" "}
+        <span className="font-heading text-olive">{doneYesterday}</span> yesterday
+        {doneToday > doneYesterday && doneYesterday > 0 ? " · ahead of yesterday" : ""}
+      </p>
+    );
+  }
+
   return (
     <p
       className={cn(
@@ -32,8 +49,7 @@ export function HabitTally({ className }: { className?: string }) {
         className,
       )}
     >
-      You did a total of{" "}
-      <span className="font-heading text-olive">{doneYesterday}</span>{" "}
+      You did a total of <span className="font-heading text-olive">{doneYesterday}</span>{" "}
       {plural(doneYesterday)} yesterday. You're up to{" "}
       <span className="font-heading text-olive">{doneToday}</span> today.{" "}
       {doneToday > doneYesterday
