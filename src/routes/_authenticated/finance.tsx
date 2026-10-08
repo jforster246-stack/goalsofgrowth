@@ -115,6 +115,8 @@ function FinancePage() {
                   onEditIncome={(entry) => setSheet({ kind: "entry", entry })}
                 />
 
+                <SavingsGoals cycle={cycle} onOpen={(goal) => setSheet({ kind: "goal", goal })} />
+
                 <PlanStatus buckets={buckets} payTotal={payTotal} left={left} />
 
                 <section>
@@ -141,10 +143,6 @@ function FinancePage() {
 
                 <ExtraPayMonths cycle={cycle} anchor={anchor} />
               </>
-            )}
-
-            {!isEmpty && (
-              <SavingsGoals cycle={cycle} onOpen={(goal) => setSheet({ kind: "goal", goal })} />
             )}
 
             {!isEmpty && (
