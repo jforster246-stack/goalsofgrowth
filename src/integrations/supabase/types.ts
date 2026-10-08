@@ -37,9 +37,6 @@ export type Database = {
       }
       awa_hobbies: {
         Row: {
-          accent: string | null
-          archived_at: string | null
-          description: string | null
           category: string | null
           created_at: string
           icon: string | null
@@ -49,9 +46,6 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          accent?: string | null
-          archived_at?: string | null
-          description?: string | null
           category?: string | null
           created_at?: string
           icon?: string | null
@@ -61,9 +55,6 @@ export type Database = {
           user_id: string
         }
         Update: {
-          accent?: string | null
-          archived_at?: string | null
-          description?: string | null
           category?: string | null
           created_at?: string
           icon?: string | null
@@ -76,8 +67,6 @@ export type Database = {
       }
       awa_logs: {
         Row: {
-          duration: string | null
-          photo_path: string | null
           activity_time: string | null
           created_at: string
           hobby_icon: string | null
@@ -90,8 +79,6 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          duration?: string | null
-          photo_path?: string | null
           activity_time?: string | null
           created_at?: string
           hobby_icon?: string | null
@@ -104,8 +91,6 @@ export type Database = {
           user_id: string
         }
         Update: {
-          duration?: string | null
-          photo_path?: string | null
           activity_time?: string | null
           created_at?: string
           hobby_icon?: string | null
