@@ -278,6 +278,15 @@ function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
         <SideLink to="/braindump" icon={Brain} label="Brain dump" />
         <SideLink to="/finance" icon={Wallet} label="Finance planner" />
         <SideLink to="/awa" icon={Armchair} label="A While Away" />
+        <a
+          href="https://morning-ink.lovable.app/"
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center gap-3 rounded-xl px-3 py-2.5 font-heading text-sm uppercase tracking-wide text-muted-foreground transition-colors hover:bg-muted/50"
+        >
+          <NotebookPen className="size-5" strokeWidth={2} />
+          Morning pages
+        </a>
       </nav>
 
       <button
