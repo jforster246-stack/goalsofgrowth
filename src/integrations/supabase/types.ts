@@ -281,30 +281,57 @@ export type Database = {
       }
       finance_entries: {
         Row: {
+          account: string | null
           amount: number
           created_at: string
           id: string
           kind: string
           label: string
+          note: string | null
           position: number
           user_id: string
         }
         Insert: {
+          account?: string | null
           amount?: number
           created_at?: string
           id?: string
           kind?: string
           label: string
+          note?: string | null
           position?: number
           user_id: string
         }
         Update: {
+          account?: string | null
           amount?: number
           created_at?: string
           id?: string
           kind?: string
           label?: string
+          note?: string | null
           position?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      finance_settings: {
+        Row: {
+          pay_anchor: string | null
+          pay_cycle: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          pay_anchor?: string | null
+          pay_cycle?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          pay_anchor?: string | null
+          pay_cycle?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -476,6 +503,42 @@ export type Database = {
           last_active_date?: string | null
           longest_streak?: number
           streak_count?: number
+        }
+        Relationships: []
+      }
+      savings_goals: {
+        Row: {
+          created_at: string
+          icon: string | null
+          id: string
+          name: string
+          per_pay: number
+          position: number
+          saved: number
+          target: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name: string
+          per_pay?: number
+          position?: number
+          saved?: number
+          target?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name?: string
+          per_pay?: number
+          position?: number
+          saved?: number
+          target?: number
+          user_id?: string
         }
         Relationships: []
       }

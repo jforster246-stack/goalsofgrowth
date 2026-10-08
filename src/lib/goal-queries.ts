@@ -9,18 +9,10 @@ import {
 import { listWins } from "@/lib/wins.functions";
 import { listBrainDump } from "@/lib/braindump.functions";
 import { listChecklists } from "@/lib/checklists.functions";
-import { listFinance } from "@/lib/finance.functions";
-import {
-  listAwaHobbies,
-  listAwaLogs,
-  listAwaWishlist,
-} from "@/lib/awa.functions";
+import { getFinanceSettings, listFinance, listSavingsGoals } from "@/lib/finance.functions";
+import { listAwaHobbies, listAwaLogs, listAwaWishlist } from "@/lib/awa.functions";
 import { listStamps } from "@/lib/stamps.functions";
-import {
-  getShowcase,
-  getStampBalance,
-  listPurchases,
-} from "@/lib/artworks.functions";
+import { getShowcase, getStampBalance, listPurchases } from "@/lib/artworks.functions";
 
 export const goalsQueryOptions = queryOptions({
   queryKey: ["goals"],
@@ -74,6 +66,16 @@ export const checklistsQueryOptions = queryOptions({
 export const financeQueryOptions = queryOptions({
   queryKey: ["finance"],
   queryFn: () => listFinance(),
+});
+
+export const financeSettingsQueryOptions = queryOptions({
+  queryKey: ["finance", "settings"],
+  queryFn: () => getFinanceSettings(),
+});
+
+export const savingsGoalsQueryOptions = queryOptions({
+  queryKey: ["finance", "savings-goals"],
+  queryFn: () => listSavingsGoals(),
 });
 
 export const awaHobbiesQueryOptions = queryOptions({
