@@ -281,6 +281,13 @@
       "when": 1791438849349,
       "tag": "0039_finance_buckets_goals",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1791440083195,
+      "tag": "0040_0039_finance_buckets_goals",
+      "breakpoints": true
     }
   ]
 }
