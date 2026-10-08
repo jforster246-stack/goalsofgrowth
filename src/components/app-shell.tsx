@@ -1,13 +1,6 @@
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Armchair,
   Brain,
@@ -33,11 +26,7 @@ import { AddMenu } from "@/components/add-fab";
 import { StampPill } from "@/components/stamp-pill";
 import { Confetti } from "@/components/confetti";
 import { goalsQueryOptions, profileQueryOptions } from "@/lib/goal-queries";
-import {
-  toggleStep,
-  touchStreak,
-  updateDisplayName,
-} from "@/lib/goals.functions";
+import { toggleStep, touchStreak, updateDisplayName } from "@/lib/goals.functions";
 
 import {
   AppShellContext,
@@ -97,8 +86,7 @@ export function AppShell({
   }, [queryClient]);
 
   const nameMutation = useMutation({
-    mutationFn: (input: { displayName: string }) =>
-      updateDisplayName({ data: input }),
+    mutationFn: (input: { displayName: string }) => updateDisplayName({ data: input }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["profile"] }),
   });
 
@@ -113,8 +101,7 @@ export function AppShell({
 
   const saveName = () => {
     const next = nameDraft.trim();
-    if (next && next !== profile?.display_name)
-      nameMutation.mutate({ displayName: next });
+    if (next && next !== profile?.display_name) nameMutation.mutate({ displayName: next });
     setEditingName(false);
   };
 
@@ -189,9 +176,7 @@ export function AppShell({
 
           {/* Page heading, beneath the utility bar. */}
           {title ? (
-            <h1 className="mt-5 font-heading text-2xl tracking-tight text-foreground">
-              {title}
-            </h1>
+            <h1 className="mt-5 font-heading text-2xl tracking-tight text-foreground">{title}</h1>
           ) : (
             <>
               <h1 className="mt-5 font-display text-3xl font-normal leading-[1.1] tracking-tight md:text-4xl">
@@ -208,43 +193,43 @@ export function AppShell({
 
           <BottomNav />
 
-        {confettiKey > 0 && <Confetti key={confettiKey} />}
+          {confettiKey > 0 && <Confetti key={confettiKey} />}
 
-        {focusOpen && (
-          <FocusMode
-            goals={goals ?? []}
-            initialStepId={focusStepId}
-            customTarget={customFocus}
-            onClose={() => {
-              setFocusOpen(false);
-              setFocusStepId(null);
-              setCustomFocus(null);
-            }}
-            onCompleteStep={(stepId) => {
-              setConfettiKey((k) => k + 1);
-              toggleStepMutation.mutate({ id: stepId, done: true });
-            }}
-          />
-        )}
+          {focusOpen && (
+            <FocusMode
+              goals={goals ?? []}
+              initialStepId={focusStepId}
+              customTarget={customFocus}
+              onClose={() => {
+                setFocusOpen(false);
+                setFocusStepId(null);
+                setCustomFocus(null);
+              }}
+              onCompleteStep={(stepId) => {
+                setConfettiKey((k) => k + 1);
+                toggleStepMutation.mutate({ id: stepId, done: true });
+              }}
+            />
+          )}
 
-        {profileOpen && (
-          <ProfileSheet
-            displayName={profile?.display_name ?? null}
-            streak={profile?.streak_count ?? 0}
-            email={email}
-            editingName={editingName}
-            nameDraft={nameDraft}
-            onNameDraftChange={setNameDraft}
-            onStartEdit={() => {
-              setNameDraft(profile?.display_name ?? "");
-              setEditingName(true);
-            }}
-            onEndEdit={() => setEditingName(false)}
-            onSaveName={saveName}
-            onSignOut={handleSignOut}
-            onClose={() => setProfileOpen(false)}
-          />
-        )}
+          {profileOpen && (
+            <ProfileSheet
+              displayName={profile?.display_name ?? null}
+              streak={profile?.streak_count ?? 0}
+              email={email}
+              editingName={editingName}
+              nameDraft={nameDraft}
+              onNameDraftChange={setNameDraft}
+              onStartEdit={() => {
+                setNameDraft(profile?.display_name ?? "");
+                setEditingName(true);
+              }}
+              onEndEdit={() => setEditingName(false)}
+              onSaveName={saveName}
+              onSignOut={handleSignOut}
+              onClose={() => setProfileOpen(false)}
+            />
+          )}
         </AppShellContext.Provider>
       </div>
     </div>
@@ -255,28 +240,34 @@ export function AppShell({
 function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
   return (
     <aside className="fixed inset-y-3 left-3 z-20 hidden w-56 flex-col rounded-3xl bg-card px-4 py-6 shadow-xl ring-1 ring-border lg:flex">
-      <p className="px-2 font-display text-[26px] leading-tight text-foreground">
-        Goals of Growth
-      </p>
+      <p className="px-2 font-display text-[26px] leading-tight text-foreground">Goals of Growth</p>
 
-      <nav className="mt-9 flex flex-col gap-1.5">
-        <SideLink to="/overview" icon={House} label="Home" />
-        <SideLink to="/gallery" icon={Frame} label="Gallery" />
-        <SideLink to="/habits" icon={Repeat} label="Habits" />
-        <SideLink to="/goals" icon={Target} label="Goals" />
-        <SideLink to="/routines" icon={ListChecks} label="Routines" />
-        <SideLink to="/braindump" icon={Brain} label="Brain dump" />
-        <SideLink to="/finance" icon={Wallet} label="Finance planner" />
-        <SideLink to="/awa" icon={Armchair} label="A While Away" />
-        <a
-          href="https://morning-ink.lovable.app/"
-          target="_blank"
-          rel="noreferrer"
-          className="flex items-center gap-3 rounded-xl px-3 py-2.5 font-heading text-sm uppercase tracking-wide text-muted-foreground transition-colors hover:bg-muted/50"
-        >
-          <NotebookPen className="size-5" strokeWidth={2} />
-          Morning pages
-        </a>
+      <nav className="mt-8 flex flex-col">
+        <div className="flex flex-col gap-1.5">
+          <SideLink to="/overview" icon={House} label="Home" />
+          <SideLink to="/gallery" icon={Frame} label="Gallery" />
+        </div>
+
+        <SideSection title="Daily">
+          <SideLink to="/habits" icon={Repeat} label="Habits" />
+          <SideLink to="/goals" icon={Target} label="Goals" />
+          <a
+            href="https://morning-ink.lovable.app/"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-3 rounded-xl px-3 py-2.5 font-heading text-sm uppercase tracking-wide text-muted-foreground transition-colors hover:bg-muted/50"
+          >
+            <NotebookPen className="size-5" strokeWidth={2} />
+            Morning pages
+          </a>
+        </SideSection>
+
+        <SideSection title="Now & then">
+          <SideLink to="/routines" icon={ListChecks} label="Routines" />
+          <SideLink to="/braindump" icon={Brain} label="Brain dump" />
+          <SideLink to="/finance" icon={Wallet} label="Finance planner" />
+          <SideLink to="/awa" icon={Armchair} label="A While Away" />
+        </SideSection>
       </nav>
 
       <button
@@ -291,15 +282,17 @@ function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
   );
 }
 
-function SideLink({
-  to,
-  icon: Icon,
-  label,
-}: {
-  to: string;
-  icon: typeof House;
-  label: string;
-}) {
+/** A titled group of sidebar links. */
+function SideSection({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div className="mt-6 flex flex-col gap-1.5">
+      <p className="px-3 pb-0.5 font-serif text-xs italic text-muted-foreground/70">{title}</p>
+      {children}
+    </div>
+  );
+}
+
+function SideLink({ to, icon: Icon, label }: { to: string; icon: typeof House; label: string }) {
   const base =
     "flex items-center gap-3 rounded-xl px-3 py-2.5 font-heading text-sm uppercase tracking-wide transition-colors";
   return (
@@ -371,6 +364,9 @@ function BottomNav() {
             className="w-full rounded-t-3xl bg-background p-5 pb-8 shadow-xl [animation:rise_0.25s_both]"
           >
             <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-black/15" />
+            <p className="mb-3 px-1 font-serif text-xs italic text-muted-foreground">
+              Now &amp; then
+            </p>
             <div className="grid grid-cols-3 gap-3">
               {BOTTOM_MORE.map(({ to, icon: Icon, label }) => (
                 <Link
@@ -490,9 +486,7 @@ function ProfileSheet({
         </div>
 
         <div className="mt-10">
-          <p className="font-heading text-sm uppercase tracking-wide text-olive">
-            Appearance
-          </p>
+          <p className="font-heading text-sm uppercase tracking-wide text-olive">Appearance</p>
           <div className="mt-3 space-y-2">
             {THEMES.map((t) => {
               const active = theme === t.id;
@@ -509,17 +503,11 @@ function ProfileSheet({
                 >
                   <span className="flex shrink-0 overflow-hidden rounded-full ring-1 ring-black/10">
                     {t.swatches.map((c, i) => (
-                      <span
-                        key={i}
-                        className="size-6"
-                        style={{ backgroundColor: c }}
-                      />
+                      <span key={i} className="size-6" style={{ backgroundColor: c }} />
                     ))}
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block font-heading text-sm text-foreground">
-                      {t.label}
-                    </span>
+                    <span className="block font-heading text-sm text-foreground">{t.label}</span>
                     <span className="block truncate font-serif text-xs text-muted-foreground">
                       {t.blurb}
                     </span>
@@ -534,9 +522,7 @@ function ProfileSheet({
             })}
           </div>
 
-          <p className="mt-6 font-heading text-sm uppercase tracking-wide text-olive">
-            Font style
-          </p>
+          <p className="mt-6 font-heading text-sm uppercase tracking-wide text-olive">Font style</p>
           <div className="mt-3 grid grid-cols-2 gap-2">
             {FONTS.map((f) => {
               const active = font === f.id;
@@ -562,9 +548,7 @@ function ProfileSheet({
                   >
                     Aa
                   </span>
-                  <span className="mt-2 block font-heading text-sm text-foreground">
-                    {f.label}
-                  </span>
+                  <span className="mt-2 block font-heading text-sm text-foreground">{f.label}</span>
                   <span className="mt-0.5 block font-serif text-xs text-muted-foreground">
                     {f.blurb}
                   </span>

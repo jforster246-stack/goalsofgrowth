@@ -12,8 +12,10 @@ import {
 } from "@/lib/finance.functions";
 import {
   CYCLE_WORD,
+  bucketGroup,
   parseAmount,
   todayIso,
+  type BucketGroup,
   type FinanceEntry,
   type PayCycle,
   type SavingsGoal,
@@ -247,11 +249,14 @@ export function EntryModal({
   onClose,
   entry,
   kind = "expense",
+  group: initialGroup,
   cycle,
 }: {
   onClose: () => void;
   entry?: FinanceEntry | undefined;
   kind?: "income" | "expense";
+  /** Preselects spending/saving for a new bucket. */
+  group?: BucketGroup | undefined;
   cycle: PayCycle;
 }) {
   const queryClient = useQueryClient();
@@ -261,6 +266,8 @@ export function EntryModal({
   const [amount, setAmount] = useState(entry ? String(Number(entry.amount)) : "");
   const [account, setAccount] = useState(entry?.account ?? "");
   const [note, setNote] = useState(entry?.note ?? "");
+  const startGroup: BucketGroup = entry ? bucketGroup(entry) : (initialGroup ?? "spending");
+  const [group, setGroup] = useState<BucketGroup>(startGroup);
 
   const done = async () => {
     await queryClient.invalidateQueries({ queryKey: ["finance"] });
@@ -274,6 +281,10 @@ export function EntryModal({
         amount: parseAmount(amount),
         account: account.trim() || null,
         note: note.trim() || null,
+        // Only send the group when it's a real choice, so names keep guessing.
+        ...(!isIncome && (group !== startGroup || (!editing && initialGroup))
+          ? { bucketGroup: group }
+          : {}),
       };
       if (editing) await updateFinanceEntry({ data: { id: entry!.id, ...fields } });
       else await addFinanceEntry({ data: { ...fields, kind: isIncome ? "income" : "expense" } });
@@ -310,6 +321,24 @@ export function EntryModal({
       </Field>
       {!isIncome && (
         <>
+          <Field label="Type">
+            <span className="mt-2 grid grid-cols-2 gap-2">
+              {(["spending", "saving"] as BucketGroup[]).map((g) => (
+                <button
+                  key={g}
+                  type="button"
+                  onClick={() => setGroup(g)}
+                  aria-pressed={group === g}
+                  className={cn(
+                    "rounded-2xl py-2.5 font-heading text-xs uppercase transition-colors",
+                    group === g ? "bg-olive text-white" : "bg-black/5 text-black/50",
+                  )}
+                >
+                  {g}
+                </button>
+              ))}
+            </span>
+          </Field>
           <Field label="What it covers" optional>
             <input
               value={note}

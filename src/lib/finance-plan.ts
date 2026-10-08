@@ -9,7 +9,20 @@ export type FinanceEntry = {
   kind: string;
   account: string | null;
   note: string | null;
+  bucket_group?: string | null;
 };
+
+export type BucketGroup = "spending" | "saving";
+
+const SAVING_WORDS = /sav|goal|future|sinking|emergency|invest|super|deposit|holiday|travel|fund/i;
+
+/** Spending or saving: what was chosen, otherwise a guess from the name. */
+export function bucketGroup(entry: Pick<FinanceEntry, "label" | "bucket_group">): BucketGroup {
+  if (entry.bucket_group === "spending" || entry.bucket_group === "saving") {
+    return entry.bucket_group;
+  }
+  return SAVING_WORDS.test(entry.label) ? "saving" : "spending";
+}
 
 export type SavingsGoal = {
   id: string;
@@ -139,6 +152,28 @@ export function nextPayday(cycle: PayCycle, anchor: string | null, from = new Da
   const today = Date.UTC(from.getFullYear(), from.getMonth(), from.getDate());
   const k = Math.ceil((today - anchorUtc(anchor)) / DAY_MS / step);
   return new Date(anchorUtc(anchor) + k * step * DAY_MS);
+}
+
+/**
+ * How many paydays fall in the next `months` months. Uses the real payday
+ * pattern when we know one (so bonus pays count), otherwise the average.
+ */
+export function paysInMonths(
+  cycle: PayCycle,
+  anchor: string | null,
+  months: number,
+  from = new Date(),
+) {
+  if (cycle === "monthly") return months;
+  if (!anchor) return Math.round((months * PAYS_PER_YEAR[cycle]) / 12);
+  const step = stepDays(cycle);
+  const start = Date.UTC(from.getFullYear(), from.getMonth(), from.getDate());
+  const end = Date.UTC(from.getFullYear(), from.getMonth() + months, from.getDate());
+  const a = anchorUtc(anchor);
+  // Paydays strictly after today, up to and including the end date.
+  const first = Math.floor((start - a) / DAY_MS / step) + 1;
+  const last = Math.floor((end - a) / DAY_MS / step);
+  return Math.max(0, last - first + 1);
 }
 
 export function todayIso() {

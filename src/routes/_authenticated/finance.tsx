@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { CalendarDays, ChevronRight, PiggyBank, Plus, Wallet } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { Loading } from "@/components/loading";
@@ -16,9 +16,12 @@ import {
   CYCLE_PHRASE,
   CYCLE_WORD,
   PAYS_PER_YEAR,
+  bucketGroup,
   extraPayMonths,
   fmtWhole,
   nextPayday,
+  paysInMonths,
+  type BucketGroup,
   type FinanceEntry,
   type PayCycle,
   type SavingsGoal,
@@ -46,6 +49,7 @@ type Sheet =
       kind: "entry";
       entry?: FinanceEntry | undefined;
       entryKind?: "income" | "expense";
+      group?: BucketGroup;
     }
   | { kind: "goal"; goal?: SavingsGoal | undefined };
 
@@ -124,20 +128,25 @@ function FinancePage() {
                   <p className="mt-1 font-serif text-xs text-black/45">
                     Tap a bucket to change it. Amounts are per {CYCLE_WORD[cycle]}.
                   </p>
-                  <div className="mt-3 space-y-2">
-                    {buckets.map((b, i) => (
-                      <BucketCard
-                        key={b.id}
-                        bucket={b}
-                        dot={BUCKET_COLOURS[i % BUCKET_COLOURS.length]!}
-                        share={payTotal > 0 ? Number(b.amount) / payTotal : 0}
-                        onClick={() => setSheet({ kind: "entry", entry: b })}
-                      />
+                  <div className="mt-4 grid gap-8 md:grid-cols-2 md:gap-5">
+                    {(["spending", "saving"] as BucketGroup[]).map((group) => (
+                      <BucketColumn
+                        key={group}
+                        group={group}
+                        buckets={buckets}
+                        payTotal={payTotal}
+                        onOpen={(entry) => setSheet({ kind: "entry", entry })}
+                        onAdd={() => setSheet({ kind: "entry", entryKind: "expense", group })}
+                      >
+                        {group === "saving" && (
+                          <SavingsProjection
+                            buckets={buckets.filter((b) => bucketGroup(b) === "saving")}
+                            cycle={cycle}
+                            anchor={anchor}
+                          />
+                        )}
+                      </BucketColumn>
                     ))}
-                    <AddButton
-                      label="Add a bucket"
-                      onClick={() => setSheet({ kind: "entry", entryKind: "expense" })}
-                    />
                   </div>
                 </section>
 
@@ -184,6 +193,7 @@ function FinancePage() {
           onClose={close}
           entry={sheet.entry}
           kind={sheet.entryKind ?? "expense"}
+          group={sheet.group}
           cycle={cycle}
         />
       )}
@@ -379,6 +389,123 @@ function BucketCard({
       </span>
       <ChevronRight className="size-4 shrink-0 text-black/25" />
     </button>
+  );
+}
+
+/** One column of buckets (spending or saving) with its total. */
+function BucketColumn({
+  group,
+  buckets,
+  payTotal,
+  onOpen,
+  onAdd,
+  children,
+}: {
+  group: BucketGroup;
+  buckets: FinanceEntry[];
+  payTotal: number;
+  onOpen: (entry: FinanceEntry) => void;
+  onAdd: () => void;
+  children?: ReactNode;
+}) {
+  // Colours follow each bucket's place in the full list, so they match the bar.
+  const mine = buckets
+    .map((b, i) => ({ b, dot: BUCKET_COLOURS[i % BUCKET_COLOURS.length]! }))
+    .filter(({ b }) => bucketGroup(b) === group);
+  const total = mine.reduce((s, { b }) => s + Number(b.amount), 0);
+  return (
+    <div>
+      <div className="flex items-baseline justify-between border-b border-black/10 pb-2">
+        <p className="font-heading text-sm uppercase text-black">
+          {group === "spending" ? "Spending" : "Saving"}
+        </p>
+        <p className="font-mono text-sm text-black/60">{fmtWhole(total)}</p>
+      </div>
+      <div className="mt-3 space-y-2">
+        {mine.length === 0 && (
+          <p className="font-serif text-xs text-black/45">
+            {group === "saving"
+              ? "No saving buckets yet. Add one, or tap a bucket and switch it to Saving."
+              : "No spending buckets yet."}
+          </p>
+        )}
+        {mine.map(({ b, dot }) => (
+          <BucketCard
+            key={b.id}
+            bucket={b}
+            dot={dot}
+            share={payTotal > 0 ? Number(b.amount) / payTotal : 0}
+            onClick={() => onOpen(b)}
+          />
+        ))}
+        <AddButton label={group === "spending" ? "Add spending" : "Add saving"} onClick={onAdd} />
+      </div>
+      {children}
+    </div>
+  );
+}
+
+const PROJECTION_MONTHS = [
+  { months: 3, label: "3 months" },
+  { months: 6, label: "6 months" },
+  { months: 9, label: "9 months" },
+  { months: 12, label: "1 year" },
+];
+
+/** "If you save $X every fortnight for N months, you'll have $Y." */
+function SavingsProjection({
+  buckets,
+  cycle,
+  anchor,
+}: {
+  buckets: FinanceEntry[];
+  cycle: PayCycle;
+  anchor: string | null;
+}) {
+  const [months, setMonths] = useState(6);
+  const perPay = buckets.reduce((s, b) => s + Number(b.amount), 0);
+  if (perPay <= 0) return null;
+  const pays = paysInMonths(cycle, anchor, months);
+  const total = perPay * pays;
+  const period = PROJECTION_MONTHS.find((p) => p.months === months)?.label ?? "";
+
+  return (
+    <div className="mt-4 rounded-2xl bg-olive/10 px-4 py-4">
+      <div className="grid grid-cols-4 gap-1.5">
+        {PROJECTION_MONTHS.map((p) => (
+          <button
+            key={p.months}
+            type="button"
+            onClick={() => setMonths(p.months)}
+            aria-pressed={months === p.months}
+            className={cn(
+              "rounded-full px-1 py-1.5 font-heading text-[11px] whitespace-nowrap uppercase transition-colors",
+              months === p.months ? "bg-olive text-white" : "bg-white/70 text-black/55",
+            )}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
+      <p className="mt-3 font-serif text-sm text-black/65">
+        If you save {fmtWhole(perPay)} {CYCLE_PHRASE[cycle]} for {period}, you'll have
+      </p>
+      <p className="mt-1 font-mono text-3xl leading-none text-olive">{fmtWhole(total)}</p>
+      <p className="mt-2 font-serif text-xs text-black/45">
+        That's {pays} {pays === 1 ? "pay" : "pays"}
+        {cycle !== "monthly" && anchor ? ", counted from your paydays" : ""}.
+      </p>
+      {buckets.length > 1 && (
+        <div className="mt-3 space-y-1 border-t border-olive/15 pt-3">
+          {buckets.map((b) => (
+            <div key={b.id} className="flex justify-between font-serif text-xs text-black/60">
+              <span>{b.label}</span>
+              <span className="font-mono">{fmtWhole(Number(b.amount) * pays)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 

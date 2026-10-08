@@ -298,6 +298,7 @@ export type Database = {
         Row: {
           account: string | null
           amount: number
+          bucket_group: string | null
           created_at: string
           id: string
           kind: string
@@ -309,6 +310,7 @@ export type Database = {
         Insert: {
           account?: string | null
           amount?: number
+          bucket_group?: string | null
           created_at?: string
           id?: string
           kind?: string
@@ -320,6 +322,7 @@ export type Database = {
         Update: {
           account?: string | null
           amount?: number
+          bucket_group?: string | null
           created_at?: string
           id?: string
           kind?: string

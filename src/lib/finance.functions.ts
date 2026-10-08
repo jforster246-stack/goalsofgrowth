@@ -4,6 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const kindSchema = z.enum(["income", "expense"]);
 const amountSchema = z.number().finite().min(0).max(1_000_000_000);
+const bucketGroupSchema = z.enum(["spending", "saving"]);
 
 /** All of the user's finance line items, income and expenses. */
 export const listFinance = createServerFn({ method: "GET" })
@@ -28,6 +29,7 @@ export const addFinanceEntry = createServerFn({ method: "POST" })
         kind: kindSchema,
         account: z.string().trim().max(140).nullish(),
         note: z.string().trim().max(500).nullish(),
+        bucketGroup: bucketGroupSchema.optional(),
       })
       .parse(data),
   )
@@ -51,6 +53,7 @@ export const addFinanceEntry = createServerFn({ method: "POST" })
         // works on a database that hasn't had migration 0039 yet.
         ...(data.account ? { account: data.account } : {}),
         ...(data.note ? { note: data.note } : {}),
+        ...(data.bucketGroup ? { bucket_group: data.bucketGroup } : {}),
         position,
         user_id: context.userId,
       })
@@ -70,6 +73,7 @@ export const updateFinanceEntry = createServerFn({ method: "POST" })
         amount: amountSchema.optional(),
         account: z.string().trim().max(140).nullish(),
         note: z.string().trim().max(500).nullish(),
+        bucketGroup: bucketGroupSchema.optional(),
       })
       .parse(data),
   )
@@ -79,7 +83,9 @@ export const updateFinanceEntry = createServerFn({ method: "POST" })
       amount?: number;
       account?: string | null;
       note?: string | null;
+      bucket_group?: string;
     } = {};
+    if (data.bucketGroup !== undefined) patch.bucket_group = data.bucketGroup;
     if (data.label !== undefined) patch.label = data.label;
     if (data.amount !== undefined) patch.amount = data.amount;
     if (data.account !== undefined) patch.account = data.account || null;
