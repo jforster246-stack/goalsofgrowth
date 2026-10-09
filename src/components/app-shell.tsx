@@ -328,7 +328,6 @@ const BOTTOM_MORE: NavItem[] = [
   { to: "/braindump", icon: Brain, label: "Brain dump" },
   { to: "/finance", icon: Wallet, label: "Finance planner" },
   { to: "/awa", icon: Armchair, label: "A While Away" },
-
 ];
 
 function BottomNav() {
@@ -355,7 +354,6 @@ function BottomNav() {
           <button
             type="button"
             onClick={() => setMoreOpen(true)}
-
             className={`${itemClass} text-muted-foreground`}
           >
             <Ellipsis className="size-5" strokeWidth={2} />
