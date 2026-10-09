@@ -326,9 +326,8 @@ const BOTTOM_PRIMARY: NavItem[] = [
 const BOTTOM_MORE: NavItem[] = [
   { to: "/routines", icon: ListChecks, label: "Routines" },
   { to: "/braindump", icon: Brain, label: "Brain dump" },
-
-
   { to: "/finance", icon: Wallet, label: "Finance planner" },
+
   { to: "/awa", icon: Armchair, label: "A While Away" },
 ];
 
