@@ -485,9 +485,7 @@ function MissedYesterday({ className }: { className?: string }) {
   if (missed.length === 0) return null;
 
   return (
-    <section
-      className={className}
-    >
+    <section className={className}>
       <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         Missed yesterday
       </p>
