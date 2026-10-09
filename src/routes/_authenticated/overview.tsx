@@ -293,11 +293,9 @@ function OverviewPage() {
  */
 function StreakCard({
   streak,
-  name,
   className,
 }: {
   streak: number;
-  name: string | null;
   className?: string;
 }) {
   const filled = Math.min(streak, 7);
