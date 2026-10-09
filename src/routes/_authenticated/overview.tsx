@@ -228,11 +228,11 @@ function OverviewPage() {
                   <p className="font-heading text-base leading-tight text-black">
                     {randomWin.title}
                   </p>
-                  <p className="mt-0.5 font-serif text-xs text-black/45">
+                  <p className="mt-0.5 font-serif text-xs text-black/70">
                     {winDateLabel(randomWin.achieved_on)}
                   </p>
                   {randomWin.note && (
-                    <p className="mt-1 line-clamp-2 font-serif text-sm italic text-black/55">
+                    <p className="mt-1 line-clamp-2 font-serif text-sm italic text-black/70">
                       {randomWin.note}
                     </p>
                   )}
