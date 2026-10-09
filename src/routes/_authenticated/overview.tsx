@@ -185,12 +185,12 @@ function OverviewPage() {
 
         <div className="grid gap-4 md:grid-cols-2">
           {/* A random goal's next step — rotates daily */}
-          <section className="rounded-3xl bg-white p-5 shadow-sm">
+          <section>
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               A goal to nudge today
             </p>
             {randomGoal ? (
-              <div className="mt-4">
+              <div className="mt-2">
                 <NextStepCard
                   goal={randomGoal.goal}
                   step={randomGoal.next!}
@@ -204,7 +204,7 @@ function OverviewPage() {
                 />
               </div>
             ) : (
-              <p className="mt-3 rounded-2xl bg-background px-4 py-4 text-sm text-muted-foreground">
+              <p className="mt-2 text-sm text-muted-foreground">
                 {goals.length === 0
                   ? "Add a goal to see a next step here."
                   : "You're all caught up — nice work."}
@@ -213,12 +213,12 @@ function OverviewPage() {
           </section>
 
           {/* A random win — rotates daily */}
-          <section className="rounded-3xl bg-white p-5 shadow-sm">
+          <section>
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               A win to remember
             </p>
             {randomWin && winStyle ? (
-              <div className="mt-4 flex items-center gap-3">
+              <div className="mt-2 flex items-center gap-3">
                 <Stamp
                   icon={winStyle.icon}
                   accent={winStyle.accent}
@@ -239,7 +239,7 @@ function OverviewPage() {
                 </div>
               </div>
             ) : (
-              <p className="mt-3 rounded-2xl bg-background px-4 py-4 text-sm text-muted-foreground">
+              <p className="mt-2 text-sm text-muted-foreground">
                 Log a win and it'll show up here to look back on.
               </p>
             )}
