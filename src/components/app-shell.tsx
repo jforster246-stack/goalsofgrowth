@@ -164,11 +164,11 @@ export function AppShell({
                 </>
               ) : (
                 <>
-                  <h1 className="font-display text-3xl font-normal leading-[1.1] tracking-tight md:text-4xl">
+                  <h1 className="truncate font-display text-xl font-normal leading-[1.1] tracking-tight md:text-2xl">
                     {profile?.display_name ? `${profile.display_name}'s ` : "Your "}
                     Goals of Growth
                   </h1>
-                  <p className="mt-2 text-sm italic text-muted-foreground">
+                  <p className="mt-1 text-sm italic text-muted-foreground">
                     "{quoteOfTheDay(localToday())}"
                   </p>
                 </>

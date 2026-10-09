@@ -180,10 +180,7 @@ function OverviewPage() {
     <AppShell>
       <div className="mt-6 space-y-4">
         {profile && (
-          <StreakCard
-            streak={profile.streak_count ?? 0}
-            name={profile.display_name ?? null}
-          />
+          <StreakCard streak={profile.streak_count ?? 0} />
         )}
 
         <div className="grid gap-4 md:grid-cols-2">
@@ -293,11 +290,9 @@ function OverviewPage() {
  */
 function StreakCard({
   streak,
-  name,
   className,
 }: {
   streak: number;
-  name: string | null;
   className?: string;
 }) {
   const filled = Math.min(streak, 7);
@@ -325,11 +320,11 @@ function StreakCard({
         )}
       </div>
 
-      <p className="min-w-0 flex-1 font-serif text-sm italic text-black/50">
-        {streak > 0
-          ? `You are doing really great${name ? `, ${name}` : ""}!`
-          : "Check in each day to start your streak."}
-      </p>
+      {streak === 0 && (
+        <p className="min-w-0 flex-1 font-serif text-sm italic text-black/50">
+          Check in each day to start your streak.
+        </p>
+      )}
 
       <span className="inline-flex items-center gap-1.5 rounded-full bg-clay/10 px-3 py-1.5">
         <Stamp icon={null} accent="clay" className="size-4" />
