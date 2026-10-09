@@ -369,12 +369,19 @@ function SideLink({ to, icon: Icon, label }: { to: string; icon: typeof House; l
   );
 }
 
-type NavItem = { to: string; icon: typeof House; label: string };
+type NavItem = {
+  to: string;
+  icon: typeof House;
+  label: string;
+  className?: string;
+};
 
 // First five get a direct tab; the rest live behind "More".
+// Gallery is hidden on phones (the stamp pill opens it instead) but stays on
+// tablet and desktop.
 const BOTTOM_PRIMARY: NavItem[] = [
   { to: "/overview", icon: House, label: "Home" },
-  { to: "/gallery", icon: Frame, label: "Gallery" },
+  { to: "/gallery", icon: Frame, label: "Gallery", className: "max-md:hidden" },
   { to: "/habits", icon: Repeat, label: "Habits" },
   { to: "/goals", icon: Target, label: "Goals" },
   { to: "/routines", icon: ListChecks, label: "Routines" },
@@ -394,12 +401,12 @@ function BottomNav() {
     <>
       <div className="fixed inset-x-0 bottom-0 z-10 bg-gradient-to-t from-background via-background/95 to-transparent px-3 pb-4 pt-8 lg:hidden">
         <nav className="mx-auto flex max-w-md items-stretch rounded-2xl bg-card px-1 shadow-lg ring-1 ring-border">
-          {BOTTOM_PRIMARY.map(({ to, icon: Icon, label }) => (
+          {BOTTOM_PRIMARY.map(({ to, icon: Icon, label, className }) => (
             <Link
               key={to}
               to={to}
-              className={`${itemClass} text-muted-foreground`}
-              activeProps={{ className: `${itemClass} text-foreground` }}
+              className={`${itemClass} text-muted-foreground ${className ?? ""}`}
+              activeProps={{ className: `${itemClass} text-foreground ${className ?? ""}` }}
             >
               <Icon className="size-5" strokeWidth={2} />
               {label}
