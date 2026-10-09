@@ -9,7 +9,6 @@ import {
   Frame,
   House,
   ListChecks,
-  NotebookPen,
   Repeat,
   Settings,
   Target,
@@ -24,6 +23,8 @@ import { quoteOfTheDay } from "@/lib/quotes";
 import { FocusMode } from "@/components/focus-mode";
 import { AddMenu } from "@/components/add-fab";
 import { StampPill } from "@/components/stamp-pill";
+import { MorningPagesLink, MorningPagesTab } from "@/components/morning-pages";
+
 import { Confetti } from "@/components/confetti";
 import { goalsQueryOptions, profileQueryOptions } from "@/lib/goal-queries";
 import { toggleStep, touchStreak, updateDisplayName } from "@/lib/goals.functions";
@@ -280,69 +281,6 @@ function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
   );
 }
 
-const MORNING_PAGES_URL = "https://morning-ink.lovable.app/";
-
-/** Morning pages lives in a separate app, so check before leaving. */
-function MorningPagesLink() {
-  const [asking, setAsking] = useState(false);
-  return (
-    <>
-      <button
-        type="button"
-        onClick={() => setAsking(true)}
-        className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left font-heading text-sm uppercase tracking-wide text-muted-foreground transition-colors hover:bg-muted/50"
-      >
-        <NotebookPen className="size-5" strokeWidth={2} />
-        Morning pages
-      </button>
-      {asking && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-5"
-          onClick={() => setAsking(false)}
-        >
-          <div
-            role="alertdialog"
-            aria-modal="true"
-            aria-labelledby="morning-pages-title"
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-sm rounded-3xl bg-background p-6 text-center shadow-xl [animation:rise_0.25s_both]"
-          >
-            <NotebookPen className="mx-auto size-8 text-olive" strokeWidth={1.75} />
-            <h2
-              id="morning-pages-title"
-              className="mt-3 font-display text-2xl leading-tight text-black"
-            >
-              Open Morning pages?
-            </h2>
-            <p className="mt-2 font-serif text-sm text-black/55">
-              This will open externally, in a new tab. Do you want to proceed?
-            </p>
-            <div className="mt-6 grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                autoFocus
-                onClick={() => setAsking(false)}
-                className="rounded-2xl bg-black/5 py-3 font-heading text-sm uppercase text-black/60 transition-colors hover:bg-black/10"
-              >
-                No
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  window.open(MORNING_PAGES_URL, "_blank", "noopener,noreferrer");
-                  setAsking(false);
-                }}
-                className="rounded-2xl bg-olive py-3 font-heading text-sm uppercase text-white transition-colors hover:bg-olive/90"
-              >
-                Yes
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  );
-}
 
 /** A titled group of sidebar links. */
 function SideSection({ title, children }: { title: string; children: ReactNode }) {
@@ -384,10 +322,11 @@ const BOTTOM_PRIMARY: NavItem[] = [
   { to: "/gallery", icon: Frame, label: "Gallery", className: "max-md:hidden" },
   { to: "/habits", icon: Repeat, label: "Habits" },
   { to: "/goals", icon: Target, label: "Goals" },
-  { to: "/routines", icon: ListChecks, label: "Routines" },
 ];
 const BOTTOM_MORE: NavItem[] = [
+  { to: "/routines", icon: ListChecks, label: "Routines" },
   { to: "/braindump", icon: Brain, label: "Brain dump" },
+
   { to: "/finance", icon: Wallet, label: "Finance planner" },
   { to: "/awa", icon: Armchair, label: "A While Away" },
 ];
@@ -412,7 +351,9 @@ function BottomNav() {
               {label}
             </Link>
           ))}
+          <MorningPagesTab className={`${itemClass} text-muted-foreground`} />
           <button
+
             type="button"
             onClick={() => setMoreOpen(true)}
             className={`${itemClass} text-muted-foreground`}
