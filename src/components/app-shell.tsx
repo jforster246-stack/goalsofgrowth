@@ -177,15 +177,6 @@ export function AppShell({
             </div>
 
             <div className="flex shrink-0 items-center gap-2">
-              {!hideSettings && (
-                <button
-                  onClick={() => setProfileOpen(true)}
-                  aria-label="Open settings"
-                  className="grid size-10 place-items-center rounded-full bg-card text-muted-foreground shadow-sm ring-1 ring-border transition-colors hover:bg-muted lg:hidden"
-                >
-                  <Settings className="size-4" strokeWidth={2} />
-                </button>
-              )}
               <StampPill />
               <div className="hidden lg:block">
                 <AddMenu />
@@ -198,7 +189,7 @@ export function AppShell({
           {/* Mobile: the add button floats bottom-right. */}
           <AddMenu floating />
 
-          <BottomNav />
+          <BottomNav onOpenSettings={() => setProfileOpen(true)} />
 
           {confettiKey > 0 && <Confetti key={confettiKey} />}
 
@@ -330,7 +321,7 @@ const BOTTOM_MORE: NavItem[] = [
   { to: "/awa", icon: Armchair, label: "A While Away" },
 ];
 
-function BottomNav() {
+function BottomNav({ onOpenSettings }: { onOpenSettings: () => void }) {
   const [moreOpen, setMoreOpen] = useState(false);
   const itemClass =
     "flex flex-1 flex-col items-center justify-center gap-1 py-3 text-[9px] font-semibold uppercase tracking-wide transition-colors";
@@ -391,6 +382,17 @@ function BottomNav() {
                 </Link>
               ))}
             </div>
+            <button
+              type="button"
+              onClick={() => {
+                setMoreOpen(false);
+                onOpenSettings();
+              }}
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-card px-3 py-3.5 font-heading text-[10px] uppercase tracking-wide text-foreground shadow-sm ring-1 ring-border"
+            >
+              <Settings className="size-5 text-olive" strokeWidth={2} />
+              Settings
+            </button>
           </div>
         </div>
       )}
