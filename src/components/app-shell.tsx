@@ -186,11 +186,16 @@ export function AppShell({
                 </button>
               )}
               <StampPill />
-              <AddMenu />
+              <div className="hidden lg:block">
+                <AddMenu />
+              </div>
             </div>
           </header>
 
           {children}
+
+          {/* Mobile: the add button floats bottom-right. */}
+          <AddMenu floating />
 
           <BottomNav />
 

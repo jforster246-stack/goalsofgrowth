@@ -12,9 +12,7 @@ import { goalProgress, localToday } from "@/components/goal-ui";
 import { Stamp } from "@/components/stamp";
 import { StampMark } from "@/components/stamp-mark";
 import { HabitDetailModal, type HabitFull } from "@/components/habit-detail-modal";
-import { HabitTally } from "@/components/habit-tally";
-import { GoalTally } from "@/components/goal-tally";
-import { AwaQuickLog } from "@/components/awa-quick-log";
+import { winStampStyle } from "@/components/win-form-modal";
 import {
   HabitRow,
   NextStepPortrait,
@@ -30,6 +28,7 @@ import {
   goalsQueryOptions,
   habitsQueryOptions,
   profileQueryOptions,
+  winsQueryOptions,
 } from "@/lib/goal-queries";
 import { deleteStep, setGoalOfDay, toggleStep, updateStep } from "@/lib/goals.functions";
 import { setChecklistHome } from "@/lib/checklists.functions";
@@ -74,10 +73,29 @@ export const Route = createFileRoute("/_authenticated/overview")({
   component: OverviewPage,
 });
 
+type Win = {
+  id: string;
+  title: string;
+  note: string | null;
+  kind: string;
+  achieved_on: string;
+  icon: string | null;
+  accent: string | null;
+};
+
+function winDateLabel(d: string): string {
+  return new Date(`${d}T00:00:00`).toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
 function OverviewPage() {
   const queryClient = useQueryClient();
   const { data: goals } = useSuspenseQuery(goalsQueryOptions);
   const { data: profile } = useQuery(profileQueryOptions);
+  const { data: wins } = useQuery(winsQueryOptions);
 
   const today = localToday();
 
@@ -94,6 +112,17 @@ function OverviewPage() {
     )
     .map((goal) => ({ goal, next: goalProgress(goal).nextStep }))
     .filter((row) => row.next);
+
+  // A random goal's next step and a random win, both rotating once a day.
+  const dayIdx = Math.floor(Date.parse(`${today}T00:00:00`) / 86_400_000);
+  const randomGoal =
+    upcoming.length > 0 ? upcoming[dayIdx % upcoming.length]! : null;
+  const winList = (wins ?? []) as Win[];
+  const randomWin =
+    winList.length > 0 ? winList[dayIdx % winList.length]! : null;
+  const winStyle = randomWin
+    ? winStampStyle(randomWin.kind, randomWin.icon, randomWin.accent)
+    : null;
 
   const chooseMutation = useMutation({
     mutationFn: (goalId: string | null) =>
@@ -149,55 +178,78 @@ function OverviewPage() {
 
   return (
     <AppShell>
-      {/* Two-column dashboard: goals on the left, habits/log rail on the right. */}
-      <div className="mt-6 grid gap-4 pb-4 lg:grid-cols-3">
-        {/* Main column */}
-        <div className="space-y-4 lg:col-span-2">
-          {profile && (
-            <StreakCard
-              streak={profile.streak_count ?? 0}
-              name={profile.display_name ?? null}
-            />
-          )}
+      <div className="mt-6 space-y-4">
+        {profile && (
+          <StreakCard
+            streak={profile.streak_count ?? 0}
+            name={profile.display_name ?? null}
+          />
+        )}
 
-          <GoalTally />
-
-          {/* Next steps — the goal cards for today */}
+        <div className="grid gap-4 md:grid-cols-2">
+          {/* A random goal's next step — rotates daily */}
           <section className="rounded-3xl bg-white p-5 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              What next step will you take today?
+              A goal to nudge today
             </p>
-            {upcoming.length === 0 ? (
+            {randomGoal ? (
+              <div className="mt-4">
+                <NextStepCard
+                  goal={randomGoal.goal}
+                  step={randomGoal.next!}
+                  onComplete={() =>
+                    handleComplete(
+                      randomGoal.goal.id,
+                      randomGoal.next!.title,
+                      randomGoal.next!.id,
+                    )
+                  }
+                />
+              </div>
+            ) : (
               <p className="mt-3 rounded-2xl bg-background px-4 py-4 text-sm text-muted-foreground">
                 {goals.length === 0
-                  ? "Add a goal to see your next steps here."
+                  ? "Add a goal to see a next step here."
                   : "You're all caught up — nice work."}
               </p>
-            ) : (
-              <div className="mt-4 flex flex-wrap items-stretch gap-4">
-                {upcoming.map(({ goal, next }) => (
-                  <NextStepCard
-                    key={goal.id}
-                    goal={goal}
-                    step={next!}
-                    portrait
-                    onComplete={() => handleComplete(goal.id, next!.title, next!.id)}
-                  />
-                ))}
-              </div>
             )}
           </section>
 
-          <RoutinesHome />
+          {/* A random win — rotates daily */}
+          <section className="rounded-3xl bg-white p-5 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              A win to remember
+            </p>
+            {randomWin && winStyle ? (
+              <div className="mt-4 flex items-center gap-3">
+                <Stamp
+                  icon={winStyle.icon}
+                  accent={winStyle.accent}
+                  className="size-14 shrink-0"
+                />
+                <div className="min-w-0">
+                  <p className="font-heading text-base leading-tight text-black">
+                    {randomWin.title}
+                  </p>
+                  <p className="mt-0.5 font-serif text-xs text-black/45">
+                    {winDateLabel(randomWin.achieved_on)}
+                  </p>
+                  {randomWin.note && (
+                    <p className="mt-1 line-clamp-2 font-serif text-sm italic text-black/55">
+                      {randomWin.note}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <p className="mt-3 rounded-2xl bg-background px-4 py-4 text-sm text-muted-foreground">
+                Log a win and it'll show up here to look back on.
+              </p>
+            )}
+          </section>
         </div>
 
-        {/* Right rail */}
-        <div className="space-y-4">
-          <AwaQuickLog />
-          <HabitTally />
-          <TodayHabits />
-          <MissedYesterday />
-        </div>
+        <TodayHabits />
       </div>
 
       {/* "Nice work" popup after completing a step (when the goal isn't finished yet) */}
