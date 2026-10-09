@@ -382,6 +382,17 @@ function BottomNav({ onOpenSettings }: { onOpenSettings: () => void }) {
                 </Link>
               ))}
             </div>
+            <button
+              type="button"
+              onClick={() => {
+                setMoreOpen(false);
+                onOpenSettings();
+              }}
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-card px-3 py-3.5 font-heading text-[10px] uppercase tracking-wide text-foreground shadow-sm ring-1 ring-border"
+            >
+              <Settings className="size-5 text-olive" strokeWidth={2} />
+              Settings
+            </button>
           </div>
         </div>
       )}
