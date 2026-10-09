@@ -49,13 +49,13 @@ export function NextStepRow({
   const accent = accentOf(goal);
 
   return (
-    <div className="flex w-full flex-col gap-2 rounded-2xl bg-white p-2 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:py-2 sm:pl-2.5 sm:pr-2">
+    <div className="flex w-full flex-col gap-2 rounded-2xl bg-white p-2 shadow-sm sm:flex-row sm:items-start sm:justify-between sm:py-2 sm:pl-2.5 sm:pr-2">
       <button
         type="button"
         onClick={onOpen}
-        className="flex min-w-0 flex-1 items-start gap-2 text-left sm:items-center"
+        className="flex min-w-0 flex-1 flex-col items-start gap-1.5 text-left"
       >
-        <GoalGlyph goal={goal} className={cn("size-8 shrink-0 sm:size-10", accent.text)} />
+        <GoalGlyph goal={goal} className={cn("size-12 shrink-0 sm:size-14", accent.text)} />
         <span className="flex min-w-0 flex-col">
           <span className="font-serif text-xs leading-snug text-black line-clamp-3 sm:text-sm">
             {step.title}

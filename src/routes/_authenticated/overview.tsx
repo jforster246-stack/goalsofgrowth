@@ -218,11 +218,11 @@ function OverviewPage() {
               A win to remember
             </p>
             {randomWin && winStyle ? (
-              <div className="mt-2 flex items-start gap-2 md:items-center md:gap-3">
+              <div className="mt-2 flex flex-col items-start gap-2">
                 <Stamp
                   icon={winStyle.icon}
                   accent={winStyle.accent}
-                  className="size-9 shrink-0 md:size-14"
+                  className="size-14 shrink-0 md:size-16"
                 />
                 <div className="min-w-0">
                   <p className="font-heading text-sm leading-tight text-black md:text-base">
