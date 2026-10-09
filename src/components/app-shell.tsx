@@ -327,6 +327,7 @@ const BOTTOM_MORE: NavItem[] = [
   { to: "/routines", icon: ListChecks, label: "Routines" },
   { to: "/braindump", icon: Brain, label: "Brain dump" },
 
+
   { to: "/finance", icon: Wallet, label: "Finance planner" },
   { to: "/awa", icon: Armchair, label: "A While Away" },
 ];
@@ -353,6 +354,7 @@ function BottomNav() {
           ))}
           <MorningPagesTab className={`${itemClass} text-muted-foreground`} />
           <button
+
 
             type="button"
             onClick={() => setMoreOpen(true)}
