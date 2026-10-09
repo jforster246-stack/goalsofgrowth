@@ -213,12 +213,12 @@ function OverviewPage() {
           </section>
 
           {/* A random win — rotates daily */}
-          <section>
+          <section className="flex flex-col">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               A win to remember
             </p>
             {randomWin && winStyle ? (
-              <div className="mt-2 flex flex-col items-start gap-2">
+              <div className="mt-2 flex flex-1 flex-col items-start gap-2 rounded-2xl bg-white p-2 shadow-sm">
                 <Stamp
                   icon={winStyle.icon}
                   accent={winStyle.accent}
