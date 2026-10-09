@@ -183,7 +183,7 @@ function OverviewPage() {
           <StreakCard streak={profile.streak_count ?? 0} />
         )}
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-2 gap-3 md:gap-4">
           {/* A random goal's next step — rotates daily */}
           <section>
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -218,21 +218,21 @@ function OverviewPage() {
               A win to remember
             </p>
             {randomWin && winStyle ? (
-              <div className="mt-2 flex items-center gap-3">
+              <div className="mt-2 flex items-start gap-2 md:items-center md:gap-3">
                 <Stamp
                   icon={winStyle.icon}
                   accent={winStyle.accent}
-                  className="size-14 shrink-0"
+                  className="size-9 shrink-0 md:size-14"
                 />
                 <div className="min-w-0">
-                  <p className="font-heading text-base leading-tight text-black">
+                  <p className="font-heading text-sm leading-tight text-black md:text-base">
                     {randomWin.title}
                   </p>
-                  <p className="mt-0.5 font-serif text-xs text-black/70">
+                  <p className="mt-0.5 font-serif text-[11px] text-black/70 md:text-xs">
                     {winDateLabel(randomWin.achieved_on)}
                   </p>
                   {randomWin.note && (
-                    <p className="mt-1 line-clamp-2 font-serif text-sm italic text-black/70">
+                    <p className="mt-1 line-clamp-3 font-serif text-xs italic text-black/70 md:line-clamp-2 md:text-sm">
                       {randomWin.note}
                     </p>
                   )}

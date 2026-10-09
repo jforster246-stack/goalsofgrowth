@@ -49,40 +49,45 @@ export function NextStepRow({
   const accent = accentOf(goal);
 
   return (
-    <div className="flex w-full items-center justify-between gap-2 rounded-2xl bg-white py-2 pl-2.5 pr-2 shadow-sm">
+    <div className="flex w-full flex-col gap-2 rounded-2xl bg-white p-2 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:py-2 sm:pl-2.5 sm:pr-2">
       <button
         type="button"
         onClick={onOpen}
-        className="flex min-w-0 flex-1 items-center gap-2 text-left"
+        className="flex min-w-0 flex-1 items-start gap-2 text-left sm:items-center"
       >
-        <GoalGlyph goal={goal} className={cn("size-10 shrink-0", accent.text)} />
+        <GoalGlyph goal={goal} className={cn("size-8 shrink-0 sm:size-10", accent.text)} />
         <span className="flex min-w-0 flex-col">
-          <span className="font-serif text-sm text-black">{step.title}</span>
+          <span className="font-serif text-xs leading-snug text-black line-clamp-3 sm:text-sm">
+            {step.title}
+          </span>
           <span className={cn("truncate font-serif text-[10px] italic", accent.text)}>
             {goal.title}
           </span>
         </span>
       </button>
 
-      <div className="flex shrink-0 items-center gap-2">
+      <div className="flex shrink-0 items-center gap-2 self-end sm:self-auto">
         <button
           type="button"
           onClick={onStartTimer}
           aria-label="Start a focus timer for this step"
-          className={cn("flex items-center justify-center rounded-lg p-2 text-white", accent.deep)}
+          className={cn(
+            "flex items-center justify-center rounded-lg p-1.5 text-white sm:p-2",
+            accent.deep,
+          )}
         >
-          <Timer className="size-6" strokeWidth={1.75} />
+          <Timer className="size-5 sm:size-6" strokeWidth={1.75} />
         </button>
         <button
           type="button"
           onClick={onComplete}
           aria-label="Mark this step complete"
           className={cn(
-            "flex items-center justify-center rounded-lg p-2 text-white",
+            "flex items-center justify-center rounded-lg p-1.5 text-white sm:p-2",
             accent.surface,
           )}
         >
-          <Check className="size-6" strokeWidth={2} />
+          <Check className="size-5 sm:size-6" strokeWidth={2} />
         </button>
       </div>
     </div>
