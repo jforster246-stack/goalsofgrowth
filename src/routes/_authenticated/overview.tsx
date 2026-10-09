@@ -180,10 +180,7 @@ function OverviewPage() {
     <AppShell>
       <div className="mt-6 space-y-4">
         {profile && (
-          <StreakCard
-            streak={profile.streak_count ?? 0}
-            name={profile.display_name ?? null}
-          />
+          <StreakCard streak={profile.streak_count ?? 0} />
         )}
 
         <div className="grid gap-4 md:grid-cols-2">
