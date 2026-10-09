@@ -314,9 +314,9 @@ type NavItem = {
   className?: string;
 };
 
-// First five get a direct tab; the rest live behind "More".
-// Gallery is hidden on phones (the stamp pill opens it instead) but stays on
-// tablet and desktop.
+// The primary tabs; the rest live behind "More". Gallery is hidden on phones
+// (the stamp pill opens it instead) but stays on tablet and desktop.
+
 const BOTTOM_PRIMARY: NavItem[] = [
   { to: "/overview", icon: House, label: "Home" },
   { to: "/gallery", icon: Frame, label: "Gallery", className: "max-md:hidden" },
@@ -353,9 +353,8 @@ function BottomNav() {
           ))}
           <MorningPagesTab className={`${itemClass} text-muted-foreground`} />
           <button
-
-
             type="button"
+
             onClick={() => setMoreOpen(true)}
             className={`${itemClass} text-muted-foreground`}
           >
