@@ -185,12 +185,12 @@ function OverviewPage() {
 
         <div className="grid gap-4 md:grid-cols-2">
           {/* A random goal's next step — rotates daily */}
-          <section className="rounded-3xl bg-white p-5 shadow-sm">
+          <section>
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               A goal to nudge today
             </p>
             {randomGoal ? (
-              <div className="mt-4">
+              <div className="mt-2">
                 <NextStepCard
                   goal={randomGoal.goal}
                   step={randomGoal.next!}
@@ -204,7 +204,7 @@ function OverviewPage() {
                 />
               </div>
             ) : (
-              <p className="mt-3 rounded-2xl bg-background px-4 py-4 text-sm text-muted-foreground">
+              <p className="mt-2 text-sm text-muted-foreground">
                 {goals.length === 0
                   ? "Add a goal to see a next step here."
                   : "You're all caught up — nice work."}
@@ -213,12 +213,12 @@ function OverviewPage() {
           </section>
 
           {/* A random win — rotates daily */}
-          <section className="rounded-3xl bg-white p-5 shadow-sm">
+          <section>
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               A win to remember
             </p>
             {randomWin && winStyle ? (
-              <div className="mt-4 flex items-center gap-3">
+              <div className="mt-2 flex items-center gap-3">
                 <Stamp
                   icon={winStyle.icon}
                   accent={winStyle.accent}
@@ -228,18 +228,18 @@ function OverviewPage() {
                   <p className="font-heading text-base leading-tight text-black">
                     {randomWin.title}
                   </p>
-                  <p className="mt-0.5 font-serif text-xs text-black/45">
+                  <p className="mt-0.5 font-serif text-xs text-black/70">
                     {winDateLabel(randomWin.achieved_on)}
                   </p>
                   {randomWin.note && (
-                    <p className="mt-1 line-clamp-2 font-serif text-sm italic text-black/55">
+                    <p className="mt-1 line-clamp-2 font-serif text-sm italic text-black/70">
                       {randomWin.note}
                     </p>
                   )}
                 </div>
               </div>
             ) : (
-              <p className="mt-3 rounded-2xl bg-background px-4 py-4 text-sm text-muted-foreground">
+              <p className="mt-2 text-sm text-muted-foreground">
                 Log a win and it'll show up here to look back on.
               </p>
             )}
@@ -485,9 +485,7 @@ function MissedYesterday({ className }: { className?: string }) {
   if (missed.length === 0) return null;
 
   return (
-    <section
-      className={cn("rounded-3xl bg-white p-5 shadow-sm", className)}
-    >
+    <section className={className}>
       <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         Missed yesterday
       </p>
@@ -754,13 +752,13 @@ function TodayHabits({ className }: { className?: string }) {
   const active = inBucket.filter((h) => !h.done);
 
   return (
-    <section className={cn("rounded-3xl bg-white p-5 shadow-sm", className)}>
+    <section className={className}>
       <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         {BUCKET_LABEL[bucket]}
       </p>
       <div className="mt-3 space-y-2">
         {active.length === 0 ? (
-          <p className="rounded-xl bg-card px-3 py-3 text-sm text-muted-foreground shadow-sm ring-1 ring-border">
+          <p className="mt-1 text-sm italic text-muted-foreground">
             {inBucket.length === 0
               ? "No habits for this time of day yet — add one with the + button."
               : "All done for now — nice work."}
