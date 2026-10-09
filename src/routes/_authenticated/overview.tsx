@@ -320,11 +320,11 @@ function StreakCard({
         )}
       </div>
 
-      <p className="min-w-0 flex-1 font-serif text-sm italic text-black/50">
-        {streak > 0
-          ? `You are doing really great${name ? `, ${name}` : ""}!`
-          : "Check in each day to start your streak."}
-      </p>
+      {streak === 0 && (
+        <p className="min-w-0 flex-1 font-serif text-sm italic text-black/50">
+          Check in each day to start your streak.
+        </p>
+      )}
 
       <span className="inline-flex items-center gap-1.5 rounded-full bg-clay/10 px-3 py-1.5">
         <Stamp icon={null} accent="clay" className="size-4" />
