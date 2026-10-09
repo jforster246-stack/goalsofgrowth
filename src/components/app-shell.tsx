@@ -369,12 +369,19 @@ function SideLink({ to, icon: Icon, label }: { to: string; icon: typeof House; l
   );
 }
 
-type NavItem = { to: string; icon: typeof House; label: string };
+type NavItem = {
+  to: string;
+  icon: typeof House;
+  label: string;
+  className?: string;
+};
 
 // First five get a direct tab; the rest live behind "More".
+// Gallery is hidden on phones (the stamp pill opens it instead) but stays on
+// tablet and desktop.
 const BOTTOM_PRIMARY: NavItem[] = [
   { to: "/overview", icon: House, label: "Home" },
-  { to: "/gallery", icon: Frame, label: "Gallery" },
+  { to: "/gallery", icon: Frame, label: "Gallery", className: "max-md:hidden" },
   { to: "/habits", icon: Repeat, label: "Habits" },
   { to: "/goals", icon: Target, label: "Goals" },
   { to: "/routines", icon: ListChecks, label: "Routines" },
