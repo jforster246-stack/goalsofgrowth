@@ -486,7 +486,7 @@ function MissedYesterday({ className }: { className?: string }) {
 
   return (
     <section
-      className={cn("rounded-3xl bg-white p-5 shadow-sm", className)}
+      className={className}
     >
       <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         Missed yesterday
@@ -754,13 +754,13 @@ function TodayHabits({ className }: { className?: string }) {
   const active = inBucket.filter((h) => !h.done);
 
   return (
-    <section className={cn("rounded-3xl bg-white p-5 shadow-sm", className)}>
+    <section className={className}>
       <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         {BUCKET_LABEL[bucket]}
       </p>
       <div className="mt-3 space-y-2">
         {active.length === 0 ? (
-          <p className="rounded-xl bg-card px-3 py-3 text-sm text-muted-foreground shadow-sm ring-1 ring-border">
+          <p className="mt-1 text-sm italic text-muted-foreground">
             {inBucket.length === 0
               ? "No habits for this time of day yet — add one with the + button."
               : "All done for now — nice work."}
