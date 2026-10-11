@@ -202,7 +202,7 @@ function GoalsListPage() {
 }
 
 /** Wraps a goal card so it can be dragged to reorder via its grip handle. */
-function DraggableGoalCard({ goal, compact }: { goal: Goal; compact?: boolean }) {
+function DraggableGoalCard({ goal, compact }: { goal: Goal; compact: boolean }) {
   const controls = useDragControls();
   return (
     <Reorder.Item as="div" value={goal} dragListener={false} dragControls={controls}>
