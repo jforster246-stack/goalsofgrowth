@@ -18,6 +18,7 @@ import {
 } from "@/lib/goals.functions";
 import { createWin } from "@/lib/wins.functions";
 import { createStamp } from "@/lib/stamps.functions";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/goals/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(goalsQueryOptions),
