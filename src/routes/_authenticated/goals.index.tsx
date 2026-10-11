@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Reorder, useDragControls } from "framer-motion";
-import { GripVertical, Plus } from "lucide-react";
+import { GripVertical, LayoutGrid, List, Plus } from "lucide-react";
 import { AppShell, useAppShell } from "@/components/app-shell";
 import { GoalCard } from "@/components/home-cards";
 import { GoalCompletePrompt, type CompletedGoal } from "@/components/goal-complete-prompt";
@@ -43,12 +43,33 @@ export const Route = createFileRoute("/_authenticated/goals/")({
 
 type Goal = GoalWithSteps & { archived_at?: string | null };
 
+/** Which way the goal cards are laid out — remembered between visits. */
+type GoalsView = "list" | "grid";
+const VIEW_KEY = "gog-goals-view";
+
+function readView(): GoalsView {
+  try {
+    return localStorage.getItem(VIEW_KEY) === "grid" ? "grid" : "list";
+  } catch {
+    return "list";
+  }
+}
+
 function GoalsListPage() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { data: goals } = useSuspenseQuery(goalsQueryOptions);
 
   const [showCompleted, setShowCompleted] = useState(false);
+  const [view, setView] = useState<GoalsView>(readView);
+  const chooseView = (next: GoalsView) => {
+    setView(next);
+    try {
+      localStorage.setItem(VIEW_KEY, next);
+    } catch {
+      /* nothing to remember it on */
+    }
+  };
 
   // Adopt goals created before sign-in existed (no-op after the first account).
   const claimed = useRef(false);
@@ -98,11 +119,43 @@ function GoalsListPage() {
       ) : (
         <div className="mt-4 space-y-4 pb-4">
           <GoalTally />
+          <div className="flex items-center justify-end">
+            <div
+              role="group"
+              aria-label="Choose how your goals are shown"
+              className="inline-flex items-center gap-1 rounded-full bg-card p-1 shadow-sm ring-1 ring-border"
+            >
+              {(
+                [
+                  { id: "list", label: "List", Icon: List },
+                  { id: "grid", label: "Grid", Icon: LayoutGrid },
+                ] as const
+              ).map(({ id, label, Icon }) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => chooseView(id)}
+                  aria-pressed={view === id}
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-full px-3 py-1.5 font-heading text-[11px] uppercase tracking-wide transition-colors",
+                    view === id ? "bg-focus text-white" : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <Icon className="size-4" strokeWidth={2} />
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
           <Reorder.Group
             as="div"
             values={order}
             onReorder={handleReorder}
-            className="grid grid-cols-1 gap-4 md:grid-cols-3"
+            className={
+              view === "grid"
+                ? "grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4"
+                : "grid grid-cols-1 gap-4"
+            }
           >
             {order.map((goal) => (
               <DraggableGoalCard key={goal.id} goal={goal} />
