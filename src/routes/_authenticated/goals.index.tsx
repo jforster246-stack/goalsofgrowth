@@ -2,9 +2,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Reorder, useDragControls } from "framer-motion";
-import { GripVertical, Plus } from "lucide-react";
+import { GripVertical, LayoutGrid, List, Plus } from "lucide-react";
 import { AppShell, useAppShell } from "@/components/app-shell";
-import { GoalCard } from "@/components/home-cards";
+import { GoalCard, GoalCardCompact } from "@/components/home-cards";
 import { GoalCompletePrompt, type CompletedGoal } from "@/components/goal-complete-prompt";
 import { goalProgress, localToday, type GoalWithSteps } from "@/components/goal-ui";
 import { StampPill } from "@/components/stamp-pill";
@@ -18,6 +18,8 @@ import {
 } from "@/lib/goals.functions";
 import { createWin } from "@/lib/wins.functions";
 import { createStamp } from "@/lib/stamps.functions";
+import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const Route = createFileRoute("/_authenticated/goals/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(goalsQueryOptions),
@@ -43,12 +45,34 @@ export const Route = createFileRoute("/_authenticated/goals/")({
 
 type Goal = GoalWithSteps & { archived_at?: string | null };
 
+/** Which way the goal cards are laid out — remembered between visits. */
+type GoalsView = "list" | "grid";
+const VIEW_KEY = "gog-goals-view";
+
+function readView(): GoalsView {
+  try {
+    return localStorage.getItem(VIEW_KEY) === "grid" ? "grid" : "list";
+  } catch {
+    return "list";
+  }
+}
+
 function GoalsListPage() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { data: goals } = useSuspenseQuery(goalsQueryOptions);
+  const isMobile = useIsMobile();
 
   const [showCompleted, setShowCompleted] = useState(false);
+  const [view, setView] = useState<GoalsView>(readView);
+  const chooseView = (next: GoalsView) => {
+    setView(next);
+    try {
+      localStorage.setItem(VIEW_KEY, next);
+    } catch {
+      /* nothing to remember it on */
+    }
+  };
 
   // Adopt goals created before sign-in existed (no-op after the first account).
   const claimed = useRef(false);
@@ -78,6 +102,10 @@ function GoalsListPage() {
     reorderMutation.mutate(next.map((g) => g.id));
   };
 
+  // Two small cards across a phone screen need the compact card; from tablet up
+  // there is room for the full one.
+  const compact = view === "grid" && isMobile;
+
   return (
     <AppShell title="All goals" titleLeft hideSettings right={<StampPill />}>
       {goals.length === 0 ? (
@@ -98,14 +126,48 @@ function GoalsListPage() {
       ) : (
         <div className="mt-4 space-y-4 pb-4">
           <GoalTally />
+          <div className="flex items-center justify-end">
+            <div
+              role="group"
+              aria-label="Choose how your goals are shown"
+              className="inline-flex items-center gap-1 rounded-full bg-card p-1 shadow-sm ring-1 ring-border"
+            >
+              {(
+                [
+                  { id: "list", label: "List", Icon: List },
+                  { id: "grid", label: "Grid", Icon: LayoutGrid },
+                ] as const
+              ).map(({ id, label, Icon }) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => chooseView(id)}
+                  aria-pressed={view === id}
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-full px-3 py-1.5 font-heading text-[11px] uppercase tracking-wide transition-colors",
+                    view === id
+                      ? "bg-focus text-white"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <Icon className="size-4" strokeWidth={2} />
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
           <Reorder.Group
             as="div"
             values={order}
             onReorder={handleReorder}
-            className="grid grid-cols-1 gap-4 md:grid-cols-3"
+            className={
+              view === "grid"
+                ? "grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4"
+                : "grid grid-cols-1 gap-4"
+            }
           >
             {order.map((goal) => (
-              <DraggableGoalCard key={goal.id} goal={goal} />
+              <DraggableGoalCard key={goal.id} goal={goal} compact={compact} />
             ))}
           </Reorder.Group>
           {active.length === 0 && (
@@ -140,18 +202,24 @@ function GoalsListPage() {
 }
 
 /** Wraps a goal card so it can be dragged to reorder via its grip handle. */
-function DraggableGoalCard({ goal }: { goal: Goal }) {
+function DraggableGoalCard({ goal, compact }: { goal: Goal; compact: boolean }) {
   const controls = useDragControls();
   return (
     <Reorder.Item as="div" value={goal} dragListener={false} dragControls={controls}>
       <GoalCardItem
         goal={goal}
+        compact={compact}
         dragHandle={
           <button
             type="button"
             aria-label="Drag to reorder"
             onPointerDown={(e) => controls.start(e)}
-            className="absolute left-2 top-2 z-20 grid size-8 cursor-grab touch-none place-items-center rounded-full bg-white/25 text-white backdrop-blur transition-colors hover:bg-white/40 active:cursor-grabbing modern:left-auto modern:right-3 modern:top-3 modern:bg-transparent modern:text-black/30 modern:backdrop-blur-none modern:hover:bg-black/5"
+            className={cn(
+              "absolute z-20 grid size-8 cursor-grab touch-none place-items-center rounded-full transition-colors active:cursor-grabbing",
+              compact
+                ? "right-2 top-2 bg-black/5 text-black/40 hover:bg-black/10"
+                : "left-2 top-2 bg-white/25 text-white backdrop-blur hover:bg-white/40 modern:left-auto modern:right-3 modern:top-3 modern:bg-transparent modern:text-black/30 modern:backdrop-blur-none modern:hover:bg-black/5",
+            )}
           >
             <GripVertical className="size-4" strokeWidth={2} />
           </button>
@@ -162,7 +230,15 @@ function DraggableGoalCard({ goal }: { goal: Goal }) {
 }
 
 /** A goal rendered as the full card. When complete it offers add-to-wins + archive. */
-function GoalCardItem({ goal, dragHandle }: { goal: Goal; dragHandle?: ReactNode }) {
+function GoalCardItem({
+  goal,
+  dragHandle,
+  compact,
+}: {
+  goal: Goal;
+  dragHandle?: ReactNode;
+  compact?: boolean;
+}) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { openFocus, celebrate } = useAppShell();
@@ -230,26 +306,38 @@ function GoalCardItem({ goal, dragHandle }: { goal: Goal; dragHandle?: ReactNode
 
   const open = () => navigate({ to: "/goals/$goalId", params: { goalId: goal.id } });
 
+  const completeNext = () => {
+    if (!next) return;
+    celebrate();
+    // This tick finishes the goal when every other step is already done.
+    if (goal.steps.every((s) => s.done || s.id === next.id)) {
+      setPromptGoal({ id: goal.id, title: goal.title, icon: goal.icon, accent: goal.accent });
+    }
+    completeMutation.mutate(next.id);
+  };
+
   return (
     <>
-      <GoalCard
-        goal={goal}
-        dragHandle={dragHandle}
-        onOpen={open}
-        onAdd={open}
-        onFocus={() => next && openFocus(next.id)}
-        onComplete={() => {
-          if (!next) return;
-          celebrate();
-          // This tick finishes the goal when every other step is already done.
-          if (goal.steps.every((s) => s.done || s.id === next.id)) {
-            setPromptGoal({ id: goal.id, title: goal.title, icon: goal.icon, accent: goal.accent });
-          }
-          completeMutation.mutate(next.id);
-        }}
-        onAddWin={() => winMutation.mutate()}
-        onArchive={() => archiveMutation.mutate()}
-      />
+      {compact ? (
+        <GoalCardCompact
+          goal={goal}
+          dragHandle={dragHandle}
+          onOpen={open}
+          onFocus={() => next && openFocus(next.id)}
+          onComplete={completeNext}
+        />
+      ) : (
+        <GoalCard
+          goal={goal}
+          dragHandle={dragHandle}
+          onOpen={open}
+          onAdd={open}
+          onFocus={() => next && openFocus(next.id)}
+          onComplete={completeNext}
+          onAddWin={() => winMutation.mutate()}
+          onArchive={() => archiveMutation.mutate()}
+        />
+      )}
       {(winMutation.isError || archiveMutation.isError) && (
         <p className="mt-2 rounded-xl bg-clay/10 px-3 py-2 font-mono text-[11px] leading-snug text-clay-deep">
           Couldn't save:{" "}

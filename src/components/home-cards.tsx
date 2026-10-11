@@ -637,3 +637,76 @@ export function HabitRow({
     </div>
   );
 }
+
+/**
+ * Compact goal card for the phone grid: motif, title and progress only, so two
+ * fit across a narrow screen without the title or the buttons crowding each other.
+ */
+export function GoalCardCompact({
+  goal,
+  onOpen,
+  onFocus,
+  onComplete,
+  dragHandle,
+}: {
+  goal: HomeGoal;
+  onOpen?: () => void;
+  onFocus?: () => void;
+  onComplete?: () => void;
+  dragHandle?: ReactNode;
+}) {
+  const accent = accentOf(goal);
+  const progress = goalProgress(goal);
+  const next = progress.nextStep;
+
+  return (
+    <div className="flex h-full flex-col rounded-2xl bg-white p-3 shadow-sm">
+      {dragHandle}
+      <button type="button" onClick={onOpen} className="flex flex-col items-start gap-2 text-left">
+        <GoalGlyph goal={goal} className={cn("size-7 shrink-0", accent.text)} />
+        <span className="line-clamp-3 font-serif text-[13px] leading-snug text-black">
+          {goal.title}
+        </span>
+        <span className="h-1.5 w-full overflow-hidden rounded-full bg-black/5">
+          <span
+            className={cn("block h-full rounded-full transition-[width] duration-500", accent.bar)}
+            style={{ width: `${progress.pct}%` }}
+          />
+        </span>
+        <span className="font-heading text-[10px] uppercase tracking-wide text-black/40">
+          {progress.complete ? "Complete" : `${progress.pct}%`}
+        </span>
+      </button>
+
+      {!progress.complete && next && (
+        <div className="mt-auto flex items-center gap-1.5 pt-3">
+          <button
+            type="button"
+            onClick={onFocus}
+            aria-label={`Start a focus timer for ${next.title}`}
+            className={cn(
+              "flex shrink-0 items-center justify-center rounded-lg p-1.5 text-white",
+              accent.deep,
+            )}
+          >
+            <Timer className="size-4" strokeWidth={1.75} />
+          </button>
+          <button
+            type="button"
+            onClick={onComplete}
+            aria-label={`Mark ${next.title} complete`}
+            className={cn(
+              "flex shrink-0 items-center justify-center rounded-lg p-1.5 text-white",
+              accent.surface,
+            )}
+          >
+            <Check className="size-4" strokeWidth={2} />
+          </button>
+          <span className="min-w-0 flex-1 truncate font-serif text-[11px] italic text-black/50">
+            {next.title}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
