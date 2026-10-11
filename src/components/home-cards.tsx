@@ -220,27 +220,48 @@ export function GoalCard({
             ? `${progress.pct}% · ${progress.done} of ${progress.total} steps`
             : "No steps yet"}
         </p>
-        <p className="mt-5 text-[11px] font-medium uppercase tracking-wide text-black/40">
-          {complete ? "Complete" : "Next step"}
-        </p>
-        <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-black">{stepText}</p>
-        <div className="mt-auto pt-5">
-          <GoalCardActions
-            variant="modern"
-            accent={accent}
-            complete={complete}
-            hasSteps={hasSteps}
-            onFocus={onFocus}
-            onComplete={onComplete}
-            onAdd={onAdd}
-            onAddWin={onAddWin}
-            onArchive={onArchive}
-          />
-        </div>
+        {complete || !hasSteps ? (
+          <>
+            <p className="mt-5 text-[11px] font-medium uppercase tracking-wide text-black/40">
+              {complete ? "Complete" : "Next step"}
+            </p>
+            <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-black">{stepText}</p>
+            <div className="mt-auto pt-5">
+              <GoalCardActions
+                variant="modern"
+                accent={accent}
+                complete={complete}
+                onAdd={onAdd}
+                onAddWin={onAddWin}
+                onArchive={onArchive}
+              />
+            </div>
+          </>
+        ) : (
+          <div className="mt-auto flex items-end gap-3 pt-5">
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-black/40">
+                Next step
+              </p>
+              <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-black">{stepText}</p>
+            </div>
+            <StepActionButtons
+              variant="modern"
+              accent={accent}
+              onFocus={onFocus}
+              onComplete={onComplete}
+            />
+          </div>
+        )}
       </div>
 
       {/* Traditional style: the ticket stub */}
-      <div className="relative flex h-[410px] flex-col overflow-hidden rounded-sm bg-white shadow-sm modern:hidden">
+      <div
+        className={cn(
+          "relative flex flex-col overflow-hidden rounded-sm bg-white shadow-sm modern:hidden",
+          !complete && hasSteps ? "h-[360px]" : "h-[410px]",
+        )}
+      >
         {/* Coloured top — stamp in the corner, title below */}
         <button
           type="button"
@@ -281,26 +302,42 @@ export function GoalCard({
             aria-hidden
           />
 
-          <p className={cn("font-serif text-base italic", accent.text)}>
-            {complete ? "Complete" : "Next Step:"}
-          </p>
-          <p className="mt-2 line-clamp-2 font-serif text-sm leading-relaxed text-black">
-            {stepText}
-          </p>
+          {!complete && hasSteps ? (
+            <div className="flex flex-1 items-center gap-3">
+              <div className="min-w-0 flex-1">
+                <p className={cn("font-serif text-base italic", accent.text)}>Next Step:</p>
+                <p className="mt-1 line-clamp-2 font-serif text-sm leading-relaxed text-black">
+                  {stepText}
+                </p>
+              </div>
+              <StepActionButtons
+                variant="ticket"
+                accent={accent}
+                onFocus={onFocus}
+                onComplete={onComplete}
+              />
+            </div>
+          ) : (
+            <>
+              <p className={cn("font-serif text-base italic", accent.text)}>
+                {complete ? "Complete" : "Next Step:"}
+              </p>
+              <p className="mt-2 line-clamp-2 font-serif text-sm leading-relaxed text-black">
+                {stepText}
+              </p>
 
-          <div className="mt-auto pt-4">
-            <GoalCardActions
-              variant="ticket"
-              accent={accent}
-              complete={complete}
-              hasSteps={hasSteps}
-              onFocus={onFocus}
-              onComplete={onComplete}
-              onAdd={onAdd}
-              onAddWin={onAddWin}
-              onArchive={onArchive}
-            />
-          </div>
+              <div className="mt-auto pt-4">
+                <GoalCardActions
+                  variant="ticket"
+                  accent={accent}
+                  complete={complete}
+                  onAdd={onAdd}
+                  onAddWin={onAddWin}
+                  onArchive={onArchive}
+                />
+              </div>
+            </>
+          )}
         </div>
 
         {/* Inverted (concave) corners — matching the side notches */}
@@ -325,14 +362,61 @@ export function GoalCard({
   );
 }
 
-/** The buttons under a goal card, styled for the ticket or the modern card. */
+/**
+ * Focus + tick for a goal's next step, sized to sit on the same line as the step
+ * itself so the card stays short. The "Focus on this" label drops to a plain
+ * icon on phones, where there's no room to spare.
+ */
+function StepActionButtons({
+  variant,
+  accent,
+  onFocus,
+  onComplete,
+}: {
+  variant: "ticket" | "modern";
+  accent: ReturnType<typeof accentOf>;
+  onFocus?: (() => void) | undefined;
+  onComplete?: (() => void) | undefined;
+}) {
+  const ticket = variant === "ticket";
+  return (
+    <div className="flex shrink-0 items-center gap-2">
+      <button
+        type="button"
+        onClick={onFocus}
+        aria-label="Focus on this step"
+        className={cn(
+          "flex items-center justify-center gap-2 rounded-xl text-white transition-colors",
+          ticket
+            ? cn("px-3.5 py-3 font-serif text-sm italic", accent.surface)
+            : "bg-focus px-3 py-2.5 text-sm font-medium hover:bg-focus/90",
+        )}
+      >
+        <Timer className={ticket ? "size-5" : "size-4"} strokeWidth={1.75} />
+        <span className="hidden sm:inline">Focus on this</span>
+      </button>
+      <button
+        type="button"
+        onClick={onComplete}
+        aria-label="Mark next step complete"
+        className={cn(
+          "grid shrink-0 place-items-center rounded-xl transition-colors",
+          ticket
+            ? cn("size-[46px] text-white", accent.deep)
+            : "size-[42px] text-black/55 ring-1 ring-black/10 hover:bg-black/5 hover:text-black",
+        )}
+      >
+        <Check className={ticket ? "size-6" : "size-5"} strokeWidth={2.25} />
+      </button>
+    </div>
+  );
+}
+
+/** The wide buttons under a goal card: a finished goal, or one with no steps yet. */
 function GoalCardActions({
   variant,
   accent,
   complete,
-  hasSteps,
-  onFocus,
-  onComplete,
   onAdd,
   onAddWin,
   onArchive,
@@ -340,9 +424,6 @@ function GoalCardActions({
   variant: "ticket" | "modern";
   accent: ReturnType<typeof accentOf>;
   complete: boolean;
-  hasSteps: boolean;
-  onFocus?: (() => void) | undefined;
-  onComplete?: (() => void) | undefined;
   onAdd?: (() => void) | undefined;
   onAddWin?: (() => void) | undefined;
   onArchive?: (() => void) | undefined;
@@ -362,24 +443,6 @@ function GoalCardActions({
           <button type="button" onClick={onArchive} className={quiet}>
             <Archive className="size-4" strokeWidth={2} />
             Archive
-          </button>
-        </div>
-      );
-    }
-    if (hasSteps) {
-      return (
-        <div className="flex items-center gap-2">
-          <button type="button" onClick={onFocus} className={primary}>
-            <Timer className="size-4" strokeWidth={2} />
-            Focus on this
-          </button>
-          <button
-            type="button"
-            onClick={onComplete}
-            aria-label="Mark next step complete"
-            className="grid size-[42px] shrink-0 place-items-center rounded-xl text-black/55 ring-1 ring-black/10 transition-colors hover:bg-black/5 hover:text-black"
-          >
-            <Check className="size-5" strokeWidth={2.25} />
           </button>
         </div>
       );
@@ -412,31 +475,6 @@ function GoalCardActions({
       >
         Archive
         <Archive className="size-5" strokeWidth={2} />
-      </button>
-    </div>
-  ) : hasSteps ? (
-    <div className="flex items-center gap-2">
-      <button
-        type="button"
-        onClick={onFocus}
-        className={cn(
-          "flex flex-1 items-center justify-center gap-2 rounded-xl py-3 font-serif text-sm italic text-white",
-          accent.surface,
-        )}
-      >
-        Focus on this
-        <Timer className="size-5" strokeWidth={1.75} />
-      </button>
-      <button
-        type="button"
-        onClick={onComplete}
-        aria-label="Mark next step complete"
-        className={cn(
-          "grid size-[46px] shrink-0 place-items-center rounded-xl text-white",
-          accent.deep,
-        )}
-      >
-        <Check className="size-6" strokeWidth={2.5} />
       </button>
     </div>
   ) : (
