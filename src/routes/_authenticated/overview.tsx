@@ -354,6 +354,57 @@ function StreakCard({
   );
 }
 
+/**
+ * A small horizontally scrolling strip of the artworks you've bought with
+ * stamps, framed like they hang in the gallery. Tapping one opens the gallery.
+ */
+function ArtworkCarousel({
+  artworks,
+  className,
+}: {
+  artworks: NonNullable<ReturnType<typeof artworkById>>[];
+  className?: string;
+}) {
+  return (
+    <section className={className}>
+      <div className="flex items-baseline justify-between">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Your art collection
+        </p>
+        <Link
+          to="/gallery"
+          className="inline-flex items-center gap-0.5 text-xs text-muted-foreground underline-offset-2 hover:underline"
+        >
+          Gallery
+          <ChevronRight className="size-3" />
+        </Link>
+      </div>
+      <div className="mt-2 -mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1">
+        {artworks.map((artwork) => (
+          <div key={artwork.id} className="w-24 shrink-0 snap-start md:w-28">
+            <GoldFrame
+              seed={`artwork-${artwork.id}`}
+              ariaLabel={`Open ${artwork.work} in your gallery`}
+              onClick={() => undefined}
+            >
+              <img
+                src={artwork.image}
+                alt={artwork.work}
+                loading="lazy"
+                draggable={false}
+                className="size-full object-cover"
+              />
+            </GoldFrame>
+            <p className="mt-1 truncate font-serif text-[10px] italic text-black/60">
+              {artwork.work}
+            </p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function NextStepCard({
   goal,
   step,
