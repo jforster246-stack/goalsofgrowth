@@ -372,7 +372,6 @@ function ArtworkCarousel({
   artworks: NonNullable<ReturnType<typeof artworkById>>[];
   className?: string;
 }) {
-  const navigate = useNavigate();
   const fontStyle = useFontStyle();
   const [detail, setDetail] = useState<Artwork | null>(null);
   return (
