@@ -387,7 +387,7 @@ function ArtworkCarousel({
             <GoldFrame
               seed={`artwork-${artwork.id}`}
               ariaLabel={`Open ${artwork.work} in your gallery`}
-              onClick={() => undefined}
+              onClick={() => navigate({ to: "/gallery" })}
             >
               <img
                 src={artwork.image}
