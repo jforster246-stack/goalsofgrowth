@@ -363,3 +363,15 @@
     font-family: var(--font-body);
   }
 }
+
+/* Modern style: artworks hang without frames, at their natural proportions. */
+.gold-frame-natural img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+.gold-frame-natural > span > div {
+  height: auto;
+  min-height: 7rem;
+}

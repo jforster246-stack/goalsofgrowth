@@ -40,6 +40,7 @@ import { StepActionsModal } from "@/components/step-actions-modal";
 import { HabitFormModal } from "@/components/habit-form-modal";
 import { artworkById, type Artwork } from "@/lib/artworks-data";
 import { frameFor } from "@/lib/frames-data";
+import { useFontStyle } from "@/lib/font";
 import { cn } from "@/lib/utils";
 
 
@@ -371,6 +372,7 @@ function ArtworkCarousel({
   className?: string;
 }) {
   const navigate = useNavigate();
+  const fontStyle = useFontStyle();
   return (
     <section className={className}>
       <div className="flex items-baseline justify-between">
@@ -387,24 +389,48 @@ function ArtworkCarousel({
       </div>
       <div className="mt-2 -mx-5 flex snap-x snap-mandatory items-center gap-3 overflow-x-auto px-5 pb-1">
         {artworks.map((artwork) => {
-          // Same frame height for every piece; width follows the frame's shape.
+          // Traditional: same frame height for every piece; width follows the
+          // frame's shape. Modern: no frame — fixed height, width follows the
+          // artwork's own proportions (nothing cropped).
           const frame = frameFor(`artwork-${artwork.id}`);
           const width = Math.round(CAROUSEL_HEIGHT * frame.ar);
           return (
-            <div key={artwork.id} className="shrink-0 snap-start" style={{ width }}>
-              <GoldFrame
-                seed={`artwork-${artwork.id}`}
-                ariaLabel={`Open ${artwork.work} in your gallery`}
-                onClick={() => navigate({ to: "/gallery" })}
-              >
-                <img
-                  src={artwork.image}
-                  alt={artwork.work}
-                  loading="lazy"
-                  draggable={false}
-                  className="size-full object-cover"
-                />
-              </GoldFrame>
+            <div
+              key={artwork.id}
+              className="shrink-0 snap-start"
+              style={fontStyle === "modern" ? undefined : { width }}
+            >
+              {fontStyle === "modern" ? (
+                <button
+                  type="button"
+                  aria-label={`Open ${artwork.work} in your gallery`}
+                  onClick={() => navigate({ to: "/gallery" })}
+                  className="block transition-transform hover:-translate-y-0.5"
+                >
+                  <img
+                    src={artwork.image}
+                    alt={artwork.work}
+                    loading="lazy"
+                    draggable={false}
+                    className="w-auto rounded-xl shadow-sm ring-1 ring-black/5"
+                    style={{ height: CAROUSEL_HEIGHT }}
+                  />
+                </button>
+              ) : (
+                <GoldFrame
+                  seed={`artwork-${artwork.id}`}
+                  ariaLabel={`Open ${artwork.work} in your gallery`}
+                  onClick={() => navigate({ to: "/gallery" })}
+                >
+                  <img
+                    src={artwork.image}
+                    alt={artwork.work}
+                    loading="lazy"
+                    draggable={false}
+                    className="size-full object-cover"
+                  />
+                </GoldFrame>
+              )}
               <p className="mt-1 truncate font-serif text-[10px] italic text-black/60">
                 {artwork.work}
               </p>

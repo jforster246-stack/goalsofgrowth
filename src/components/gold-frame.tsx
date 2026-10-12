@@ -1,4 +1,5 @@
 import { frameFor } from "@/lib/frames-data";
+import { useFontStyle } from "@/lib/font";
 import { cn } from "@/lib/utils";
 
 /**
@@ -22,6 +23,29 @@ export function GoldFrame({
   mountClassName?: string | undefined;
 }) {
   const frame = frameFor(seed);
+  const style = useFontStyle();
+
+  // Modern style: no frame — the picture shows at its own proportions,
+  // uncropped (the .gold-frame-natural rules in styles.css undo the
+  // size-full/object-cover on the children).
+  if (style === "modern") {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        aria-label={ariaLabel}
+        className={cn(
+          "gold-frame-natural block w-full transition-transform hover:-translate-y-0.5",
+          className,
+        )}
+      >
+        <span className="block w-full overflow-hidden rounded-xl shadow-sm ring-1 ring-black/5">
+          {children}
+        </span>
+      </button>
+    );
+  }
+
   return (
     <button
       type="button"

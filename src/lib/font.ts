@@ -1,4 +1,5 @@
 /** Font styles the user can switch between under settings. */
+import { useSyncExternalStore } from "react";
 
 export type FontStyle = "traditional" | "modern";
 
@@ -36,7 +37,22 @@ export function setFont(id: FontStyle) {
   }
   try {
     document.documentElement.setAttribute("data-font", id);
+    window.dispatchEvent(new Event(FONT_EVENT));
   } catch {
     /* no document (SSR) */
   }
+}
+
+const FONT_EVENT = "gog-font-change";
+
+/** Live font-style choice — re-renders when the user switches in settings. */
+export function useFontStyle(): FontStyle {
+  return useSyncExternalStore(
+    (cb) => {
+      window.addEventListener(FONT_EVENT, cb);
+      return () => window.removeEventListener(FONT_EVENT, cb);
+    },
+    getFont,
+    () => DEFAULT,
+  );
 }
