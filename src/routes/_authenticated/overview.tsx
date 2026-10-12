@@ -11,6 +11,7 @@ import { AppShell, useAppShell } from "@/components/app-shell";
 import { goalProgress, localToday } from "@/components/goal-ui";
 import { Stamp } from "@/components/stamp";
 import { StampMark } from "@/components/stamp-mark";
+import { GoldFrame } from "@/components/gold-frame";
 import { HabitDetailModal, type HabitFull } from "@/components/habit-detail-modal";
 import { winStampStyle } from "@/components/win-form-modal";
 import {
@@ -28,6 +29,7 @@ import {
   goalsQueryOptions,
   habitsQueryOptions,
   profileQueryOptions,
+  purchasesQueryOptions,
   winsQueryOptions,
 } from "@/lib/goal-queries";
 import { deleteStep, setGoalOfDay, toggleStep, updateStep } from "@/lib/goals.functions";
@@ -36,7 +38,9 @@ import { toggleHabit } from "@/lib/habits.functions";
 import { frequencyLabel, isHabitDueToday } from "@/lib/habit-schedule";
 import { StepActionsModal } from "@/components/step-actions-modal";
 import { HabitFormModal } from "@/components/habit-form-modal";
+import { artworkById } from "@/lib/artworks-data";
 import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/_authenticated/overview")({
   loader: ({ context }) => context.queryClient.ensureQueryData(goalsQueryOptions),
