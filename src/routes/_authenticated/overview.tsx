@@ -103,9 +103,10 @@ function OverviewPage() {
   const { data: purchases } = useQuery(purchasesQueryOptions);
 
   // Artworks bought with stamps, newest last — shown as a small carousel.
+  // Copyrighted works without a public image are skipped (they'd show blank).
   const acquiredArtworks = (purchases ?? [])
     .map((id) => artworkById(id))
-    .filter((a) => a !== undefined);
+    .filter((a) => a !== undefined && !!a.image);
 
   const today = localToday();
 
@@ -365,6 +366,7 @@ function ArtworkCarousel({
   artworks: NonNullable<ReturnType<typeof artworkById>>[];
   className?: string;
 }) {
+  const navigate = useNavigate();
   return (
     <section className={className}>
       <div className="flex items-baseline justify-between">
