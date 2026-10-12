@@ -375,3 +375,12 @@
   height: auto;
   min-height: 7rem;
 }
+
+/* Hide the scrollbar but keep the row swipeable (used by the art carousel). */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

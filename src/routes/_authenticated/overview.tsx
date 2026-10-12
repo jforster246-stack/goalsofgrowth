@@ -387,7 +387,7 @@ function ArtworkCarousel({
           <ChevronRight className="size-3" />
         </Link>
       </div>
-      <div className="mt-2 -mx-5 flex snap-x snap-mandatory items-center gap-3 overflow-x-auto px-5 pb-1">
+      <div className="no-scrollbar mt-2 -mx-5 flex snap-x snap-mandatory items-center gap-3 overflow-x-auto px-5 pb-1">
         {artworks.map((artwork) => {
           // Traditional: same frame height for every piece; width follows the
           // frame's shape. Modern: no frame — fixed height, width follows the
