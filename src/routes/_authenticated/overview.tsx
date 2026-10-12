@@ -100,6 +100,12 @@ function OverviewPage() {
   const { data: goals } = useSuspenseQuery(goalsQueryOptions);
   const { data: profile } = useQuery(profileQueryOptions);
   const { data: wins } = useQuery(winsQueryOptions);
+  const { data: purchases } = useQuery(purchasesQueryOptions);
+
+  // Artworks bought with stamps, newest last — shown as a small carousel.
+  const acquiredArtworks = (purchases ?? [])
+    .map((id) => artworkById(id))
+    .filter((a) => a !== undefined);
 
   const today = localToday();
 
