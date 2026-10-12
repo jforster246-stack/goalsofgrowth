@@ -464,44 +464,6 @@ function SlotPickerModal({
   );
 }
 
-function ArtworkDetailModal({
-  artwork,
-  seed,
-  onClose,
-  onRemove,
-}: {
-  artwork: Artwork;
-  seed: string;
-  onClose: () => void;
-  onRemove: () => void;
-}) {
-  return (
-    <ModalShell title="Artwork" onClose={onClose}>
-      <div className="mt-3 flex flex-col items-center gap-4 text-center">
-        <div className="w-44">
-          <GoldFrame seed={seed} ariaLabel={artwork.work}>
-            <ArtworkPlacard artwork={artwork} />
-          </GoldFrame>
-        </div>
-        <div>
-          <p className="font-display text-2xl leading-tight text-black">
-            {artwork.work}
-          </p>
-          <p className="mt-1 font-serif text-sm italic text-black/60">
-            {artwork.artist}, {artwork.year}
-          </p>
-        </div>
-      </div>
-      <button
-        type="button"
-        onClick={onRemove}
-        className="mt-6 w-full py-2 font-heading text-sm uppercase text-black/40 transition-colors hover:text-clay-deep"
-      >
-        Take down from wall
-      </button>
-    </ModalShell>
-  );
-}
 
 /** Confirm spending stamps on an artwork before it's bought — or, when the
  *  balance is short, a gentle "not enough stamps" note. Fires confetti on buy. */
