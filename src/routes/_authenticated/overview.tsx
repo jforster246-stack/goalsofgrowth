@@ -12,6 +12,7 @@ import { goalProgress, localToday } from "@/components/goal-ui";
 import { Stamp } from "@/components/stamp";
 import { StampMark } from "@/components/stamp-mark";
 import { GoldFrame } from "@/components/gold-frame";
+import { ArtworkDetailModal } from "@/components/artwork-modal";
 import { HabitDetailModal, type HabitFull } from "@/components/habit-detail-modal";
 import { winStampStyle } from "@/components/win-form-modal";
 import {
@@ -373,6 +374,7 @@ function ArtworkCarousel({
 }) {
   const navigate = useNavigate();
   const fontStyle = useFontStyle();
+  const [detail, setDetail] = useState<Artwork | null>(null);
   return (
     <section className={className}>
       <div className="flex items-baseline justify-between">
