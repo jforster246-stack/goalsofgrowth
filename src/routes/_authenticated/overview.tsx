@@ -406,7 +406,7 @@ function ArtworkCarousel({
                 <button
                   type="button"
                   aria-label={`Open ${artwork.work} in your gallery`}
-                  onClick={() => navigate({ to: "/gallery" })}
+                  onClick={() => setDetail(artwork)}
                   className="block transition-transform hover:-translate-y-0.5"
                 >
                   <img
@@ -422,7 +422,7 @@ function ArtworkCarousel({
                 <GoldFrame
                   seed={`artwork-${artwork.id}`}
                   ariaLabel={`Open ${artwork.work} in your gallery`}
-                  onClick={() => navigate({ to: "/gallery" })}
+                  onClick={() => setDetail(artwork)}
                 >
                   <img
                     src={artwork.image}
