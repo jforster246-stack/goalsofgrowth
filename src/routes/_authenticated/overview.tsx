@@ -371,6 +371,7 @@ function ArtworkCarousel({
   className?: string;
 }) {
   const navigate = useNavigate();
+  const fontStyle = useFontStyle();
   return (
     <section className={className}>
       <div className="flex items-baseline justify-between">
