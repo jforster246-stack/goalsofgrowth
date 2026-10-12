@@ -4,6 +4,11 @@ import { useState } from "react";
 import { Check, Plus, X } from "lucide-react";
 import { AppShell, useAppShell } from "@/components/app-shell";
 import { GoldFrame } from "@/components/gold-frame";
+import {
+  ArtworkDetailModal,
+  ArtworkPlacard,
+  ModalShell,
+} from "@/components/artwork-modal";
 import { Stamp } from "@/components/stamp";
 import { localToday, type Accent } from "@/components/goal-ui";
 import { StampStyleEditor } from "@/components/stamp-style-editor";
