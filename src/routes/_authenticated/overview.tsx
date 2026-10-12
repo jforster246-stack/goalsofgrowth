@@ -39,6 +39,7 @@ import { frequencyLabel, isHabitDueToday } from "@/lib/habit-schedule";
 import { StepActionsModal } from "@/components/step-actions-modal";
 import { HabitFormModal } from "@/components/habit-form-modal";
 import { artworkById, type Artwork } from "@/lib/artworks-data";
+import { frameFor } from "@/lib/frames-data";
 import { cn } from "@/lib/utils";
 
 
@@ -355,6 +356,9 @@ function StreakCard({
   );
 }
 
+/** Every carousel frame is drawn at this height, so the row stays level. */
+const CAROUSEL_HEIGHT = 96;
+
 /**
  * A small horizontally scrolling strip of the artworks you've bought with
  * stamps, framed like they hang in the gallery. Tapping one opens the gallery.
@@ -381,27 +385,32 @@ function ArtworkCarousel({
           <ChevronRight className="size-3" />
         </Link>
       </div>
-      <div className="mt-2 -mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1">
-        {artworks.map((artwork) => (
-          <div key={artwork.id} className="w-24 shrink-0 snap-start md:w-28">
-            <GoldFrame
-              seed={`artwork-${artwork.id}`}
-              ariaLabel={`Open ${artwork.work} in your gallery`}
-              onClick={() => navigate({ to: "/gallery" })}
-            >
-              <img
-                src={artwork.image}
-                alt={artwork.work}
-                loading="lazy"
-                draggable={false}
-                className="size-full object-cover"
-              />
-            </GoldFrame>
-            <p className="mt-1 truncate font-serif text-[10px] italic text-black/60">
-              {artwork.work}
-            </p>
-          </div>
-        ))}
+      <div className="mt-2 -mx-5 flex snap-x snap-mandatory items-center gap-3 overflow-x-auto px-5 pb-1">
+        {artworks.map((artwork) => {
+          // Same frame height for every piece; width follows the frame's shape.
+          const frame = frameFor(`artwork-${artwork.id}`);
+          const width = Math.round(CAROUSEL_HEIGHT * frame.ar);
+          return (
+            <div key={artwork.id} className="shrink-0 snap-start" style={{ width }}>
+              <GoldFrame
+                seed={`artwork-${artwork.id}`}
+                ariaLabel={`Open ${artwork.work} in your gallery`}
+                onClick={() => navigate({ to: "/gallery" })}
+              >
+                <img
+                  src={artwork.image}
+                  alt={artwork.work}
+                  loading="lazy"
+                  draggable={false}
+                  className="size-full object-cover"
+                />
+              </GoldFrame>
+              <p className="mt-1 truncate font-serif text-[10px] italic text-black/60">
+                {artwork.work}
+              </p>
+            </div>
+          );
+        })}
       </div>
     </section>
   );
