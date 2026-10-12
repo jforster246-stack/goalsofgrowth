@@ -38,7 +38,7 @@ import { toggleHabit } from "@/lib/habits.functions";
 import { frequencyLabel, isHabitDueToday } from "@/lib/habit-schedule";
 import { StepActionsModal } from "@/components/step-actions-modal";
 import { HabitFormModal } from "@/components/habit-form-modal";
-import { artworkById } from "@/lib/artworks-data";
+import { artworkById, type Artwork } from "@/lib/artworks-data";
 import { cn } from "@/lib/utils";
 
 
@@ -106,7 +106,7 @@ function OverviewPage() {
   // Copyrighted works without a public image are skipped (they'd show blank).
   const acquiredArtworks = (purchases ?? [])
     .map((id) => artworkById(id))
-    .filter((a) => a !== undefined && !!a.image);
+    .filter((a): a is Artwork => a !== undefined && !!a.image);
 
   const today = localToday();
 
