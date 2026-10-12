@@ -193,6 +193,10 @@ function OverviewPage() {
           <StreakCard streak={profile.streak_count ?? 0} />
         )}
 
+        {acquiredArtworks.length > 0 && (
+          <ArtworkCarousel artworks={acquiredArtworks} />
+        )}
+
         <div className="grid grid-cols-2 gap-3 md:gap-4">
           {/* A random goal's next step — rotates daily */}
           <section>
