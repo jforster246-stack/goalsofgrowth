@@ -440,6 +440,13 @@ function ArtworkCarousel({
           );
         })}
       </div>
+      {detail && (
+        <ArtworkDetailModal
+          artwork={detail}
+          seed={`home-${detail.id}`}
+          onClose={() => setDetail(null)}
+        />
+      )}
     </section>
   );
 }
