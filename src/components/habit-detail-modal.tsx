@@ -13,6 +13,7 @@ import {
   habitStreaksQueryOptions,
 } from "@/lib/goal-queries";
 import { frequencyLabel } from "@/lib/habit-schedule";
+import { useFocusTimerEnabled } from "@/lib/focus-timer";
 import { cn } from "@/lib/utils";
 
 export type HabitFull = {
@@ -74,6 +75,7 @@ export function HabitDetailModal({
   const today = localToday();
   const queryClient = useQueryClient();
   const { openTimer, celebrate } = useAppShell();
+  const focusEnabled = useFocusTimerEnabled();
   const [done, setDone] = useState(habit.done);
   const [editing, setEditing] = useState(false);
 
@@ -283,20 +285,22 @@ export function HabitDetailModal({
 
           {/* Timer + tick */}
           <div className="mt-6 flex gap-2">
-            <button
-              type="button"
-              onClick={() =>
-                openTimer({
-                  title: habit.name,
-                  subtitle: `${TIME_LABEL[habit.time_of_day]} habit`,
-                  onComplete: () => setTick(true),
-                })
-              }
-              className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-black/5 py-3.5 font-heading text-sm uppercase text-olive transition-colors hover:bg-black/10"
-            >
-              <Timer className="size-5" strokeWidth={1.75} />
-              Timer
-            </button>
+            {focusEnabled && (
+              <button
+                type="button"
+                onClick={() =>
+                  openTimer({
+                    title: habit.name,
+                    subtitle: `${TIME_LABEL[habit.time_of_day]} habit`,
+                    onComplete: () => setTick(true),
+                  })
+                }
+                className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-black/5 py-3.5 font-heading text-sm uppercase text-olive transition-colors hover:bg-black/10"
+              >
+                <Timer className="size-5" strokeWidth={1.75} />
+                Timer
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setTick(!done)}

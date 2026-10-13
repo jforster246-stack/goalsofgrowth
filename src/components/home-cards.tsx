@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Archive, Check, Plus, Timer, Trophy, Undo2 } from "lucide-react";
+import { useFocusTimerEnabled } from "@/lib/focus-timer";
 import { accentOf, goalProgress, STAR_PATH } from "@/components/goal-ui";
 import { Motif, TIME_MOTIF } from "@/components/motif-icons";
 import { Stamp } from "@/components/stamp";
@@ -47,6 +48,7 @@ export function NextStepRow({
   onComplete?: () => void;
 }) {
   const accent = accentOf(goal);
+  const focusEnabled = useFocusTimerEnabled();
 
   return (
     <div className="flex w-full flex-col gap-2 rounded-2xl bg-white p-2 shadow-sm sm:flex-row sm:items-start sm:justify-between sm:py-2 sm:pl-2.5 sm:pr-2">
@@ -67,17 +69,19 @@ export function NextStepRow({
       </button>
 
       <div className="flex shrink-0 items-center gap-2 self-end sm:self-auto">
-        <button
-          type="button"
-          onClick={onStartTimer}
-          aria-label="Start a focus timer for this step"
-          className={cn(
-            "flex items-center justify-center rounded-lg p-1.5 text-white sm:p-2",
-            accent.deep,
-          )}
-        >
-          <Timer className="size-5 sm:size-6" strokeWidth={1.75} />
-        </button>
+        {focusEnabled && (
+          <button
+            type="button"
+            onClick={onStartTimer}
+            aria-label="Start a focus timer for this step"
+            className={cn(
+              "flex items-center justify-center rounded-lg p-1.5 text-white sm:p-2",
+              accent.deep,
+            )}
+          >
+            <Timer className="size-5 sm:size-6" strokeWidth={1.75} />
+          </button>
+        )}
         <button
           type="button"
           onClick={onComplete}
@@ -112,6 +116,7 @@ export function NextStepPortrait({
   onComplete?: () => void;
 }) {
   const accent = accentOf(goal);
+  const focusEnabled = useFocusTimerEnabled();
 
   return (
     <div className="flex w-48 shrink-0 flex-col rounded-2xl bg-white p-3 shadow-sm">
@@ -128,17 +133,19 @@ export function NextStepPortrait({
       </button>
 
       <div className="mt-3 flex items-center gap-2">
-        <button
-          type="button"
-          onClick={onStartTimer}
-          aria-label="Start a focus timer for this step"
-          className={cn(
-            "flex flex-1 items-center justify-center rounded-lg p-2 text-white",
-            accent.deep,
-          )}
-        >
-          <Timer className="size-5" strokeWidth={1.75} />
-        </button>
+        {focusEnabled && (
+          <button
+            type="button"
+            onClick={onStartTimer}
+            aria-label="Start a focus timer for this step"
+            className={cn(
+              "flex flex-1 items-center justify-center rounded-lg p-2 text-white",
+              accent.deep,
+            )}
+          >
+            <Timer className="size-5" strokeWidth={1.75} />
+          </button>
+        )}
         <button
           type="button"
           onClick={onComplete}
@@ -379,22 +386,25 @@ function StepActionButtons({
   onComplete?: (() => void) | undefined;
 }) {
   const ticket = variant === "ticket";
+  const focusEnabled = useFocusTimerEnabled();
   return (
     <div className="flex shrink-0 items-center gap-2">
-      <button
-        type="button"
-        onClick={onFocus}
-        aria-label="Focus on this step"
-        className={cn(
-          "flex items-center justify-center gap-2 rounded-xl text-white transition-colors",
-          ticket
-            ? cn("px-3.5 py-3 font-serif text-sm italic", accent.surface)
-            : "bg-focus px-3 py-2.5 text-sm font-medium hover:bg-focus/90",
-        )}
-      >
-        <Timer className={ticket ? "size-5" : "size-4"} strokeWidth={1.75} />
-        <span className="hidden sm:inline">Focus on this</span>
-      </button>
+      {focusEnabled && (
+        <button
+          type="button"
+          onClick={onFocus}
+          aria-label="Focus on this step"
+          className={cn(
+            "flex items-center justify-center gap-2 rounded-xl text-white transition-colors",
+            ticket
+              ? cn("px-3.5 py-3 font-serif text-sm italic", accent.surface)
+              : "bg-focus px-3 py-2.5 text-sm font-medium hover:bg-focus/90",
+          )}
+        >
+          <Timer className={ticket ? "size-5" : "size-4"} strokeWidth={1.75} />
+          <span className="hidden sm:inline">Focus on this</span>
+        </button>
+      )}
       <button
         type="button"
         onClick={onComplete}
@@ -538,6 +548,7 @@ export function StepRow({
   onTimer?: () => void;
   onToggle?: () => void;
 }) {
+  const focusEnabled = useFocusTimerEnabled();
   return (
     <div
       className={cn(
@@ -559,17 +570,19 @@ export function StepRow({
           </button>
         ) : (
           <>
-            <button
-              type="button"
-              onClick={onTimer}
-              aria-label="Start a focus timer for this step"
-              className={cn(
-                "flex items-center justify-center rounded-lg p-2 text-white",
-                accent.deep,
-              )}
-            >
-              <Timer className="size-6" strokeWidth={1.75} />
-            </button>
+            {focusEnabled && (
+              <button
+                type="button"
+                onClick={onTimer}
+                aria-label="Start a focus timer for this step"
+                className={cn(
+                  "flex items-center justify-center rounded-lg p-2 text-white",
+                  accent.deep,
+                )}
+              >
+                <Timer className="size-6" strokeWidth={1.75} />
+              </button>
+            )}
             <button
               type="button"
               onClick={onToggle}
@@ -621,6 +634,7 @@ export function HabitRow({
   onToggle?: () => void;
 }) {
   const showFrequency = frequencyLabel && frequencyLabel !== "Daily";
+  const focusEnabled = useFocusTimerEnabled();
 
   return (
     <div className="flex w-full items-center justify-between gap-2 rounded-2xl bg-white py-2 pl-3 pr-2 shadow-sm">
@@ -652,14 +666,16 @@ export function HabitRow({
       </button>
 
       <div className="flex shrink-0 items-center gap-2">
-        <button
-          type="button"
-          onClick={onTimer}
-          aria-label={`Start a focus timer for ${name}`}
-          className="flex items-center justify-center rounded-lg bg-olive p-2 text-white"
-        >
-          <Timer className="size-6" strokeWidth={1.75} />
-        </button>
+        {focusEnabled && (
+          <button
+            type="button"
+            onClick={onTimer}
+            aria-label={`Start a focus timer for ${name}`}
+            className="flex items-center justify-center rounded-lg bg-olive p-2 text-white"
+          >
+            <Timer className="size-6" strokeWidth={1.75} />
+          </button>
+        )}
         <button
           type="button"
           onClick={onToggle}
@@ -696,6 +712,7 @@ export function GoalCardCompact({
   const accent = accentOf(goal);
   const progress = goalProgress(goal);
   const next = progress.nextStep;
+  const focusEnabled = useFocusTimerEnabled();
 
   return (
     <div className="flex h-full flex-col rounded-2xl bg-white p-3 shadow-sm">
@@ -718,17 +735,19 @@ export function GoalCardCompact({
 
       {!progress.complete && next && (
         <div className="mt-auto flex items-center gap-1.5 pt-3">
-          <button
-            type="button"
-            onClick={onFocus}
-            aria-label={`Start a focus timer for ${next.title}`}
-            className={cn(
-              "flex shrink-0 items-center justify-center rounded-lg p-1.5 text-white",
-              accent.deep,
-            )}
-          >
-            <Timer className="size-4" strokeWidth={1.75} />
-          </button>
+          {focusEnabled && (
+            <button
+              type="button"
+              onClick={onFocus}
+              aria-label={`Start a focus timer for ${next.title}`}
+              className={cn(
+                "flex shrink-0 items-center justify-center rounded-lg p-1.5 text-white",
+                accent.deep,
+              )}
+            >
+              <Timer className="size-4" strokeWidth={1.75} />
+            </button>
+          )}
           <button
             type="button"
             onClick={onComplete}

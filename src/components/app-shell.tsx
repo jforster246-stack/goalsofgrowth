@@ -17,6 +17,11 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { getTheme, setTheme, THEMES, type ThemeId } from "@/lib/theme";
 import { FONTS, getFont, setFont, type FontStyle } from "@/lib/font";
+import {
+  getFocusTimerEnabled,
+  setFocusTimerEnabled,
+  useFocusTimerEnabled,
+} from "@/lib/focus-timer";
 import { cn } from "@/lib/utils";
 import { localToday } from "@/components/goal-ui";
 import { quoteOfTheDay } from "@/lib/quotes";
@@ -112,6 +117,8 @@ export function AppShell({
     navigate({ to: "/auth", replace: true });
   };
 
+  const focusEnabled = useFocusTimerEnabled();
+
   return (
     <div className="relative min-h-dvh bg-background font-body text-foreground antialiased lg:pl-64">
       <Sidebar onOpenSettings={() => setProfileOpen(true)} />
@@ -119,11 +126,13 @@ export function AppShell({
         <AppShellContext.Provider
           value={{
             openFocus: (stepId) => {
+              if (!focusEnabled) return;
               setCustomFocus(null);
               setFocusStepId(stepId ?? null);
               setFocusOpen(true);
             },
             openTimer: (target) => {
+              if (!focusEnabled) return;
               setFocusStepId(null);
               setCustomFocus(target);
               setFocusOpen(true);
@@ -436,6 +445,12 @@ function ProfileSheet({
     setFont(id);
     setFontState(id);
   };
+  const [focusTimer, setFocusTimerState] = useState<boolean>(() => getFocusTimerEnabled());
+  const toggleFocusTimer = () => {
+    const next = !focusTimer;
+    setFocusTimerEnabled(next);
+    setFocusTimerState(next);
+  };
 
   return (
     <div className="fixed inset-0 z-30 flex flex-col bg-background [animation:rise_0.25s_both]">
@@ -566,6 +581,38 @@ function ProfileSheet({
               );
             })}
           </div>
+
+          <p className="mt-6 font-heading text-sm uppercase tracking-wide text-olive">Focus timer</p>
+          <button
+            type="button"
+            onClick={toggleFocusTimer}
+            aria-pressed={focusTimer}
+            className="mt-3 flex w-full items-center gap-3 rounded-2xl bg-card p-3 text-left ring-1 ring-border transition-colors hover:bg-muted/50"
+          >
+            <span className="min-w-0 flex-1">
+              <span className="block font-heading text-sm text-foreground">
+                {focusTimer ? "On" : "Off"}
+              </span>
+              <span className="block font-serif text-xs text-muted-foreground">
+                {focusTimer
+                  ? "Timer buttons show on goals, steps and habits"
+                  : "Timer buttons are hidden across the app"}
+              </span>
+            </span>
+            <span
+              className={cn(
+                "relative h-7 w-12 shrink-0 rounded-full transition-colors",
+                focusTimer ? "bg-olive" : "bg-black/15",
+              )}
+            >
+              <span
+                className={cn(
+                  "absolute top-0.5 size-6 rounded-full bg-white shadow transition-all",
+                  focusTimer ? "left-[22px]" : "left-0.5",
+                )}
+              />
+            </span>
+          </button>
         </div>
 
         <div className="mt-10 pt-2">

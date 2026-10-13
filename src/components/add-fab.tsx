@@ -21,6 +21,7 @@ import {
 } from "@/components/create-modals";
 import { AwaLogModal, type AwaHobby } from "@/components/awa-log-modal";
 import { awaHobbiesQueryOptions } from "@/lib/goal-queries";
+import { useFocusTimerEnabled } from "@/lib/focus-timer";
 import { cn } from "@/lib/utils";
 
 type Create = "goal" | "habit" | "routine" | "braindump" | "win" | "hobbylog";
@@ -32,6 +33,7 @@ type Create = "goal" | "habit" | "routine" | "braindump" | "win" | "hobbylog";
  */
 export function AddMenu({ floating = false }: { floating?: boolean }) {
   const { openFocus } = useAppShell();
+  const focusEnabled = useFocusTimerEnabled();
   const navigate = useNavigate();
   const { data: hobbies } = useQuery(awaHobbiesQueryOptions);
   const [open, setOpen] = useState(false);
@@ -48,7 +50,9 @@ export function AddMenu({ floating = false }: { floating?: boolean }) {
     { label: "Habit", Icon: Repeat, onClick: () => setCreating("habit") },
     { label: "Routine", Icon: ListChecks, onClick: () => setCreating("routine") },
     { label: "Brain dump", Icon: Brain, onClick: () => setCreating("braindump") },
-    { label: "Focus session", Icon: Timer, onClick: () => openFocus() },
+    ...(focusEnabled
+      ? [{ label: "Focus session", Icon: Timer, onClick: () => openFocus() }]
+      : []),
     { label: "Win", Icon: Trophy, onClick: () => setCreating("win") },
   ];
 

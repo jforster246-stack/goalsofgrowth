@@ -13,6 +13,7 @@ import {
   goalProgress,
   type GoalWithSteps,
 } from "@/components/goal-ui";
+import { useFocusTimerEnabled } from "@/lib/focus-timer";
 
 type GoalCardDeckProps = {
   goals: GoalWithSteps[];
@@ -210,6 +211,7 @@ function DeckCard({
 }) {
   const accent = accentOf(goal);
   const { done, total, pct, complete, nextStep } = goalProgress(goal);
+  const focusEnabled = useFocusTimerEnabled();
 
   return (
     <article className="relative flex h-[410px] flex-col overflow-hidden rounded-2xl bg-card shadow-lg ring-1 ring-border">
@@ -261,13 +263,15 @@ function DeckCard({
         <div className="mt-auto flex items-center gap-3">
           {nextStep ? (
             <>
-              <Button
-                type="button"
-                onClick={() => onFocus(nextStep.id)}
-                className="h-12 flex-1 rounded-xl bg-focus text-primary-foreground hover:bg-focus/90"
-              >
-                Focus on this
-              </Button>
+              {focusEnabled && (
+                <Button
+                  type="button"
+                  onClick={() => onFocus(nextStep.id)}
+                  className="h-12 flex-1 rounded-xl bg-focus text-primary-foreground hover:bg-focus/90"
+                >
+                  Focus on this
+                </Button>
+              )}
               <CompleteButton
                 stepTitle={nextStep.title}
                 accentClass={accent.check}
