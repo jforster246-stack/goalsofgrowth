@@ -13,6 +13,7 @@ import {
   goalProgress,
   type GoalWithSteps,
 } from "@/components/goal-ui";
+import { useFocusTimerEnabled } from "@/lib/focus-timer";
 
 type GoalCardDeckProps = {
   goals: GoalWithSteps[];

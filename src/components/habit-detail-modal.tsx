@@ -75,6 +75,7 @@ export function HabitDetailModal({
   const today = localToday();
   const queryClient = useQueryClient();
   const { openTimer, celebrate } = useAppShell();
+  const focusEnabled = useFocusTimerEnabled();
   const [done, setDone] = useState(habit.done);
   const [editing, setEditing] = useState(false);
 
