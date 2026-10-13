@@ -547,6 +547,7 @@ export function StepRow({
   onTimer?: () => void;
   onToggle?: () => void;
 }) {
+  const focusEnabled = useFocusTimerEnabled();
   return (
     <div
       className={cn(
