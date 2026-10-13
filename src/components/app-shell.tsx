@@ -17,6 +17,11 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { getTheme, setTheme, THEMES, type ThemeId } from "@/lib/theme";
 import { FONTS, getFont, setFont, type FontStyle } from "@/lib/font";
+import {
+  getFocusTimerEnabled,
+  setFocusTimerEnabled,
+  useFocusTimerEnabled,
+} from "@/lib/focus-timer";
 import { cn } from "@/lib/utils";
 import { localToday } from "@/components/goal-ui";
 import { quoteOfTheDay } from "@/lib/quotes";
@@ -112,6 +117,8 @@ export function AppShell({
     navigate({ to: "/auth", replace: true });
   };
 
+  const focusEnabled = useFocusTimerEnabled();
+
   return (
     <div className="relative min-h-dvh bg-background font-body text-foreground antialiased lg:pl-64">
       <Sidebar onOpenSettings={() => setProfileOpen(true)} />
@@ -119,11 +126,13 @@ export function AppShell({
         <AppShellContext.Provider
           value={{
             openFocus: (stepId) => {
+              if (!focusEnabled) return;
               setCustomFocus(null);
               setFocusStepId(stepId ?? null);
               setFocusOpen(true);
             },
             openTimer: (target) => {
+              if (!focusEnabled) return;
               setFocusStepId(null);
               setCustomFocus(target);
               setFocusOpen(true);
