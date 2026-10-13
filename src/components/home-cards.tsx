@@ -633,6 +633,7 @@ export function HabitRow({
   onToggle?: () => void;
 }) {
   const showFrequency = frequencyLabel && frequencyLabel !== "Daily";
+  const focusEnabled = useFocusTimerEnabled();
 
   return (
     <div className="flex w-full items-center justify-between gap-2 rounded-2xl bg-white py-2 pl-3 pr-2 shadow-sm">
@@ -664,14 +665,16 @@ export function HabitRow({
       </button>
 
       <div className="flex shrink-0 items-center gap-2">
-        <button
-          type="button"
-          onClick={onTimer}
-          aria-label={`Start a focus timer for ${name}`}
-          className="flex items-center justify-center rounded-lg bg-olive p-2 text-white"
-        >
-          <Timer className="size-6" strokeWidth={1.75} />
-        </button>
+        {focusEnabled && (
+          <button
+            type="button"
+            onClick={onTimer}
+            aria-label={`Start a focus timer for ${name}`}
+            className="flex items-center justify-center rounded-lg bg-olive p-2 text-white"
+          >
+            <Timer className="size-6" strokeWidth={1.75} />
+          </button>
+        )}
         <button
           type="button"
           onClick={onToggle}
