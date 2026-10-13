@@ -21,6 +21,7 @@ import {
 } from "@/components/create-modals";
 import { AwaLogModal, type AwaHobby } from "@/components/awa-log-modal";
 import { awaHobbiesQueryOptions } from "@/lib/goal-queries";
+import { useFocusTimerEnabled } from "@/lib/focus-timer";
 import { cn } from "@/lib/utils";
 
 type Create = "goal" | "habit" | "routine" | "braindump" | "win" | "hobbylog";

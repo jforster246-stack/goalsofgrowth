@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Archive, Check, Plus, Timer, Trophy, Undo2 } from "lucide-react";
+import { useFocusTimerEnabled } from "@/lib/focus-timer";
 import { accentOf, goalProgress, STAR_PATH } from "@/components/goal-ui";
 import { Motif, TIME_MOTIF } from "@/components/motif-icons";
 import { Stamp } from "@/components/stamp";
