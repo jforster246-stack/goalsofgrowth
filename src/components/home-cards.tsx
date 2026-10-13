@@ -115,6 +115,7 @@ export function NextStepPortrait({
   onComplete?: () => void;
 }) {
   const accent = accentOf(goal);
+  const focusEnabled = useFocusTimerEnabled();
 
   return (
     <div className="flex w-48 shrink-0 flex-col rounded-2xl bg-white p-3 shadow-sm">
@@ -131,17 +132,19 @@ export function NextStepPortrait({
       </button>
 
       <div className="mt-3 flex items-center gap-2">
-        <button
-          type="button"
-          onClick={onStartTimer}
-          aria-label="Start a focus timer for this step"
-          className={cn(
-            "flex flex-1 items-center justify-center rounded-lg p-2 text-white",
-            accent.deep,
-          )}
-        >
-          <Timer className="size-5" strokeWidth={1.75} />
-        </button>
+        {focusEnabled && (
+          <button
+            type="button"
+            onClick={onStartTimer}
+            aria-label="Start a focus timer for this step"
+            className={cn(
+              "flex flex-1 items-center justify-center rounded-lg p-2 text-white",
+              accent.deep,
+            )}
+          >
+            <Timer className="size-5" strokeWidth={1.75} />
+          </button>
+        )}
         <button
           type="button"
           onClick={onComplete}
