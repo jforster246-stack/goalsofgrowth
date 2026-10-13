@@ -711,6 +711,7 @@ export function GoalCardCompact({
   const accent = accentOf(goal);
   const progress = goalProgress(goal);
   const next = progress.nextStep;
+  const focusEnabled = useFocusTimerEnabled();
 
   return (
     <div className="flex h-full flex-col rounded-2xl bg-white p-3 shadow-sm">
@@ -733,17 +734,19 @@ export function GoalCardCompact({
 
       {!progress.complete && next && (
         <div className="mt-auto flex items-center gap-1.5 pt-3">
-          <button
-            type="button"
-            onClick={onFocus}
-            aria-label={`Start a focus timer for ${next.title}`}
-            className={cn(
-              "flex shrink-0 items-center justify-center rounded-lg p-1.5 text-white",
-              accent.deep,
-            )}
-          >
-            <Timer className="size-4" strokeWidth={1.75} />
-          </button>
+          {focusEnabled && (
+            <button
+              type="button"
+              onClick={onFocus}
+              aria-label={`Start a focus timer for ${next.title}`}
+              className={cn(
+                "flex shrink-0 items-center justify-center rounded-lg p-1.5 text-white",
+                accent.deep,
+              )}
+            >
+              <Timer className="size-4" strokeWidth={1.75} />
+            </button>
+          )}
           <button
             type="button"
             onClick={onComplete}
