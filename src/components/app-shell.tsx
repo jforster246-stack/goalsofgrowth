@@ -445,6 +445,12 @@ function ProfileSheet({
     setFont(id);
     setFontState(id);
   };
+  const [focusTimer, setFocusTimerState] = useState<boolean>(() => getFocusTimerEnabled());
+  const toggleFocusTimer = () => {
+    const next = !focusTimer;
+    setFocusTimerEnabled(next);
+    setFocusTimerState(next);
+  };
 
   return (
     <div className="fixed inset-0 z-30 flex flex-col bg-background [animation:rise_0.25s_both]">
