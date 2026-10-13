@@ -385,22 +385,25 @@ function StepActionButtons({
   onComplete?: (() => void) | undefined;
 }) {
   const ticket = variant === "ticket";
+  const focusEnabled = useFocusTimerEnabled();
   return (
     <div className="flex shrink-0 items-center gap-2">
-      <button
-        type="button"
-        onClick={onFocus}
-        aria-label="Focus on this step"
-        className={cn(
-          "flex items-center justify-center gap-2 rounded-xl text-white transition-colors",
-          ticket
-            ? cn("px-3.5 py-3 font-serif text-sm italic", accent.surface)
-            : "bg-focus px-3 py-2.5 text-sm font-medium hover:bg-focus/90",
-        )}
-      >
-        <Timer className={ticket ? "size-5" : "size-4"} strokeWidth={1.75} />
-        <span className="hidden sm:inline">Focus on this</span>
-      </button>
+      {focusEnabled && (
+        <button
+          type="button"
+          onClick={onFocus}
+          aria-label="Focus on this step"
+          className={cn(
+            "flex items-center justify-center gap-2 rounded-xl text-white transition-colors",
+            ticket
+              ? cn("px-3.5 py-3 font-serif text-sm italic", accent.surface)
+              : "bg-focus px-3 py-2.5 text-sm font-medium hover:bg-focus/90",
+          )}
+        >
+          <Timer className={ticket ? "size-5" : "size-4"} strokeWidth={1.75} />
+          <span className="hidden sm:inline">Focus on this</span>
+        </button>
+      )}
       <button
         type="button"
         onClick={onComplete}
