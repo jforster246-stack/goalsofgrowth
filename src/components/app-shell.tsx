@@ -581,6 +581,38 @@ function ProfileSheet({
               );
             })}
           </div>
+
+          <p className="mt-6 font-heading text-sm uppercase tracking-wide text-olive">Focus timer</p>
+          <button
+            type="button"
+            onClick={toggleFocusTimer}
+            aria-pressed={focusTimer}
+            className="mt-3 flex w-full items-center gap-3 rounded-2xl bg-card p-3 text-left ring-1 ring-border transition-colors hover:bg-muted/50"
+          >
+            <span className="min-w-0 flex-1">
+              <span className="block font-heading text-sm text-foreground">
+                {focusTimer ? "On" : "Off"}
+              </span>
+              <span className="block font-serif text-xs text-muted-foreground">
+                {focusTimer
+                  ? "Timer buttons show on goals, steps and habits"
+                  : "Timer buttons are hidden across the app"}
+              </span>
+            </span>
+            <span
+              className={cn(
+                "relative h-7 w-12 shrink-0 rounded-full transition-colors",
+                focusTimer ? "bg-olive" : "bg-black/15",
+              )}
+            >
+              <span
+                className={cn(
+                  "absolute top-0.5 size-6 rounded-full bg-white shadow transition-all",
+                  focusTimer ? "left-[22px]" : "left-0.5",
+                )}
+              />
+            </span>
+          </button>
         </div>
 
         <div className="mt-10 pt-2">
