@@ -47,6 +47,7 @@ export function NextStepRow({
   onComplete?: () => void;
 }) {
   const accent = accentOf(goal);
+  const focusEnabled = useFocusTimerEnabled();
 
   return (
     <div className="flex w-full flex-col gap-2 rounded-2xl bg-white p-2 shadow-sm sm:flex-row sm:items-start sm:justify-between sm:py-2 sm:pl-2.5 sm:pr-2">
@@ -67,17 +68,19 @@ export function NextStepRow({
       </button>
 
       <div className="flex shrink-0 items-center gap-2 self-end sm:self-auto">
-        <button
-          type="button"
-          onClick={onStartTimer}
-          aria-label="Start a focus timer for this step"
-          className={cn(
-            "flex items-center justify-center rounded-lg p-1.5 text-white sm:p-2",
-            accent.deep,
-          )}
-        >
-          <Timer className="size-5 sm:size-6" strokeWidth={1.75} />
-        </button>
+        {focusEnabled && (
+          <button
+            type="button"
+            onClick={onStartTimer}
+            aria-label="Start a focus timer for this step"
+            className={cn(
+              "flex items-center justify-center rounded-lg p-1.5 text-white sm:p-2",
+              accent.deep,
+            )}
+          >
+            <Timer className="size-5 sm:size-6" strokeWidth={1.75} />
+          </button>
+        )}
         <button
           type="button"
           onClick={onComplete}
