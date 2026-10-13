@@ -569,17 +569,19 @@ export function StepRow({
           </button>
         ) : (
           <>
-            <button
-              type="button"
-              onClick={onTimer}
-              aria-label="Start a focus timer for this step"
-              className={cn(
-                "flex items-center justify-center rounded-lg p-2 text-white",
-                accent.deep,
-              )}
-            >
-              <Timer className="size-6" strokeWidth={1.75} />
-            </button>
+            {focusEnabled && (
+              <button
+                type="button"
+                onClick={onTimer}
+                aria-label="Start a focus timer for this step"
+                className={cn(
+                  "flex items-center justify-center rounded-lg p-2 text-white",
+                  accent.deep,
+                )}
+              >
+                <Timer className="size-6" strokeWidth={1.75} />
+              </button>
+            )}
             <button
               type="button"
               onClick={onToggle}
