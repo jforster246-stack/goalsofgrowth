@@ -103,3 +103,64 @@ export function isHabitDueToday(h: HabitSchedule, today: Date = new Date()): boo
       return true;
   }
 }
+
+function fmtDate(d: Date): string {
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+/**
+ * The next day (YYYY-MM-DD) a habit is due, counting from `from` (default today).
+ * Returns null for daily habits — they're always due, so there's no "next" to show.
+ */
+export function nextDueDate(h: HabitSchedule, from: Date = new Date()): string | null {
+  if (h.frequency === "daily") return null;
+  const anchor = anchorDay(h);
+  const base = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+
+  // Day-of-week based rhythms pick the next matching weekday.
+  if (
+    h.frequency === "weekdays" ||
+    h.frequency === "weekends" ||
+    h.frequency === "specific_days"
+  ) {
+    const wanted =
+      h.frequency === "weekdays"
+        ? [1, 2, 3, 4, 5]
+        : h.frequency === "weekends"
+          ? [0, 6]
+          : parseDays(h.days_of_week);
+    if (wanted.length === 0) return null;
+    let cursor = base;
+    if (h.start_date) {
+      const [y, m, d] = h.start_date.split("-").map(Number);
+      const start = new Date(y ?? 1970, (m ?? 1) - 1, d ?? 1);
+      if (start > cursor) cursor = start; // nothing shows before the start date
+    }
+    for (let i = 0; i < 8; i++) {
+      const d = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate() + i);
+      if (wanted.includes(d.getDay())) return fmtDate(d);
+    }
+    return null;
+  }
+
+  // Cycle-based rhythms repeat from their anchor day.
+  const every =
+    h.frequency === "weekly"
+      ? 7
+      : h.frequency === "fortnightly"
+        ? 14
+        : h.frequency === "monthly"
+          ? 30
+          : Math.max(1, h.interval_days ?? 1);
+  if (anchor === null) return fmtDate(base);
+  const diff = Math.round((startOfDay(base) - anchor) / 86400000);
+  let offset: number;
+  if (diff < 0) {
+    offset = -diff; // first occurrence is the start date itself
+  } else {
+    const rem = diff % every;
+    offset = rem === 0 ? 0 : every - rem;
+  }
+  return fmtDate(new Date(base.getFullYear(), base.getMonth(), base.getDate() + offset));
+}
