@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, type SearchSchemaInput } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { CalendarClock, Plus } from "lucide-react";
 import { AppShell, useAppShell } from "@/components/app-shell";
 import { HabitRow, type HabitTime } from "@/components/home-cards";
 import { Motif, TIME_MOTIF } from "@/components/motif-icons";
@@ -11,7 +11,7 @@ import { HabitTally } from "@/components/habit-tally";
 import { localToday } from "@/components/goal-ui";
 import { habitsQueryOptions } from "@/lib/goal-queries";
 import { toggleHabit } from "@/lib/habits.functions";
-import { frequencyLabel, isHabitDueToday } from "@/lib/habit-schedule";
+import { frequencyLabel, isHabitDueToday, nextDueDate } from "@/lib/habit-schedule";
 import { Loading } from "@/components/loading";
 import { HabitTracker } from "@/components/habit-month-grid";
 import { cn } from "@/lib/utils";
@@ -202,6 +202,8 @@ function HabitsBody({
       {notToday.length > 0 && <NotTodaySection habits={notToday} onOpen={onOpen} />}
 
       <HabitTracker />
+
+      <ScheduledHabitsSection habits={habits} onOpen={onOpen} />
     </div>
   );
 }
