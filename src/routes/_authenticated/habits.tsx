@@ -11,7 +11,7 @@ import { HabitTally } from "@/components/habit-tally";
 import { localToday } from "@/components/goal-ui";
 import { habitsQueryOptions } from "@/lib/goal-queries";
 import { toggleHabit } from "@/lib/habits.functions";
-import { frequencyLabel } from "@/lib/habit-schedule";
+import { frequencyLabel, isHabitDueToday } from "@/lib/habit-schedule";
 import { Loading } from "@/components/loading";
 import { HabitTracker } from "@/components/habit-month-grid";
 import { cn } from "@/lib/utils";
@@ -42,6 +42,7 @@ type Habit = {
   reason: string | null;
   icon: string | null;
   created_at: string;
+  start_date: string | null;
   done: boolean;
 };
 
@@ -177,11 +178,14 @@ function HabitsBody({
   const hour = new Date().getHours();
   const now: HabitTime = hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening";
 
+  const dueToday = habits.filter((h) => isHabitDueToday(h));
+  const notToday = habits.filter((h) => !isHabitDueToday(h));
+
   return (
     <div className="mt-5 space-y-8 pb-4">
       <div className="grid gap-8 md:grid-cols-2 md:items-start lg:grid-cols-3">
         {TIMES.map((time) => {
-          const inBucket = habits.filter((h) => h.time_of_day === time.key);
+          const inBucket = dueToday.filter((h) => h.time_of_day === time.key);
           if (inBucket.length === 0) return null;
           return (
             <HabitSection
@@ -194,6 +198,8 @@ function HabitsBody({
           );
         })}
       </div>
+
+      {notToday.length > 0 && <NotTodaySection habits={notToday} onOpen={onOpen} />}
 
       <HabitTracker />
     </div>
@@ -259,6 +265,45 @@ function HabitSection({
             {showDone ? "Hide done" : `Done today (${completed.length})`}
           </button>
           {showDone && <div className="mt-2 space-y-2">{completed.map(renderHabit)}</div>}
+        </div>
+      )}
+    </section>
+  );
+}
+
+/** Habits that aren't scheduled today — tucked away, still openable to edit. */
+function NotTodaySection({
+  habits,
+  onOpen,
+}: {
+  habits: Habit[];
+  onOpen: (habit: Habit) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <section>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="font-heading text-[11px] uppercase text-black/40 transition-colors hover:text-black/70"
+      >
+        {open ? "Hide" : `Not due today (${habits.length})`}
+      </button>
+      {open && (
+        <div className="mt-2 space-y-2">
+          {habits.map((h) => (
+            <button
+              key={h.id}
+              type="button"
+              onClick={() => onOpen(h)}
+              className="flex w-full items-center justify-between rounded-2xl bg-white/60 px-4 py-3 text-left"
+            >
+              <span className="font-serif text-sm text-black/60">{h.name}</span>
+              <span className="font-heading text-[10px] uppercase text-black/40">
+                {frequencyLabel(h)}
+              </span>
+            </button>
+          ))}
         </div>
       )}
     </section>
