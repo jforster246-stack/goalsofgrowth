@@ -460,6 +460,7 @@ export type Database = {
           name: string
           position: number
           reason: string | null
+          start_date: string | null
           time_of_day: string
           user_id: string
         }
@@ -473,6 +474,7 @@ export type Database = {
           name: string
           position?: number
           reason?: string | null
+          start_date?: string | null
           time_of_day?: string
           user_id: string
         }
@@ -486,6 +488,7 @@ export type Database = {
           name?: string
           position?: number
           reason?: string | null
+          start_date?: string | null
           time_of_day?: string
           user_id?: string
         }

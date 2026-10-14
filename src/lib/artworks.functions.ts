@@ -24,7 +24,7 @@ async function earnedStamps(supabase: any): Promise<number> {
       supabase.from("habit_completions").select("habit_id, completed_on"),
       supabase
         .from("habits")
-        .select("id, time_of_day, frequency, days_of_week, interval_days, created_at"),
+        .select("id, time_of_day, frequency, days_of_week, interval_days, created_at, start_date"),
       supabase.from("profiles").select("bonus_stamps").maybeSingle(),
     ]);
   if (stampsRes.error) throw new Error(stampsRes.error.message);

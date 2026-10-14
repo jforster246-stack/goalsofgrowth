@@ -25,6 +25,7 @@ export type HabitFull = {
   interval_days: number | null;
   reason: string | null;
   icon: string | null;
+  start_date?: string | null;
   done: boolean;
 };
 
@@ -138,6 +139,7 @@ export function HabitDetailModal({
     interval_days: habit.interval_days,
     reason: habit.reason,
     icon: habit.icon,
+    start_date: habit.start_date ?? null,
   };
 
   return (

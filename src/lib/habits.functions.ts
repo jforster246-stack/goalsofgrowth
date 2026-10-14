@@ -122,6 +122,7 @@ type HabitForBonus = {
   days_of_week: string | null;
   interval_days: number | null;
   created_at: string;
+  start_date?: string | null;
 };
 
 const DAY_SECTIONS = ["morning", "afternoon", "evening"] as const;
@@ -171,7 +172,7 @@ export const getHabitStampBonus = createServerFn({ method: "GET" })
       context.supabase.from("habit_completions").select("habit_id, completed_on"),
       context.supabase
         .from("habits")
-        .select("id, time_of_day, frequency, days_of_week, interval_days, created_at"),
+        .select("id, time_of_day, frequency, days_of_week, interval_days, created_at, start_date"),
     ]);
     if (compRes.error) throw new Error(compRes.error.message);
     if (habitRes.error) throw new Error(habitRes.error.message);
@@ -306,6 +307,7 @@ export const createHabit = createServerFn({ method: "POST" })
         intervalDays: intervalSchema,
         reason: z.string().trim().max(2000).optional(),
         icon: z.string().trim().max(40).optional(),
+        startDate: dateSchema.nullable().optional(),
       })
       .parse(data),
   )
@@ -330,6 +332,7 @@ export const createHabit = createServerFn({ method: "POST" })
         interval_days: data.intervalDays ?? null,
         reason: data.reason ?? null,
         icon: data.icon || null,
+        start_date: data.startDate ?? null,
         position,
         user_id: context.userId,
       })
@@ -352,6 +355,7 @@ export const updateHabit = createServerFn({ method: "POST" })
         intervalDays: z.number().int().min(1).max(365).nullable().optional(),
         reason: z.string().trim().max(2000).optional(),
         icon: z.string().trim().max(40).optional(),
+        startDate: dateSchema.nullable().optional(),
       })
       .parse(data),
   )
@@ -364,7 +368,9 @@ export const updateHabit = createServerFn({ method: "POST" })
       interval_days?: number | null;
       reason?: string;
       icon?: string | null;
+      start_date?: string | null;
     } = {};
+    if (data.startDate !== undefined) fields.start_date = data.startDate;
     if (data.name !== undefined) fields.name = data.name;
     if (data.timeOfDay !== undefined) fields.time_of_day = data.timeOfDay;
     if (data.frequency !== undefined) fields.frequency = data.frequency;

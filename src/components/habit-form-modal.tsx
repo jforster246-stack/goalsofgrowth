@@ -16,6 +16,7 @@ export type EditableHabit = {
   interval_days?: number | null;
   reason: string | null;
   icon?: string | null;
+  start_date?: string | null;
 };
 
 const TIMES: { key: HabitTime; label: string; Icon: typeof Sun; activeBg: string }[] = [
@@ -104,6 +105,8 @@ export function HabitFormModal({
   const [interval, setIntervalDays] = useState<number>(init.interval);
   const [reason, setReason] = useState(habit?.reason ?? "");
   const [icon, setIcon] = useState<string | null>(habit?.icon ?? null);
+  const [startDate, setStartDate] = useState<string>(habit?.start_date ?? "");
+  const periodic = frequency === "interval" || frequency === "weekly";
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["habits"] });
 
@@ -126,6 +129,7 @@ export function HabitFormModal({
             intervalDays,
             reason: trimmedReason,
             icon: icon ?? "",
+            startDate: periodic && startDate ? startDate : null,
           },
         });
       } else {
@@ -138,6 +142,7 @@ export function HabitFormModal({
             ...(intervalDays ? { intervalDays } : {}),
             ...(trimmedReason ? { reason: trimmedReason } : {}),
             ...(icon ? { icon } : {}),
+            ...(periodic && startDate ? { startDate } : {}),
           },
         });
       }
@@ -308,6 +313,25 @@ export function HabitFormModal({
             >
               <Plus className="size-4" strokeWidth={2.5} />
             </button>
+          </div>
+        )}
+
+        {/* Start date for repeating habits */}
+        {periodic && (
+          <div className="mt-4">
+            <label className="font-heading text-xs uppercase text-olive">
+              Starting from
+            </label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="mt-2 w-full rounded-2xl bg-black/5 px-4 py-3 font-serif text-sm focus:outline-none focus:ring-1 focus:ring-olive/40"
+            />
+            <p className="mt-1 font-serif text-xs text-black/40">
+              It shows up on this day, then every{" "}
+              {frequency === "weekly" ? "7" : interval} days after.
+            </p>
           </div>
         )}
 
