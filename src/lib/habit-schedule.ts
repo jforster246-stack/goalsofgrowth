@@ -16,6 +16,7 @@ export type HabitSchedule = {
   days_of_week?: string | null;
   interval_days?: number | null;
   created_at?: string;
+  start_date?: string | null;
 };
 
 const DAY_ABBR = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -65,9 +66,24 @@ function startOfDay(d: Date) {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
 }
 
-/** Whether a habit is scheduled for `today`. Legacy/coarse frequencies always show. */
+/** The day a habit's cycle counts from: its chosen start date, else the day it was made. */
+function anchorDay(h: HabitSchedule): number | null {
+  if (h.start_date) {
+    const [y, m, d] = h.start_date.split("-").map(Number);
+    return new Date(y, m - 1, d).getTime();
+  }
+  if (h.created_at) return startOfDay(new Date(h.created_at));
+  return null;
+}
+
+/** Whether a habit is scheduled for `today`. */
 export function isHabitDueToday(h: HabitSchedule, today: Date = new Date()): boolean {
   const dow = today.getDay(); // 0 = Sun … 6 = Sat
+  const anchor = anchorDay(h);
+  const diff = anchor === null ? 0 : Math.round((startOfDay(today) - anchor) / 86400000);
+  // Nothing shows before its start date.
+  if (h.start_date && diff < 0) return false;
+  const every = (n: number) => anchor === null || (diff >= 0 && diff % n === 0);
   switch (h.frequency) {
     case "weekdays":
       return dow >= 1 && dow <= 5;
@@ -75,24 +91,15 @@ export function isHabitDueToday(h: HabitSchedule, today: Date = new Date()): boo
       return dow === 0 || dow === 6;
     case "specific_days":
       return parseDays(h.days_of_week).includes(dow);
-    case "interval": {
-      const n = Math.max(1, h.interval_days ?? 1);
-      if (!h.created_at) return true;
-      const days = Math.floor(
-        (startOfDay(today) - startOfDay(new Date(h.created_at))) / 86400000,
-      );
-      return days >= 0 && days % n === 0;
-    }
-    case "weekly": {
-      // Once a week, on the weekday it was created.
-      if (!h.created_at) return true;
-      const days = Math.floor(
-        (startOfDay(today) - startOfDay(new Date(h.created_at))) / 86400000,
-      );
-      return days >= 0 && days % 7 === 0;
-    }
+    case "interval":
+      return every(Math.max(1, h.interval_days ?? 1));
+    case "weekly":
+      return every(7);
+    case "fortnightly":
+      return every(14);
+    case "monthly":
+      return every(30);
     default:
-      // daily + legacy fortnightly/monthly
       return true;
   }
 }
