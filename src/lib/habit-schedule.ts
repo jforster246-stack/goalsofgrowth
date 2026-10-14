@@ -70,7 +70,7 @@ function startOfDay(d: Date) {
 function anchorDay(h: HabitSchedule): number | null {
   if (h.start_date) {
     const [y, m, d] = h.start_date.split("-").map(Number);
-    return new Date(y, m - 1, d).getTime();
+    return new Date(y ?? 1970, (m ?? 1) - 1, d ?? 1).getTime();
   }
   if (h.created_at) return startOfDay(new Date(h.created_at));
   return null;
