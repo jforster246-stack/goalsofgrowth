@@ -311,3 +311,73 @@ function NotTodaySection({
     </section>
   );
 }
+
+const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/** "8 Oct" from a YYYY-MM-DD string. */
+function shortDate(iso: string): string {
+  const [, m, d] = iso.split("-").map(Number);
+  return `${d} ${MONTHS_SHORT[(m ?? 1) - 1]}`;
+}
+
+/**
+ * Every habit with its own rhythm (weekly, every 3 days, chosen weekdays…)
+ * listed with when it counts from and when it's next due. Tap to edit.
+ */
+function ScheduledHabitsSection({
+  habits,
+  onOpen,
+}: {
+  habits: Habit[];
+  onOpen: (habit: Habit) => void;
+}) {
+  const periodic = habits.filter((h) => h.frequency !== "daily");
+  if (periodic.length === 0) return null;
+
+  const today = new Date();
+  const rows = periodic
+    .map((h) => ({
+      habit: h,
+      next: nextDueDate(h, today),
+      from:
+        h.start_date ??
+        (h.created_at ? h.created_at.slice(0, 10) : null),
+    }))
+    .sort((a, b) => (a.next ?? "9") .localeCompare(b.next ?? "9"));
+
+  return (
+    <section>
+      <div className="flex items-center gap-1.5">
+        <CalendarClock className="size-4 text-olive" strokeWidth={2} />
+        <p className="font-heading text-sm uppercase text-olive">Scheduled habits</p>
+      </div>
+      <p className="mt-1 font-serif text-xs text-black/40">
+        Habits that come around on their own days — tap one to change its rhythm or starting date.
+      </p>
+      <div className="mt-3 space-y-2">
+        {rows.map(({ habit, next, from }) => (
+          <button
+            key={habit.id}
+            type="button"
+            onClick={() => onOpen(habit)}
+            className="flex w-full items-center justify-between gap-3 rounded-2xl bg-white px-4 py-3 text-left shadow-sm transition-colors hover:bg-white/80"
+          >
+            <span className="min-w-0">
+              <span className="flex items-center gap-1.5 font-serif text-sm text-black/80">
+                {habit.icon ? <Motif id={habit.icon} className="size-4 shrink-0 text-olive" /> : null}
+                <span className="truncate">{habit.name}</span>
+              </span>
+              <span className="mt-0.5 block font-heading text-[10px] uppercase text-black/45">
+                {from ? `From ${shortDate(from)} · ` : ""}
+                {next ? `Next ${shortDate(next)}` : "No start date set"}
+              </span>
+            </span>
+            <span className="shrink-0 rounded-full bg-black/[0.05] px-2.5 py-1 font-heading text-[10px] uppercase text-black/60">
+              {frequencyLabel(habit)}
+            </span>
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
