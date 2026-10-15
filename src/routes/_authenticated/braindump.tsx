@@ -282,33 +282,7 @@ function BrainDumpList({ initial }: { initial: Item[] }) {
   return (
     <>
       <div className="mt-4 rounded-2xl bg-white px-2 py-3 shadow-sm sm:px-4">
-        {items.map((item, index) => (
-          <Row
-            key={item.id}
-            item={item}
-            menuOpen={menuFor === item.id}
-            registerRef={(el) => {
-              if (el) refs.current.set(item.id, el);
-              else refs.current.delete(item.id);
-            }}
-            onChange={(text) => {
-              setItems((list) => list.map((i) => (i.id === item.id ? { ...i, text } : i)));
-              saveText(item.id, text);
-            }}
-            onBlur={() => {
-              if (timers.current.has(item.id)) saveText(item.id, item.text, true);
-            }}
-            onKeyDown={(e) => onKeyDown(e, index)}
-            onToggle={() => toggle(index)}
-            onMenu={() => setMenuFor(menuFor === item.id ? null : item.id)}
-            onCloseMenu={() => setMenuFor(null)}
-            onIndent={() => setIndent(index, (item.indent ?? 0) + 1)}
-            onOutdent={() => setIndent(index, (item.indent ?? 0) - 1)}
-            onMakeGoal={() => navigate({ to: "/goals/new", search: { title: item.text } })}
-            onMakeHabit={() => setHabitPrefill(item.text)}
-            onDelete={() => remove(index)}
-          />
-        ))}
+        {active.map(renderRow)}
 
         {/* The empty line at the bottom - tap it to start a new item. */}
         <button
