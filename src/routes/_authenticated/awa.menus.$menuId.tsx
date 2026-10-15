@@ -32,7 +32,7 @@ import {
 } from "@/lib/menus.functions";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/_authenticated/menus/$menuId")({
+export const Route = createFileRoute("/_authenticated/awa/menus/$menuId")({
   head: () => ({
     meta: [
       { title: "Menu — Goals of Growth" },
