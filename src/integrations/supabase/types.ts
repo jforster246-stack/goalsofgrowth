@@ -494,6 +494,138 @@ export type Database = {
         }
         Relationships: []
       }
+      menu_activities: {
+        Row: {
+          created_at: string
+          duration_minutes: number | null
+          energy: string | null
+          hobby_id: string | null
+          id: string
+          kind: string
+          last_done_on: string | null
+          name: string
+          notes: string | null
+          step_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_minutes?: number | null
+          energy?: string | null
+          hobby_id?: string | null
+          id?: string
+          kind?: string
+          last_done_on?: string | null
+          name: string
+          notes?: string | null
+          step_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          duration_minutes?: number | null
+          energy?: string | null
+          hobby_id?: string | null
+          id?: string
+          kind?: string
+          last_done_on?: string | null
+          name?: string
+          notes?: string | null
+          step_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_activities_hobby_id_fkey"
+            columns: ["hobby_id"]
+            isOneToOne: false
+            referencedRelation: "awa_hobbies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "menu_activities_step_id_fkey"
+            columns: ["step_id"]
+            isOneToOne: false
+            referencedRelation: "steps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      menu_items: {
+        Row: {
+          activity_id: string
+          created_at: string
+          id: string
+          menu_id: string
+          position: number
+          user_id: string
+        }
+        Insert: {
+          activity_id: string
+          created_at?: string
+          id?: string
+          menu_id: string
+          position?: number
+          user_id: string
+        }
+        Update: {
+          activity_id?: string
+          created_at?: string
+          id?: string
+          menu_id?: string
+          position?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_items_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "menu_activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "menu_items_menu_id_fkey"
+            columns: ["menu_id"]
+            isOneToOne: false
+            referencedRelation: "menus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      menus: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+          position: number
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          position?: number
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          position?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           bonus_stamps: number
