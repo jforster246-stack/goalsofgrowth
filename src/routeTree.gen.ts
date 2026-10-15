@@ -29,6 +29,7 @@ import { Route as AuthenticatedGoalsIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedGoalsGoalIdRouteImport } from './routes/_authenticated/goals.$goalId'
 import { Route as AuthenticatedGoalsNewRouteImport } from './routes/_authenticated/goals.new'
 import { Route as AuthenticatedMenusIndexRouteImport } from './routes/_authenticated/menus.index'
+import { Route as AuthenticatedMenusMenuIdRouteImport } from './routes/_authenticated/menus.$menuId'
 import { Route as AuthenticatedRoutinesIndexRouteImport } from './routes/_authenticated/routines.index'
 import { Route as AuthenticatedRoutinesRoutineIdRouteImport } from './routes/_authenticated/routines.$routineId'
 
@@ -132,6 +133,12 @@ const AuthenticatedMenusIndexRoute = AuthenticatedMenusIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedMenusRoute,
 } as any)
+const AuthenticatedMenusMenuIdRoute =
+  AuthenticatedMenusMenuIdRouteImport.update({
+    id: '/$menuId',
+    path: '/$menuId',
+    getParentRoute: () => AuthenticatedMenusRoute,
+  } as any)
 const AuthenticatedRoutinesIndexRoute =
   AuthenticatedRoutinesIndexRouteImport.update({
     id: '/',
@@ -162,6 +169,7 @@ export interface FileRoutesByFullPath {
   '/awa/$hobbyId': typeof AuthenticatedAwaHobbyIdRoute
   '/goals/$goalId': typeof AuthenticatedGoalsGoalIdRoute
   '/goals/new': typeof AuthenticatedGoalsNewRoute
+  '/menus/$menuId': typeof AuthenticatedMenusMenuIdRoute
   '/routines/$routineId': typeof AuthenticatedRoutinesRoutineIdRoute
   '/awa/': typeof AuthenticatedAwaIndexRoute
   '/goals/': typeof AuthenticatedGoalsIndexRoute
@@ -181,6 +189,7 @@ export interface FileRoutesByTo {
   '/awa/$hobbyId': typeof AuthenticatedAwaHobbyIdRoute
   '/goals/$goalId': typeof AuthenticatedGoalsGoalIdRoute
   '/goals/new': typeof AuthenticatedGoalsNewRoute
+  '/menus/$menuId': typeof AuthenticatedMenusMenuIdRoute
   '/routines/$routineId': typeof AuthenticatedRoutinesRoutineIdRoute
   '/awa': typeof AuthenticatedAwaIndexRoute
   '/goals': typeof AuthenticatedGoalsIndexRoute
@@ -206,6 +215,7 @@ export interface FileRoutesById {
   '/_authenticated/awa/$hobbyId': typeof AuthenticatedAwaHobbyIdRoute
   '/_authenticated/goals/$goalId': typeof AuthenticatedGoalsGoalIdRoute
   '/_authenticated/goals/new': typeof AuthenticatedGoalsNewRoute
+  '/_authenticated/menus/$menuId': typeof AuthenticatedMenusMenuIdRoute
   '/_authenticated/routines/$routineId': typeof AuthenticatedRoutinesRoutineIdRoute
   '/_authenticated/awa/': typeof AuthenticatedAwaIndexRoute
   '/_authenticated/goals/': typeof AuthenticatedGoalsIndexRoute
@@ -231,6 +241,7 @@ export interface FileRouteTypes {
     | '/awa/$hobbyId'
     | '/goals/$goalId'
     | '/goals/new'
+    | '/menus/$menuId'
     | '/routines/$routineId'
     | '/awa/'
     | '/goals/'
@@ -250,6 +261,7 @@ export interface FileRouteTypes {
     | '/awa/$hobbyId'
     | '/goals/$goalId'
     | '/goals/new'
+    | '/menus/$menuId'
     | '/routines/$routineId'
     | '/awa'
     | '/goals'
@@ -274,6 +286,7 @@ export interface FileRouteTypes {
     | '/_authenticated/awa/$hobbyId'
     | '/_authenticated/goals/$goalId'
     | '/_authenticated/goals/new'
+    | '/_authenticated/menus/$menuId'
     | '/_authenticated/routines/$routineId'
     | '/_authenticated/awa/'
     | '/_authenticated/goals/'
@@ -429,6 +442,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMenusIndexRouteImport
       parentRoute: typeof AuthenticatedMenusRoute
     }
+    '/_authenticated/menus/$menuId': {
+      id: '/_authenticated/menus/$menuId'
+      path: '/$menuId'
+      fullPath: '/menus/$menuId'
+      preLoaderRoute: typeof AuthenticatedMenusMenuIdRouteImport
+      parentRoute: typeof AuthenticatedMenusRoute
+    }
     '/_authenticated/routines/': {
       id: '/_authenticated/routines/'
       path: '/'
@@ -475,10 +495,12 @@ const AuthenticatedGoalsRouteWithChildren =
   AuthenticatedGoalsRoute._addFileChildren(AuthenticatedGoalsRouteChildren)
 
 interface AuthenticatedMenusRouteChildren {
+  AuthenticatedMenusMenuIdRoute: typeof AuthenticatedMenusMenuIdRoute
   AuthenticatedMenusIndexRoute: typeof AuthenticatedMenusIndexRoute
 }
 
 const AuthenticatedMenusRouteChildren: AuthenticatedMenusRouteChildren = {
+  AuthenticatedMenusMenuIdRoute: AuthenticatedMenusMenuIdRoute,
   AuthenticatedMenusIndexRoute: AuthenticatedMenusIndexRoute,
 }
 
