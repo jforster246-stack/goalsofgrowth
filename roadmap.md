@@ -4,3 +4,4 @@
 - [x] Connect direct Focus and instant completion
 - [x] Make deck the default with grid toggle
 - [ ] Verify mobile interactions and build
+- [x] Menus feature (create/edit/delete, activities, time/energy filter, surprise me, completion)
