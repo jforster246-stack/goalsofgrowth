@@ -50,7 +50,7 @@ export function AppShell({
   right?: ReactNode;
   /** A short line under the page title (e.g. the habits tally). */
   subtitle?: ReactNode;
-  backTo?: "/overview" | "/goals" | "/routines" | "/awa";
+  backTo?: "/overview" | "/goals" | "/routines" | "/awa" | "/menus";
   title?: string;
   titleLeft?: boolean;
   hideSettings?: boolean;
