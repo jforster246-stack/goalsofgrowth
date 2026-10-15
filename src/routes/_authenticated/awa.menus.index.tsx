@@ -8,7 +8,7 @@ import { Motif } from "@/components/motif-icons";
 import { MenuFormModal, type MenuDraft } from "@/components/menu-ui";
 import { deleteMenu, listMenus, saveMenu } from "@/lib/menus.functions";
 
-export const Route = createFileRoute("/_authenticated/menus/")({
+export const Route = createFileRoute("/_authenticated/awa/menus/")({
   head: () => ({
     meta: [
       { title: "Menus — Goals of Growth" },
@@ -47,7 +47,7 @@ function MenusPage() {
       qc.invalidateQueries({ queryKey: ["menus"] });
       qc.invalidateQueries({ queryKey: ["menu"] });
       setForm(null);
-      if (!vars.id) navigate({ to: "/menus/$menuId", params: { menuId: res.id } });
+      if (!vars.id) navigate({ to: "/awa/menus/$menuId", params: { menuId: res.id } });
     },
   });
   const remove = useMutation({
@@ -102,7 +102,7 @@ function MenusPage() {
             {menus!.map((m) => (
               <div key={m.id} className="relative flex flex-col rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border">
                 <Link
-                  to="/menus/$menuId"
+                  to="/awa/menus/$menuId"
                   params={{ menuId: m.id }}
                   className="flex flex-1 items-start gap-3 pr-16"
                 >

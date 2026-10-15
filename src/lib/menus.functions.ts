@@ -60,25 +60,17 @@ export const getMenu = createServerFn({ method: "GET" })
     };
   });
 
-/** Every activity the user has made, plus open goal steps and hobbies to pick from. */
-export const listActivitySources = createServerFn({ method: "GET" })
+/** The user's hobbies on the shelf, to pull into a menu. */
+export const listMenuHobbies = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const [acts, steps, hobbies] = await Promise.all([
-      context.supabase.from("menu_activities").select("*").order("name"),
-      context.supabase
-        .from("steps")
-        .select("id, title, done, goal:goals(title, archived_at)")
-        .eq("done", false)
-        .order("position"),
-      context.supabase.from("awa_hobbies").select("id, name, icon").is("archived_at", null).order("position"),
-    ]);
-    for (const r of [acts, steps, hobbies]) if (r.error) throw new Error(r.error.message);
-    return {
-      activities: acts.data ?? [],
-      steps: (steps.data ?? []).filter((s) => s.goal && !s.goal.archived_at),
-      hobbies: hobbies.data ?? [],
-    };
+    const { data, error } = await context.supabase
+      .from("awa_hobbies")
+      .select("id, name, icon")
+      .is("archived_at", null)
+      .order("position");
+    if (error) throw new Error(error.message);
+    return data ?? [];
   });
 
 export const saveMenu = createServerFn({ method: "POST" })
@@ -146,68 +138,37 @@ async function link(
   if (error) throw new Error(error.message);
 }
 
-/** Adds a new activity, an existing one, or one linked to a goal step / hobby (reused if it already exists). */
+/** Adds a hobby to a menu; the activity row is reused if the hobby is already in a menu. */
 export const addMenuActivity = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
-    z
-      .object({
-        menuId: z.string().uuid(),
-        activityId: z.string().uuid().optional(),
-        stepId: z.string().uuid().optional(),
-        hobbyId: z.string().uuid().optional(),
-        fields: activityFields.optional(),
-      })
-      .parse(d),
-  )
+  .inputValidator((d) => z.object({ menuId: z.string().uuid(), hobbyId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const sb = context.supabase;
-    let activityId = data.activityId;
-    if (!activityId && (data.stepId || data.hobbyId)) {
-      const col = data.stepId ? "step_id" : "hobby_id";
-      const val = (data.stepId ?? data.hobbyId)!;
-      const { data: existing } = await sb.from("menu_activities").select("id").eq(col, val).maybeSingle();
-      if (existing) activityId = existing.id;
-      else {
-        let name = data.fields?.name;
-        if (!name) {
-          const src = data.stepId
-            ? await sb.from("steps").select("title").eq("id", val).single()
-            : await sb.from("awa_hobbies").select("name").eq("id", val).single();
-          if (src.error) throw new Error(src.error.message);
-          name = "title" in src.data ? src.data.title : src.data.name;
-        }
-        const { data: a, error } = await sb
-          .from("menu_activities")
-          .insert({
-            user_id: context.userId,
-            name,
-            kind: data.stepId ? "task" : "hobby",
-            step_id: data.stepId ?? null,
-            hobby_id: data.hobbyId ?? null,
-          })
-          .select("id")
-          .single();
-        if (error) throw new Error(error.message);
-        activityId = a.id;
-      }
-    }
-    if (!activityId) {
-      const f = data.fields;
-      if (!f) throw new Error("Activity name is required");
-      const { data: a, error } = await sb
+    let activityId: string | undefined;
+    const { data: existing } = await sb
+      .from("menu_activities")
+      .select("id")
+      .eq("hobby_id", data.hobbyId)
+      .maybeSingle();
+    if (existing) activityId = existing.id;
+    else {
+      const { data: hobby, error } = await sb
+        .from("awa_hobbies")
+        .select("name")
+        .eq("id", data.hobbyId)
+        .single();
+      if (error) throw new Error(error.message);
+      const { data: a, error: e2 } = await sb
         .from("menu_activities")
         .insert({
           user_id: context.userId,
-          name: f.name,
-          duration_minutes: f.durationMinutes ?? null,
-          energy: f.energy ?? null,
-          kind: f.kind ?? "other",
-          notes: f.notes || null,
+          name: hobby.name,
+          kind: "hobby",
+          hobby_id: data.hobbyId,
         })
         .select("id")
         .single();
-      if (error) throw new Error(error.message);
+      if (e2) throw new Error(e2.message);
       activityId = a.id;
     }
     await link(sb, context.userId, data.menuId, activityId);

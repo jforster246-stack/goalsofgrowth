@@ -9,4 +9,4 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- Menus: reusable activities live in menu_activities and join menus via menu_items; goal steps/hobbies link by step_id/hobby_id (unique per user) so they are never duplicated, and standalone activities are pruned when no menu holds them. Why: one activity can sit in many menus without copying tasks.
+- Menus: the pages live under /awa/menus, opened from the A While Away page (no nav entry). Every menu activity is linked to an A While Away hobby via hobby_id (unique per user) and is reused across menus via menu_items; standalone or goal-step-linked activities are not supported. Why: menus are only ever built from the user's hobbies.
