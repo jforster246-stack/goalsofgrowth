@@ -28,12 +28,13 @@ export function durationText(m: number | null | undefined) {
 export const inputClass =
   "w-full rounded-xl bg-white px-3 py-2.5 text-sm text-foreground ring-1 ring-border focus:outline-none focus:ring-2 focus:ring-ring";
 
-export function Field({ label, children }: { label: string; children: ReactNode }) {
+export function Field({ label, group, children }: { label: string; group?: boolean; children: ReactNode }) {
+  const Tag = group ? "div" : "label";
   return (
-    <label className="block">
+    <Tag className="block" {...(group ? { role: "group", "aria-label": label } : {})}>
       <span className="mb-1.5 block font-heading text-xs uppercase tracking-wide text-olive">{label}</span>
       {children}
-    </label>
+    </Tag>
   );
 }
 
@@ -125,7 +126,7 @@ export function MenuFormModal({
             className={inputClass}
           />
         </Field>
-        <Field label="Icon (optional)">
+        <Field label="Icon (optional)" group>
           <IconPicker value={d.icon} onChange={(icon) => setD({ ...d, icon })} defaultLabel="None" />
         </Field>
         <button
@@ -174,7 +175,7 @@ export function ActivityFields({
           />
         </Field>
       )}
-      <Field label="How long">
+      <Field label="How long" group>
         <div className="flex flex-wrap gap-2">
           {DURATIONS.map((m) => (
             <Chip
@@ -206,7 +207,7 @@ export function ActivityFields({
           />
         )}
       </Field>
-      <Field label="Energy">
+      <Field label="Energy" group>
         <div className="flex flex-wrap gap-2">
           {(["low", "medium", "high"] as Energy[]).map((e) => (
             <Chip key={e} active={d.energy === e} onClick={() => setD({ ...d, energy: d.energy === e ? null : e })}>
@@ -215,7 +216,7 @@ export function ActivityFields({
           ))}
         </div>
       </Field>
-      <Field label="Type">
+      <Field label="Type" group>
         <div className="flex flex-wrap gap-2">
           {(Object.keys(KIND_LABEL) as Kind[]).map((k) => (
             <Chip key={k} active={d.kind === k} onClick={() => setD({ ...d, kind: k })}>
