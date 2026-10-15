@@ -78,16 +78,39 @@ export function AppShell({
       .catch(() => {});
   }, []);
 
-  const touched = useRef(false);
+  // Records today for the streak — on open, when the app comes back into view,
+  // when the day rolls over while open, and whenever something is ticked/saved.
+  const touchedDay = useRef<string | null>(null);
   useEffect(() => {
-    if (touched.current) return;
-    touched.current = true;
-    touchStreak({ data: { today: localToday() } })
-      .then(() => {
-        queryClient.invalidateQueries({ queryKey: ["profile"] });
-        queryClient.invalidateQueries({ queryKey: ["stamp-balance"] });
-      })
-      .catch(() => {});
+    const touch = () => {
+      const today = localToday();
+      if (touchedDay.current === today) return;
+      touchedDay.current = today;
+      touchStreak({ data: { today } })
+        .then(() => {
+          queryClient.invalidateQueries({ queryKey: ["profile"] });
+          queryClient.invalidateQueries({ queryKey: ["stamp-balance"] });
+        })
+        .catch(() => {
+          touchedDay.current = null;
+        });
+    };
+    touch();
+    const onVisible = () => {
+      if (document.visibilityState === "visible") touch();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", touch);
+    const timer = window.setInterval(touch, 60_000);
+    const unsub = queryClient.getMutationCache().subscribe((e) => {
+      if (e.type === "updated" && e.action.type === "success") touch();
+    });
+    return () => {
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", touch);
+      window.clearInterval(timer);
+      unsub();
+    };
   }, [queryClient]);
 
   const nameMutation = useMutation({
