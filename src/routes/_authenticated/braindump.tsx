@@ -295,6 +295,19 @@ function BrainDumpList({ initial }: { initial: Item[] }) {
             {items.length === 0 ? "Start typing your first idea…" : "To-do"}
           </span>
         </button>
+
+        {completed.length > 0 && (
+          <div className="mt-1 px-2">
+            <button
+              type="button"
+              onClick={() => setShowDone((v) => !v)}
+              className="font-heading text-[11px] uppercase text-black/40 transition-colors hover:text-black/70"
+            >
+              {showDone ? "Hide done" : `Done (${completed.length})`}
+            </button>
+            {showDone && <div className="mt-2 space-y-1">{completed.map(renderRow)}</div>}
+          </div>
+        )}
       </div>
 
       <p className="mt-3 text-center font-serif text-xs text-black/35">
