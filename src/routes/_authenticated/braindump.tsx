@@ -78,6 +78,7 @@ function BrainDumpList({ initial }: { initial: Item[] }) {
   const [focus, setFocus] = useState<Focus | null>(null);
   const [menuFor, setMenuFor] = useState<string | null>(null);
   const [habitPrefill, setHabitPrefill] = useState<string | null>(null);
+  const [showDone, setShowDone] = useState(false);
   const refs = useRef(new Map<string, HTMLTextAreaElement>());
   const timers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
   const unsaved = useRef(new Map<string, string>());
@@ -247,36 +248,41 @@ function BrainDumpList({ initial }: { initial: Item[] }) {
     }
   };
 
+  const renderRow = (item: Item) => (
+    <Row
+      key={item.id}
+      item={item}
+      menuOpen={menuFor === item.id}
+      registerRef={(el) => {
+        if (el) refs.current.set(item.id, el);
+        else refs.current.delete(item.id);
+      }}
+      onChange={(text) => {
+        setItems((list) => list.map((i) => (i.id === item.id ? { ...i, text } : i)));
+        saveText(item.id, text);
+      }}
+      onBlur={() => {
+        if (timers.current.has(item.id)) saveText(item.id, item.text, true);
+      }}
+      onKeyDown={(e) => onKeyDown(e, items.indexOf(item))}
+      onToggle={() => toggle(items.indexOf(item))}
+      onMenu={() => setMenuFor(menuFor === item.id ? null : item.id)}
+      onCloseMenu={() => setMenuFor(null)}
+      onIndent={() => setIndent(items.indexOf(item), (item.indent ?? 0) + 1)}
+      onOutdent={() => setIndent(items.indexOf(item), (item.indent ?? 0) - 1)}
+      onMakeGoal={() => navigate({ to: "/goals/new", search: { title: item.text } })}
+      onMakeHabit={() => setHabitPrefill(item.text)}
+      onDelete={() => remove(items.indexOf(item))}
+    />
+  );
+
+  const active = items.filter((i) => !i.done);
+  const completed = items.filter((i) => i.done);
+
   return (
     <>
       <div className="mt-4 rounded-2xl bg-white px-2 py-3 shadow-sm sm:px-4">
-        {items.map((item, index) => (
-          <Row
-            key={item.id}
-            item={item}
-            menuOpen={menuFor === item.id}
-            registerRef={(el) => {
-              if (el) refs.current.set(item.id, el);
-              else refs.current.delete(item.id);
-            }}
-            onChange={(text) => {
-              setItems((list) => list.map((i) => (i.id === item.id ? { ...i, text } : i)));
-              saveText(item.id, text);
-            }}
-            onBlur={() => {
-              if (timers.current.has(item.id)) saveText(item.id, item.text, true);
-            }}
-            onKeyDown={(e) => onKeyDown(e, index)}
-            onToggle={() => toggle(index)}
-            onMenu={() => setMenuFor(menuFor === item.id ? null : item.id)}
-            onCloseMenu={() => setMenuFor(null)}
-            onIndent={() => setIndent(index, (item.indent ?? 0) + 1)}
-            onOutdent={() => setIndent(index, (item.indent ?? 0) - 1)}
-            onMakeGoal={() => navigate({ to: "/goals/new", search: { title: item.text } })}
-            onMakeHabit={() => setHabitPrefill(item.text)}
-            onDelete={() => remove(index)}
-          />
-        ))}
+        {active.map(renderRow)}
 
         {/* The empty line at the bottom - tap it to start a new item. */}
         <button
@@ -289,6 +295,19 @@ function BrainDumpList({ initial }: { initial: Item[] }) {
             {items.length === 0 ? "Start typing your first idea…" : "To-do"}
           </span>
         </button>
+
+        {completed.length > 0 && (
+          <div className="mt-1 px-2">
+            <button
+              type="button"
+              onClick={() => setShowDone((v) => !v)}
+              className="font-heading text-[11px] uppercase text-black/40 transition-colors hover:text-black/70"
+            >
+              {showDone ? "Hide done" : `Done (${completed.length})`}
+            </button>
+            {showDone && <div className="mt-2 space-y-1">{completed.map(renderRow)}</div>}
+          </div>
+        )}
       </div>
 
       <p className="mt-3 text-center font-serif text-xs text-black/35">
