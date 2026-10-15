@@ -18,6 +18,7 @@ import { Route as AuthenticatedFinanceRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedGalleryRouteImport } from './routes/_authenticated/gallery'
 import { Route as AuthenticatedGoalsRouteImport } from './routes/_authenticated/goals'
 import { Route as AuthenticatedHabitsRouteImport } from './routes/_authenticated/habits'
+import { Route as AuthenticatedMenusRouteImport } from './routes/_authenticated/menus'
 import { Route as AuthenticatedOverviewRouteImport } from './routes/_authenticated/overview'
 import { Route as AuthenticatedRoutinesRouteImport } from './routes/_authenticated/routines'
 import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated/welcome'
@@ -27,6 +28,7 @@ import { Route as AuthenticatedAwaHobbyIdRouteImport } from './routes/_authentic
 import { Route as AuthenticatedGoalsIndexRouteImport } from './routes/_authenticated/goals.index'
 import { Route as AuthenticatedGoalsGoalIdRouteImport } from './routes/_authenticated/goals.$goalId'
 import { Route as AuthenticatedGoalsNewRouteImport } from './routes/_authenticated/goals.new'
+import { Route as AuthenticatedMenusIndexRouteImport } from './routes/_authenticated/menus.index'
 import { Route as AuthenticatedRoutinesIndexRouteImport } from './routes/_authenticated/routines.index'
 import { Route as AuthenticatedRoutinesRoutineIdRouteImport } from './routes/_authenticated/routines.$routineId'
 
@@ -72,6 +74,11 @@ const AuthenticatedGoalsRoute = AuthenticatedGoalsRouteImport.update({
 const AuthenticatedHabitsRoute = AuthenticatedHabitsRouteImport.update({
   id: '/habits',
   path: '/habits',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMenusRoute = AuthenticatedMenusRouteImport.update({
+  id: '/menus',
+  path: '/menus',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedOverviewRoute = AuthenticatedOverviewRouteImport.update({
@@ -120,6 +127,11 @@ const AuthenticatedGoalsNewRoute = AuthenticatedGoalsNewRouteImport.update({
   path: '/new',
   getParentRoute: () => AuthenticatedGoalsRoute,
 } as any)
+const AuthenticatedMenusIndexRoute = AuthenticatedMenusIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedMenusRoute,
+} as any)
 const AuthenticatedRoutinesIndexRoute =
   AuthenticatedRoutinesIndexRouteImport.update({
     id: '/',
@@ -142,6 +154,7 @@ export interface FileRoutesByFullPath {
   '/gallery': typeof AuthenticatedGalleryRoute
   '/goals': typeof AuthenticatedGoalsRouteWithChildren
   '/habits': typeof AuthenticatedHabitsRoute
+  '/menus': typeof AuthenticatedMenusRouteWithChildren
   '/overview': typeof AuthenticatedOverviewRoute
   '/routines': typeof AuthenticatedRoutinesRouteWithChildren
   '/welcome': typeof AuthenticatedWelcomeRoute
@@ -152,6 +165,7 @@ export interface FileRoutesByFullPath {
   '/routines/$routineId': typeof AuthenticatedRoutinesRoutineIdRoute
   '/awa/': typeof AuthenticatedAwaIndexRoute
   '/goals/': typeof AuthenticatedGoalsIndexRoute
+  '/menus/': typeof AuthenticatedMenusIndexRoute
   '/routines/': typeof AuthenticatedRoutinesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -170,6 +184,7 @@ export interface FileRoutesByTo {
   '/routines/$routineId': typeof AuthenticatedRoutinesRoutineIdRoute
   '/awa': typeof AuthenticatedAwaIndexRoute
   '/goals': typeof AuthenticatedGoalsIndexRoute
+  '/menus': typeof AuthenticatedMenusIndexRoute
   '/routines': typeof AuthenticatedRoutinesIndexRoute
 }
 export interface FileRoutesById {
@@ -183,6 +198,7 @@ export interface FileRoutesById {
   '/_authenticated/gallery': typeof AuthenticatedGalleryRoute
   '/_authenticated/goals': typeof AuthenticatedGoalsRouteWithChildren
   '/_authenticated/habits': typeof AuthenticatedHabitsRoute
+  '/_authenticated/menus': typeof AuthenticatedMenusRouteWithChildren
   '/_authenticated/overview': typeof AuthenticatedOverviewRoute
   '/_authenticated/routines': typeof AuthenticatedRoutinesRouteWithChildren
   '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
@@ -193,6 +209,7 @@ export interface FileRoutesById {
   '/_authenticated/routines/$routineId': typeof AuthenticatedRoutinesRoutineIdRoute
   '/_authenticated/awa/': typeof AuthenticatedAwaIndexRoute
   '/_authenticated/goals/': typeof AuthenticatedGoalsIndexRoute
+  '/_authenticated/menus/': typeof AuthenticatedMenusIndexRoute
   '/_authenticated/routines/': typeof AuthenticatedRoutinesIndexRoute
 }
 export interface FileRouteTypes {
@@ -206,6 +223,7 @@ export interface FileRouteTypes {
     | '/gallery'
     | '/goals'
     | '/habits'
+    | '/menus'
     | '/overview'
     | '/routines'
     | '/welcome'
@@ -216,6 +234,7 @@ export interface FileRouteTypes {
     | '/routines/$routineId'
     | '/awa/'
     | '/goals/'
+    | '/menus/'
     | '/routines/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -234,6 +253,7 @@ export interface FileRouteTypes {
     | '/routines/$routineId'
     | '/awa'
     | '/goals'
+    | '/menus'
     | '/routines'
   id:
     | '__root__'
@@ -246,6 +266,7 @@ export interface FileRouteTypes {
     | '/_authenticated/gallery'
     | '/_authenticated/goals'
     | '/_authenticated/habits'
+    | '/_authenticated/menus'
     | '/_authenticated/overview'
     | '/_authenticated/routines'
     | '/_authenticated/welcome'
@@ -256,6 +277,7 @@ export interface FileRouteTypes {
     | '/_authenticated/routines/$routineId'
     | '/_authenticated/awa/'
     | '/_authenticated/goals/'
+    | '/_authenticated/menus/'
     | '/_authenticated/routines/'
   fileRoutesById: FileRoutesById
 }
@@ -330,6 +352,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHabitsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/menus': {
+      id: '/_authenticated/menus'
+      path: '/menus'
+      fullPath: '/menus'
+      preLoaderRoute: typeof AuthenticatedMenusRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/overview': {
       id: '/_authenticated/overview'
       path: '/overview'
@@ -393,6 +422,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGoalsNewRouteImport
       parentRoute: typeof AuthenticatedGoalsRoute
     }
+    '/_authenticated/menus/': {
+      id: '/_authenticated/menus/'
+      path: '/'
+      fullPath: '/menus/'
+      preLoaderRoute: typeof AuthenticatedMenusIndexRouteImport
+      parentRoute: typeof AuthenticatedMenusRoute
+    }
     '/_authenticated/routines/': {
       id: '/_authenticated/routines/'
       path: '/'
@@ -438,6 +474,17 @@ const AuthenticatedGoalsRouteChildren: AuthenticatedGoalsRouteChildren = {
 const AuthenticatedGoalsRouteWithChildren =
   AuthenticatedGoalsRoute._addFileChildren(AuthenticatedGoalsRouteChildren)
 
+interface AuthenticatedMenusRouteChildren {
+  AuthenticatedMenusIndexRoute: typeof AuthenticatedMenusIndexRoute
+}
+
+const AuthenticatedMenusRouteChildren: AuthenticatedMenusRouteChildren = {
+  AuthenticatedMenusIndexRoute: AuthenticatedMenusIndexRoute,
+}
+
+const AuthenticatedMenusRouteWithChildren =
+  AuthenticatedMenusRoute._addFileChildren(AuthenticatedMenusRouteChildren)
+
 interface AuthenticatedRoutinesRouteChildren {
   AuthenticatedRoutinesRoutineIdRoute: typeof AuthenticatedRoutinesRoutineIdRoute
   AuthenticatedRoutinesIndexRoute: typeof AuthenticatedRoutinesIndexRoute
@@ -460,6 +507,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedGalleryRoute: typeof AuthenticatedGalleryRoute
   AuthenticatedGoalsRoute: typeof AuthenticatedGoalsRouteWithChildren
   AuthenticatedHabitsRoute: typeof AuthenticatedHabitsRoute
+  AuthenticatedMenusRoute: typeof AuthenticatedMenusRouteWithChildren
   AuthenticatedOverviewRoute: typeof AuthenticatedOverviewRoute
   AuthenticatedRoutinesRoute: typeof AuthenticatedRoutinesRouteWithChildren
   AuthenticatedWelcomeRoute: typeof AuthenticatedWelcomeRoute
@@ -473,6 +521,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedGalleryRoute: AuthenticatedGalleryRoute,
   AuthenticatedGoalsRoute: AuthenticatedGoalsRouteWithChildren,
   AuthenticatedHabitsRoute: AuthenticatedHabitsRoute,
+  AuthenticatedMenusRoute: AuthenticatedMenusRouteWithChildren,
   AuthenticatedOverviewRoute: AuthenticatedOverviewRoute,
   AuthenticatedRoutinesRoute: AuthenticatedRoutinesRouteWithChildren,
   AuthenticatedWelcomeRoute: AuthenticatedWelcomeRoute,
