@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { Check, Clock, Pencil, Plus, Shuffle, Target, Armchair, Timer, X } from "lucide-react";
+import { Check, Clock, Pencil, Plus, Shuffle, Armchair, Timer, X } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { useAppShell } from "@/components/app-shell-context";
 import { Loading } from "@/components/loading";
@@ -24,7 +24,7 @@ import {
 import {
   addMenuActivity,
   getMenu,
-  listActivitySources,
+  listMenuHobbies,
   removeMenuActivity,
   saveMenu,
   setMenuActivityDone,
@@ -64,14 +64,14 @@ function MenuPage() {
     queryFn: () => getMenu({ data: { id: menuId } }),
   });
   return (
-    <AppShell title={data?.menu.name ?? "Menu"} backTo="/menus" hideSettings>
+    <AppShell title={data?.menu.name ?? "Menu"} backTo="/awa/menus" hideSettings>
       {isPending ? (
         <Loading />
       ) : error ? (
         <p className="mt-6 text-sm text-destructive">Couldn't load this menu. Please refresh.</p>
       ) : !data ? (
         <p className="mt-6 text-sm text-muted-foreground">
-          This menu no longer exists. <Link to="/menus" className="underline">Back to menus</Link>
+          This menu no longer exists. <Link to="/awa/menus" className="underline">Back to menus</Link>
         </p>
       ) : (
         <MenuBody menuId={menuId} menu={data.menu} items={data.items} />
@@ -106,7 +106,7 @@ function MenuBody({
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["menu"] });
     qc.invalidateQueries({ queryKey: ["menus"] });
-    qc.invalidateQueries({ queryKey: ["activity-sources"] });
+    qc.invalidateQueries({ queryKey: ["menu-hobbies"] });
   };
 
   const isDone = (i: Item) => doneLocal[i.id] ?? i.last_done_on === today;
@@ -115,11 +115,7 @@ function MenuBody({
     mutationFn: (v: { id: string; done: boolean }) => setMenuActivityDone({ data: { ...v, today } }),
     onMutate: (v) => setDoneLocal((s) => ({ ...s, [v.id]: v.done })),
     onError: (_e, v) => setDoneLocal((s) => ({ ...s, [v.id]: !v.done })),
-    onSuccess: () => {
-      invalidate();
-      qc.invalidateQueries({ queryKey: ["goals"] });
-      qc.invalidateQueries({ queryKey: ["goal"] });
-    },
+    onSuccess: () => invalidate(),
   });
 
   const markDone = (i: Item, done: boolean) => {
@@ -231,7 +227,7 @@ function MenuBody({
               onClick={() => setShowAll(!showAll)}
               className="text-xs font-semibold text-muted-foreground underline underline-offset-4"
             >
-              {showAll ? "Use my filters" : `View all activities (${items.length})`}
+              {showAll ? "Use my filters" : `View all hobbies (${items.length})`}
             </button>
           )}
         </div>
@@ -285,27 +281,27 @@ function MenuBody({
 
       <div className="mt-5 flex items-center justify-between">
         <p className="font-heading text-sm uppercase tracking-wide text-olive">
-          {filtering ? `Fits right now (${matches.length})` : `Activities (${items.length})`}
+          {filtering ? `Fits right now (${matches.length})` : `Hobbies (${items.length})`}
         </p>
         <button
           type="button"
           onClick={() => setAdding(true)}
           className="flex items-center gap-1 text-sm font-semibold text-primary"
         >
-          <Plus className="size-4" /> Add activity
+          <Plus className="size-4" /> Add hobby
         </button>
       </div>
 
       {items.length === 0 ? (
         <div className="mt-3 rounded-2xl bg-card p-6 text-center text-sm text-muted-foreground ring-1 ring-border">
-          No activities yet. Add your own, or pull in a goal step or hobby you already have.
+          No hobbies yet. Pull one in from your shelf.
         </div>
       ) : matches.length === 0 ? (
         <div className="mt-3 rounded-2xl bg-card p-6 text-center text-sm text-muted-foreground ring-1 ring-border">
           Nothing in this menu fits that time and energy.
           <div className="mt-3 flex justify-center gap-2">
             <Chip active={false} onClick={() => { setTime(null); setEnergy(null); }}>Clear filters</Chip>
-            <Chip active={false} onClick={() => setShowAll(true)}>View all activities</Chip>
+            <Chip active={false} onClick={() => setShowAll(true)}>View all hobbies</Chip>
           </div>
         </div>
       ) : (
@@ -357,11 +353,11 @@ function MenuBody({
           onClick={() => setShowAll(true)}
           className="mt-3 text-xs text-muted-foreground underline underline-offset-4"
         >
-          {hiddenMissing} activit{hiddenMissing === 1 ? "y has" : "ies have"} no time or energy set — view all
+          {hiddenMissing} hobb{hiddenMissing === 1 ? "y has" : "ies have"} no time or energy set — view all
         </button>
       )}
 
-      {adding && <AddActivityModal menuId={menuId} existingIds={items.map((i) => i.id)} onDone={invalidate} onClose={() => setAdding(false)} />}
+      {adding && <AddActivityModal menuId={menuId} addedHobbyIds={items.map((i) => i.hobby?.id ?? "").filter(Boolean)} onDone={invalidate} onClose={() => setAdding(false)} />}
       {editing && (
         <EditActivityModal
           item={editing}
@@ -400,11 +396,6 @@ function Meta({ i }: { i: Item }) {
       )}
       <EnergyDots energy={(i.energy as Energy | null) ?? null} />
       <span>{KIND_LABEL[(i.kind as Kind) ?? "other"] ?? "Other"}</span>
-      {i.step && (
-        <span className="inline-flex items-center gap-1 text-olive">
-          <Target className="size-3" /> Goal step
-        </span>
-      )}
       {i.hobby && (
         <span className="inline-flex items-center gap-1 text-olive">
           <Armchair className="size-3" /> Hobby
@@ -414,15 +405,8 @@ function Meta({ i }: { i: Item }) {
   );
 }
 
-type AddInput = {
-  menuId: string;
-  activityId?: string;
-  stepId?: string;
-  hobbyId?: string;
-  fields?: { name: string; durationMinutes: number | null; energy: Energy | null; kind: Kind; notes: string | null };
-};
+type AddInput = { menuId: string; hobbyId: string };
 
-const emptyDraft: ActivityDraft = { name: "", durationMinutes: null, energy: null, kind: "other", notes: "" };
 
 function AddActivityModal({
   menuId,
@@ -575,7 +559,7 @@ function EditActivityModal({
       onClose();
     },
   });
-  const linked = item.step || item.hobby;
+  const linked = item.hobby;
   return (
     <ModalShell title="Edit activity" onClose={onClose}>
       <form
@@ -588,7 +572,7 @@ function EditActivityModal({
         <ActivityFields d={d} setD={setD} />
         <p className="mt-3 text-xs text-muted-foreground">
           Changes show in every menu this activity is in.
-          {linked && " Your original goal step or hobby isn't changed."}
+          {linked && " Your hobby itself isn't changed."}
         </p>
         {save.error && <p className="mt-2 text-sm text-destructive">Couldn't save. Please try again.</p>}
         <button
