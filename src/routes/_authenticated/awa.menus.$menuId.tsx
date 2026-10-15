@@ -410,22 +410,19 @@ type AddInput = { menuId: string; hobbyId: string };
 
 function AddActivityModal({
   menuId,
-  existingIds,
+  addedHobbyIds,
   onDone,
   onClose,
 }: {
   menuId: string;
-  existingIds: string[];
+  addedHobbyIds: string[];
   onDone: () => void;
   onClose: () => void;
 }) {
-  const [tab, setTab] = useState<"new" | "existing">("new");
-  const [d, setD] = useState<ActivityDraft>(emptyDraft);
   const [q, setQ] = useState("");
-  const sources = useQuery({
-    queryKey: ["activity-sources"],
-    queryFn: () => listActivitySources(),
-    enabled: tab === "existing",
+  const { data: hobbies, isPending } = useQuery({
+    queryKey: ["menu-hobbies"],
+    queryFn: () => listMenuHobbies(),
   });
   const add = useMutation({
     mutationFn: (v: AddInput) => addMenuActivity({ data: v }),
@@ -433,61 +430,35 @@ function AddActivityModal({
   });
 
   const ql = q.trim().toLowerCase();
-  const m = (s: string) => !ql || s.toLowerCase().includes(ql);
-  const linkedStep = new Set((sources.data?.activities ?? []).filter((a) => existingIds.includes(a.id)).map((a) => a.step_id ?? a.hobby_id));
+  const rows = (hobbies ?? [])
+    .filter((h) => !ql || h.name.toLowerCase().includes(ql))
+    .map((h) => ({
+      key: h.id,
+      label: h.name,
+      added: addedHobbyIds.includes(h.id),
+      onAdd: () => add.mutate({ menuId, hobbyId: h.id }),
+    }));
 
   return (
-    <ModalShell title="Add activity" onClose={onClose}>
-      <div className="mt-3 flex gap-2">
-        <Chip active={tab === "new"} onClick={() => setTab("new")}>New activity</Chip>
-        <Chip active={tab === "existing"} onClick={() => setTab("existing")}>From my app</Chip>
-      </div>
+    <ModalShell title="Add a hobby" onClose={onClose}>
       {add.error && <p className="mt-2 text-sm text-destructive">Couldn't add that. Please try again.</p>}
-      {tab === "new" ? (
-        <form
-          className="mt-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (!d.name.trim()) return;
-            add.mutate(
-              { menuId, fields: { ...d, notes: d.notes || null } },
-              { onSuccess: () => setD(emptyDraft) },
-            );
-          }}
-        >
-          <ActivityFields d={d} setD={setD} />
-          <button
-            type="submit"
-            disabled={add.isPending || !d.name.trim()}
-            className="mt-4 w-full rounded-2xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
-          >
-            {add.isPending ? "Adding…" : "Add to menu"}
-          </button>
-          <p className="mt-2 text-center text-xs text-muted-foreground">The form stays open so you can add several.</p>
-        </form>
-      ) : sources.isPending ? (
+      {isPending ? (
         <Loading />
+      ) : rows.length === 0 ? (
+        <p className="mt-4 text-sm text-muted-foreground">
+          {ql
+            ? "No hobbies match that search."
+            : "You haven't added any hobbies yet — add one on your shelf first."}
+        </p>
       ) : (
-        <div className="mt-4 space-y-4">
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search" className={inputClass} />
-          <SourceGroup
-            title="My menu activities"
-            rows={(sources.data?.activities ?? [])
-              .filter((a) => !a.step_id && !a.hobby_id && m(a.name))
-              .map((a) => ({ key: a.id, label: a.name, added: existingIds.includes(a.id), onAdd: () => add.mutate({ menuId, activityId: a.id }) }))}
+        <div className="mt-4 space-y-3">
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search your hobbies"
+            className={inputClass}
           />
-          <SourceGroup
-            title="Hobbies"
-            rows={(sources.data?.hobbies ?? [])
-              .filter((h) => m(h.name))
-              .map((h) => ({ key: h.id, label: h.name, added: linkedStep.has(h.id), onAdd: () => add.mutate({ menuId, hobbyId: h.id }) }))}
-          />
-          <SourceGroup
-            title="Goal steps"
-            rows={(sources.data?.steps ?? [])
-              .filter((s) => m(s.title) || m(s.goal?.title ?? ""))
-              .map((s) => ({ key: s.id, label: s.title, sub: s.goal?.title, added: linkedStep.has(s.id), onAdd: () => add.mutate({ menuId, stepId: s.id }) }))}
-          />
+          <SourceGroup title="From your shelf" rows={rows} />
         </div>
       )}
     </ModalShell>
