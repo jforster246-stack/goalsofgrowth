@@ -414,6 +414,14 @@ function Meta({ i }: { i: Item }) {
   );
 }
 
+type AddInput = {
+  menuId: string;
+  activityId?: string;
+  stepId?: string;
+  hobbyId?: string;
+  fields?: { name: string; durationMinutes: number | null; energy: Energy | null; kind: Kind; notes: string | null };
+};
+
 const emptyDraft: ActivityDraft = { name: "", durationMinutes: null, energy: null, kind: "other", notes: "" };
 
 function AddActivityModal({
@@ -436,7 +444,7 @@ function AddActivityModal({
     enabled: tab === "existing",
   });
   const add = useMutation({
-    mutationFn: (v: Parameters<typeof addMenuActivity>[0]["data"]) => addMenuActivity({ data: v }),
+    mutationFn: (v: AddInput) => addMenuActivity({ data: v }),
     onSuccess: () => onDone(),
   });
 

@@ -75,7 +75,7 @@ export function MenuFormModal({
   onSave,
   onClose,
 }: {
-  initial?: Partial<MenuDraft>;
+  initial?: Partial<MenuDraft> | undefined;
   title: string;
   saving: boolean;
   onSave: (d: MenuDraft) => void;
