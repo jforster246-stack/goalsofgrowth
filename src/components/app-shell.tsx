@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useRef, useState, type ReactNode 
 import {
   Armchair,
   Brain,
+  BookOpen,
   Check,
   Ellipsis,
   Frame,
@@ -50,7 +51,7 @@ export function AppShell({
   right?: ReactNode;
   /** A short line under the page title (e.g. the habits tally). */
   subtitle?: ReactNode;
-  backTo?: "/overview" | "/goals" | "/routines" | "/awa";
+  backTo?: "/overview" | "/goals" | "/routines" | "/awa" | "/menus";
   title?: string;
   titleLeft?: boolean;
   hideSettings?: boolean;
@@ -286,6 +287,7 @@ function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
 
         <SideSection title="Now & then">
           <SideLink to="/routines" icon={ListChecks} label="Routines" />
+          <SideLink to="/menus" icon={BookOpen} label="Menus" />
           <SideLink to="/braindump" icon={Brain} label="Brain dump" />
           <SideLink to="/finance" icon={Wallet} label="Finance planner" />
           <SideLink to="/awa" icon={Armchair} label="A While Away" />
@@ -348,6 +350,7 @@ const BOTTOM_PRIMARY: NavItem[] = [
 ];
 const BOTTOM_MORE: NavItem[] = [
   { to: "/routines", icon: ListChecks, label: "Routines" },
+  { to: "/menus", icon: BookOpen, label: "Menus" },
   { to: "/braindump", icon: Brain, label: "Brain dump" },
   { to: "/finance", icon: Wallet, label: "Finance planner" },
   { to: "/awa", icon: Armchair, label: "A While Away" },
