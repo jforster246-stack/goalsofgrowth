@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { Reorder, useDragControls } from "framer-motion";
-import { CalendarDays, ChevronLeft, ChevronRight, GripVertical, List, Plus, X } from "lucide-react";
+import { BookOpen, CalendarDays, ChevronLeft, ChevronRight, GripVertical, List, Plus, X } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { Loading } from "@/components/loading";
 import { localToday } from "@/components/goal-ui";
@@ -122,6 +122,13 @@ function AwaPage() {
             Log a little time
           </button>
         )}
+        <Link
+          to="/awa/menus"
+          className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-2xl bg-white py-3.5 font-heading text-sm uppercase text-olive shadow-sm ring-1 ring-olive/25 transition-colors hover:bg-olive/5"
+        >
+          <BookOpen className="size-4" strokeWidth={2.5} />
+          Menus
+        </Link>
 
         <div className="mt-6">
           {tab === "shelf" && (
