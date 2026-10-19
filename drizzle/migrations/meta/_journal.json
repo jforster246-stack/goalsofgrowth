@@ -351,6 +351,13 @@
       "when": 1792101090356,
       "tag": "0049_create_menus",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1792376661637,
+      "tag": "0050_one_stamp_per_completed_goal",
+      "breakpoints": true
     }
   ]
 }
