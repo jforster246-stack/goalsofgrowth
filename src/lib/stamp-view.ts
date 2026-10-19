@@ -1,4 +1,5 @@
 import { goalProgress } from "@/components/goal-ui";
+import { uniqueGoalStamps } from "@/lib/stamp-ledger";
 
 type StampRow = {
   id: string;
@@ -36,7 +37,7 @@ export function mergeStamps(
   stamps: StampRow[] | undefined,
   goals: GoalLike[] | undefined,
 ): StampView[] {
-  const list = stamps ?? [];
+  const list = uniqueGoalStamps(stamps ?? []);
   const seen = new Set(
     list.map((s) => s.goal_id).filter((x): x is string => !!x),
   );

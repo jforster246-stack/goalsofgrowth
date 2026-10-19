@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Remove duplicate completed-goal stamp and prevent repeat awards; verify gallery
+
 - [x] Add swipeable goal card deck
 - [x] Connect direct Focus and instant completion
 - [x] Make deck the default with grid toggle

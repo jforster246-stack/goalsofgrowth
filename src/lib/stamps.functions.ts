@@ -49,13 +49,13 @@ export const createStamp = createServerFn({ method: "POST" })
       .parse(data),
   )
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("stamps").insert({
+    const { error } = await context.supabase.from("stamps").upsert({
       user_id: context.userId,
       goal_id: data.goalId ?? null,
       title: data.title,
       icon: data.icon || null,
       accent: data.accent || "mint",
-    });
+    }, { onConflict: "user_id,goal_id", ignoreDuplicates: true });
     if (error) throw new Error(error.message);
     return { ok: true };
   });
