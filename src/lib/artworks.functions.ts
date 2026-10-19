@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { ARTWORK_COST, ARTWORKS } from "@/lib/artworks-data";
 import { habitStampBonusFromRows } from "@/lib/habits.functions";
+import { uniqueGoalStamps } from "@/lib/stamp-ledger";
 
 const artworkIdSchema = z
   .number()
@@ -34,7 +35,7 @@ async function earnedStamps(supabase: any): Promise<number> {
   if (habitDefRes.error) throw new Error(habitDefRes.error.message);
   if (profileRes.error) throw new Error(profileRes.error.message);
 
-  const ledger = (stampsRes.data ?? []) as { goal_id: string | null }[];
+  const ledger = uniqueGoalStamps((stampsRes.data ?? []) as { goal_id: string | null }[]);
   const seen = new Set(ledger.map((s) => s.goal_id).filter(Boolean));
 
   const agg = new Map<string, { total: number; done: number }>();
