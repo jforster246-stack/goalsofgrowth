@@ -380,3 +380,94 @@ function ArchivedGoalRow({ goal }: { goal: Goal }) {
     </div>
   );
 }
+
+/* ------------------------------------------------------------------ */
+/* Next-steps to-do list — every goal's next step, above the cards     */
+/* ------------------------------------------------------------------ */
+
+/** One tickable row per goal that still has a next step, shown as a to-do list. */
+function NextStepTodoList({ goals }: { goals: Goal[] }) {
+  const rows = goals.filter((g) => goalProgress(g).nextStep);
+  if (rows.length === 0) return null;
+
+  return (
+    <section aria-label="Next steps to do">
+      <h2 className="mb-2 font-heading text-xs uppercase tracking-wide text-black/40">
+        Next steps
+      </h2>
+      <div className="space-y-2">
+        {rows.map((goal) => (
+          <NextStepTodoRow key={goal.id} goal={goal} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function NextStepTodoRow({ goal }: { goal: Goal }) {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { openFocus, celebrate } = useAppShell();
+  const focusEnabled = useFocusTimerEnabled();
+  const [promptGoal, setPromptGoal] = useState<CompletedGoal | null>(null);
+
+  const next = goalProgress(goal).nextStep;
+  const accent = accentOf(goal);
+
+  const toggleMutation = useMutation({
+    mutationFn: (stepId: string) =>
+      toggleStep({ data: { id: stepId, done: true, today: localToday() } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["goals"] });
+      queryClient.invalidateQueries({ queryKey: ["goal"] });
+    },
+  });
+
+  const complete = () => {
+    if (!next) return;
+    celebrate();
+    // This tick finishes the goal when every other step is already done.
+    if (goal.steps.every((s) => s.done || s.id === next.id)) {
+      setPromptGoal({ id: goal.id, title: goal.title, icon: goal.icon, accent: goal.accent });
+    }
+    toggleMutation.mutate(next.id);
+  };
+
+  return (
+    <div className="flex items-center gap-3 rounded-2xl bg-white px-3 py-3 shadow-sm">
+      <button
+        type="button"
+        onClick={complete}
+        aria-label={`Mark "${next?.title}" done`}
+        className="grid size-7 shrink-0 place-items-center rounded-lg transition-colors hover:bg-black/5"
+      >
+        <svg viewBox="0 0 24 24" className={cn("size-5", accent.text)} aria-hidden>
+          <path d={DIAMOND_PATH} />
+        </svg>
+      </button>
+      <button
+        type="button"
+        onClick={() => navigate({ to: "/goals/$goalId", params: { goalId: goal.id } })}
+        className="min-w-0 flex-1 text-left"
+      >
+        <span className="line-clamp-2 block font-serif text-sm leading-snug text-black">
+          {next?.title}
+        </span>
+        <span className={cn("truncate font-serif text-[10px] italic", accent.text)}>
+          {goal.title}
+        </span>
+      </button>
+      {focusEnabled && (
+        <button
+          type="button"
+          onClick={() => next && openFocus(next.id)}
+          aria-label="Focus on this step"
+          className="grid size-9 shrink-0 place-items-center rounded-xl bg-black/5 text-black/55 transition-colors hover:bg-black/10 hover:text-black"
+        >
+          <Timer className="size-4" strokeWidth={1.75} />
+        </button>
+      )}
+      <GoalCompletePrompt goal={promptGoal} onClose={() => setPromptGoal(null)} />
+    </div>
+  );
+}
