@@ -156,6 +156,7 @@ function GoalsListPage() {
               ))}
             </div>
           </div>
+          <NextStepTodoList goals={order} />
           <Reorder.Group
             as="div"
             values={order}
