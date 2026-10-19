@@ -2,11 +2,18 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Reorder, useDragControls } from "framer-motion";
-import { GripVertical, LayoutGrid, List, Plus } from "lucide-react";
+import { GripVertical, LayoutGrid, List, Plus, Timer } from "lucide-react";
 import { AppShell, useAppShell } from "@/components/app-shell";
 import { GoalCard, GoalCardCompact } from "@/components/home-cards";
 import { GoalCompletePrompt, type CompletedGoal } from "@/components/goal-complete-prompt";
-import { goalProgress, localToday, type GoalWithSteps } from "@/components/goal-ui";
+import {
+  DIAMOND_PATH,
+  accentOf,
+  goalProgress,
+  localToday,
+  type GoalWithSteps,
+} from "@/components/goal-ui";
+import { useFocusTimerEnabled } from "@/lib/focus-timer";
 import { StampPill } from "@/components/stamp-pill";
 import { GoalTally } from "@/components/goal-tally";
 import { goalsQueryOptions } from "@/lib/goal-queries";
