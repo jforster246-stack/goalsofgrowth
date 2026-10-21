@@ -284,18 +284,8 @@ function GoalCardItem({
   // "Add to wins log" both records the win and files the goal away under
   // "Completed goals" at the bottom of the list.
   const winMutation = useMutation({
-    mutationFn: async () => {
-      await createWin({ data: { title: goal.title, kind: "achievement" } });
-      await createStamp({
-        data: {
-          goalId: goal.id,
-          title: goal.title,
-          ...(goal.icon ? { icon: goal.icon } : {}),
-          accent: goal.accent,
-        },
-      });
-      await setGoalArchived({ data: { id: goal.id, archived: true } });
-    },
+    mutationFn: () =>
+      completeGoal({ id: goal.id, title: goal.title, icon: goal.icon, accent: goal.accent }),
     onMutate: () => optimisticArchive(true),
     onError: (_e, _v, ctx) => rollback(ctx),
     onSettled: () => {
