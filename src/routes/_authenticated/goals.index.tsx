@@ -23,8 +23,6 @@ import {
   setGoalArchived,
   toggleStep,
 } from "@/lib/goals.functions";
-import { createWin } from "@/lib/wins.functions";
-import { createStamp } from "@/lib/stamps.functions";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
