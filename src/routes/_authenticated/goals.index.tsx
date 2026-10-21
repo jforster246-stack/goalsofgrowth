@@ -5,7 +5,7 @@ import { Reorder, useDragControls } from "framer-motion";
 import { GripVertical, LayoutGrid, List, Plus, Timer } from "lucide-react";
 import { AppShell, useAppShell } from "@/components/app-shell";
 import { GoalCard, GoalCardCompact } from "@/components/home-cards";
-import { GoalCompletePrompt, type CompletedGoal } from "@/components/goal-complete-prompt";
+import { GoalCompletePrompt, completeGoal, type CompletedGoal } from "@/components/goal-complete-prompt";
 import {
   DIAMOND_PATH,
   accentOf,
