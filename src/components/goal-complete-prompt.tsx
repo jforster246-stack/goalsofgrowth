@@ -1,7 +1,24 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { createWin } from "@/lib/wins.functions";
 import { createStamp } from "@/lib/stamps.functions";
+import { setGoalArchived } from "@/lib/goals.functions";
+
+/**
+ * Records a finished goal: one stamp under "Completed goals" (no separate
+ * achievement win, which would show the same goal twice), and files the goal
+ * away so it leaves the active goals list.
+ */
+export async function completeGoal(g: CompletedGoal) {
+  await createStamp({
+    data: {
+      goalId: g.id,
+      title: g.title,
+      ...(g.icon ? { icon: g.icon } : {}),
+      ...(g.accent ? { accent: g.accent } : {}),
+    },
+  });
+  await setGoalArchived({ data: { id: g.id, archived: true } });
+}
 
 export type CompletedGoal = {
   id: string;
@@ -30,18 +47,7 @@ export function GoalCompletePrompt({
   const navigate = useNavigate();
 
   const winMutation = useMutation({
-    mutationFn: async (g: CompletedGoal) => {
-      await createWin({ data: { title: g.title, kind: "achievement" } });
-      // Earn a stamp for the gallery, stamped with the goal's own icon.
-      await createStamp({
-        data: {
-          goalId: g.id,
-          title: g.title,
-          ...(g.icon ? { icon: g.icon } : {}),
-          ...(g.accent ? { accent: g.accent } : {}),
-        },
-      });
-    },
+    mutationFn: (g: CompletedGoal) => completeGoal(g),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["wins"] });
       queryClient.invalidateQueries({ queryKey: ["stamps"] });

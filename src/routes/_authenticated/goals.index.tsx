@@ -5,7 +5,7 @@ import { Reorder, useDragControls } from "framer-motion";
 import { GripVertical, LayoutGrid, List, Plus, Timer } from "lucide-react";
 import { AppShell, useAppShell } from "@/components/app-shell";
 import { GoalCard, GoalCardCompact } from "@/components/home-cards";
-import { GoalCompletePrompt, type CompletedGoal } from "@/components/goal-complete-prompt";
+import { GoalCompletePrompt, completeGoal, type CompletedGoal } from "@/components/goal-complete-prompt";
 import {
   DIAMOND_PATH,
   accentOf,
@@ -23,8 +23,6 @@ import {
   setGoalArchived,
   toggleStep,
 } from "@/lib/goals.functions";
-import { createWin } from "@/lib/wins.functions";
-import { createStamp } from "@/lib/stamps.functions";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -284,18 +282,8 @@ function GoalCardItem({
   // "Add to wins log" both records the win and files the goal away under
   // "Completed goals" at the bottom of the list.
   const winMutation = useMutation({
-    mutationFn: async () => {
-      await createWin({ data: { title: goal.title, kind: "achievement" } });
-      await createStamp({
-        data: {
-          goalId: goal.id,
-          title: goal.title,
-          ...(goal.icon ? { icon: goal.icon } : {}),
-          accent: goal.accent,
-        },
-      });
-      await setGoalArchived({ data: { id: goal.id, archived: true } });
-    },
+    mutationFn: () =>
+      completeGoal({ id: goal.id, title: goal.title, icon: goal.icon, accent: goal.accent }),
     onMutate: () => optimisticArchive(true),
     onError: (_e, _v, ctx) => rollback(ctx),
     onSettled: () => {
