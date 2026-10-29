@@ -1,6 +1,7 @@
 /** Colour themes the user can switch between under settings. */
 
 export type ThemeId =
+  | "moonlight"
   | "natural"
   | "ice-cream"
   | "dark-magic"
@@ -14,6 +15,12 @@ export const THEMES: {
   /** Representative swatches shown in the picker (surface, two accents, bg). */
   swatches: string[];
 }[] = [
+  {
+    id: "moonlight",
+    label: "Moonlight",
+    blurb: "Soft celestial gradients on white",
+    swatches: ["#ffd9e8", "#e3d6ff", "#cfeede", "#6f7c4e", "#a24b57", "#6a4b7a"],
+  },
   {
     id: "natural",
     label: "Natural",
@@ -47,7 +54,7 @@ export const THEMES: {
 ];
 
 const KEY = "gog-theme";
-const DEFAULT: ThemeId = "natural";
+const DEFAULT: ThemeId = "moonlight";
 
 export function getTheme(): ThemeId {
   try {

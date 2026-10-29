@@ -66,6 +66,10 @@
 :root {
   --radius: 0.625rem;
   --background: #fbfbfe; /* fresh near-white — the refreshed canvas */
+  /* Gradient palette (the celestial surfaces); themes override these. */
+  --mg-1: #ffe4ef;
+  --mg-2: #e9e4ff;
+  --mg-3: #e0f3ec;
   --foreground: oklch(0.24 0.01 264);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.24 0.01 264);
@@ -141,8 +145,33 @@
  * page background; all cards stay light so every screen stays legible.
  * "natural" matches the @theme defaults and is here for completeness.
  * ============================================================= */
-:root[data-theme="natural"] {
+/* Moonlight — the main look: soft celestial gradients on near-white. */
+:root[data-theme="moonlight"] {
   --background: #fbfbfe;
+  --mg-1: #ffe4ef;
+  --mg-2: #e9e4ff;
+  --mg-3: #e0f3ec;
+  --color-olive: #3b4a30;
+  --color-sage: #6f7c4e;
+  --color-gold: #d19a4a;
+  --color-gold-deep: #9c5a28;
+  --color-clay: #a24b57;
+  --color-clay-deep: #6e1d3c;
+  --color-plum: #6a4b7a;
+  --color-plum-deep: #46315a;
+  --color-rose: #b56b5e;
+  --color-rose-deep: #86463b;
+  --color-sky: #5f8a7d;
+  --color-sky-deep: #3d5f55;
+  --color-focus: #3b4a30;
+  --color-star: #d9c39c;
+}
+
+:root[data-theme="natural"] {
+  --background: #f4eee1;
+  --mg-1: #ffe9d6;
+  --mg-2: #eef0d4;
+  --mg-3: #f6e6cc;
   --color-olive: #3b4a30;
   --color-sage: #6f7c4e;
   --color-gold: #d19a4a;
@@ -162,6 +191,9 @@
 /* Ice cream — soft strawberry, mint and toffee on oat-milk cream. */
 :root[data-theme="ice-cream"] {
   --background: #fff7ec;
+  --mg-1: #ffe0e8;
+  --mg-2: #dff3e7;
+  --mg-3: #f7e7d2;
   --color-olive: #6e4326;
   --color-sage: #6aa07c;
   --color-gold: #cf9a5a;
@@ -181,6 +213,9 @@
 /* Dark magic — deep forest, plum and crimson (Forest Reverie). */
 :root[data-theme="dark-magic"] {
   --background: #dde1d6;
+  --mg-1: #dfe9db;
+  --mg-2: #e6dcec;
+  --mg-3: #f0dadf;
   --color-olive: #24361f;
   --color-sage: #4e6b4a;
   --color-gold: #6e4a59;
@@ -200,6 +235,9 @@
 /* Wild berries — amethyst, faded copper and wine plum on soft lavender. */
 :root[data-theme="wild-berries"] {
   --background: #ece4ed;
+  --mg-1: #ece4f6;
+  --mg-2: #f2e6d8;
+  --mg-3: #f4dae4;
   --color-olive: #241d37;
   --color-sage: #8c80b5;
   --color-gold: #95805f;
@@ -219,6 +257,9 @@
 /* Black & white — a simple monochrome palette of greys. */
 :root[data-theme="mono"] {
   --background: #f4f4f3;
+  --mg-1: #ededed;
+  --mg-2: #e4e4e4;
+  --mg-3: #f2f2f2;
   --color-olive: #1c1c1c;
   --color-sage: #4b4b4b;
   --color-gold: #6f6f6f;
@@ -391,19 +432,24 @@
 /* ------------------------------------------------------------------ */
 .mg-aura {
   background:
-    radial-gradient(48% 40% at 12% 6%, rgba(255, 201, 224, 0.20), transparent 70%),
-    radial-gradient(46% 40% at 88% 10%, rgba(206, 224, 255, 0.20), transparent 70%),
-    radial-gradient(58% 50% at 74% 96%, rgba(210, 240, 224, 0.18), transparent 70%);
+    radial-gradient(48% 40% at 12% 6%, color-mix(in srgb, var(--mg-1) 30%, transparent), transparent 70%),
+    radial-gradient(46% 40% at 88% 10%, color-mix(in srgb, var(--mg-2) 30%, transparent), transparent 70%),
+    radial-gradient(58% 50% at 74% 96%, color-mix(in srgb, var(--mg-3) 26%, transparent), transparent 70%);
 }
 .mg-hero {
-  background: linear-gradient(140deg, #ffe7f1 0%, #efe6ff 46%, #e2f3ea 100%);
+  background: linear-gradient(140deg, var(--mg-1) 0%, var(--mg-2) 46%, var(--mg-3) 100%);
 }
 .mg-chip {
-  background: linear-gradient(140deg, #f5ecff, #ffe9f2 60%, #e6f4ec);
+  background: linear-gradient(140deg, var(--mg-1), var(--mg-2) 60%, var(--mg-3));
 }
 .mg-cta {
-  background: linear-gradient(90deg, #ffd9e8, #e3d6ff 55%, #cfeede);
+  background: linear-gradient(90deg, var(--mg-1), var(--mg-2) 55%, var(--mg-3));
 }
 .mg-panel {
-  background: linear-gradient(165deg, #fbf3f8 0%, #f3f0fb 50%, #edf6f1 100%);
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--mg-1) 55%, white) 0%,
+    color-mix(in srgb, var(--mg-2) 50%, white) 50%,
+    color-mix(in srgb, var(--mg-3) 55%, white) 100%
+  );
 }
