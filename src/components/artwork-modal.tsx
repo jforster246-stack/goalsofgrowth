@@ -1,5 +1,7 @@
 import { X } from "lucide-react";
-import { CelestialBody } from "@/components/celestial-body";
+import { ConstellationArt, TarotCard } from "@/components/collectible-art";
+import { constellationById } from "@/components/constellations-data";
+import { tarotById } from "@/components/tarot-data";
 import { artworkTint, TIER_LABEL, type Artwork } from "@/lib/artworks-data";
 
 /**
@@ -8,12 +10,19 @@ import { artworkTint, TIER_LABEL, type Artwork } from "@/lib/artworks-data";
  * works still under copyright, whose images we don't reproduce.
  */
 export function ArtworkPlacard({ artwork }: { artwork: Artwork }) {
+  const tarot = artwork.kind === "tarot" ? tarotById(artwork.ref) : undefined;
+  const con =
+    artwork.kind === "constellation" ? constellationById(artwork.ref) : undefined;
   return (
     <div
       className="flex size-full items-center justify-center p-3 text-olive"
       style={{ background: artworkTint(artwork.id) }}
     >
-      <CelestialBody shape={artwork.shape} className="h-4/5 w-4/5" />
+      {tarot ? (
+        <TarotCard card={tarot} />
+      ) : con ? (
+        <ConstellationArt c={con} className="h-4/5 w-4/5" />
+      ) : null}
     </div>
   );
 }

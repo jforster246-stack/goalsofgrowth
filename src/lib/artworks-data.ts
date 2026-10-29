@@ -1,13 +1,14 @@
-import type { CelestialShape } from "@/components/celestial-body";
+import { CONSTELLATION_DATA } from "@/components/constellations-data";
+import { TAROT, ICONIC_TAROT } from "@/components/tarot-data";
 
 /**
- * Moongrove collectibles — the celestial bodies you buy with stardust and place
- * in your universe (stars, moons, planets, suns, comets, galaxies, constellations).
+ * Moongrove collectibles — what you buy with stardust and place in your universe:
+ * constellation star-maps and original tarot cards.
  *
- * This file used to hold famous paintings; it now holds celestial collectibles.
  * The export names (Artwork, ARTWORKS, artworkById, dailyArtworkIds, …) are kept
- * so the gallery/showcase code and its database tables — which key off the
- * numeric `id` — keep working unchanged.
+ * so the gallery/showcase code and its database tables — which key off the numeric
+ * `id` — keep working unchanged. `kind` + `ref` say what each collectible is and
+ * which constellation/tarot it points to.
  */
 export type Tier = "common" | "uncommon" | "rare" | "legendary";
 
@@ -17,13 +18,13 @@ export type Artwork = {
   tier: Tier;
   /** Price in stardust. */
   cost: number;
-  shape: CelestialShape;
-  /** 0–360, the body's colour. */
-  hue: number;
+  kind: "constellation" | "tarot";
+  /** Constellation id or tarot id. */
+  ref: string;
 };
 
 /** The cheapest collectible's price — a sensible default where a flat cost is needed. */
-export const ARTWORK_COST = 8;
+export const ARTWORK_COST = 10;
 
 export const TIER_LABEL: Record<Tier, string> = {
   common: "Common",
@@ -32,38 +33,37 @@ export const TIER_LABEL: Record<Tier, string> = {
   legendary: "Legendary",
 };
 
+/** Non-zodiac constellations priced a notch higher as "rare" finds. */
+const RARE_CONSTELLATIONS = new Set(["ori", "uma", "cas", "cyg", "cru", "peg"]);
+
+const CONSTELLATION_ARTWORKS: Artwork[] = CONSTELLATION_DATA.map((c, i) => {
+  const zodiac = i < 12;
+  const rare = RARE_CONSTELLATIONS.has(c.id);
+  return {
+    id: i + 1,
+    name: c.name,
+    tier: zodiac ? "common" : rare ? "rare" : "uncommon",
+    cost: zodiac ? 10 + (i % 4) * 2 : rare ? 36 + (i % 3) * 4 : 20 + (i % 5) * 3,
+    kind: "constellation",
+    ref: c.id,
+  };
+});
+
+const TAROT_ARTWORKS: Artwork[] = TAROT.map((t, i) => {
+  const iconic = ICONIC_TAROT.has(t.id);
+  return {
+    id: CONSTELLATION_ARTWORKS.length + 1 + i,
+    name: t.name,
+    tier: iconic ? "legendary" : "rare",
+    cost: iconic ? 100 : 55 + (i % 4) * 6,
+    kind: "tarot",
+    ref: t.id,
+  };
+});
+
 export const ARTWORKS: Artwork[] = [
-  // Common — the everyday sky
-  { id: 1, name: "Twinkle", tier: "common", cost: 8, shape: "star4", hue: 48 },
-  { id: 2, name: "Wishing Star", tier: "common", cost: 10, shape: "star5", hue: 45 },
-  { id: 3, name: "Crescent", tier: "common", cost: 10, shape: "crescent", hue: 210 },
-  { id: 4, name: "Half Moon", tier: "common", cost: 12, shape: "halfmoon", hue: 220 },
-  { id: 5, name: "Dwarf Star", tier: "common", cost: 12, shape: "starburst", hue: 32 },
-
-  // Uncommon — worlds of your own
-  { id: 6, name: "Full Moon", tier: "uncommon", cost: 16, shape: "fullmoon", hue: 48 },
-  { id: 7, name: "Little World", tier: "uncommon", cost: 18, shape: "planet", hue: 160 },
-  { id: 8, name: "Red Planet", tier: "uncommon", cost: 20, shape: "planet", hue: 10 },
-  { id: 9, name: "Blue Marble", tier: "uncommon", cost: 22, shape: "planet", hue: 205 },
-  { id: 10, name: "Amber Star", tier: "uncommon", cost: 24, shape: "star5", hue: 28 },
-
-  // Rare — the harder-won sights
-  { id: 11, name: "Ringed World", tier: "rare", cost: 35, shape: "ringed", hue: 42 },
-  { id: 12, name: "Gas Giant", tier: "rare", cost: 40, shape: "gasgiant", hue: 26 },
-  { id: 13, name: "Ice World", tier: "rare", cost: 38, shape: "iceworld", hue: 195 },
-  { id: 14, name: "The Sun", tier: "rare", cost: 45, shape: "sun", hue: 45 },
-  { id: 15, name: "Comet", tier: "rare", cost: 35, shape: "comet", hue: 190 },
-  { id: 16, name: "Blood Moon", tier: "rare", cost: 42, shape: "fullmoon", hue: 6 },
-  { id: 17, name: "Blue Moon", tier: "rare", cost: 48, shape: "fullmoon", hue: 222 },
-
-  // Legendary — once-in-a-lifetime
-  { id: 18, name: "Orion", tier: "legendary", cost: 70, shape: "orion", hue: 220 },
-  { id: 19, name: "The Swan", tier: "legendary", cost: 75, shape: "swan", hue: 260 },
-  { id: 20, name: "The Great Bear", tier: "legendary", cost: 80, shape: "bear", hue: 200 },
-  { id: 21, name: "Spiral Galaxy", tier: "legendary", cost: 100, shape: "galaxy", hue: 285 },
-  { id: 22, name: "Nebula", tier: "legendary", cost: 90, shape: "nebula", hue: 300 },
-  { id: 23, name: "Solar Eclipse", tier: "legendary", cost: 95, shape: "eclipse", hue: 40 },
-  { id: 24, name: "Supernova", tier: "legendary", cost: 100, shape: "supernova", hue: 320 },
+  ...CONSTELLATION_ARTWORKS,
+  ...TAROT_ARTWORKS,
 ];
 
 const BY_ID = new Map(ARTWORKS.map((a) => [a.id, a]));
@@ -85,10 +85,7 @@ export function dailyArtworkIds(today: string): number[] {
     new Date(`${today}T00:00:00`).getTime() / 86_400_000,
   );
   const n = ARTWORKS.length;
-  const step = 3;
+  const step = 7;
   const base = ((dayIndex * step) % n + n) % n;
-  return [0, 8, 16].map((offset) => {
-    const idx = (base + offset) % n;
-    return ARTWORKS[idx]!.id;
-  });
+  return [0, 17, 34].map((offset) => ARTWORKS[(base + offset) % n]!.id);
 }

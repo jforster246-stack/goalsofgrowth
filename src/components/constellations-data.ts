@@ -178,3 +178,9 @@ export const CONSTELLATION_DATA: Constellation[] = [
     lines: [[0, 1], [1, 2], [2, 3], [3, 0], [3, 4]],
   },
 ];
+
+const BY_ID = new Map(CONSTELLATION_DATA.map((c) => [c.id, c]));
+export function constellationById(id: string): Constellation | undefined {
+  return BY_ID.get(id);
+}
+

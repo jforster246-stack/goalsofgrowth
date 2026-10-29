@@ -12,7 +12,7 @@ import { goalProgress, localToday } from "@/components/goal-ui";
 import { Stamp } from "@/components/stamp";
 import { StampMark } from "@/components/stamp-mark";
 import { GoldFrame } from "@/components/gold-frame";
-import { ArtworkDetailModal } from "@/components/artwork-modal";
+import { ArtworkDetailModal, ArtworkPlacard } from "@/components/artwork-modal";
 import { HabitDetailModal, type HabitFull } from "@/components/habit-detail-modal";
 import { winStampStyle } from "@/components/win-form-modal";
 import {
@@ -401,10 +401,9 @@ function ArtworkCarousel({
                 type="button"
                 aria-label={`Open ${artwork.name} in your gallery`}
                 onClick={() => setDetail(artwork)}
-                className="block aspect-square w-full overflow-hidden rounded-xl text-olive ring-1 ring-black/5 transition-transform hover:-translate-y-0.5"
-                style={{ background: artworkTint(artwork.id) }}
+                className="block aspect-square w-full overflow-hidden rounded-xl ring-1 ring-black/5 transition-transform hover:-translate-y-0.5"
               >
-                <CelestialBody shape={artwork.shape} className="size-full p-3" />
+                <ArtworkPlacard artwork={artwork} />
               </button>
               <p className="mt-1 truncate text-center font-serif text-[10px] italic text-black/60">
                 {artwork.name}
