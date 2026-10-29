@@ -86,7 +86,7 @@ export function NextStepRow({
 
       {/* The next step, big */}
       <button type="button" onClick={onOpen} className="flex-1 text-left">
-        <p className="line-clamp-4 font-display text-xl leading-[1.08] text-[#201b2f]">
+        <p className="line-clamp-4 font-display text-lg leading-[1.12] text-[#201b2f]">
           {step.title}
         </p>
       </button>
@@ -659,7 +659,7 @@ export function HabitRow({
         <span className="flex min-w-0 flex-col">
           <span
             className={cn(
-              "font-heading text-lg leading-tight",
+              "font-heading text-base leading-tight",
               done ? "text-black/40 line-through decoration-black/30" : "text-[#201b2f]",
             )}
           >
@@ -729,7 +729,7 @@ export function GoalCardCompact({
         </div>
 
         {/* Goal title — the hero */}
-        <p className="line-clamp-3 font-display text-lg leading-[1.12] text-[#201b2f]">
+        <p className="line-clamp-3 font-display text-base leading-[1.14] text-[#201b2f]">
           {goal.title}
         </p>
 

@@ -197,12 +197,12 @@ export function AppShell({
             <div className="min-w-0 flex-1">
               {title ? (
                 <>
-                  <h1 className="font-heading text-2xl tracking-tight text-foreground">{title}</h1>
+                  <h1 className="font-heading text-xl tracking-tight text-foreground">{title}</h1>
                   {subtitle && <div className="mt-1">{subtitle}</div>}
                 </>
               ) : (
                 <>
-                  <h1 className="font-heading text-2xl uppercase leading-tight tracking-wide text-foreground md:text-3xl">
+                  <h1 className="font-heading text-xl uppercase leading-tight tracking-wide text-foreground md:text-2xl">
                     {profile?.display_name ? `${profile.display_name}'s ` : "Your "}
                     Moongrove Planner
                   </h1>

@@ -238,7 +238,7 @@ function OverviewPage() {
                     accent={winStyle.accent}
                     className="size-16"
                   />
-                  <p className="font-display text-lg leading-tight text-[#201b2f]">
+                  <p className="font-display text-base leading-tight text-[#201b2f]">
                     {randomWin.title}
                   </p>
                   <p className="font-heading text-[10px] uppercase tracking-wide text-[#928e9d]">
@@ -343,7 +343,7 @@ function StreakCard({
         className,
       )}
     >
-      <span className="font-heading text-xl text-[#201b2f] md:text-2xl">
+      <span className="font-heading text-lg text-[#201b2f] md:text-xl">
         {streak} Day Streak
       </span>
       <div className="flex items-center gap-2">

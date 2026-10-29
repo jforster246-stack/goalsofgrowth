@@ -67,6 +67,7 @@
   --radius: 0.625rem;
   --background: #fbfbfe; /* fresh near-white — the refreshed canvas */
   /* Gradient palette (the celestial surfaces); themes override these. */
+  --mg-canvas: var(--background);
   --mg-1: #ffe4ef;
   --mg-2: #e9e4ff;
   --mg-3: #e0f3ec;
@@ -148,6 +149,7 @@
 /* Moonlight — the main look: soft celestial gradients on near-white. */
 :root[data-theme="moonlight"] {
   --background: #fbfbfe;
+  --mg-canvas: radial-gradient(135% 125% at 30% 12%, #fff1fc 0%, #f9f3e0 50%, #f8b3e8 77%, #ecd4f1 100%);
   --mg-1: #ffe4ef;
   --mg-2: #e9e4ff;
   --mg-3: #e0f3ec;
@@ -431,10 +433,7 @@
 /* Reusable surfaces: a faint page aura, gradient hero, chip and CTA.   */
 /* ------------------------------------------------------------------ */
 .mg-aura {
-  background:
-    radial-gradient(48% 40% at 12% 6%, color-mix(in srgb, var(--mg-1) 30%, transparent), transparent 70%),
-    radial-gradient(46% 40% at 88% 10%, color-mix(in srgb, var(--mg-2) 30%, transparent), transparent 70%),
-    radial-gradient(58% 50% at 74% 96%, color-mix(in srgb, var(--mg-3) 26%, transparent), transparent 70%);
+  background: var(--mg-canvas);
 }
 .mg-hero {
   background: linear-gradient(140deg, var(--mg-1) 0%, var(--mg-2) 46%, var(--mg-3) 100%);
