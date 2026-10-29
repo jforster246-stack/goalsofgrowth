@@ -240,7 +240,7 @@ function GalleryPage() {
                     "mt-2 flex items-center justify-center gap-1 rounded-full py-2.5 font-heading text-[11px] uppercase transition-colors",
                     isOwned
                       ? "bg-black/5 text-black/40"
-                      : "bg-olive text-white hover:bg-olive/90",
+                      : "mg-cta text-[#4a3d63] hover:opacity-90",
                   )}
                 >
                   {isOwned ? (
@@ -266,7 +266,7 @@ function GalleryPage() {
           Swipe around your sky to explore.
         </p>
 
-        <div className="mt-3 -mx-5 overflow-auto bg-card px-5 py-6 sm:mx-0 sm:rounded-3xl">
+        <div className="mg-panel mt-3 -mx-5 overflow-auto px-5 py-6 sm:mx-0 sm:rounded-3xl">
 
           <div className="grid w-max gap-5 [grid-template-columns:repeat(4,132px)] sm:w-full sm:[grid-template-columns:repeat(auto-fill,minmax(150px,1fr))]">
             {/* Artwork slots */}
@@ -514,7 +514,7 @@ function ConfirmPurchaseModal({
               onConfirm();
             }}
             disabled={pending}
-            className="mt-6 w-full rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
+            className="mg-cta mt-6 w-full rounded-full py-3.5 font-heading text-sm uppercase text-[#4a3d63] shadow-sm transition-opacity hover:opacity-90 disabled:opacity-40"
           >
             {pending ? "Purchasing…" : "Yes"}
           </button>

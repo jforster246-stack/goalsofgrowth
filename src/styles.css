@@ -404,3 +404,6 @@
 .mg-cta {
   background: linear-gradient(90deg, #ffd9e8, #e3d6ff 55%, #cfeede);
 }
+.mg-panel {
+  background: linear-gradient(165deg, #fbf3f8 0%, #f3f0fb 50%, #edf6f1 100%);
+}
