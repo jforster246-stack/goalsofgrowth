@@ -46,7 +46,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/_authenticated/gallery")({
   head: () => ({
     meta: [
-      { title: "Gallery - Moongrove" },
+      { title: "Your universe - Moongrove" },
       {
         name: "description",
         content:
@@ -185,7 +185,7 @@ function GalleryPage() {
 
   return (
     <AppShell
-      title="Gallery"
+      title="Your universe"
       right={
         <span className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-sm">
           <Stamp icon={null} accent="sea" className="size-5" />
@@ -345,6 +345,33 @@ function GalleryPage() {
             })}
           </div>
         </div>
+      </section>
+
+      {/* How to earn stardust */}
+      <section className="mt-6 rounded-2xl bg-white/70 p-4 shadow-sm">
+        <p className="font-heading text-sm uppercase text-olive">How to earn stardust</p>
+        <ul className="mt-3 space-y-2 font-serif text-sm text-black/60">
+          <li className="flex items-baseline gap-2">
+            <span className="font-heading text-olive">+5</span>
+            <span>finish a whole part of your day - all your morning, afternoon or evening habits</span>
+          </li>
+          <li className="flex items-baseline gap-2">
+            <span className="font-heading text-olive">+2</span>
+            <span>every 3 habits you tick off in a day</span>
+          </li>
+          <li className="flex items-baseline gap-2">
+            <span className="font-heading text-olive">+1</span>
+            <span>finish a goal</span>
+          </li>
+          <li className="flex items-baseline gap-2">
+            <span className="font-heading text-olive">+5</span>
+            <span>sign in 7 days in a row</span>
+          </li>
+        </ul>
+        <p className="mt-3 border-t border-black/5 pt-3 font-serif text-sm text-black/50">
+          Each collectible costs{" "}
+          <span className="font-heading text-olive">{ARTWORK_COST} stardust</span>.
+        </p>
       </section>
 
       {/* Slot picker */}

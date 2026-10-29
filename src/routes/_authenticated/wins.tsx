@@ -1,31 +1,9 @@
-import { createFileRoute, type SearchSchemaInput } from "@tanstack/react-router";
-import { AppShell } from "@/components/app-shell";
-import { StampCollections } from "@/components/stamp-collections";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
+// Wins merged into the "Your universe" page (the gallery). Keep this route as a
+// redirect so old links and bookmarks still land somewhere sensible.
 export const Route = createFileRoute("/_authenticated/wins")({
-  validateSearch: (search: { new?: boolean } & SearchSchemaInput) => ({
-    new: search["new"] === true || (search["new"] as unknown) === "true",
-  }),
-  head: () => ({
-    meta: [
-      { title: "Wins - Moongrove" },
-      {
-        name: "description",
-        content:
-          "Your universe: the stars you've collected for completed goals, achievements, and life events.",
-      },
-    ],
-  }),
-  component: WinsPage,
+  beforeLoad: () => {
+    throw redirect({ to: "/gallery" });
+  },
 });
-
-function WinsPage() {
-  const { new: openNew } = Route.useSearch();
-  return (
-    <AppShell title="Wins">
-      <div className="mt-4 pb-4">
-        <StampCollections defaultAdd={openNew} />
-      </div>
-    </AppShell>
-  );
-}

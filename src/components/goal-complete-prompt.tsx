@@ -54,7 +54,7 @@ export function GoalCompletePrompt({
       queryClient.invalidateQueries({ queryKey: ["goals"] });
       queryClient.invalidateQueries({ queryKey: ["stamp-balance"] });
       onClose();
-      navigate({ to: "/wins" });
+      navigate({ to: "/gallery" });
     },
   });
 

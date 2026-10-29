@@ -280,8 +280,7 @@ function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
       <nav className="mt-8 flex flex-col">
         <div className="flex flex-col gap-1.5">
           <SideLink to="/overview" icon={House} label="Home" />
-          <SideLink to="/gallery" icon={Frame} label="Gallery" />
-          <SideLink to="/wins" icon={Trophy} label="Wins" />
+          <SideLink to="/gallery" icon={Frame} label="Your universe" />
         </div>
 
         <SideSection title="Daily">
@@ -348,12 +347,11 @@ type NavItem = {
 
 const BOTTOM_PRIMARY: NavItem[] = [
   { to: "/overview", icon: House, label: "Home" },
-  { to: "/gallery", icon: Frame, label: "Gallery", className: "max-md:hidden" },
+  { to: "/gallery", icon: Frame, label: "Your universe", className: "max-md:hidden" },
   { to: "/habits", icon: Repeat, label: "Habits" },
   { to: "/goals", icon: Target, label: "Goals" },
 ];
 const BOTTOM_MORE: NavItem[] = [
-  { to: "/wins", icon: Trophy, label: "Wins" },
   { to: "/routines", icon: ListChecks, label: "Routines" },
   { to: "/braindump", icon: Brain, label: "Brain dump" },
   { to: "/finance", icon: Wallet, label: "Finance planner" },
