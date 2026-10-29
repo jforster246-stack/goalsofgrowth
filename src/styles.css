@@ -68,6 +68,14 @@
   --background: #fbfbfe; /* fresh near-white — the refreshed canvas */
   /* Gradient palette (the celestial surfaces); themes override these. */
   --mg-canvas: var(--background);
+  /* Card surfaces + nav highlight — derived from the theme's accents.
+     Moonlight overrides these with its pink/blue/yellow palette. */
+  --s-goal: linear-gradient(180deg, color-mix(in srgb, var(--color-rose) 12%, white), color-mix(in srgb, var(--color-rose) 26%, white));
+  --s-win: linear-gradient(160deg, color-mix(in srgb, var(--color-sky) 10%, white), color-mix(in srgb, var(--color-sky) 26%, white));
+  --s-btn: linear-gradient(90deg, color-mix(in srgb, var(--color-rose) 30%, white), color-mix(in srgb, var(--color-rose) 50%, white));
+  --s-tile: color-mix(in srgb, var(--color-rose) 18%, white);
+  --nav-active-bg: var(--color-olive);
+  --nav-active-fg: #ffffff;
   --mg-1: #ffe4ef;
   --mg-2: #e9e4ff;
   --mg-3: #e0f3ec;
@@ -150,6 +158,12 @@
 :root[data-theme="moonlight"] {
   --background: #fbfbfe;
   --mg-canvas: radial-gradient(135% 125% at 30% 12%, #fff1fc 0%, #f9f3e0 50%, #f8b3e8 77%, #ecd4f1 100%);
+  --s-goal: linear-gradient(180deg, #fff1fc 0%, #fcdff5 100%);
+  --s-win: linear-gradient(160deg, #eafbff 0%, #daf3f8 100%);
+  --s-btn: linear-gradient(90deg, #fbd1f1 0%, #f8b3e8 100%);
+  --s-tile: #fbddf3;
+  --nav-active-bg: #daf3f8;
+  --nav-active-fg: #201b2f;
   --mg-1: #ffe4ef;
   --mg-2: #e9e4ff;
   --mg-3: #e0f3ec;
@@ -453,16 +467,17 @@
   );
 }
 
-/* Homepage card surfaces (from the Moongrove home design). */
+/* Homepage card surfaces — theme-driven (Moonlight = pink/blue; others derive
+   from their own accent palette). */
 .card-goal {
-  background: linear-gradient(180deg, #fff1fc 0%, #fcdff5 100%);
+  background: var(--s-goal);
 }
 .card-win {
-  background: linear-gradient(160deg, #eafbff 0%, #daf3f8 100%);
+  background: var(--s-win);
 }
 .btn-pink {
-  background: linear-gradient(90deg, #fbd1f1 0%, #f8b3e8 100%);
+  background: var(--s-btn);
 }
 .tile-pink {
-  background: #fbddf3;
+  background: var(--s-tile);
 }

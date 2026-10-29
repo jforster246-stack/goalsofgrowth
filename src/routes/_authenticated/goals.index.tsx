@@ -135,7 +135,7 @@ function GoalsListPage() {
           {/* The view toggle sits right above the cards it controls, so tapping
               it visibly changes the adjacent section. */}
           <div className="flex items-center justify-between gap-3 pt-2">
-            <h2 className="font-heading text-xs uppercase tracking-wide text-black/40">
+            <h2 className="font-heading text-[11px] uppercase tracking-[0.12em] text-[#928e9d]">
               Your goals
             </h2>
             <div
@@ -192,7 +192,7 @@ function GoalsListPage() {
               <button
                 type="button"
                 onClick={() => setShowCompleted((v) => !v)}
-                className="flex w-full items-center justify-between font-heading text-xs uppercase text-black/40 transition-colors hover:text-black/70"
+                className="flex w-full items-center justify-between font-heading text-[11px] uppercase tracking-[0.12em] text-[#928e9d] transition-colors hover:text-[#201b2f]"
               >
                 <span>Completed goals ({archived.length})</span>
                 <span>{showCompleted ? "Hide" : "Show"}</span>
@@ -392,7 +392,7 @@ function NextStepTodoList({ goals }: { goals: Goal[] }) {
 
   return (
     <section aria-label="Next steps to do">
-      <h2 className="mb-2 font-heading text-xs uppercase tracking-wide text-black/40">
+      <h2 className="mb-2 font-heading text-[11px] uppercase tracking-[0.12em] text-[#928e9d]">
         Next steps
       </h2>
       <div className="space-y-2">
@@ -450,10 +450,10 @@ function NextStepTodoRow({ goal }: { goal: Goal }) {
         onClick={() => navigate({ to: "/goals/$goalId", params: { goalId: goal.id } })}
         className="min-w-0 flex-1 text-left"
       >
-        <span className="line-clamp-2 block font-serif text-sm leading-snug text-black">
+        <span className="line-clamp-2 block font-display text-base leading-snug text-[#201b2f]">
           {next?.title}
         </span>
-        <span className={cn("truncate font-serif text-[10px] italic", accent.text)}>
+        <span className={cn("mt-0.5 block truncate font-heading text-[10px] uppercase tracking-[0.12em]", accent.text)}>
           {goal.title}
         </span>
       </button>

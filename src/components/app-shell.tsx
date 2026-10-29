@@ -327,7 +327,7 @@ function SideLink({ to, icon: Icon, label }: { to: string; icon: typeof House; l
     <Link
       to={to}
       className={`${base} text-muted-foreground hover:bg-muted/50`}
-      activeProps={{ className: `${base} bg-[#daf3f8] text-[#201b2f]` }}
+      activeProps={{ className: `${base} bg-[var(--nav-active-bg)] text-[var(--nav-active-fg)]` }}
     >
       <Icon className="size-5" strokeWidth={2} />
       {label}
