@@ -54,12 +54,12 @@ export const Route = createFileRoute("/_authenticated/overview")({
       {
         name: "description",
         content:
-          "Your progress at a glance: goals completed, your goal of the day, and your sign-in streak.",
+          "Your progress at a glance: dreams completed, your dream of the day, and your sign-in streak.",
       },
       { property: "og:title", content: "Overview - Moongrove" },
       {
         property: "og:description",
-        content: "Goals completed, goal of the day, and your day streak.",
+        content: "Dreams completed, dream of the day, and your day streak.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -202,7 +202,7 @@ function OverviewPage() {
         <div className="grid gap-5 lg:grid-cols-3 lg:items-stretch">
           <section className="flex flex-col lg:col-span-2">
             <p className="font-heading text-[11px] uppercase tracking-[0.12em] text-[#928e9d]">
-              A couple of goals to nudge today
+              A couple of dreams to nudge today
             </p>
             <div className="mt-3 grid flex-1 grid-cols-2 items-stretch gap-3">
               {twoGoals.length > 0 ? (
@@ -219,7 +219,7 @@ function OverviewPage() {
               ) : (
                 <div className="col-span-2 grid place-items-center rounded-3xl bg-white p-6 text-center text-sm text-muted-foreground shadow-sm">
                   {goals.length === 0
-                    ? "Add a goal to see a next step here."
+                    ? "Add a dream to see a next step here."
                     : "You're all caught up — nice work."}
                 </div>
               )}
@@ -270,7 +270,7 @@ function OverviewPage() {
             {celebratingNext && (
               <>
                 <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Next up for this goal
+                  Next up for this dream
                 </p>
                 <p className="mt-1 text-base">{celebratingNext.title}</p>
               </>

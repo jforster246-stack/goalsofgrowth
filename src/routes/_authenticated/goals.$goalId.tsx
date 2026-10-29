@@ -32,13 +32,13 @@ type Step = HomeGoal["steps"][number];
 export const Route = createFileRoute("/_authenticated/goals/$goalId")({
   head: () => ({
     meta: [
-      { title: "Goal - Moongrove" },
+      { title: "Dream - Moongrove" },
       {
         name: "description",
         content:
-          "Your goal in detail: why it matters, what it looks like when it's done, and every small step.",
+          "Your dream in detail: why it matters, what it looks like when it's done, and every small step.",
       },
-      { property: "og:title", content: "Goal - Moongrove" },
+      { property: "og:title", content: "Dream - Moongrove" },
       {
         property: "og:description",
         content: "Why it matters, how it will feel, and every small step.",
@@ -57,7 +57,7 @@ export const Route = createFileRoute("/_authenticated/goals/$goalId")({
   ),
   notFoundComponent: () => (
     <div className="flex min-h-dvh items-center justify-center bg-background px-5">
-      <p className="text-base text-muted-foreground">Goal not found.</p>
+      <p className="text-base text-muted-foreground">Dream not found.</p>
     </div>
   ),
   component: GoalDetailPage,
@@ -361,7 +361,7 @@ function GoalDetailBody({
         onClick={() => deleteGoalMutation.mutate()}
         className="w-full py-2 font-heading text-sm uppercase text-black/40 transition-colors hover:text-black/70"
       >
-        Delete this goal
+        Delete this dream
       </button>
 
       <GoalCompletePrompt goal={promptGoal} onClose={() => setPromptGoal(null)} />

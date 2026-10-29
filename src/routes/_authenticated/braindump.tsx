@@ -403,8 +403,8 @@ function Row({
         <button
           type="button"
           onClick={onMakeGoal}
-          aria-label="Make it a goal"
-          title="Make it a goal"
+          aria-label="Make it a dream"
+          title="Make it a dream"
           className="grid size-8 place-items-center rounded-lg text-olive transition-colors hover:bg-black/5"
         >
           <Target className="size-4" strokeWidth={2} />

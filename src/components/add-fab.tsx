@@ -46,7 +46,7 @@ export function AddMenu({ floating = false }: { floating?: boolean }) {
 
   const items: { label: string; Icon: typeof Plus; onClick: () => void }[] = [
     { label: "Hobby log", Icon: Armchair, onClick: () => setCreating("hobbylog") },
-    { label: "Goal", Icon: Target, onClick: () => setCreating("goal") },
+    { label: "Dream", Icon: Target, onClick: () => setCreating("goal") },
     { label: "Habit", Icon: Repeat, onClick: () => setCreating("habit") },
     { label: "Routine", Icon: ListChecks, onClick: () => setCreating("routine") },
     { label: "Brain dump", Icon: Brain, onClick: () => setCreating("braindump") },

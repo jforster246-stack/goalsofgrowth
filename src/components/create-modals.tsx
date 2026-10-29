@@ -42,7 +42,7 @@ function Sheet({
 /** The goal wizard, in a popup instead of its own page. */
 export function GoalFormModal({ onClose }: { onClose: () => void }) {
   return (
-    <Sheet title="New goal" onClose={onClose} wide>
+    <Sheet title="New dream" onClose={onClose} wide>
       <NewGoalForm onCreated={onClose} />
     </Sheet>
   );

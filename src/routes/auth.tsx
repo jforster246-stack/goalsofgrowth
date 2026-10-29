@@ -12,12 +12,12 @@ export const Route = createFileRoute("/auth")({
       {
         name: "description",
         content:
-          "Sign in to Moongrove to keep your goals and steps private to your account.",
+          "Sign in to Moongrove to keep your dreams and steps private to your account.",
       },
       { property: "og:title", content: "Sign in - Moongrove" },
       {
         property: "og:description",
-        content: "Sign in to Moongrove to keep your goals private.",
+        content: "Sign in to Moongrove to keep your dreams private.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

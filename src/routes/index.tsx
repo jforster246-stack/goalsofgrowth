@@ -14,7 +14,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Moongrove is a gentle goal tracker: create goals, break them into small steps, and check them off one calm step at a time.",
+          "Moongrove is a gentle dream tracker: create dreams, break them into small steps, and check them off one calm step at a time.",
       },
       {
         property: "og:title",
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "Create goals, break them into small steps, and check them off one calm step at a time.",
+          "Create dreams, break them into small steps, and check them off one calm step at a time.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

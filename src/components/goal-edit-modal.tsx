@@ -61,7 +61,7 @@ export function GoalEditModal({
         <div className="mt-5">
           <GoalHero goal={{ ...goal, accent, icon }}>
             <p className="w-full break-words text-center font-heading text-2xl leading-tight">
-              {title.trim() || "Name this goal"}
+              {title.trim() || "Name this dream"}
             </p>
           </GoalHero>
         </div>
@@ -75,7 +75,7 @@ export function GoalEditModal({
           onChange={(e) => setTitle(e.target.value)}
           rows={2}
           maxLength={140}
-          aria-label="Goal name"
+          aria-label="Dream name"
           className="mt-2 w-full resize-none rounded-2xl bg-black/5 px-4 py-3 font-serif text-sm focus:outline-none focus:ring-1 focus:ring-olive/40"
         />
 

@@ -30,8 +30,8 @@ const SLIDES: Slide[] = [
   {
     hero: Target,
     accent: "bg-olive",
-    title: "Set goals, step by step",
-    body: "Add a goal, break it into next steps, and tick them off as you go. Start a focus timer on any step when you want to knuckle down.",
+    title: "Set dreams, step by step",
+    body: "Add a dream, break it into next steps, and tick them off as you go. Start a focus timer on any step when you want to knuckle down.",
   },
   {
     hero: Repeat,
@@ -43,13 +43,13 @@ const SLIDES: Slide[] = [
     hero: Trophy,
     accent: "bg-clay-deep",
     title: "Earn stardust, grow your sky",
-    body: "Finish a goal and it becomes a star in your universe. You'll earn stardust too - spend it on artworks for your gallery.",
+    body: "Finish a dream and it becomes a star in your universe. You'll earn stardust too - spend it on artworks for your gallery.",
   },
   {
     hero: Plus,
     accent: "bg-olive",
     title: "Everything starts with +",
-    body: "Tap the + button any time to add a goal, habit, routine, focus session or win. That's it - let's grow.",
+    body: "Tap the + button any time to add a dream, habit, routine, focus session or win. That's it - let's grow.",
   },
 ];
 

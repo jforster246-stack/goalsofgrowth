@@ -285,7 +285,7 @@ function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
 
         <SideSection title="Check in daily">
           <SideLink to="/habits" icon={Repeat} label="Habits" />
-          <SideLink to="/goals" icon={Target} label="Goals" />
+          <SideLink to="/goals" icon={Target} label="Dreams" />
           <MorningPagesLink />
         </SideSection>
 
@@ -349,7 +349,7 @@ const BOTTOM_PRIMARY: NavItem[] = [
   { to: "/overview", icon: House, label: "Home" },
   { to: "/gallery", icon: Frame, label: "My Moongrove", className: "max-md:hidden" },
   { to: "/habits", icon: Repeat, label: "Habits" },
-  { to: "/goals", icon: Target, label: "Goals" },
+  { to: "/goals", icon: Target, label: "Dreams" },
 ];
 const BOTTOM_MORE: NavItem[] = [
   { to: "/routines", icon: ListChecks, label: "Routines" },
@@ -623,7 +623,7 @@ function ProfileSheet({
               </span>
               <span className="block font-serif text-xs text-muted-foreground">
                 {focusTimer
-                  ? "Timer buttons show on goals, steps and habits"
+                  ? "Timer buttons show on dreams, steps and habits"
                   : "Timer buttons are hidden across the app"}
               </span>
             </span>

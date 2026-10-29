@@ -88,13 +88,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "Moongrove is a gentle goal tracker: create goals, break them into small steps, and check them off one calm step at a time.",
+          "Moongrove is a gentle dream tracker: create dreams, break them into small steps, and check them off one calm step at a time.",
       },
       { property: "og:title", content: "Moongrove — a quiet place to finish small things" },
       {
         property: "og:description",
         content:
-          "Create goals, break them into small steps, and check them off one calm step at a time.",
+          "Create dreams, break them into small steps, and check them off one calm step at a time.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

@@ -15,13 +15,13 @@ export const Route = createFileRoute("/_authenticated/goals/new")({
     return title ? { title } : {};
   },
   head: () => ({
-    meta: [{ title: "New goal - Moongrove" }],
+    meta: [{ title: "New dream - Moongrove" }],
   }),
   component: NewGoalPage,
 });
 
 const STEPS = [
-  { key: "title", label: "Name your goal" },
+  { key: "title", label: "Name your dream" },
   { key: "steps", label: "Next steps" },
   { key: "why", label: "Why you're doing this" },
   { key: "vision", label: "When it's done" },
@@ -30,7 +30,7 @@ const STEPS = [
 function NewGoalPage() {
   const { title } = Route.useSearch();
   return (
-    <AppShell title="New goal" backTo="/goals">
+    <AppShell title="New dream" backTo="/goals">
       <NewGoalForm initialTitle={title} />
     </AppShell>
   );
@@ -127,7 +127,7 @@ export function NewGoalForm({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && next()}
-                placeholder="Name your goal"
+                placeholder="Name your dream"
                 maxLength={140}
                 className="mt-5 w-full rounded-2xl bg-black/5 px-4 py-3 font-serif text-base placeholder:text-black/40 focus:outline-none focus:ring-1 focus:ring-olive/40"
               />
@@ -283,7 +283,7 @@ export function NewGoalForm({
             {isLast
               ? createMutation.isPending
                 ? "Creating…"
-                : "Create goal"
+                : "Create dream"
               : "Continue"}
           </button>
         </div>

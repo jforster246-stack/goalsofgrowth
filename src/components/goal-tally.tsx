@@ -33,11 +33,11 @@ export function GoalTally({ className }: { className?: string }) {
       )}
     >
       You ticked off{" "}
-      <span className="font-heading text-olive">{doneYesterday}</span> goal{" "}
+      <span className="font-heading text-olive">{doneYesterday}</span> dream{" "}
       {plural(doneYesterday)} yesterday. You're up to{" "}
       <span className="font-heading text-olive">{doneToday}</span> today.{" "}
       {doneToday > doneYesterday
-        ? "You've already beaten it — nice work!"
+        ? "You've already beaten it - nice work!"
         : "See if you can beat it."}
     </p>
   );

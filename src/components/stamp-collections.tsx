@@ -95,7 +95,7 @@ export function StampCollections({
       <section>
         <div className="flex items-center gap-1.5">
           <p className="font-heading text-sm uppercase text-olive">
-            Completed goals
+            Completed dreams
           </p>
           <span className="ml-1 font-mono text-xs text-olive/50">
             {stampList.length}
@@ -152,7 +152,7 @@ export function StampCollections({
           </li>
           <li className="flex items-baseline gap-2">
             <span className="font-heading text-olive">+1</span>
-            <span>finish a goal</span>
+            <span>finish a dream</span>
           </li>
           <li className="flex items-baseline gap-2">
             <span className="font-heading text-olive">+5</span>
@@ -297,7 +297,7 @@ function StampSnapshotModal({
       >
         <div className="flex items-start justify-between">
           <p className="font-heading text-sm uppercase text-olive">
-            Completed goal
+            Completed dream
           </p>
           <button
             type="button"

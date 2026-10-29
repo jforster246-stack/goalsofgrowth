@@ -169,20 +169,22 @@
   --tarot-ink: #b34a9c;
   --mg-1: #ffe4ef;
   --mg-2: #e9e4ff;
-  --mg-3: #e0f3ec;
-  --color-olive: #3b4a30;
-  --color-sage: #6f7c4e;
+  --mg-3: #e0f0f8;
+  /* Moonlight is pinks, blues and yellows — no greens. Olive (the primary
+     action colour) becomes a dreamy orchid-pink; sage/sky become blues. */
+  --color-olive: #a8408f;
+  --color-sage: #8fb6d6;
   --color-gold: #d19a4a;
   --color-gold-deep: #9c5a28;
   --color-clay: #a24b57;
   --color-clay-deep: #6e1d3c;
   --color-plum: #6a4b7a;
   --color-plum-deep: #46315a;
-  --color-rose: #b56b5e;
-  --color-rose-deep: #86463b;
-  --color-sky: #5f8a7d;
-  --color-sky-deep: #3d5f55;
-  --color-focus: #3b4a30;
+  --color-rose: #cf6aa6;
+  --color-rose-deep: #9c3d87;
+  --color-sky: #6f9fc4;
+  --color-sky-deep: #46709a;
+  --color-focus: #4a6ba0;
   --color-star: #d9c39c;
 }
 

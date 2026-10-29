@@ -30,10 +30,10 @@ export const Route = createFileRoute("/_authenticated/goals/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(goalsQueryOptions),
   head: () => ({
     meta: [
-      { title: "Your goals - Moongrove" },
+      { title: "Your dreams - Moongrove" },
       {
         name: "description",
-        content: "Every goal you're growing, with its progress and the very next small step.",
+        content: "Every dream you're growing, with its progress and the very next small step.",
       },
     ],
   }),
@@ -112,12 +112,12 @@ function GoalsListPage() {
   const compact = view === "grid" && isMobile;
 
   return (
-    <AppShell title="All goals" titleLeft hideSettings right={<StampPill />}>
+    <AppShell title="All dreams" titleLeft hideSettings right={<StampPill />}>
       {goals.length === 0 ? (
         <div className="mt-6 rounded-2xl bg-white p-8 text-center shadow-sm">
-          <p className="font-heading text-base text-black">No goals yet</p>
+          <p className="font-heading text-base text-black">No dreams yet</p>
           <p className="mt-2 font-serif text-sm text-black/50">
-            Tap the + button to create your first goal.
+            Tap the + button to create your first dream.
           </p>
           <button
             type="button"
@@ -125,7 +125,7 @@ function GoalsListPage() {
             className="mt-5 inline-flex items-center gap-1.5 rounded-2xl bg-olive px-5 py-2.5 font-heading text-sm uppercase text-white transition-colors hover:bg-olive/90"
           >
             <Plus className="size-4" strokeWidth={2} />
-            New goal
+            New dream
           </button>
         </div>
       ) : (
@@ -136,11 +136,11 @@ function GoalsListPage() {
               it visibly changes the adjacent section. */}
           <div className="flex items-center justify-between gap-3 pt-2">
             <h2 className="font-heading text-[11px] uppercase tracking-[0.12em] text-[#928e9d]">
-              Your goals
+              Your dreams
             </h2>
             <div
               role="group"
-              aria-label="Choose how your goals are shown"
+              aria-label="Choose how your dreams are shown"
               className="inline-flex items-center gap-1 rounded-full bg-card p-1 shadow-sm ring-1 ring-border"
             >
               {(
@@ -183,7 +183,7 @@ function GoalsListPage() {
           </Reorder.Group>
           {active.length === 0 && (
             <p className="rounded-2xl bg-white/60 px-4 py-4 text-center font-serif text-sm text-black/40">
-              All your goals are complete — nice work.
+              All your dreams are complete - nice work.
             </p>
           )}
 
@@ -194,7 +194,7 @@ function GoalsListPage() {
                 onClick={() => setShowCompleted((v) => !v)}
                 className="flex w-full items-center justify-between font-heading text-[11px] uppercase tracking-[0.12em] text-[#928e9d] transition-colors hover:text-[#201b2f]"
               >
-                <span>Completed goals ({archived.length})</span>
+                <span>Completed dreams ({archived.length})</span>
                 <span>{showCompleted ? "Hide" : "Show"}</span>
               </button>
               {showCompleted && (

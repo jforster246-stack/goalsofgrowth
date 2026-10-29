@@ -65,7 +65,7 @@ export function GoalCompletePrompt({
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Goal completion prompt"
+        aria-label="Dream completion prompt"
         className="w-full max-w-sm rounded-3xl bg-background p-6 text-center shadow-xl [animation:rise_0.25s_both]"
       >
         <p className="font-heading text-xs uppercase tracking-wide text-olive/60">
@@ -75,7 +75,7 @@ export function GoalCompletePrompt({
           You completed “{goal.title}”
         </h2>
         <p className="mt-3 font-serif text-sm text-black/60">
-          That was the last step. Is this goal done?
+          That was the last step. Is this dream done?
         </p>
 
         <div className="mt-6 flex flex-col gap-2">
@@ -95,7 +95,7 @@ export function GoalCompletePrompt({
             }}
             className="w-full rounded-2xl bg-black/5 py-3.5 font-heading text-sm uppercase text-black/70 transition-colors hover:bg-black/10"
           >
-            Not yet — add more steps
+            Not yet - add more steps
           </button>
         </div>
 

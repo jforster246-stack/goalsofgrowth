@@ -199,10 +199,10 @@ export function GoalCard({
   const complete = progress.complete;
 
   const stepText = complete
-    ? "Every step is done — nice work."
+    ? "Every step is done - nice work."
     : hasSteps
-      ? (progress.nextStep?.title ?? "Every step is done — nice work.")
-      : "Break down this goal into manageable tasks";
+      ? (progress.nextStep?.title ?? "Every step is done - nice work.")
+      : "Break down this dream into manageable tasks";
 
   return (
     <div className="relative w-full">

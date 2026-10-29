@@ -50,7 +50,7 @@ export const Route = createFileRoute("/_authenticated/gallery")({
       {
         name: "description",
         content:
-          "Your universe of wins, completed goals and artworks bought with the stardust you earn.",
+          "Your universe of wins, completed dreams and artworks bought with the stardust you earn.",
       },
     ],
   }),
@@ -361,7 +361,7 @@ function GalleryPage() {
           </li>
           <li className="flex items-baseline gap-2">
             <span className="font-heading text-olive">+1</span>
-            <span>finish a goal</span>
+            <span>finish a dream</span>
           </li>
           <li className="flex items-baseline gap-2">
             <span className="font-heading text-olive">+5</span>
@@ -591,7 +591,7 @@ function GoalInfoModal({
   const doneCount = steps.filter((s) => s.done).length;
 
   return (
-    <ModalShell title="Completed goal" onClose={onClose}>
+    <ModalShell title="Completed dream" onClose={onClose}>
       <div className="mt-2 flex flex-col items-center gap-3 text-center">
         <Stamp icon={icon} accent={accent} className="size-24" />
         <p className="font-display text-2xl leading-tight text-black">
