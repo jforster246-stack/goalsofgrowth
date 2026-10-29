@@ -84,13 +84,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1",
       },
       { name: "theme-color", content: "#f7f7f5" },
-      { title: "Goals of Growth — a quiet place to finish small things" },
+      { title: "Moongrove — a quiet place to finish small things" },
       {
         name: "description",
         content:
-          "Goals of Growth is a gentle goal tracker: create goals, break them into small steps, and check them off one calm step at a time.",
+          "Moongrove is a gentle goal tracker: create goals, break them into small steps, and check them off one calm step at a time.",
       },
-      { property: "og:title", content: "Goals of Growth — a quiet place to finish small things" },
+      { property: "og:title", content: "Moongrove — a quiet place to finish small things" },
       {
         property: "og:description",
         content:

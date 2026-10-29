@@ -12,6 +12,7 @@ import {
   Repeat,
   Settings,
   Target,
+  Trophy,
   Wallet,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -145,7 +146,10 @@ export function AppShell({
   return (
     <div className="relative min-h-dvh bg-background font-body text-foreground antialiased lg:pl-64">
       <Sidebar onOpenSettings={() => setProfileOpen(true)} />
-      <div className="relative z-[1] mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 pb-28 pt-6 md:max-w-3xl lg:max-w-5xl lg:pb-12">
+      {/* pb clears both the bottom nav and the floating + button (which sits at
+          bottom-24 and is 56px tall), so the last row's controls are never
+          trapped underneath it. */}
+      <div className="relative z-[1] mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 pb-40 pt-6 md:max-w-3xl lg:max-w-5xl lg:pb-12">
         <AppShellContext.Provider
           value={{
             openFocus: (stepId) => {
@@ -199,7 +203,7 @@ export function AppShell({
                 <>
                   <h1 className="truncate font-display text-xl font-normal leading-[1.1] tracking-tight md:text-2xl">
                     {profile?.display_name ? `${profile.display_name}'s ` : "Your "}
-                    Goals of Growth
+                    Moongrove
                   </h1>
                   <p className="mt-1 text-sm italic text-muted-foreground">
                     "{quoteOfTheDay(localToday())}"
@@ -270,12 +274,13 @@ export function AppShell({
 function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
   return (
     <aside className="fixed inset-y-3 left-3 z-20 hidden w-56 flex-col rounded-3xl bg-card px-4 py-6 shadow-xl ring-1 ring-border lg:flex">
-      <p className="px-2 font-display text-[26px] leading-tight text-foreground">Goals of Growth</p>
+      <p className="px-2 font-display text-[26px] leading-tight text-foreground">Moongrove</p>
 
       <nav className="mt-8 flex flex-col">
         <div className="flex flex-col gap-1.5">
           <SideLink to="/overview" icon={House} label="Home" />
           <SideLink to="/gallery" icon={Frame} label="Gallery" />
+          <SideLink to="/wins" icon={Trophy} label="Wins" />
         </div>
 
         <SideSection title="Daily">
@@ -347,6 +352,7 @@ const BOTTOM_PRIMARY: NavItem[] = [
   { to: "/goals", icon: Target, label: "Goals" },
 ];
 const BOTTOM_MORE: NavItem[] = [
+  { to: "/wins", icon: Trophy, label: "Wins" },
   { to: "/routines", icon: ListChecks, label: "Routines" },
   { to: "/braindump", icon: Brain, label: "Brain dump" },
   { to: "/finance", icon: Wallet, label: "Finance planner" },

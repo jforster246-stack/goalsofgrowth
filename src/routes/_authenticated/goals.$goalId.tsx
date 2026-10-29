@@ -32,13 +32,13 @@ type Step = HomeGoal["steps"][number];
 export const Route = createFileRoute("/_authenticated/goals/$goalId")({
   head: () => ({
     meta: [
-      { title: "Goal — Goals of Growth" },
+      { title: "Goal - Moongrove" },
       {
         name: "description",
         content:
           "Your goal in detail: why it matters, what it looks like when it's done, and every small step.",
       },
-      { property: "og:title", content: "Goal — Goals of Growth" },
+      { property: "og:title", content: "Goal - Moongrove" },
       {
         property: "og:description",
         content: "Why it matters, how it will feel, and every small step.",
@@ -302,7 +302,7 @@ function GoalDetailBody({
       {/* Vision */}
       <section className="rounded-2xl bg-white p-5 shadow-sm">
         <label htmlFor="goal-vision" className="font-heading text-sm uppercase text-olive">
-          What it looks like and feels like when its done
+          What it looks like and feels like when it's done
         </label>
         <textarea
           id="goal-vision"

@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/routines/$routineId")({
   head: () => ({
-    meta: [{ title: "Routine — Goals of Growth" }],
+    meta: [{ title: "Routine - Moongrove" }],
   }),
   component: RoutineDetailPage,
 });

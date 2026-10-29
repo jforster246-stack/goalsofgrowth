@@ -77,7 +77,7 @@ export function StampCollections({
         <span className="font-heading text-olive">
           {spendable} stardust
         </span>{" "}
-        left to spend on artworks for your{" "}
+        left to spend on collectibles for your{" "}
         <Link
           to="/gallery"
           onClick={() => onNavigate?.()}
@@ -159,7 +159,7 @@ export function StampCollections({
           </li>
         </ul>
         <p className="mt-3 border-t border-black/5 pt-3 font-serif text-sm text-black/50">
-          Each artwork in the gallery costs{" "}
+          Collectibles cost from{" "}
           <span className="font-heading text-olive">{ARTWORK_COST} stardust</span>.
         </p>
       </section>

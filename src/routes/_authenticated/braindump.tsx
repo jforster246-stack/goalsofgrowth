@@ -26,7 +26,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/_authenticated/braindump")({
   head: () => ({
     meta: [
-      { title: "Brain dump — Goals of Growth" },
+      { title: "Brain dump - Moongrove" },
       {
         name: "description",
         content: "One running list of everything you want to do or try. Just keep typing.",

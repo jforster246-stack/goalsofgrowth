@@ -1,6 +1,6 @@
 import { X } from "lucide-react";
-import { GoldFrame } from "@/components/gold-frame";
-import { artworkTint, type Artwork } from "@/lib/artworks-data";
+import { CelestialBody } from "@/components/celestial-body";
+import { artworkTint, TIER_LABEL, type Artwork } from "@/lib/artworks-data";
 
 /**
  * How an artwork fills its frame: a public-domain image when we have one,
@@ -8,30 +8,12 @@ import { artworkTint, type Artwork } from "@/lib/artworks-data";
  * works still under copyright, whose images we don't reproduce.
  */
 export function ArtworkPlacard({ artwork }: { artwork: Artwork }) {
-  if (artwork.image) {
-    return (
-      <img
-        src={artwork.image}
-        alt={`${artwork.work} by ${artwork.artist}`}
-        loading="lazy"
-        className="size-full object-cover"
-        style={{ background: artworkTint(artwork.id) }}
-      />
-    );
-  }
   return (
     <div
-      className="flex size-full flex-col items-center justify-center gap-1.5 px-2 text-center"
+      className="flex size-full items-center justify-center p-3 text-olive"
       style={{ background: artworkTint(artwork.id) }}
     >
-      <p className="font-display text-[13px] font-medium leading-tight text-black/80">
-        {artwork.work}
-      </p>
-      <span className="my-0.5 h-px w-6 bg-black/30" />
-      <p className="font-serif text-[10px] italic leading-tight text-black/60">
-        {artwork.artist}
-      </p>
-      <p className="font-mono text-[9px] text-black/45">{artwork.year}</p>
+      <CelestialBody shape={artwork.shape} className="h-4/5 w-4/5" />
     </div>
   );
 }
@@ -85,19 +67,17 @@ export function ArtworkDetailModal({
   onRemove?: (() => void) | undefined;
 }) {
   return (
-    <ModalShell title="Artwork" onClose={onClose}>
+    <ModalShell title="Collectible" onClose={onClose}>
       <div className="mt-3 flex flex-col items-center gap-4 text-center">
-        <div className="w-44">
-          <GoldFrame seed={seed} ariaLabel={artwork.work}>
-            <ArtworkPlacard artwork={artwork} />
-          </GoldFrame>
+        <div className="aspect-square w-44 overflow-hidden rounded-2xl ring-1 ring-black/5">
+          <ArtworkPlacard artwork={artwork} />
         </div>
         <div>
           <p className="font-display text-2xl leading-tight text-black">
-            {artwork.work}
+            {artwork.name}
           </p>
           <p className="mt-1 font-serif text-sm italic text-black/60">
-            {artwork.artist}, {artwork.year}
+            {TIER_LABEL[artwork.tier]}
           </p>
         </div>
       </div>

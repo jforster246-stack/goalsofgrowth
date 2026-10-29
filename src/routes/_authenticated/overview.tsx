@@ -39,7 +39,8 @@ import { toggleHabit } from "@/lib/habits.functions";
 import { frequencyLabel, isHabitDueToday } from "@/lib/habit-schedule";
 import { StepActionsModal } from "@/components/step-actions-modal";
 import { HabitFormModal } from "@/components/habit-form-modal";
-import { artworkById, type Artwork } from "@/lib/artworks-data";
+import { artworkById, artworkTint, type Artwork } from "@/lib/artworks-data";
+import { CelestialBody } from "@/components/celestial-body";
 import { frameFor } from "@/lib/frames-data";
 import { useFontStyle } from "@/lib/font";
 import { cn } from "@/lib/utils";
@@ -49,13 +50,13 @@ export const Route = createFileRoute("/_authenticated/overview")({
   loader: ({ context }) => context.queryClient.ensureQueryData(goalsQueryOptions),
   head: () => ({
     meta: [
-      { title: "Overview — Goals of Growth" },
+      { title: "Overview - Moongrove" },
       {
         name: "description",
         content:
           "Your progress at a glance: goals completed, your goal of the day, and your sign-in streak.",
       },
-      { property: "og:title", content: "Overview — Goals of Growth" },
+      { property: "og:title", content: "Overview - Moongrove" },
       {
         property: "og:description",
         content: "Goals completed, goal of the day, and your day streak.",
@@ -109,7 +110,7 @@ function OverviewPage() {
   // Copyrighted works without a public image are skipped (they'd show blank).
   const acquiredArtworks = (purchases ?? [])
     .map((id) => artworkById(id))
-    .filter((a): a is Artwork => a !== undefined && !!a.image);
+    .filter((a): a is Artwork => a !== undefined);
 
   const today = localToday();
 
@@ -378,7 +379,7 @@ function ArtworkCarousel({
     <section className={className}>
       <div className="flex items-baseline justify-between">
         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          Your art collection
+          Your collection
         </p>
         <Link
           to="/gallery"
@@ -390,50 +391,23 @@ function ArtworkCarousel({
       </div>
       <div className="no-scrollbar mt-2 -mx-5 flex snap-x snap-mandatory items-center gap-3 overflow-x-auto px-5 pb-1">
         {artworks.map((artwork) => {
-          // Traditional: same frame height for every piece; width follows the
-          // frame's shape. Modern: no frame — fixed height, width follows the
-          // artwork's own proportions (nothing cropped).
-          const frame = frameFor(`artwork-${artwork.id}`);
-          const width = Math.round(CAROUSEL_HEIGHT * frame.ar);
           return (
             <div
               key={artwork.id}
               className="shrink-0 snap-start"
-              style={fontStyle === "modern" ? undefined : { width }}
+              style={{ width: CAROUSEL_HEIGHT }}
             >
-              {fontStyle === "modern" ? (
-                <button
-                  type="button"
-                  aria-label={`Open ${artwork.work} in your gallery`}
-                  onClick={() => setDetail(artwork)}
-                  className="block transition-transform hover:-translate-y-0.5"
-                >
-                  <img
-                    src={artwork.image}
-                    alt={artwork.work}
-                    loading="lazy"
-                    draggable={false}
-                    className="w-auto rounded-xl shadow-sm ring-1 ring-black/5"
-                    style={{ height: CAROUSEL_HEIGHT }}
-                  />
-                </button>
-              ) : (
-                <GoldFrame
-                  seed={`artwork-${artwork.id}`}
-                  ariaLabel={`Open ${artwork.work} in your gallery`}
-                  onClick={() => setDetail(artwork)}
-                >
-                  <img
-                    src={artwork.image}
-                    alt={artwork.work}
-                    loading="lazy"
-                    draggable={false}
-                    className="size-full object-cover"
-                  />
-                </GoldFrame>
-              )}
-              <p className="mt-1 truncate font-serif text-[10px] italic text-black/60">
-                {artwork.work}
+              <button
+                type="button"
+                aria-label={`Open ${artwork.name} in your gallery`}
+                onClick={() => setDetail(artwork)}
+                className="block aspect-square w-full overflow-hidden rounded-xl text-olive ring-1 ring-black/5 transition-transform hover:-translate-y-0.5"
+                style={{ background: artworkTint(artwork.id) }}
+              >
+                <CelestialBody shape={artwork.shape} className="size-full p-3" />
+              </button>
+              <p className="mt-1 truncate text-center font-serif text-[10px] italic text-black/60">
+                {artwork.name}
               </p>
             </div>
           );

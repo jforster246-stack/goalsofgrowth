@@ -10,15 +10,15 @@ export const Route = createFileRoute("/")({
   },
   head: () => ({
     meta: [
-      { title: "Goals of Growth — a quiet place to finish small things" },
+      { title: "Moongrove — a quiet place to finish small things" },
       {
         name: "description",
         content:
-          "Goals of Growth is a gentle goal tracker: create goals, break them into small steps, and check them off one calm step at a time.",
+          "Moongrove is a gentle goal tracker: create goals, break them into small steps, and check them off one calm step at a time.",
       },
       {
         property: "og:title",
-        content: "Goals of Growth — a quiet place to finish small things",
+        content: "Moongrove — a quiet place to finish small things",
       },
       {
         property: "og:description",
@@ -37,7 +37,7 @@ function Landing() {
     <div className="min-h-dvh bg-background font-body text-foreground antialiased">
       <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-5 py-10">
         <h1 className="font-display text-[44px] leading-tight text-focus">
-          Goals of Growth
+          Moongrove
         </h1>
         <p className="mt-3 text-base text-muted-foreground">
           Add a goal, break it into small steps, and tick them off. Private to

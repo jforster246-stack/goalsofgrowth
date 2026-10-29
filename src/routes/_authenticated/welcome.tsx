@@ -8,7 +8,7 @@ export const ONBOARDED_KEY = "gog-onboarded";
 
 export const Route = createFileRoute("/_authenticated/welcome")({
   head: () => ({
-    meta: [{ title: "Welcome — Goals of Growth" }],
+    meta: [{ title: "Welcome - Moongrove" }],
   }),
   component: WelcomePage,
 });

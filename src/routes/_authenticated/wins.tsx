@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_authenticated/wins")({
   }),
   head: () => ({
     meta: [
-      { title: "Wins — Goals of Growth" },
+      { title: "Wins - Moongrove" },
       {
         name: "description",
         content:

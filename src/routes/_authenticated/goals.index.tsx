@@ -30,7 +30,7 @@ export const Route = createFileRoute("/_authenticated/goals/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(goalsQueryOptions),
   head: () => ({
     meta: [
-      { title: "Your goals — Goals of Growth" },
+      { title: "Your goals - Moongrove" },
       {
         name: "description",
         content: "Every goal you're growing, with its progress and the very next small step.",
@@ -131,7 +131,13 @@ function GoalsListPage() {
       ) : (
         <div className="mt-4 space-y-4 pb-4">
           <GoalTally />
-          <div className="flex items-center justify-end">
+          <NextStepTodoList goals={order} />
+          {/* The view toggle sits right above the cards it controls, so tapping
+              it visibly changes the adjacent section. */}
+          <div className="flex items-center justify-between gap-3 pt-2">
+            <h2 className="font-heading text-xs uppercase tracking-wide text-black/40">
+              Your goals
+            </h2>
             <div
               role="group"
               aria-label="Choose how your goals are shown"
@@ -161,7 +167,6 @@ function GoalsListPage() {
               ))}
             </div>
           </div>
-          <NextStepTodoList goals={order} />
           <Reorder.Group
             as="div"
             values={order}

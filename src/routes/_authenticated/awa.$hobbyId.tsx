@@ -20,7 +20,7 @@ import { setAwaHobbyPutAway } from "@/lib/awa.functions";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/awa/$hobbyId")({
-  head: () => ({ meta: [{ title: "A While Away — Goals of Growth" }] }),
+  head: () => ({ meta: [{ title: "A While Away - Moongrove" }] }),
   component: HobbyPage,
 });
 

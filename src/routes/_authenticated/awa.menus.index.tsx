@@ -11,12 +11,12 @@ import { deleteMenu, listMenus, saveMenu } from "@/lib/menus.functions";
 export const Route = createFileRoute("/_authenticated/awa/menus/")({
   head: () => ({
     meta: [
-      { title: "Menus — Goals of Growth" },
+      { title: "Menus - Moongrove" },
       {
         name: "description",
         content: "Your own menus of activities to pick from based on the time and energy you have.",
       },
-      { property: "og:title", content: "Menus — Goals of Growth" },
+      { property: "og:title", content: "Menus - Moongrove" },
       { property: "og:description", content: "Pick what to do based on your time and energy." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

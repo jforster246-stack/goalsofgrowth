@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_authenticated/goals/new")({
     return title ? { title } : {};
   },
   head: () => ({
-    meta: [{ title: "New goal — Goals of Growth" }],
+    meta: [{ title: "New goal - Moongrove" }],
   }),
   component: NewGoalPage,
 });

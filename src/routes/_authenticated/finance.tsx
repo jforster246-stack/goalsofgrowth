@@ -32,7 +32,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/_authenticated/finance")({
   head: () => ({
     meta: [
-      { title: "Finance planner — Goals of Growth" },
+      { title: "Finance planner - Moongrove" },
       {
         name: "description",
         content:

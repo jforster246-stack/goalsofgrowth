@@ -9,7 +9,7 @@ import { checklistsQueryOptions } from "@/lib/goal-queries";
 export const Route = createFileRoute("/_authenticated/routines/")({
   head: () => ({
     meta: [
-      { title: "Routines — Goals of Growth" },
+      { title: "Routines - Moongrove" },
       {
         name: "description",
         content:

@@ -38,6 +38,7 @@ import {
   artworkById,
   artworkTint,
   dailyArtworkIds,
+  TIER_LABEL,
   type Artwork,
 } from "@/lib/artworks-data";
 import { mergeStamps, type StampView } from "@/lib/stamp-view";
@@ -46,7 +47,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/_authenticated/gallery")({
   head: () => ({
     meta: [
-      { title: "Gallery — Goals of Growth" },
+      { title: "Gallery - Moongrove" },
       {
         name: "description",
         content:
@@ -197,7 +198,7 @@ function GalleryPage() {
       <section className="mt-4">
         <div className="flex items-baseline justify-between">
           <p className="font-heading text-sm uppercase text-olive">
-            Today's artworks
+            The Observatory
           </p>
           <div className="flex items-center gap-2">
             <button
@@ -209,7 +210,7 @@ function GalleryPage() {
               {grant.isPending ? "…" : "+50"}
             </button>
             <span className="font-serif text-xs text-black/50">
-              {ARTWORK_COST} stardust each
+              New picks daily
             </span>
           </div>
         </div>
@@ -220,15 +221,15 @@ function GalleryPage() {
             const isOwned = owned.includes(id);
             return (
               <div key={id} className="flex flex-col">
-                <div className="aspect-[4/5] overflow-hidden rounded-2xl shadow-sm">
+                <div className="aspect-square overflow-hidden rounded-2xl shadow-sm">
                   <ArtworkPlacard artwork={art} />
                 </div>
                 <div className="mt-2 text-center">
                   <p className="truncate font-display text-[13px] font-medium leading-tight text-black/80">
-                    {art.work}
+                    {art.name}
                   </p>
                   <p className="truncate font-serif text-[10px] italic leading-tight text-black/55">
-                    {art.artist} · {art.year}
+                    {TIER_LABEL[art.tier]}
                   </p>
                 </div>
                 <button
@@ -246,7 +247,7 @@ function GalleryPage() {
                     "Owned"
                   ) : (
                     <>
-                      Purchase · {ARTWORK_COST}
+                      Buy · {art.cost}
                       <Stamp icon={null} accent="sea" className="size-3.5" />
                     </>
                   )}
@@ -261,8 +262,8 @@ function GalleryPage() {
       <section className="mt-6">
         <p className="font-heading text-sm uppercase text-olive">Your universe</p>
         <p className="mt-1 font-serif text-xs text-black/40">
-          Completed goals and wins, plus five spots for artworks. Swipe around to
-          explore.
+          Your completed goals and wins, with room to hang collectibles you buy.
+          Swipe around your sky to explore.
         </p>
 
         <div className="mt-3 -mx-5 overflow-auto bg-card px-5 py-6 sm:mx-0 sm:rounded-3xl">
@@ -274,24 +275,27 @@ function GalleryPage() {
               return (
                 <FrameCell
                   key={`slot-${slot}`}
-                  caption={art ? art.work : "Add artwork"}
-                  subtitle={art ? `${art.artist} · ${art.year}` : undefined}
+                  caption={art ? art.name : "Add a collectible"}
+                  subtitle={art ? TIER_LABEL[art.tier] : undefined}
                 >
-                  <GoldFrame
-                    seed={`slot-${slot}`}
-                    ariaLabel={art ? `Artwork: ${art.work}` : "Add an artwork"}
+                  <button
+                    type="button"
+                    aria-label={
+                      art ? `Collectible: ${art.name}` : "Add a collectible"
+                    }
                     onClick={() =>
                       art ? setDetailArtwork({ slot, artwork: art }) : setPickSlot(slot)
                     }
+                    className="block aspect-square w-full overflow-hidden rounded-2xl bg-card ring-1 ring-black/5 transition-transform hover:-translate-y-0.5"
                   >
                     {art ? (
                       <ArtworkPlacard artwork={art} />
                     ) : (
-                      <span className="grid size-full place-items-center bg-background/70">
-                        <Plus className="size-8 text-olive/50" strokeWidth={2} />
+                      <span className="grid size-full place-items-center">
+                        <Plus className="size-8 text-olive/40" strokeWidth={2} />
                       </span>
                     )}
-                  </GoldFrame>
+                  </button>
                 </FrameCell>
               );
             })}
@@ -387,7 +391,7 @@ function GalleryPage() {
         <ConfirmPurchaseModal
           artwork={confirmBuy}
           pending={buy.isPending}
-          canAfford={spendable >= ARTWORK_COST}
+          canAfford={spendable >= confirmBuy.cost}
           onConfirm={() => buy.mutate(confirmBuy.id)}
           onClose={() => setConfirmBuy(null)}
         />
@@ -484,16 +488,14 @@ function ConfirmPurchaseModal({
   return (
     <ModalShell title={canAfford ? "Purchase" : "Not enough stardust"} onClose={onClose}>
       <div className="mt-2 flex flex-col items-center gap-4 text-center">
-        <div className="w-40">
-          <GoldFrame seed={`buy-${artwork.id}`} ariaLabel={artwork.work}>
-            <ArtworkPlacard artwork={artwork} />
-          </GoldFrame>
+        <div className="aspect-square w-40 overflow-hidden rounded-2xl ring-1 ring-black/5">
+          <ArtworkPlacard artwork={artwork} />
         </div>
         {canAfford ? (
           <p className="font-serif text-base leading-relaxed text-black/80">
             Ready to purchase{" "}
-            <span className="font-heading text-black">{artwork.work}</span> for{" "}
-            <span className="font-heading text-olive">{ARTWORK_COST} stardust</span>?
+            <span className="font-heading text-black">{artwork.name}</span> for{" "}
+            <span className="font-heading text-olive">{artwork.cost} stardust</span>?
           </p>
         ) : (
           <p className="font-serif text-base leading-relaxed text-black/70">

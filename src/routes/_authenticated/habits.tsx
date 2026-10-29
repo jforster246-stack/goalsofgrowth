@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_authenticated/habits")({
   }),
   head: () => ({
     meta: [
-      { title: "Habits — Goals of Growth" },
+      { title: "Habits - Moongrove" },
       {
         name: "description",
         content: "Your daily habits by time of day — tick each one off and it resets for tomorrow.",

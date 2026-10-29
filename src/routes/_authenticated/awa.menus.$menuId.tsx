@@ -35,9 +35,9 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/_authenticated/awa/menus/$menuId")({
   head: () => ({
     meta: [
-      { title: "Menu — Goals of Growth" },
+      { title: "Menu - Moongrove" },
       { name: "description", content: "Choose an activity that fits your time and energy." },
-      { property: "og:title", content: "Menu — Goals of Growth" },
+      { property: "og:title", content: "Menu - Moongrove" },
       { property: "og:description", content: "Choose an activity that fits your time and energy." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

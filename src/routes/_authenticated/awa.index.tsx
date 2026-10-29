@@ -35,7 +35,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/_authenticated/awa/")({
   head: () => ({
     meta: [
-      { title: "A While Away — Goals of Growth" },
+      { title: "A While Away - Moongrove" },
       {
         name: "description",
         content:
