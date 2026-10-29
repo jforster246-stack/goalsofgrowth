@@ -217,27 +217,27 @@ export function GoalCard({
       {/* Modern style: a plain, quiet card */}
       <div className="hidden min-h-[260px] flex-col rounded-2xl bg-white p-5 shadow-sm ring-1 ring-black/5 modern:flex">
         <button type="button" onClick={onOpen} className="flex items-start gap-3 text-left">
-          <span className={cn("mg-chip mt-0.5 grid size-9 shrink-0 place-items-center rounded-xl", accent.text)}>
-            <GoalGlyph goal={goal} className="size-5" />
-          </span>
-          <span className="line-clamp-2 min-w-0 flex-1 pr-8 text-lg font-medium leading-snug text-black">
-            {goal.title}
+          <MoonPhase
+            pct={progress.pct}
+            className={cn("mt-0.5 size-10 shrink-0", accent.text)}
+          />
+          <span className="min-w-0 flex-1 pr-8">
+            <span className="line-clamp-2 block font-display text-lg leading-snug text-[#201b2f]">
+              {goal.title}
+            </span>
+            <span className="mt-1 block font-heading text-[10px] tracking-[0.12em] text-[#928e9d]">
+              {hasSteps
+                ? `${progress.pct}% · ${progress.done} of ${progress.total} steps`
+                : "No steps yet"}
+            </span>
           </span>
         </button>
-        <div className={cn("mt-4 flex items-center gap-2", accent.text)}>
-          <MoonPhase pct={progress.pct} className="size-6 shrink-0" />
-          <p className="text-xs text-black/45">
-            {hasSteps
-              ? `${progress.pct}% · ${progress.done} of ${progress.total} steps`
-              : "No steps yet"}
-          </p>
-        </div>
         {complete || !hasSteps ? (
           <>
-            <p className="mt-5 text-[11px] font-medium tracking-wide text-black/40">
+            <p className="mt-5 font-heading text-[11px] tracking-[0.12em] text-[#928e9d]">
               {complete ? "Complete" : "Next step"}
             </p>
-            <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-black">{stepText}</p>
+            <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-[#201b2f]">{stepText}</p>
             <div className="mt-auto pt-5">
               <GoalCardActions
                 variant="modern"
@@ -252,10 +252,10 @@ export function GoalCard({
         ) : (
           <div className="mt-auto flex items-end gap-3 pt-5">
             <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-medium tracking-wide text-black/40">
+              <p className="whitespace-nowrap font-heading text-[11px] tracking-[0.12em] text-[#928e9d]">
                 Next step
               </p>
-              <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-black">{stepText}</p>
+              <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-[#201b2f]">{stepText}</p>
             </div>
             <StepActionButtons
               variant="modern"
@@ -708,23 +708,18 @@ export function GoalCardCompact({
   const focusEnabled = useFocusTimerEnabled();
 
   return (
-    <div className="card-goal flex h-full flex-col gap-3 rounded-3xl p-3 shadow-sm">
+    <div className="flex h-full flex-col gap-3 rounded-3xl bg-white p-3 shadow-sm ring-1 ring-black/5">
       {dragHandle}
       <button
         type="button"
         onClick={onOpen}
-        className="flex flex-1 flex-col gap-3 text-left"
+        className="flex flex-1 flex-col gap-2.5 text-left"
       >
-        {/* Lock-up: icon + moon progress */}
-        <div className="flex items-center justify-between gap-2 rounded-2xl bg-white/85 px-2.5 py-2 shadow-sm">
-          <span className="tile-pink grid size-8 shrink-0 place-items-center rounded-lg text-[#4f1506]">
-            <GoalGlyph goal={goal} className="size-5" />
-          </span>
-          <span className="flex items-center gap-1 text-[#201b2f]">
-            <MoonPhase pct={progress.pct} className="size-5 shrink-0" />
-            <span className="font-heading text-[9px] tracking-wide text-[#928e9d]">
-              {progress.complete ? "Done" : `${progress.pct}%`}
-            </span>
+        {/* Lock-up: moon progress stands in for the icon */}
+        <div className="flex items-center gap-1.5 text-[#201b2f]">
+          <MoonPhase pct={progress.pct} className={cn("size-7 shrink-0", accent.text)} />
+          <span className="font-heading text-[9px] tracking-[0.12em] text-[#928e9d]">
+            {progress.complete ? "Done" : `${progress.pct}%`}
           </span>
         </div>
 
