@@ -228,7 +228,9 @@ function HabitSection({
   return (
     <section>
       <div className="flex items-center gap-1.5">
-        <Motif id={TIME_MOTIF[time.key]} className={cn("size-4", time.color)} />
+        <span className={cn("mg-chip grid size-6 place-items-center rounded-lg", time.color)}>
+          <Motif id={TIME_MOTIF[time.key]} className="size-3.5" />
+        </span>
         <p className="font-heading text-sm uppercase text-olive">{time.label}</p>
         {isNow && (
           <span className="rounded-full bg-olive px-2 py-0.5 font-heading text-[9px] uppercase tracking-wide text-white">

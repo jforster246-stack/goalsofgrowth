@@ -663,10 +663,14 @@ export function HabitRow({
         aria-label={`Edit ${name}`}
         className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
       >
-        <Motif
-          id={icon || TIME_MOTIF[timeOfDay]}
-          className={cn("size-8 shrink-0", HABIT_ICON_COLOR[timeOfDay])}
-        />
+        <span
+          className={cn(
+            "mg-chip grid size-9 shrink-0 place-items-center rounded-xl",
+            HABIT_ICON_COLOR[timeOfDay],
+          )}
+        >
+          <Motif id={icon || TIME_MOTIF[timeOfDay]} className="size-5" />
+        </span>
         <span className="flex min-w-0 flex-col">
           <span
             className={cn(
