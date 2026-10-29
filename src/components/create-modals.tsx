@@ -80,7 +80,7 @@ export function RoutineFormModal({ onClose }: { onClose: () => void }) {
 
   return (
     <Sheet title="New routine" onClose={onClose}>
-      <label className="mt-6 block font-heading text-sm uppercase text-olive">
+      <label className="mt-6 block font-heading text-sm text-olive">
         Name
       </label>
       <input
@@ -92,7 +92,7 @@ export function RoutineFormModal({ onClose }: { onClose: () => void }) {
         className="mt-2 w-full rounded-2xl bg-black/5 px-4 py-3 font-serif text-base placeholder:text-black/40 focus:outline-none focus:ring-1 focus:ring-olive/40"
       />
 
-      <p className="mt-6 font-heading text-sm uppercase text-olive">Steps</p>
+      <p className="mt-6 font-heading text-sm text-olive">Steps</p>
       <p className="mt-1 font-serif text-sm text-black/50">
         Add a few now, or more later. (optional)
       </p>
@@ -147,7 +147,7 @@ export function RoutineFormModal({ onClose }: { onClose: () => void }) {
         type="button"
         onClick={() => create.mutate()}
         disabled={!canCreate}
-        className="mt-6 w-full rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
+        className="mt-6 w-full rounded-2xl bg-olive py-3.5 font-heading text-sm text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
       >
         {create.isPending ? "Creating…" : "Create routine"}
       </button>
@@ -191,7 +191,7 @@ export function BrainDumpQuickModal({ onClose }: { onClose: () => void }) {
         type="button"
         onClick={() => add.mutate()}
         disabled={!canAdd}
-        className="mt-4 w-full rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
+        className="mt-4 w-full rounded-2xl bg-olive py-3.5 font-heading text-sm text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
       >
         {add.isPending ? "Adding…" : "Add to brain dump"}
       </button>

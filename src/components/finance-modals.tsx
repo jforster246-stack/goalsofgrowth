@@ -77,7 +77,7 @@ function Field({
   return (
     <label className="mt-5 block">
       <span className="flex items-baseline justify-between">
-        <span className="font-heading text-sm uppercase text-olive">{label}</span>
+        <span className="font-heading text-sm text-olive">{label}</span>
         {optional && <span className="font-serif text-xs italic text-black/40">optional</span>}
       </span>
       {children}
@@ -128,7 +128,7 @@ function Actions({
       <button
         type="submit"
         disabled={disabled}
-        className="mt-7 w-full rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
+        className="mt-7 w-full rounded-2xl bg-olive py-3.5 font-heading text-sm text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
       >
         {saveLabel}
       </button>
@@ -137,7 +137,7 @@ function Actions({
           type="button"
           onClick={onDelete}
           disabled={deleting}
-          className="mt-2 w-full rounded-2xl py-3 font-heading text-sm uppercase text-clay-deep transition-colors hover:bg-clay/10 disabled:opacity-40"
+          className="mt-2 w-full rounded-2xl py-3 font-heading text-sm text-clay-deep transition-colors hover:bg-clay/10 disabled:opacity-40"
         >
           {deleting ? "Deleting…" : "Delete"}
         </button>
@@ -208,7 +208,7 @@ export function PayModal({
               onClick={() => setCycle(c)}
               aria-pressed={cycle === c}
               className={cn(
-                "rounded-2xl py-2.5 font-heading text-xs uppercase transition-colors",
+                "rounded-2xl py-2.5 font-heading text-xs transition-colors",
                 cycle === c ? "bg-olive text-white" : "bg-black/5 text-black/50",
               )}
             >
@@ -333,7 +333,7 @@ export function EntryModal({
                   onClick={() => setGroup(g)}
                   aria-pressed={group === g}
                   className={cn(
-                    "rounded-2xl py-2.5 font-heading text-xs uppercase transition-colors",
+                    "rounded-2xl py-2.5 font-heading text-xs transition-colors",
                     group === g ? "bg-olive text-white" : "bg-black/5 text-black/50",
                   )}
                 >
@@ -509,7 +509,7 @@ export function SavingsGoalModal({
             <button
               type="button"
               onClick={() => setTargetDate("")}
-              className="shrink-0 px-2 font-heading text-[11px] uppercase text-black/45 hover:text-black/70"
+              className="shrink-0 px-2 font-heading text-[11px] text-black/45 hover:text-black/70"
             >
               Clear
             </button>

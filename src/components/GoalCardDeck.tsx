@@ -185,7 +185,7 @@ export function GoalCardDeck({
         type="button"
         variant="ghost"
         onClick={() => setView((current) => (current === "deck" ? "grid" : "deck"))}
-        className="mx-auto mt-6 flex h-10 rounded-full px-5 text-[11px] font-semibold uppercase text-focus"
+        className="mx-auto mt-6 flex h-10 rounded-full px-5 text-[11px] font-semibold text-focus"
       >
         {view === "deck" ? "See all goals grid" : "See swipeable cards"}
       </Button>
@@ -256,7 +256,7 @@ function DeckCard({
       </div>
 
       <div className="flex flex-1 flex-col p-6">
-        <p className="text-[11px] font-semibold uppercase text-muted-foreground">{complete ? "Completed" : "Next step:"}</p>
+        <p className="text-[11px] font-semibold text-muted-foreground">{complete ? "Completed" : "Next step:"}</p>
         <p className="mt-2 line-clamp-2 min-h-12 text-lg font-medium leading-snug">
           {complete ? "Every step is done — beautiful work." : nextStep?.title ?? "Add your first small step."}
         </p>
@@ -314,7 +314,7 @@ function GridGoalCard({
         <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
           <div className={`h-full rounded-full ${accent.bar} transition-[width] duration-500`} style={{ width: `${pct}%` }} />
         </div>
-        <p className="mt-3 text-[11px] font-semibold uppercase text-muted-foreground">{complete ? "Completed" : "Next step:"}</p>
+        <p className="mt-3 text-[11px] font-semibold text-muted-foreground">{complete ? "Completed" : "Next step:"}</p>
       </Link>
       {nextStep ? (
         <div className="mt-1 flex items-center gap-2">

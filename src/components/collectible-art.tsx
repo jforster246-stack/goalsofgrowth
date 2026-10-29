@@ -50,7 +50,7 @@ export function TarotCard({ card }: { card: TarotCardData }) {
         <div className="pointer-events-none absolute inset-[4%] rounded-sm ring-1 ring-current/40" />
         <span className="font-serif text-[9px] leading-none">{card.num}</span>
         <MysticalSymbol id={card.emblem} className="h-[46%] w-[46%]" />
-        <span className="px-0.5 text-center font-heading text-[6.5px] uppercase leading-tight tracking-wide">
+        <span className="px-0.5 text-center font-heading text-[6.5px] leading-tight tracking-wide">
           {card.name}
         </span>
       </div>

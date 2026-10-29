@@ -80,7 +80,7 @@ export function WelcomePage() {
           <button
             type="button"
             onClick={finish}
-            className="font-heading text-xs uppercase tracking-wide text-black/40 transition-colors hover:text-black/70"
+            className="font-heading text-xs tracking-wide text-black/40 transition-colors hover:text-black/70"
           >
             Skip
           </button>
@@ -113,7 +113,7 @@ export function WelcomePage() {
           {index === 3 && (
             <span className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-sm">
               <Stamp className="size-4 text-clay-deep" strokeWidth={2} />
-              <span className="font-heading text-[11px] uppercase text-olive">
+              <span className="font-heading text-[11px] text-olive">
                 A star per goal
               </span>
             </span>
@@ -121,7 +121,7 @@ export function WelcomePage() {
           {index === 1 && (
             <span className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-sm">
               <Timer className="size-4 text-olive" strokeWidth={2} />
-              <span className="font-heading text-[11px] uppercase text-olive">
+              <span className="font-heading text-[11px] text-olive">
                 Focus timer built in
               </span>
             </span>
@@ -147,7 +147,7 @@ export function WelcomePage() {
             <button
               type="button"
               onClick={() => setIndex((i) => i - 1)}
-              className="rounded-2xl px-5 py-3.5 font-heading text-sm uppercase text-black/50 transition-colors hover:text-black/80"
+              className="rounded-2xl px-5 py-3.5 font-heading text-sm text-black/50 transition-colors hover:text-black/80"
             >
               Back
             </button>
@@ -155,7 +155,7 @@ export function WelcomePage() {
           <button
             type="button"
             onClick={next}
-            className="flex-1 rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90"
+            className="flex-1 rounded-2xl bg-olive py-3.5 font-heading text-sm text-white shadow-sm transition-colors hover:bg-olive/90"
           >
             {isLast ? "Get started" : "Next"}
           </button>

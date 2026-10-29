@@ -59,7 +59,7 @@ export function StepActionsModal({
                 onGoToGoal();
                 onClose();
               }}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white transition-colors hover:bg-olive/90"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-olive py-3.5 font-heading text-sm text-white transition-colors hover:bg-olive/90"
             >
               Go to this goal
               <ArrowRight className="size-5" strokeWidth={2} />
@@ -72,7 +72,7 @@ export function StepActionsModal({
                 onRename(trimmed);
                 onClose();
               }}
-              className="w-full rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white transition-colors hover:bg-olive/90 disabled:opacity-40"
+              className="w-full rounded-2xl bg-olive py-3.5 font-heading text-sm text-white transition-colors hover:bg-olive/90 disabled:opacity-40"
             >
               Save changes
             </button>
@@ -84,7 +84,7 @@ export function StepActionsModal({
               onToggle();
               onClose();
             }}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-sage/60 py-3.5 font-heading text-sm uppercase text-white transition-colors hover:bg-sage/80"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-sage/60 py-3.5 font-heading text-sm text-white transition-colors hover:bg-sage/80"
           >
             <Check className="size-5" strokeWidth={2} />
             {done ? "Mark not done" : "Mark as done"}
@@ -93,7 +93,7 @@ export function StepActionsModal({
           <button
             type="button"
             onClick={() => onAddAsHabit(trimmed || title)}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-black/5 py-3.5 font-heading text-sm uppercase text-black/70 transition-colors hover:bg-black/10"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-black/5 py-3.5 font-heading text-sm text-black/70 transition-colors hover:bg-black/10"
           >
             <Repeat className="size-5" strokeWidth={2} />
             Add this as a habit
@@ -105,7 +105,7 @@ export function StepActionsModal({
               onDelete();
               onClose();
             }}
-            className="flex w-full items-center justify-center gap-2 py-2 font-heading text-sm uppercase text-clay-deep transition-opacity hover:opacity-70"
+            className="flex w-full items-center justify-center gap-2 py-2 font-heading text-sm text-clay-deep transition-opacity hover:opacity-70"
           >
             <Trash2 className="size-4" strokeWidth={2} />
             Delete step

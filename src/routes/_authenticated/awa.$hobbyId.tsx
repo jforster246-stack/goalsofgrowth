@@ -62,7 +62,7 @@ export function HobbyView({ hobbyId }: { hobbyId: string }) {
           <p className="font-serif text-sm text-black/55">This hobby isn't on your shelf.</p>
           <Link
             to="/awa"
-            className="mt-4 inline-block rounded-2xl bg-olive px-5 py-3 font-heading text-sm uppercase text-white"
+            className="mt-4 inline-block rounded-2xl bg-olive px-5 py-3 font-heading text-sm text-white"
           >
             Back to the shelf
           </Link>
@@ -111,7 +111,7 @@ export function HobbyView({ hobbyId }: { hobbyId: string }) {
             <button
               type="button"
               onClick={() => bringBack.mutate()}
-              className="mt-2 rounded-full bg-olive px-4 py-2 font-heading text-xs uppercase text-white"
+              className="mt-2 rounded-full bg-olive px-4 py-2 font-heading text-xs text-white"
             >
               Bring it back to the shelf
             </button>
@@ -120,7 +120,7 @@ export function HobbyView({ hobbyId }: { hobbyId: string }) {
           <button
             type="button"
             onClick={() => setLogging(true)}
-            className="flex w-full items-center justify-center gap-1.5 rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90"
+            className="flex w-full items-center justify-center gap-1.5 rounded-2xl bg-olive py-3.5 font-heading text-sm text-white shadow-sm transition-colors hover:bg-olive/90"
           >
             <Plus className="size-4" strokeWidth={2.5} />
             Log a little time
@@ -138,7 +138,7 @@ export function HobbyView({ hobbyId }: { hobbyId: string }) {
               <button
                 type="button"
                 onClick={() => setLogging(true)}
-                className="mt-4 font-heading text-xs uppercase text-olive underline-offset-4 hover:underline"
+                className="mt-4 font-heading text-xs text-olive underline-offset-4 hover:underline"
               >
                 Log something
               </button>
@@ -160,7 +160,7 @@ export function HobbyView({ hobbyId }: { hobbyId: string }) {
                 >
                   {photo && <img src={photo} alt="" className="max-h-80 w-full object-cover" />}
                   <span className="block px-4 py-3">
-                    <span className="block font-heading text-xs uppercase tracking-wide text-black/55">
+                    <span className="block font-heading text-xs tracking-wide text-black/55">
                       {longDate(l.logged_on)}
                     </span>
                     {when && (

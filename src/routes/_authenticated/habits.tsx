@@ -165,7 +165,7 @@ function HabitsBody({
         <button
           type="button"
           onClick={onAdd}
-          className="mt-5 inline-flex items-center gap-1.5 rounded-2xl bg-olive px-5 py-2.5 font-heading text-sm uppercase text-white transition-colors hover:bg-olive/90"
+          className="mt-5 inline-flex items-center gap-1.5 rounded-2xl bg-olive px-5 py-2.5 font-heading text-sm text-white transition-colors hover:bg-olive/90"
         >
           <Plus className="size-4" strokeWidth={2} />
           Add a habit
@@ -231,9 +231,9 @@ function HabitSection({
         <span className={cn("mg-chip grid size-6 place-items-center rounded-lg", time.color)}>
           <Motif id={TIME_MOTIF[time.key]} className="size-3.5" />
         </span>
-        <p className="font-heading text-sm uppercase text-olive">{time.label}</p>
+        <p className="font-heading text-sm text-olive">{time.label}</p>
         {isNow && (
-          <span className="rounded-full bg-olive px-2 py-0.5 font-heading text-[9px] uppercase tracking-wide text-white">
+          <span className="rounded-full bg-olive px-2 py-0.5 font-heading text-[9px] tracking-wide text-white">
             Now
           </span>
         )}
@@ -264,7 +264,7 @@ function HabitSection({
           <button
             type="button"
             onClick={() => setShowDone((v) => !v)}
-            className="font-heading text-[11px] uppercase text-black/40 transition-colors hover:text-black/70"
+            className="font-heading text-[11px] text-black/40 transition-colors hover:text-black/70"
           >
             {showDone ? "Hide done" : `Done today (${completed.length})`}
           </button>
@@ -289,7 +289,7 @@ function NotTodaySection({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="font-heading text-[11px] uppercase text-black/40 transition-colors hover:text-black/70"
+        className="font-heading text-[11px] text-black/40 transition-colors hover:text-black/70"
       >
         {open ? "Hide" : `Not due today (${habits.length})`}
       </button>
@@ -303,7 +303,7 @@ function NotTodaySection({
               className="flex w-full items-center justify-between rounded-2xl bg-white/60 px-4 py-3 text-left"
             >
               <span className="font-serif text-sm text-black/60">{h.name}</span>
-              <span className="font-heading text-[10px] uppercase text-black/40">
+              <span className="font-heading text-[10px] text-black/40">
                 {frequencyLabel(h)}
               </span>
             </button>
@@ -351,7 +351,7 @@ function ScheduledHabitsSection({
     <section>
       <div className="flex items-center gap-1.5">
         <CalendarClock className="size-4 text-olive" strokeWidth={2} />
-        <p className="font-heading text-sm uppercase text-olive">Scheduled habits</p>
+        <p className="font-heading text-sm text-olive">Scheduled habits</p>
       </div>
       <p className="mt-1 font-serif text-xs text-black/40">
         Habits that come around on their own days — tap one to change its rhythm or starting date.
@@ -369,12 +369,12 @@ function ScheduledHabitsSection({
                 {habit.icon ? <Motif id={habit.icon} className="size-4 shrink-0 text-olive" /> : null}
                 <span className="truncate">{habit.name}</span>
               </span>
-              <span className="mt-0.5 block font-heading text-[10px] uppercase text-black/45">
+              <span className="mt-0.5 block font-heading text-[10px] text-black/45">
                 {from ? `From ${shortDate(from)} · ` : ""}
                 {next ? `Next ${shortDate(next)}` : "No start date set"}
               </span>
             </span>
-            <span className="shrink-0 rounded-full bg-black/[0.05] px-2.5 py-1 font-heading text-[10px] uppercase text-black/60">
+            <span className="shrink-0 rounded-full bg-black/[0.05] px-2.5 py-1 font-heading text-[10px] text-black/60">
               {frequencyLabel(habit)}
             </span>
           </button>

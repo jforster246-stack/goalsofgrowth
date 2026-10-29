@@ -122,7 +122,7 @@ function GoalsListPage() {
           <button
             type="button"
             onClick={() => navigate({ to: "/goals/new" })}
-            className="mt-5 inline-flex items-center gap-1.5 rounded-2xl bg-olive px-5 py-2.5 font-heading text-sm uppercase text-white transition-colors hover:bg-olive/90"
+            className="mt-5 inline-flex items-center gap-1.5 rounded-2xl bg-olive px-5 py-2.5 font-heading text-sm text-white transition-colors hover:bg-olive/90"
           >
             <Plus className="size-4" strokeWidth={2} />
             New dream
@@ -135,7 +135,7 @@ function GoalsListPage() {
           {/* The view toggle sits right above the cards it controls, so tapping
               it visibly changes the adjacent section. */}
           <div className="flex items-center justify-between gap-3 pt-2">
-            <h2 className="font-heading text-[11px] uppercase tracking-[0.12em] text-[#928e9d]">
+            <h2 className="font-heading text-[11px] tracking-[0.12em] text-[#928e9d]">
               Your dreams
             </h2>
             <div
@@ -155,7 +155,7 @@ function GoalsListPage() {
                   onClick={() => chooseView(id)}
                   aria-pressed={view === id}
                   className={cn(
-                    "flex items-center gap-1.5 rounded-full px-3 py-1.5 font-heading text-[11px] uppercase tracking-wide transition-colors",
+                    "flex items-center gap-1.5 rounded-full px-3 py-1.5 font-heading text-[11px] tracking-wide transition-colors",
                     view === id
                       ? "bg-focus text-white"
                       : "text-muted-foreground hover:text-foreground",
@@ -192,7 +192,7 @@ function GoalsListPage() {
               <button
                 type="button"
                 onClick={() => setShowCompleted((v) => !v)}
-                className="flex w-full items-center justify-between font-heading text-[11px] uppercase tracking-[0.12em] text-[#928e9d] transition-colors hover:text-[#201b2f]"
+                className="flex w-full items-center justify-between font-heading text-[11px] tracking-[0.12em] text-[#928e9d] transition-colors hover:text-[#201b2f]"
               >
                 <span>Completed dreams ({archived.length})</span>
                 <span>{showCompleted ? "Hide" : "Show"}</span>
@@ -373,7 +373,7 @@ function ArchivedGoalRow({ goal }: { goal: Goal }) {
       <button
         type="button"
         onClick={() => unarchive.mutate()}
-        className="shrink-0 font-heading text-[11px] uppercase text-olive transition-opacity hover:opacity-70"
+        className="shrink-0 font-heading text-[11px] text-olive transition-opacity hover:opacity-70"
       >
         Restore
       </button>
@@ -392,7 +392,7 @@ function NextStepTodoList({ goals }: { goals: Goal[] }) {
 
   return (
     <section aria-label="Next steps to do">
-      <h2 className="mb-2 font-heading text-[11px] uppercase tracking-[0.12em] text-[#928e9d]">
+      <h2 className="mb-2 font-heading text-[11px] tracking-[0.12em] text-[#928e9d]">
         Next steps
       </h2>
       <div className="space-y-2">
@@ -453,7 +453,7 @@ function NextStepTodoRow({ goal }: { goal: Goal }) {
         <span className="line-clamp-2 block font-display text-base leading-snug text-[#201b2f]">
           {next?.title}
         </span>
-        <span className={cn("mt-0.5 block truncate font-heading text-[10px] uppercase tracking-[0.12em]", accent.text)}>
+        <span className={cn("mt-0.5 block truncate font-heading text-[10px] tracking-[0.12em]", accent.text)}>
           {goal.title}
         </span>
       </button>

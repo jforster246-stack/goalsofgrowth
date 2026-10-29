@@ -22,7 +22,7 @@ export function IconPicker({
         onClick={() => onChange(null)}
         aria-pressed={!value}
         className={cn(
-          "grid h-10 place-items-center rounded-xl px-3 font-heading text-xs uppercase transition-colors",
+          "grid h-10 place-items-center rounded-xl px-3 font-heading text-xs transition-colors",
           !value
             ? "bg-olive text-white"
             : "bg-black/5 text-black/60 hover:bg-black/10",

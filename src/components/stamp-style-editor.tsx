@@ -19,7 +19,7 @@ export function StampStyleEditor({
 }) {
   return (
     <div>
-      <p className="font-heading text-sm uppercase text-olive">Colour</p>
+      <p className="font-heading text-sm text-olive">Colour</p>
       <div className="mt-2 flex flex-wrap gap-3">
         {GOAL_ACCENTS.map((a) => (
           <button
@@ -41,7 +41,7 @@ export function StampStyleEditor({
         ))}
       </div>
 
-      <p className="mt-4 font-heading text-sm uppercase text-olive">Icon</p>
+      <p className="mt-4 font-heading text-sm text-olive">Icon</p>
       <div className="mt-2">
         <IconPicker value={icon} onChange={onIcon} defaultLabel={defaultLabel} />
       </div>

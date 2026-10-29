@@ -186,7 +186,7 @@ function RoutineEditor({ list }: { list: Checklist }) {
           type="button"
           onClick={() => resetMutation.mutate()}
           disabled={doneCount === 0}
-          className="flex items-center gap-1 rounded-full bg-black/5 px-3 py-1.5 font-heading text-[11px] uppercase text-black/60 transition-colors hover:bg-black/10 disabled:opacity-40"
+          className="flex items-center gap-1 rounded-full bg-black/5 px-3 py-1.5 font-heading text-[11px] text-black/60 transition-colors hover:bg-black/10 disabled:opacity-40"
         >
           <RotateCcw className="size-3.5" strokeWidth={2} />
           Reset
@@ -239,7 +239,7 @@ function RoutineEditor({ list }: { list: Checklist }) {
       <button
         type="button"
         onClick={() => deleteMutation.mutate()}
-        className="mt-8 flex w-full items-center justify-center gap-2 py-2 font-heading text-sm uppercase text-black/40 transition-colors hover:text-clay-deep"
+        className="mt-8 flex w-full items-center justify-center gap-2 py-2 font-heading text-sm text-black/40 transition-colors hover:text-clay-deep"
       >
         <Trash2 className="size-4" strokeWidth={2} />
         Delete routine

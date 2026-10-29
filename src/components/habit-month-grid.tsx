@@ -161,9 +161,9 @@ export function HabitMonthGrid() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           <Grid3X3 className="size-4 text-olive" strokeWidth={2} />
-          <p className="font-heading text-sm uppercase text-olive">Tracker</p>
+          <p className="font-heading text-sm text-olive">Tracker</p>
         </div>
-        <div className="flex rounded-full bg-black/5 p-0.5 font-heading text-[11px] uppercase">
+        <div className="flex rounded-full bg-black/5 p-0.5 font-heading text-[11px]">
           {(["week", "month"] as const).map((v) => (
             <button
               key={v}
@@ -215,7 +215,7 @@ function NavBar({
       >
         <ChevronLeft className="size-4 text-olive" strokeWidth={2} />
       </button>
-      <span className="min-w-36 text-center font-heading text-xs uppercase text-black/60">
+      <span className="min-w-36 text-center font-heading text-xs text-black/60">
         {label}
       </span>
       <button
@@ -495,7 +495,7 @@ export function HabitTracker() {
           type="button"
           onClick={toggleOpen}
           aria-expanded={open}
-          className="font-heading text-[11px] uppercase text-black/45 transition-colors hover:text-olive"
+          className="font-heading text-[11px] text-black/45 transition-colors hover:text-olive"
         >
           {open ? "Hide full tracker" : "See full tracker"}
         </button>
@@ -530,7 +530,7 @@ function WeekStrip() {
   return (
     <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
       <div className="flex items-center justify-between px-1">
-        <p className="font-heading text-xs uppercase text-olive">This week</p>
+        <p className="font-heading text-xs text-olive">This week</p>
         <p className="font-mono text-[11px] text-black/40">
           {counts.reduce((a, b) => a + b, 0)} ticked
         </p>

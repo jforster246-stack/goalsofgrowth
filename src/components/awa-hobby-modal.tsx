@@ -126,7 +126,7 @@ export function AwaHobbyModal({
         </div>
 
         <label className="mt-5 block">
-          <span className="font-heading text-sm uppercase text-olive">Hobby</span>
+          <span className="font-heading text-sm text-olive">Hobby</span>
           <input
             autoFocus={!editing}
             value={name}
@@ -139,7 +139,7 @@ export function AwaHobbyModal({
 
         <label className="mt-5 block">
           <span className="flex items-baseline justify-between">
-            <span className="font-heading text-sm uppercase text-olive">A few words</span>
+            <span className="font-heading text-sm text-olive">A few words</span>
             <span className="font-serif text-xs italic text-black/40">optional</span>
           </span>
           <input
@@ -151,7 +151,7 @@ export function AwaHobbyModal({
           />
         </label>
 
-        <p className="mt-5 font-heading text-sm uppercase text-olive">Colour</p>
+        <p className="mt-5 font-heading text-sm text-olive">Colour</p>
         <div className="mt-2 flex gap-3">
           {GOAL_ACCENTS.map((a) => (
             <button
@@ -172,7 +172,7 @@ export function AwaHobbyModal({
         </div>
 
         <div className="mt-5 flex items-baseline justify-between">
-          <p className="font-heading text-sm uppercase text-olive">Icon</p>
+          <p className="font-heading text-sm text-olive">Icon</p>
           <label className="flex items-center gap-2 font-serif text-xs text-black/45">
             or an emoji
             <input
@@ -201,7 +201,7 @@ export function AwaHobbyModal({
         <button
           type="submit"
           disabled={!canSave}
-          className="mt-7 w-full rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
+          className="mt-7 w-full rounded-2xl bg-olive py-3.5 font-heading text-sm text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
         >
           {save.isPending ? "Saving…" : editing ? "Save" : "Add to my shelf"}
         </button>
@@ -212,7 +212,7 @@ export function AwaHobbyModal({
               type="button"
               onClick={() => putAway.mutate()}
               disabled={putAway.isPending}
-              className="mt-2 w-full rounded-2xl py-3 font-heading text-sm uppercase text-black/50 transition-colors hover:bg-black/5 disabled:opacity-40"
+              className="mt-2 w-full rounded-2xl py-3 font-heading text-sm text-black/50 transition-colors hover:bg-black/5 disabled:opacity-40"
             >
               {putAway.isPending ? "Putting away…" : "Put away"}
             </button>

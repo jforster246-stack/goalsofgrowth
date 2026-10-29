@@ -280,7 +280,7 @@ function MenuBody({
       )}
 
       <div className="mt-5 flex items-center justify-between">
-        <p className="font-heading text-sm uppercase tracking-wide text-olive">
+        <p className="font-heading text-sm tracking-wide text-olive">
           {filtering ? `Fits right now (${matches.length})` : `Hobbies (${items.length})`}
         </p>
         <button
@@ -476,7 +476,7 @@ function SourceGroup({
   if (!rows.length) return null;
   return (
     <div>
-      <p className="mb-1.5 font-heading text-xs uppercase tracking-wide text-olive">{title}</p>
+      <p className="mb-1.5 font-heading text-xs tracking-wide text-olive">{title}</p>
       <ul className="max-h-56 space-y-1 overflow-y-auto">
         {rows.map((r) => {
           const isAdded = r.added || added.has(r.key);

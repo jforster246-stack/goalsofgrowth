@@ -67,7 +67,7 @@ export function GoalEditModal({
         </div>
 
         {/* Name */}
-        <label className="mt-5 block font-heading text-sm uppercase text-olive">
+        <label className="mt-5 block font-heading text-sm text-olive">
           Name
         </label>
         <textarea
@@ -80,7 +80,7 @@ export function GoalEditModal({
         />
 
         {/* Colour */}
-        <p className="mt-4 font-heading text-sm uppercase text-olive">Colour</p>
+        <p className="mt-4 font-heading text-sm text-olive">Colour</p>
         <div className="mt-2 flex gap-3">
           {GOAL_ACCENTS.map((a) => (
             <button
@@ -103,7 +103,7 @@ export function GoalEditModal({
         </div>
 
         {/* Icon */}
-        <p className="mt-4 font-heading text-sm uppercase text-olive">Icon</p>
+        <p className="mt-4 font-heading text-sm text-olive">Icon</p>
         <div className="mt-2">
           <IconPicker value={icon} onChange={setIcon} defaultLabel="Star" />
         </div>
@@ -113,7 +113,7 @@ export function GoalEditModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-2xl px-5 py-3.5 font-heading text-sm uppercase text-black/50 transition-colors hover:text-black/80"
+            className="rounded-2xl px-5 py-3.5 font-heading text-sm text-black/50 transition-colors hover:text-black/80"
           >
             Cancel
           </button>
@@ -121,7 +121,7 @@ export function GoalEditModal({
             type="button"
             onClick={() => save.mutate()}
             disabled={save.isPending}
-            className="flex-1 rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
+            className="flex-1 rounded-2xl bg-olive py-3.5 font-heading text-sm text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
           >
             {save.isPending ? "Saving…" : "Save changes"}
           </button>

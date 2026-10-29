@@ -40,7 +40,7 @@ function MorningPagesDialog({ onClose }: { onClose: () => void }) {
             type="button"
             autoFocus
             onClick={onClose}
-            className="rounded-2xl bg-black/5 py-3 font-heading text-sm uppercase text-black/60 transition-colors hover:bg-black/10"
+            className="rounded-2xl bg-black/5 py-3 font-heading text-sm text-black/60 transition-colors hover:bg-black/10"
           >
             No
           </button>
@@ -50,7 +50,7 @@ function MorningPagesDialog({ onClose }: { onClose: () => void }) {
               window.open(MORNING_PAGES_URL, "_blank", "noopener,noreferrer");
               onClose();
             }}
-            className="rounded-2xl bg-olive py-3 font-heading text-sm uppercase text-white transition-colors hover:bg-olive/90"
+            className="rounded-2xl bg-olive py-3 font-heading text-sm text-white transition-colors hover:bg-olive/90"
           >
             Yes
           </button>
@@ -68,7 +68,7 @@ export function MorningPagesLink() {
       <button
         type="button"
         onClick={ask}
-        className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left font-heading text-sm uppercase tracking-wide text-muted-foreground transition-colors hover:bg-muted/50"
+        className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left font-heading text-sm tracking-wide text-muted-foreground transition-colors hover:bg-muted/50"
       >
         <NotebookPen className="size-5" strokeWidth={2} />
         Morning pages

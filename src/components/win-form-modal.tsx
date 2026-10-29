@@ -147,7 +147,7 @@ export function WinFormModal({
           </button>
         </div>
 
-        <label className="mt-6 block font-heading text-sm uppercase text-olive">
+        <label className="mt-6 block font-heading text-sm text-olive">
           What happened
         </label>
         <input
@@ -159,7 +159,7 @@ export function WinFormModal({
           className="mt-2 w-full rounded-2xl bg-black/5 px-4 py-3 font-serif text-sm placeholder:text-black/40 focus:outline-none focus:ring-1 focus:ring-olive/40"
         />
 
-        <p className="mt-5 font-heading text-sm uppercase text-olive">Type</p>
+        <p className="mt-5 font-heading text-sm text-olive">Type</p>
         <div className="mt-2 grid grid-cols-2 gap-2">
           {KINDS.map((k) => {
             const active = kind === k.key;
@@ -170,7 +170,7 @@ export function WinFormModal({
                 onClick={() => setKind(k.key)}
                 aria-pressed={active}
                 className={cn(
-                  "flex items-center justify-center gap-1.5 rounded-2xl py-2.5 font-heading text-xs uppercase transition-colors",
+                  "flex items-center justify-center gap-1.5 rounded-2xl py-2.5 font-heading text-xs transition-colors",
                   active ? "bg-olive text-white" : "bg-black/5 text-black/50",
                 )}
               >
@@ -198,7 +198,7 @@ export function WinFormModal({
           />
         </div>
 
-        <label className="mt-5 block font-heading text-sm uppercase text-olive">
+        <label className="mt-5 block font-heading text-sm text-olive">
           When
         </label>
         <input
@@ -210,7 +210,7 @@ export function WinFormModal({
         />
 
         <div className="mt-5 flex items-baseline justify-between">
-          <p className="font-heading text-sm uppercase text-olive">Note</p>
+          <p className="font-heading text-sm text-olive">Note</p>
           <span className="font-serif text-xs italic text-black/40">optional</span>
         </div>
         <textarea
@@ -225,7 +225,7 @@ export function WinFormModal({
         <button
           type="submit"
           disabled={!title.trim() || busy}
-          className="mt-6 w-full rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
+          className="mt-6 w-full rounded-2xl bg-olive py-3.5 font-heading text-sm text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
         >
           {busy ? "Saving…" : isEdit ? "Save changes" : "Save win"}
         </button>
@@ -237,7 +237,7 @@ export function WinFormModal({
               if (!busy) deleteMutation.mutate(win.id);
             }}
             disabled={busy}
-            className="mt-2 flex w-full items-center justify-center gap-1.5 py-2 font-heading text-sm uppercase text-black/40 transition-colors hover:text-clay-deep disabled:opacity-40"
+            className="mt-2 flex w-full items-center justify-center gap-1.5 py-2 font-heading text-sm text-black/40 transition-colors hover:text-clay-deep disabled:opacity-40"
           >
             <Trash2 className="size-4" strokeWidth={2} />
             Delete win

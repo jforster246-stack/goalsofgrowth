@@ -101,7 +101,7 @@ export function FocusMode({
                   <div className="flex items-center gap-1.5">
                     <AccentStar fillClass={t.accentClass} />
                     <p
-                      className={`text-xs font-semibold uppercase tracking-wide ${t.accentTextClass}`}
+                      className={`text-xs font-semibold tracking-wide ${t.accentTextClass}`}
                     >
                       {t.goalTitle}
                     </p>
@@ -208,7 +208,7 @@ function FocusSession({
       </div>
 
       <div className="flex flex-1 flex-col items-center justify-center text-center">
-        <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+        <p className="text-xs font-medium tracking-widest text-muted-foreground">
           {target.goalTitle}
         </p>
         <h2 className="mt-3 max-w-xs text-2xl font-semibold leading-snug tracking-tight">

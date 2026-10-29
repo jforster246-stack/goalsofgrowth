@@ -171,7 +171,7 @@ function AuthPage() {
               <div>
                 <label
                   htmlFor="auth-name"
-                  className="mb-1 block font-heading text-[11px] uppercase tracking-wide text-muted-foreground"
+                  className="mb-1 block font-heading text-[11px] tracking-wide text-muted-foreground"
                 >
                   Your name
                 </label>
@@ -189,7 +189,7 @@ function AuthPage() {
             <div>
               <label
                 htmlFor="auth-email"
-                className="mb-1 block font-heading text-[11px] uppercase tracking-wide text-muted-foreground"
+                className="mb-1 block font-heading text-[11px] tracking-wide text-muted-foreground"
               >
                 Email
               </label>
@@ -209,7 +209,7 @@ function AuthPage() {
               <div className="mb-1 flex items-center justify-between gap-2">
                 <label
                   htmlFor="auth-password"
-                  className="block font-heading text-[11px] uppercase tracking-wide text-muted-foreground"
+                  className="block font-heading text-[11px] tracking-wide text-muted-foreground"
                 >
                   Password
                 </label>
@@ -218,7 +218,7 @@ function AuthPage() {
                     type="button"
                     onClick={forgotPassword}
                     disabled={busy}
-                    className="font-heading text-[11px] uppercase tracking-wide text-olive underline underline-offset-2 transition-opacity hover:opacity-70 disabled:opacity-40"
+                    className="font-heading text-[11px] tracking-wide text-olive underline underline-offset-2 transition-opacity hover:opacity-70 disabled:opacity-40"
                   >
                     Forgot password?
                   </button>

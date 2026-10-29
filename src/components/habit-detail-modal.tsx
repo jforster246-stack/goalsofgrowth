@@ -192,7 +192,7 @@ export function HabitDetailModal({
             <h2 className="mt-3 font-display text-2xl leading-tight text-black">
               {habit.name}
             </h2>
-            <p className="mt-1 font-heading text-xs uppercase tracking-wide text-olive">
+            <p className="mt-1 font-heading text-xs tracking-wide text-olive">
               {TIME_LABEL[habit.time_of_day]} · {frequencyLabel(habit)}
             </p>
             {habit.reason?.trim() && (
@@ -232,7 +232,7 @@ export function HabitDetailModal({
           {/* This week */}
           <div className="mt-4">
             <div className="flex items-baseline justify-between">
-              <p className="font-heading text-sm uppercase text-olive">This week</p>
+              <p className="font-heading text-sm text-olive">This week</p>
               <span className="font-serif text-xs text-black/50">
                 {weekCount} {weekCount === 1 ? "day" : "days"} done
               </span>
@@ -246,7 +246,7 @@ export function HabitDetailModal({
                   <div key={d} className="flex flex-col items-center gap-1">
                     <span
                       className={cn(
-                        "font-heading text-[10px] uppercase",
+                        "font-heading text-[10px]",
                         isToday ? "text-olive" : "text-black/40",
                       )}
                     >
@@ -297,7 +297,7 @@ export function HabitDetailModal({
                     onComplete: () => setTick(true),
                   })
                 }
-                className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-black/5 py-3.5 font-heading text-sm uppercase text-olive transition-colors hover:bg-black/10"
+                className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-black/5 py-3.5 font-heading text-sm text-olive transition-colors hover:bg-black/10"
               >
                 <Timer className="size-5" strokeWidth={1.75} />
                 Timer
@@ -307,7 +307,7 @@ export function HabitDetailModal({
               type="button"
               onClick={() => setTick(!done)}
               className={cn(
-                "flex flex-1 items-center justify-center gap-2 rounded-2xl py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors",
+                "flex flex-1 items-center justify-center gap-2 rounded-2xl py-3.5 font-heading text-sm text-white shadow-sm transition-colors",
                 done ? "bg-olive hover:bg-olive/90" : "bg-sage hover:bg-sage/80",
               )}
             >

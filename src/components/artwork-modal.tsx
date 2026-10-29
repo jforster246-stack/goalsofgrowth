@@ -84,7 +84,7 @@ export function ArtworkDetailModal({
         <button
           type="button"
           onClick={onRemove}
-          className="mt-6 w-full py-2 font-heading text-sm uppercase text-black/40 transition-colors hover:text-clay-deep"
+          className="mt-6 w-full py-2 font-heading text-sm text-black/40 transition-colors hover:text-clay-deep"
         >
           Take down from wall
         </button>

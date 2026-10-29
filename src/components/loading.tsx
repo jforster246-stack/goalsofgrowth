@@ -11,7 +11,7 @@ export function Loading({ label = "Loading" }: { label?: string }) {
       >
         <path d={STAR_PATH} fillRule="evenodd" />
       </svg>
-      <p className="font-heading text-xs uppercase tracking-wide text-olive/60">
+      <p className="font-heading text-xs tracking-wide text-olive/60">
         {label}
       </p>
     </div>

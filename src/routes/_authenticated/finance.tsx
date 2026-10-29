@@ -104,7 +104,7 @@ function FinancePage() {
                 <button
                   type="button"
                   onClick={() => setSheet({ kind: "setup" })}
-                  className="mt-6 w-full rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90"
+                  className="mt-6 w-full rounded-2xl bg-olive py-3.5 font-heading text-sm text-white shadow-sm transition-colors hover:bg-olive/90"
                 >
                   Start setup
                 </button>
@@ -164,14 +164,14 @@ function FinancePage() {
                 <button
                   type="button"
                   onClick={() => setSheet({ kind: "entry", entryKind: "income" })}
-                  className="font-heading text-xs uppercase text-black/40 transition-colors hover:text-olive"
+                  className="font-heading text-xs text-black/40 transition-colors hover:text-olive"
                 >
                   Add another income
                 </button>
                 <button
                   type="button"
                   onClick={() => setSheet({ kind: "setup" })}
-                  className="font-heading text-xs uppercase text-black/40 transition-colors hover:text-olive"
+                  className="font-heading text-xs text-black/40 transition-colors hover:text-olive"
                 >
                   Redo guided setup
                 </button>
@@ -215,7 +215,7 @@ function SectionTitle({ Icon, title }: { Icon: typeof Wallet; title: string }) {
   return (
     <div className="flex items-center gap-1.5">
       <Icon className="size-4 text-olive" strokeWidth={2} />
-      <p className="font-heading text-sm uppercase text-olive">{title}</p>
+      <p className="font-heading text-sm text-olive">{title}</p>
     </div>
   );
 }
@@ -225,7 +225,7 @@ function AddButton({ label, onClick }: { label: string; onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-olive/35 py-3 font-heading text-xs uppercase text-olive transition-colors hover:bg-olive/5"
+      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-olive/35 py-3 font-heading text-xs text-olive transition-colors hover:bg-olive/5"
     >
       <Plus className="size-4" strokeWidth={2.5} />
       {label}
@@ -253,14 +253,14 @@ function PayCard({
     <div className="rounded-3xl bg-olive px-5 py-5 text-white shadow-sm">
       <div className="flex items-start justify-between">
         <div>
-          <p className="font-heading text-[11px] uppercase tracking-wide text-white/60">Your pay</p>
+          <p className="font-heading text-[11px] tracking-wide text-white/60">Your pay</p>
           <p className="mt-1 font-mono text-4xl leading-none">{fmtWhole(total)}</p>
           <p className="mt-2 font-serif text-sm text-white/75">{CYCLE_PHRASE[cycle]}</p>
         </div>
         <button
           type="button"
           onClick={onEdit}
-          className="rounded-full bg-white/15 px-4 py-2 font-heading text-xs uppercase text-white transition-colors hover:bg-white/25"
+          className="rounded-full bg-white/15 px-4 py-2 font-heading text-xs text-white transition-colors hover:bg-white/25"
         >
           Edit
         </button>
@@ -377,7 +377,7 @@ function BucketCard({
           <span className="block font-serif text-xs text-black/50">{bucket.note}</span>
         )}
         {bucket.account && (
-          <span className="mt-0.5 block font-heading text-[10px] uppercase tracking-wide text-olive/70">
+          <span className="mt-0.5 block font-heading text-[10px] tracking-wide text-olive/70">
             → {bucket.account}
           </span>
         )}
@@ -421,7 +421,7 @@ function BucketColumn({
   return (
     <div>
       <div className="flex items-baseline justify-between border-b border-black/10 pb-2">
-        <p className="font-heading text-sm uppercase text-black">
+        <p className="font-heading text-sm text-black">
           {group === "spending" ? "Spending" : "Saving"}
         </p>
         <p className="font-mono text-sm text-black/60">{fmtWhole(total)}</p>
@@ -484,7 +484,7 @@ function SavingsProjection({
             onClick={() => setMonths(p.months)}
             aria-pressed={months === p.months}
             className={cn(
-              "rounded-full px-1 py-1.5 font-heading text-[11px] whitespace-nowrap uppercase transition-colors",
+              "rounded-full px-1 py-1.5 font-heading text-[11px] whitespace-nowrap transition-colors",
               months === p.months ? "bg-olive text-white" : "bg-white/70 text-black/55",
             )}
           >
@@ -523,7 +523,7 @@ function ExtraPayMonths({ cycle, anchor }: { cycle: PayCycle; anchor: string | n
     <section className="rounded-2xl bg-gold/15 px-4 py-3">
       <div className="flex items-center gap-1.5">
         <CalendarDays className="size-4 text-gold-deep" strokeWidth={2} />
-        <p className="font-heading text-sm uppercase text-gold-deep">Bonus pay months</p>
+        <p className="font-heading text-sm text-gold-deep">Bonus pay months</p>
       </div>
       <p className="mt-1.5 font-serif text-sm text-black/65">
         {months

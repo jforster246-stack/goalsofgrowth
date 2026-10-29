@@ -68,7 +68,7 @@ export function GoalCompletePrompt({
         aria-label="Dream completion prompt"
         className="w-full max-w-sm rounded-3xl bg-background p-6 text-center shadow-xl [animation:rise_0.25s_both]"
       >
-        <p className="font-heading text-xs uppercase tracking-wide text-olive/60">
+        <p className="font-heading text-xs tracking-wide text-olive/60">
           Nice work
         </p>
         <h2 className="mt-2 font-heading text-xl leading-snug text-black">
@@ -83,7 +83,7 @@ export function GoalCompletePrompt({
             type="button"
             disabled={winMutation.isPending}
             onClick={() => winMutation.mutate(goal)}
-            className="w-full rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white transition-colors hover:bg-olive/90 disabled:opacity-50"
+            className="w-full rounded-2xl bg-olive py-3.5 font-heading text-sm text-white transition-colors hover:bg-olive/90 disabled:opacity-50"
           >
             {winMutation.isPending ? "Adding…" : "Yes, add to my wins"}
           </button>
@@ -93,7 +93,7 @@ export function GoalCompletePrompt({
               sessionStorage.setItem(FOCUS_ADD_STEP_KEY, goal.id);
               navigate({ to: "/goals/$goalId", params: { goalId: goal.id } });
             }}
-            className="w-full rounded-2xl bg-black/5 py-3.5 font-heading text-sm uppercase text-black/70 transition-colors hover:bg-black/10"
+            className="w-full rounded-2xl bg-black/5 py-3.5 font-heading text-sm text-black/70 transition-colors hover:bg-black/10"
           >
             Not yet - add more steps
           </button>
@@ -102,7 +102,7 @@ export function GoalCompletePrompt({
         <button
           type="button"
           onClick={onClose}
-          className="mt-3 font-heading text-xs uppercase text-black/40 transition-colors hover:text-black/70"
+          className="mt-3 font-heading text-xs text-black/40 transition-colors hover:text-black/70"
         >
           Dismiss
         </button>

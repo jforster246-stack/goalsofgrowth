@@ -35,14 +35,14 @@ export function AwaQuickLog({ className }: { className?: string }) {
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="shrink-0 rounded-full bg-olive px-4 py-2 font-heading text-xs uppercase text-white transition-colors hover:bg-olive/90"
+            className="shrink-0 rounded-full bg-olive px-4 py-2 font-heading text-xs text-white transition-colors hover:bg-olive/90"
           >
             Log
           </button>
         ) : (
           <Link
             to="/awa"
-            className="shrink-0 rounded-full bg-olive/10 px-4 py-2 font-heading text-xs uppercase text-olive transition-colors hover:bg-olive/20"
+            className="shrink-0 rounded-full bg-olive/10 px-4 py-2 font-heading text-xs text-olive transition-colors hover:bg-olive/20"
           >
             Shelf
           </Link>

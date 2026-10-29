@@ -79,7 +79,7 @@ export function NextStepRow({
         <span className="tile-pink grid size-8 shrink-0 place-items-center rounded-lg text-[#4f1506]">
           <GoalGlyph goal={goal} className="size-5" />
         </span>
-        <span className="line-clamp-1 font-heading text-[10px] uppercase leading-tight tracking-wide text-[#201b2f]">
+        <span className="line-clamp-1 font-heading text-[10px] leading-tight tracking-wide text-[#201b2f]">
           {goal.title}
         </span>
       </button>
@@ -207,7 +207,7 @@ export function GoalCard({
   return (
     <div className="relative w-full">
       {isGoalOfDay && (
-        <span className="absolute left-1/2 top-0 z-10 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-olive px-5 py-2 font-heading text-[13.9px] uppercase leading-none text-white">
+        <span className="absolute left-1/2 top-0 z-10 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-olive px-5 py-2 font-heading text-[13.9px] leading-none text-white">
           Goal of the day
         </span>
       )}
@@ -234,7 +234,7 @@ export function GoalCard({
         </div>
         {complete || !hasSteps ? (
           <>
-            <p className="mt-5 text-[11px] font-medium uppercase tracking-wide text-black/40">
+            <p className="mt-5 text-[11px] font-medium tracking-wide text-black/40">
               {complete ? "Complete" : "Next step"}
             </p>
             <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-black">{stepText}</p>
@@ -252,7 +252,7 @@ export function GoalCard({
         ) : (
           <div className="mt-auto flex items-end gap-3 pt-5">
             <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-medium uppercase tracking-wide text-black/40">
+              <p className="text-[11px] font-medium tracking-wide text-black/40">
                 Next step
               </p>
               <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-black">{stepText}</p>
@@ -526,7 +526,7 @@ export function GoalHero({ goal, children }: { goal: HomeGoal; children: ReactNo
       {children}
       <div className="flex flex-col items-center gap-2">
         <MoonPhase pct={pct} className="size-14" />
-        <span className="font-heading text-[11px] uppercase tracking-wide opacity-70">
+        <span className="font-heading text-[11px] tracking-wide opacity-70">
           {complete
             ? "Full moon · complete"
             : pct === 0
@@ -666,7 +666,7 @@ export function HabitRow({
             {name}
           </span>
           {showFrequency && (
-            <span className="font-heading text-[10px] uppercase tracking-wide text-[#928e9d]">
+            <span className="font-heading text-[10px] tracking-wide text-[#928e9d]">
               {frequencyLabel}
             </span>
           )}
@@ -722,7 +722,7 @@ export function GoalCardCompact({
           </span>
           <span className="flex items-center gap-1 text-[#201b2f]">
             <MoonPhase pct={progress.pct} className="size-5 shrink-0" />
-            <span className="font-heading text-[9px] uppercase tracking-wide text-[#928e9d]">
+            <span className="font-heading text-[9px] tracking-wide text-[#928e9d]">
               {progress.complete ? "Done" : `${progress.pct}%`}
             </span>
           </span>
@@ -736,7 +736,7 @@ export function GoalCardCompact({
         {/* Next step — secondary */}
         {!progress.complete && next && (
           <p className="line-clamp-2 text-[11px] leading-tight text-[#201b2f]/70">
-            <span className="font-heading text-[9px] uppercase tracking-wide text-[#928e9d]">
+            <span className="font-heading text-[9px] tracking-wide text-[#928e9d]">
               Next ·{" "}
             </span>
             <span className="font-serif italic">{next.title}</span>

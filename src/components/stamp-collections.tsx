@@ -94,7 +94,7 @@ export function StampCollections({
       {/* Completed goals */}
       <section>
         <div className="flex items-center gap-1.5">
-          <p className="font-heading text-sm uppercase text-olive">
+          <p className="font-heading text-sm text-olive">
             Completed dreams
           </p>
           <span className="ml-1 font-mono text-xs text-olive/50">
@@ -140,7 +140,7 @@ export function StampCollections({
 
       {/* How to earn stardust */}
       <section className="mg-panel rounded-2xl p-4">
-        <p className="font-heading text-sm uppercase text-olive">How to earn stardust</p>
+        <p className="font-heading text-sm text-olive">How to earn stardust</p>
         <ul className="mt-3 space-y-2 font-serif text-sm text-black/60">
           <li className="flex items-baseline gap-2">
             <span className="font-heading text-olive">+5</span>
@@ -224,7 +224,7 @@ function WinCollection({
     <section>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
-          <p className="font-heading text-sm uppercase text-olive">{title}</p>
+          <p className="font-heading text-sm text-olive">{title}</p>
           <span className="ml-1 font-mono text-xs text-olive/50">
             {wins.length}
           </span>
@@ -232,7 +232,7 @@ function WinCollection({
         <button
           type="button"
           onClick={onAdd}
-          className="inline-flex items-center gap-1 font-heading text-xs uppercase text-olive transition-opacity hover:opacity-70"
+          className="inline-flex items-center gap-1 font-heading text-xs text-olive transition-opacity hover:opacity-70"
         >
           <Plus className="size-4" strokeWidth={2} />
           Add
@@ -296,7 +296,7 @@ function StampSnapshotModal({
         className="w-full max-w-sm rounded-t-3xl bg-background p-6 shadow-xl [animation:rise_0.25s_both] sm:rounded-3xl"
       >
         <div className="flex items-start justify-between">
-          <p className="font-heading text-sm uppercase text-olive">
+          <p className="font-heading text-sm text-olive">
             Completed dream
           </p>
           <button

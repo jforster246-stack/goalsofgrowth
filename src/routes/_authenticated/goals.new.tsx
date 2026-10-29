@@ -111,7 +111,7 @@ export function NewGoalForm({
             />
           ))}
         </div>
-        <p className="mt-3 font-heading text-sm uppercase text-olive">
+        <p className="mt-3 font-heading text-sm text-olive">
           Step {step + 1} of {STEPS.length}
         </p>
 
@@ -132,7 +132,7 @@ export function NewGoalForm({
                 className="mt-5 w-full rounded-2xl bg-black/5 px-4 py-3 font-serif text-base placeholder:text-black/40 focus:outline-none focus:ring-1 focus:ring-olive/40"
               />
 
-              <p className="mt-6 font-heading text-sm uppercase text-olive">
+              <p className="mt-6 font-heading text-sm text-olive">
                 Colour
               </p>
               <div className="mt-2 flex gap-3">
@@ -156,7 +156,7 @@ export function NewGoalForm({
                 ))}
               </div>
 
-              <p className="mt-6 font-heading text-sm uppercase text-olive">
+              <p className="mt-6 font-heading text-sm text-olive">
                 Icon
               </p>
               <div className="mt-2">
@@ -269,7 +269,7 @@ export function NewGoalForm({
             <button
               type="button"
               onClick={() => setStep((s) => s - 1)}
-              className="rounded-2xl px-5 py-3.5 font-heading text-sm uppercase text-black/50 transition-colors hover:text-black/80"
+              className="rounded-2xl px-5 py-3.5 font-heading text-sm text-black/50 transition-colors hover:text-black/80"
             >
               Back
             </button>
@@ -278,7 +278,7 @@ export function NewGoalForm({
             type="button"
             onClick={next}
             disabled={!canContinue || createMutation.isPending}
-            className="flex-1 rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
+            className="flex-1 rounded-2xl bg-olive py-3.5 font-heading text-sm text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
           >
             {isLast
               ? createMutation.isPending

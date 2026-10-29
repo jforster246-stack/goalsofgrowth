@@ -48,7 +48,7 @@ function yesterday() {
 
 const chip = (active: boolean) =>
   cn(
-    "rounded-full px-4 py-2 font-heading text-xs uppercase transition-colors",
+    "rounded-full px-4 py-2 font-heading text-xs transition-colors",
     active ? "bg-olive text-white" : "bg-black/5 text-black/55 hover:bg-black/10",
   );
 
@@ -216,7 +216,7 @@ export function AwaLogModal({
                   <button
                     type="button"
                     onClick={onAddHobby}
-                    className="mt-4 rounded-2xl bg-olive px-5 py-3 font-heading text-sm uppercase text-white transition-colors hover:bg-olive/90"
+                    className="mt-4 rounded-2xl bg-olive px-5 py-3 font-heading text-sm text-white transition-colors hover:bg-olive/90"
                   >
                     Go to shelf
                   </button>
@@ -226,7 +226,7 @@ export function AwaLogModal({
               <>
                 {showPicker && (
                   <>
-                    <p className="mt-6 font-heading text-sm uppercase text-olive">
+                    <p className="mt-6 font-heading text-sm text-olive">
                       What did you spend time on?
                     </p>
                     <div className="mt-2 flex flex-wrap gap-2">
@@ -251,7 +251,7 @@ export function AwaLogModal({
                   </>
                 )}
 
-                <p className="mt-6 font-heading text-sm uppercase text-olive">When</p>
+                <p className="mt-6 font-heading text-sm text-olive">When</p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   <button
                     type="button"
@@ -298,14 +298,14 @@ export function AwaLogModal({
                   <button
                     type="button"
                     onClick={() => setMore(true)}
-                    className="mt-6 inline-flex items-center gap-1 font-heading text-xs uppercase text-black/45 transition-colors hover:text-olive"
+                    className="mt-6 inline-flex items-center gap-1 font-heading text-xs text-black/45 transition-colors hover:text-olive"
                   >
                     <ChevronDown className="size-4" />
                     Add a note, photo or how long
                   </button>
                 ) : (
                   <>
-                    <p className="mt-6 font-heading text-sm uppercase text-olive">
+                    <p className="mt-6 font-heading text-sm text-olive">
                       What did you get up to?{" "}
                       <span className="font-serif text-xs normal-case italic text-black/35">
                         optional
@@ -320,7 +320,7 @@ export function AwaLogModal({
                       className="mt-2 w-full resize-y rounded-2xl bg-black/5 px-4 py-3 font-serif text-sm leading-relaxed placeholder:text-black/40 focus:outline-none focus:ring-1 focus:ring-olive/40"
                     />
 
-                    <p className="mt-5 font-heading text-sm uppercase text-olive">
+                    <p className="mt-5 font-heading text-sm text-olive">
                       How long?{" "}
                       <span className="font-serif text-xs normal-case italic text-black/35">
                         optional
@@ -340,7 +340,7 @@ export function AwaLogModal({
                       ))}
                     </div>
 
-                    <p className="mt-5 font-heading text-sm uppercase text-olive">
+                    <p className="mt-5 font-heading text-sm text-olive">
                       Photo{" "}
                       <span className="font-serif text-xs normal-case italic text-black/35">
                         optional
@@ -380,7 +380,7 @@ export function AwaLogModal({
                       <button
                         type="button"
                         onClick={() => fileInput.current?.click()}
-                        className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-olive/35 py-4 font-heading text-xs uppercase text-olive transition-colors hover:bg-olive/5"
+                        className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-olive/35 py-4 font-heading text-xs text-olive transition-colors hover:bg-olive/5"
                       >
                         <Camera className="size-4" />
                         Add a photo
@@ -398,7 +398,7 @@ export function AwaLogModal({
                   type="button"
                   onClick={() => canSave && save.mutate()}
                   disabled={!canSave}
-                  className="mt-6 w-full rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
+                  className="mt-6 w-full rounded-2xl bg-olive py-3.5 font-heading text-sm text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
                 >
                   {save.isPending ? "Saving…" : "Save"}
                 </button>
@@ -407,7 +407,7 @@ export function AwaLogModal({
                     type="button"
                     onClick={() => (confirmDelete ? remove.mutate() : setConfirmDelete(true))}
                     disabled={remove.isPending}
-                    className="mt-2 w-full rounded-2xl py-3 font-heading text-sm uppercase text-clay-deep transition-colors hover:bg-clay/10 disabled:opacity-40"
+                    className="mt-2 w-full rounded-2xl py-3 font-heading text-sm text-clay-deep transition-colors hover:bg-clay/10 disabled:opacity-40"
                   >
                     {remove.isPending
                       ? "Deleting…"

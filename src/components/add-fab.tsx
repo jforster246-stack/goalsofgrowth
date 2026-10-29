@@ -106,7 +106,7 @@ export function AddMenu({ floating = false }: { floating?: boolean }) {
                   <span className="mg-chip grid size-8 shrink-0 place-items-center rounded-full text-olive">
                     <Icon className="size-4" strokeWidth={2} />
                   </span>
-                  <span className="font-heading text-xs uppercase tracking-wide text-foreground">
+                  <span className="font-heading text-xs tracking-wide text-foreground">
                     {label}
                   </span>
                 </button>

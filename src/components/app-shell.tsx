@@ -202,7 +202,7 @@ export function AppShell({
                 </>
               ) : (
                 <>
-                  <h1 className="font-heading text-xl uppercase leading-tight tracking-wide text-foreground md:text-2xl">
+                  <h1 className="font-heading text-xl leading-tight tracking-wide text-foreground md:text-2xl">
                     {profile?.display_name ? `${profile.display_name}'s ` : "Your "}
                     Moongrove Planner
                   </h1>
@@ -275,7 +275,7 @@ export function AppShell({
 function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
   return (
     <aside className="fixed inset-y-3 left-3 z-20 hidden w-56 flex-col rounded-3xl bg-card px-4 py-6 shadow-xl ring-1 ring-border lg:flex">
-      <p className="px-2 font-heading text-xl uppercase tracking-wide text-foreground">Moongrove</p>
+      <p className="px-2 font-heading text-xl tracking-wide text-foreground">Moongrove</p>
 
       <nav className="mt-8 flex flex-col">
         <div className="flex flex-col gap-1.5">
@@ -300,7 +300,7 @@ function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
       <button
         type="button"
         onClick={onOpenSettings}
-        className="mt-auto flex items-center gap-3 rounded-xl px-3 py-2.5 font-heading text-sm uppercase tracking-wide text-muted-foreground transition-colors hover:bg-muted/50"
+        className="mt-auto flex items-center gap-3 rounded-xl px-3 py-2.5 font-heading text-sm tracking-wide text-muted-foreground transition-colors hover:bg-muted/50"
       >
         <Settings className="size-5" strokeWidth={2} />
         Settings
@@ -322,7 +322,7 @@ function SideSection({ title, children }: { title: string; children: ReactNode }
 
 function SideLink({ to, icon: Icon, label }: { to: string; icon: typeof House; label: string }) {
   const base =
-    "flex items-center gap-3 rounded-xl px-3 py-2.5 font-heading text-sm uppercase tracking-wide transition-colors";
+    "flex items-center gap-3 rounded-xl px-3 py-2.5 font-heading text-sm tracking-wide transition-colors";
   return (
     <Link
       to={to}
@@ -361,7 +361,7 @@ const BOTTOM_MORE: NavItem[] = [
 function BottomNav({ onOpenSettings }: { onOpenSettings: () => void }) {
   const [moreOpen, setMoreOpen] = useState(false);
   const itemClass =
-    "flex flex-1 flex-col items-center justify-center gap-1 py-3 text-[9px] font-semibold uppercase tracking-wide transition-colors";
+    "flex flex-1 flex-col items-center justify-center gap-1 py-3 text-[9px] font-semibold tracking-wide transition-colors";
 
   return (
     <>
@@ -413,7 +413,7 @@ function BottomNav({ onOpenSettings }: { onOpenSettings: () => void }) {
                   activeProps={{ className: "ring-olive" }}
                 >
                   <Icon className="size-6 text-olive" strokeWidth={2} />
-                  <span className="font-heading text-[10px] uppercase tracking-wide text-foreground">
+                  <span className="font-heading text-[10px] tracking-wide text-foreground">
                     {label}
                   </span>
                 </Link>
@@ -425,7 +425,7 @@ function BottomNav({ onOpenSettings }: { onOpenSettings: () => void }) {
                 setMoreOpen(false);
                 onOpenSettings();
               }}
-              className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-card px-3 py-3.5 font-heading text-[10px] uppercase tracking-wide text-foreground shadow-sm ring-1 ring-border"
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-card px-3 py-3.5 font-heading text-[10px] tracking-wide text-foreground shadow-sm ring-1 ring-border"
             >
               <Settings className="size-5 text-olive" strokeWidth={2} />
               Settings
@@ -539,7 +539,7 @@ function ProfileSheet({
         </div>
 
         <div className="mt-10">
-          <p className="font-heading text-sm uppercase tracking-wide text-olive">Appearance</p>
+          <p className="font-heading text-sm tracking-wide text-olive">Appearance</p>
           <div className="mt-3 space-y-2">
             {THEMES.map((t) => {
               const active = theme === t.id;
@@ -575,7 +575,7 @@ function ProfileSheet({
             })}
           </div>
 
-          <p className="mt-6 font-heading text-sm uppercase tracking-wide text-olive">Font style</p>
+          <p className="mt-6 font-heading text-sm tracking-wide text-olive">Font style</p>
           <div className="mt-3 grid grid-cols-2 gap-2">
             {FONTS.map((f) => {
               const active = font === f.id;
@@ -610,7 +610,7 @@ function ProfileSheet({
             })}
           </div>
 
-          <p className="mt-6 font-heading text-sm uppercase tracking-wide text-olive">Focus timer</p>
+          <p className="mt-6 font-heading text-sm tracking-wide text-olive">Focus timer</p>
           <button
             type="button"
             onClick={toggleFocusTimer}

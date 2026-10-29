@@ -201,7 +201,7 @@ function OverviewPage() {
 
         <div className="grid gap-5 lg:grid-cols-3 lg:items-stretch">
           <section className="flex flex-col lg:col-span-2">
-            <p className="font-heading text-[11px] uppercase tracking-[0.12em] text-[#928e9d]">
+            <p className="font-heading text-[11px] tracking-[0.12em] text-[#928e9d]">
               A couple of dreams to nudge today
             </p>
             <div className="mt-3 grid flex-1 grid-cols-2 items-stretch gap-3">
@@ -227,7 +227,7 @@ function OverviewPage() {
           </section>
 
           <section className="flex flex-col">
-            <p className="font-heading text-[11px] uppercase tracking-[0.12em] text-[#928e9d]">
+            <p className="font-heading text-[11px] tracking-[0.12em] text-[#928e9d]">
               A recent win
             </p>
             <div className="mt-3 flex-1">
@@ -241,7 +241,7 @@ function OverviewPage() {
                   <p className="font-display text-base leading-tight text-[#201b2f]">
                     {randomWin.title}
                   </p>
-                  <p className="font-heading text-[10px] uppercase tracking-wide text-[#928e9d]">
+                  <p className="font-heading text-[10px] tracking-wide text-[#928e9d]">
                     {winDateLabel(randomWin.achieved_on)}
                   </p>
                 </div>
@@ -261,7 +261,7 @@ function OverviewPage() {
       {celebrating && (
         <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/40 sm:items-center">
           <div className="w-full max-w-sm rounded-t-3xl bg-card p-6 text-center shadow-xl sm:rounded-3xl">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            <p className="text-xs font-semibold tracking-wide text-muted-foreground">
               Nice work
             </p>
             <p className="mt-2 text-lg font-semibold">
@@ -269,7 +269,7 @@ function OverviewPage() {
             </p>
             {celebratingNext && (
               <>
-                <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <p className="mt-4 text-xs font-semibold tracking-wide text-muted-foreground">
                   Next up for this dream
                 </p>
                 <p className="mt-1 text-base">{celebratingNext.title}</p>
@@ -301,7 +301,7 @@ function YourCollection({ artworks }: { artworks: Artwork[] }) {
   const items = artworks.slice(0, 5);
   return (
     <section>
-      <p className="font-heading text-[11px] uppercase tracking-[0.12em] text-[#928e9d]">
+      <p className="font-heading text-[11px] tracking-[0.12em] text-[#928e9d]">
         Your collection
       </p>
       <div className="no-scrollbar mt-3 flex items-start gap-3 overflow-x-auto">
@@ -317,7 +317,7 @@ function YourCollection({ artworks }: { artworks: Artwork[] }) {
         ))}
         <Link
           to="/gallery"
-          className="grid h-[92px] min-w-[160px] flex-1 place-items-center rounded-2xl border-2 border-[#4f1506] px-4 text-center font-heading text-sm uppercase tracking-wide text-[#4f1506] transition-colors hover:bg-[#4f1506]/5"
+          className="grid h-[92px] min-w-[160px] flex-1 place-items-center rounded-2xl border-2 border-[#4f1506] px-4 text-center font-heading text-sm tracking-wide text-[#4f1506] transition-colors hover:bg-[#4f1506]/5"
         >
           Open Gallery
         </Link>
@@ -380,7 +380,7 @@ function ArtworkCarousel({
   return (
     <section className={className}>
       <div className="flex items-baseline justify-between">
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        <p className="text-xs font-semibold tracking-wide text-muted-foreground">
           Your collection
         </p>
         <Link
@@ -571,7 +571,7 @@ function MissedYesterday({ className }: { className?: string }) {
 
   return (
     <section className={className}>
-      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+      <p className="text-xs font-semibold tracking-wide text-muted-foreground">
         Missed yesterday
       </p>
       <p className="mt-1 text-sm text-muted-foreground">
@@ -646,13 +646,13 @@ function RoutinesHome({ className }: { className?: string }) {
   return (
     <section className={cn("rounded-3xl bg-white p-5 shadow-sm", className)}>
       <div className="flex items-center justify-between">
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        <p className="text-xs font-semibold tracking-wide text-muted-foreground">
           Routines
         </p>
         <button
           type="button"
           onClick={() => setChoosing(true)}
-          className="font-heading text-[11px] uppercase text-olive transition-opacity hover:opacity-70"
+          className="font-heading text-[11px] text-olive transition-opacity hover:opacity-70"
         >
           Choose
         </button>
@@ -838,7 +838,7 @@ function TodayHabits({ className }: { className?: string }) {
 
   return (
     <section className={className}>
-      <p className="font-heading text-[11px] uppercase tracking-[0.12em] text-[#928e9d]">
+      <p className="font-heading text-[11px] tracking-[0.12em] text-[#928e9d]">
         {BUCKET_LABEL[bucket]}
       </p>
       <div className="mt-3 space-y-2">

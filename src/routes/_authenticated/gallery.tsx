@@ -196,7 +196,7 @@ function GalleryPage() {
       {/* Today's picks */}
       <section className="mt-4">
         <div className="flex items-baseline justify-between">
-          <p className="font-heading text-sm uppercase text-olive">
+          <p className="font-heading text-sm text-olive">
             The Observatory
           </p>
           <div className="flex items-center gap-2">
@@ -204,7 +204,7 @@ function GalleryPage() {
               type="button"
               onClick={() => grant.mutate()}
               disabled={grant.isPending}
-              className="rounded-full border border-dashed border-olive/40 px-2.5 py-0.5 font-heading text-[10px] uppercase text-olive/70 transition-colors hover:bg-olive/5 disabled:opacity-40"
+              className="rounded-full border border-dashed border-olive/40 px-2.5 py-0.5 font-heading text-[10px] text-olive/70 transition-colors hover:bg-olive/5 disabled:opacity-40"
             >
               {grant.isPending ? "…" : "+50"}
             </button>
@@ -236,7 +236,7 @@ function GalleryPage() {
                   disabled={isOwned}
                   onClick={() => setConfirmBuy(art)}
                   className={cn(
-                    "mt-2 flex items-center justify-center gap-1 rounded-full py-2.5 font-heading text-[11px] uppercase transition-colors",
+                    "mt-2 flex items-center justify-center gap-1 rounded-full py-2.5 font-heading text-[11px] transition-colors",
                     isOwned
                       ? "bg-black/5 text-black/40"
                       : "mg-cta text-[#4a3d63] hover:opacity-90",
@@ -259,7 +259,7 @@ function GalleryPage() {
 
       {/* The wall */}
       <section className="mt-6">
-        <p className="font-heading text-sm uppercase text-olive">Your universe</p>
+        <p className="font-heading text-sm text-olive">Your universe</p>
         <p className="mt-1 font-serif text-xs text-black/40">
           Your completed goals and wins, with room to hang collectibles you buy.
           Swipe around your sky to explore.
@@ -349,7 +349,7 @@ function GalleryPage() {
 
       {/* How to earn stardust */}
       <section className="mt-6 rounded-2xl bg-white/70 p-4 shadow-sm">
-        <p className="font-heading text-sm uppercase text-olive">How to earn stardust</p>
+        <p className="font-heading text-sm text-olive">How to earn stardust</p>
         <ul className="mt-3 space-y-2 font-serif text-sm text-black/60">
           <li className="flex items-baseline gap-2">
             <span className="font-heading text-olive">+5</span>
@@ -540,7 +540,7 @@ function ConfirmPurchaseModal({
               onConfirm();
             }}
             disabled={pending}
-            className="mg-cta mt-6 w-full rounded-full py-3.5 font-heading text-sm uppercase text-[#4a3d63] shadow-sm transition-opacity hover:opacity-90 disabled:opacity-40"
+            className="mg-cta mt-6 w-full rounded-full py-3.5 font-heading text-sm text-[#4a3d63] shadow-sm transition-opacity hover:opacity-90 disabled:opacity-40"
           >
             {pending ? "Purchasing…" : "Yes"}
           </button>
@@ -548,7 +548,7 @@ function ConfirmPurchaseModal({
             type="button"
             onClick={onClose}
             disabled={pending}
-            className="mt-2 w-full py-2 font-heading text-sm uppercase text-black/40 transition-colors hover:text-black/70 disabled:opacity-40"
+            className="mt-2 w-full py-2 font-heading text-sm text-black/40 transition-colors hover:text-black/70 disabled:opacity-40"
           >
             Not this time
           </button>
@@ -557,7 +557,7 @@ function ConfirmPurchaseModal({
         <button
           type="button"
           onClick={onClose}
-          className="mt-6 w-full rounded-2xl bg-black/5 py-3.5 font-heading text-sm uppercase text-black/60 transition-colors hover:bg-black/10"
+          className="mt-6 w-full rounded-2xl bg-black/5 py-3.5 font-heading text-sm text-black/60 transition-colors hover:bg-black/10"
         >
           Dismiss
         </button>
@@ -614,7 +614,7 @@ function GoalInfoModal({
           type="button"
           onClick={() => onSave(icon, accent)}
           disabled={!dirty || saving}
-          className="mt-4 w-full rounded-2xl bg-olive py-3 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
+          className="mt-4 w-full rounded-2xl bg-olive py-3 font-heading text-sm text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
         >
           {saving ? "Saving…" : "Save look"}
         </button>
@@ -622,7 +622,7 @@ function GoalInfoModal({
 
       {goal?.why?.trim() && (
         <section className="mt-5">
-          <p className="font-heading text-sm uppercase text-olive">
+          <p className="font-heading text-sm text-olive">
             Why I did this
           </p>
           <p className="mt-1 whitespace-pre-wrap font-serif text-sm leading-relaxed text-black/70">
@@ -633,7 +633,7 @@ function GoalInfoModal({
 
       {goal?.vision?.trim() && (
         <section className="mt-4">
-          <p className="font-heading text-sm uppercase text-olive">
+          <p className="font-heading text-sm text-olive">
             What it looked like when done
           </p>
           <p className="mt-1 whitespace-pre-wrap font-serif text-sm leading-relaxed text-black/70">
@@ -644,7 +644,7 @@ function GoalInfoModal({
 
       {steps.length > 0 && (
         <section className="mt-4">
-          <p className="font-heading text-sm uppercase text-olive">
+          <p className="font-heading text-sm text-olive">
             Steps
             <span className="ml-1.5 font-mono text-xs text-olive/50">
               {doneCount}/{steps.length}

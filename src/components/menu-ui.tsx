@@ -32,7 +32,7 @@ export function Field({ label, group, children }: { label: string; group?: boole
   const Tag = group ? "div" : "label";
   return (
     <Tag className="block" {...(group ? { role: "group", "aria-label": label } : {})}>
-      <span className="mb-1.5 block font-heading text-xs uppercase tracking-wide text-olive">{label}</span>
+      <span className="mb-1.5 block font-heading text-xs tracking-wide text-olive">{label}</span>
       {children}
     </Tag>
   );

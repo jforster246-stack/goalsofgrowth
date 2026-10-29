@@ -167,7 +167,7 @@ export function FinanceSetup({
       <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 pt-6">
         {/* Header + progress */}
         <div className="flex items-center justify-between">
-          <p className="font-heading text-sm uppercase text-olive">
+          <p className="font-heading text-sm text-olive">
             Step {step + 1} of {steps.length}
           </p>
           <button
@@ -461,7 +461,7 @@ export function FinanceSetup({
               <button
                 type="button"
                 onClick={() => setStep((s) => s - 1)}
-                className="rounded-2xl px-5 py-3.5 font-heading text-sm uppercase text-black/50 transition-colors hover:text-black/80"
+                className="rounded-2xl px-5 py-3.5 font-heading text-sm text-black/50 transition-colors hover:text-black/80"
               >
                 Back
               </button>
@@ -470,7 +470,7 @@ export function FinanceSetup({
               type="button"
               onClick={next}
               disabled={!canContinue || save.isPending}
-              className="flex-1 rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
+              className="flex-1 rounded-2xl bg-olive py-3.5 font-heading text-sm text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
             >
               {current === "done"
                 ? save.isPending

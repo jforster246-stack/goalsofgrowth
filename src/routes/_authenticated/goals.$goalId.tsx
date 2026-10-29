@@ -228,7 +228,7 @@ function GoalDetailBody({
 
       {/* Steps */}
       <section>
-        <p className="font-heading text-sm uppercase text-olive">Next steps:</p>
+        <p className="font-heading text-sm text-olive">Next steps:</p>
 
         <Reorder.Group
           as="div"
@@ -275,7 +275,7 @@ function GoalDetailBody({
             <button
               type="submit"
               disabled={!stepDraft.trim()}
-              className="shrink-0 rounded-2xl bg-sage/60 px-6 py-3 font-heading text-sm uppercase text-white transition-colors hover:bg-sage/80 disabled:opacity-40"
+              className="shrink-0 rounded-2xl bg-sage/60 px-6 py-3 font-heading text-sm text-white transition-colors hover:bg-sage/80 disabled:opacity-40"
             >
               Add
             </button>
@@ -285,7 +285,7 @@ function GoalDetailBody({
 
       {/* Why */}
       <section className="rounded-2xl bg-white p-5 shadow-sm">
-        <label htmlFor="goal-why" className="font-heading text-sm uppercase text-olive">
+        <label htmlFor="goal-why" className="font-heading text-sm text-olive">
           Why I'm doing this
         </label>
         <textarea
@@ -301,7 +301,7 @@ function GoalDetailBody({
 
       {/* Vision */}
       <section className="rounded-2xl bg-white p-5 shadow-sm">
-        <label htmlFor="goal-vision" className="font-heading text-sm uppercase text-olive">
+        <label htmlFor="goal-vision" className="font-heading text-sm text-olive">
           What it looks like and feels like when it's done
         </label>
         <textarea
@@ -318,7 +318,7 @@ function GoalDetailBody({
       {/* Completed steps — ticked items collect here */}
       {doneSteps.length > 0 && (
         <section>
-          <p className="font-heading text-sm uppercase text-olive">
+          <p className="font-heading text-sm text-olive">
             Completed steps
             <span className="ml-1.5 font-mono text-xs text-olive/50">
               {doneSteps.length}
@@ -352,14 +352,14 @@ function GoalDetailBody({
           saveMutation.mutate({ why, vision })
         }
         disabled={!dirty || saveMutation.isPending}
-        className="w-full rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
+        className="w-full rounded-2xl bg-olive py-3.5 font-heading text-sm text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
       >
         {saved ? "Saved" : saveMutation.isPending ? "Saving…" : "Save changes"}
       </button>
 
       <button
         onClick={() => deleteGoalMutation.mutate()}
-        className="w-full py-2 font-heading text-sm uppercase text-black/40 transition-colors hover:text-black/70"
+        className="w-full py-2 font-heading text-sm text-black/40 transition-colors hover:text-black/70"
       >
         Delete this dream
       </button>

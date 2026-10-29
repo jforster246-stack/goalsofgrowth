@@ -301,7 +301,7 @@ function BrainDumpList({ initial }: { initial: Item[] }) {
             <button
               type="button"
               onClick={() => setShowDone((v) => !v)}
-              className="font-heading text-[11px] uppercase text-black/40 transition-colors hover:text-black/70"
+              className="font-heading text-[11px] text-black/40 transition-colors hover:text-black/70"
             >
               {showDone ? "Hide done" : `Done (${completed.length})`}
             </button>

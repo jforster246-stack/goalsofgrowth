@@ -201,7 +201,7 @@ export function HabitFormModal({
         </div>
 
         {/* Name */}
-        <label className="mt-6 block font-heading text-sm uppercase text-olive">
+        <label className="mt-6 block font-heading text-sm text-olive">
           Habit
         </label>
         <input
@@ -214,7 +214,7 @@ export function HabitFormModal({
         />
 
         {/* Time of day */}
-        <p className="mt-5 font-heading text-sm uppercase text-olive">
+        <p className="mt-5 font-heading text-sm text-olive">
           Time of day
         </p>
         <div className="mt-2 grid grid-cols-3 gap-2">
@@ -227,7 +227,7 @@ export function HabitFormModal({
                 onClick={() => setTimeOfDay(t.key)}
                 aria-pressed={active}
                 className={cn(
-                  "flex flex-col items-center gap-1 rounded-2xl py-2.5 font-heading text-[11px] uppercase transition-colors",
+                  "flex flex-col items-center gap-1 rounded-2xl py-2.5 font-heading text-[11px] transition-colors",
                   active ? `${t.activeBg} text-white` : "bg-black/5 text-black/50",
                 )}
               >
@@ -239,13 +239,13 @@ export function HabitFormModal({
         </div>
 
         {/* Icon */}
-        <p className="mt-5 font-heading text-sm uppercase text-olive">Icon</p>
+        <p className="mt-5 font-heading text-sm text-olive">Icon</p>
         <div className="mt-2">
           <IconPicker value={icon} onChange={setIcon} defaultLabel="Time of day" />
         </div>
 
         {/* Frequency */}
-        <p className="mt-5 font-heading text-sm uppercase text-olive">Frequency</p>
+        <p className="mt-5 font-heading text-sm text-olive">Frequency</p>
         <div className="mt-2 flex flex-wrap gap-2">
           {FREQ_OPTIONS.map((f) => {
             const active = frequency === f.key;
@@ -256,7 +256,7 @@ export function HabitFormModal({
                 onClick={() => setFrequency(f.key)}
                 aria-pressed={active}
                 className={cn(
-                  "rounded-full px-4 py-2 font-heading text-xs uppercase transition-colors",
+                  "rounded-full px-4 py-2 font-heading text-xs transition-colors",
                   active ? "bg-olive text-white" : "bg-black/5 text-black/50",
                 )}
               >
@@ -279,7 +279,7 @@ export function HabitFormModal({
                   aria-pressed={active}
                   aria-label={`Toggle day ${d.v}`}
                   className={cn(
-                    "grid size-9 place-items-center rounded-full font-heading text-xs uppercase transition-colors",
+                    "grid size-9 place-items-center rounded-full font-heading text-xs transition-colors",
                     active ? "bg-olive text-white" : "bg-black/5 text-black/50",
                   )}
                 >
@@ -319,7 +319,7 @@ export function HabitFormModal({
         {/* Start date for repeating habits */}
         {periodic && (
           <div className="mt-4">
-            <label className="font-heading text-xs uppercase text-olive">
+            <label className="font-heading text-xs text-olive">
               Starting from
             </label>
             <input
@@ -337,7 +337,7 @@ export function HabitFormModal({
 
         {/* Reason */}
         <div className="mt-5 flex items-baseline justify-between">
-          <p className="font-heading text-sm uppercase text-olive">Why this habit</p>
+          <p className="font-heading text-sm text-olive">Why this habit</p>
           <span className="font-serif text-xs italic text-black/40">optional</span>
         </div>
         <textarea
@@ -352,7 +352,7 @@ export function HabitFormModal({
         <button
           type="submit"
           disabled={invalid}
-          className="mt-6 w-full rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
+          className="mt-6 w-full rounded-2xl bg-olive py-3.5 font-heading text-sm text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
         >
           {saveMutation.isPending
             ? editing
@@ -368,7 +368,7 @@ export function HabitFormModal({
             type="button"
             onClick={() => deleteMutation.mutate()}
             disabled={deleteMutation.isPending}
-            className="mt-2 w-full py-2 font-heading text-sm uppercase text-clay-deep transition-opacity hover:opacity-70 disabled:opacity-40"
+            className="mt-2 w-full py-2 font-heading text-sm text-clay-deep transition-opacity hover:opacity-70 disabled:opacity-40"
           >
             Delete habit
           </button>

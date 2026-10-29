@@ -103,7 +103,7 @@ function AwaPage() {
               type="button"
               onClick={() => setTab(t.key)}
               className={cn(
-                "flex-1 whitespace-nowrap rounded-full px-3 py-1.5 font-heading text-[11px] uppercase tracking-wide transition-colors",
+                "flex-1 whitespace-nowrap rounded-full px-3 py-1.5 font-heading text-[11px] tracking-wide transition-colors",
                 tab === t.key ? "bg-white text-olive shadow-sm" : "text-black/45",
               )}
             >
@@ -116,7 +116,7 @@ function AwaPage() {
           <button
             type="button"
             onClick={() => setLogFor({})}
-            className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-2xl bg-olive py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90"
+            className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-2xl bg-olive py-3.5 font-heading text-sm text-white shadow-sm transition-colors hover:bg-olive/90"
           >
             <Plus className="size-4" strokeWidth={2.5} />
             Log a little time
@@ -124,7 +124,7 @@ function AwaPage() {
         )}
         <Link
           to="/awa/menus"
-          className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-2xl bg-white py-3.5 font-heading text-sm uppercase text-olive shadow-sm ring-1 ring-olive/25 transition-colors hover:bg-olive/5"
+          className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-2xl bg-white py-3.5 font-heading text-sm text-olive shadow-sm ring-1 ring-olive/25 transition-colors hover:bg-olive/5"
         >
           <BookOpen className="size-4" strokeWidth={2.5} />
           Menus
@@ -204,7 +204,7 @@ function ShelfTab({ onLog, onAdd }: { onLog: (hobbyId: string) => void; onAdd: (
         <button
           type="button"
           onClick={onAdd}
-          className="mt-6 inline-flex items-center gap-1.5 rounded-2xl bg-olive px-6 py-3.5 font-heading text-sm uppercase text-white shadow-sm transition-colors hover:bg-olive/90"
+          className="mt-6 inline-flex items-center gap-1.5 rounded-2xl bg-olive px-6 py-3.5 font-heading text-sm text-white shadow-sm transition-colors hover:bg-olive/90"
         >
           <Plus className="size-4" strokeWidth={2.5} />
           Add your first hobby
@@ -236,7 +236,7 @@ function ShelfTab({ onLog, onAdd }: { onLog: (hobbyId: string) => void; onAdd: (
             <button
               type="button"
               onClick={onAdd}
-              className="flex min-h-40 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-olive/35 font-heading text-xs uppercase text-olive transition-colors hover:bg-olive/5"
+              className="flex min-h-40 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-olive/35 font-heading text-xs text-olive transition-colors hover:bg-olive/5"
             >
               <Plus className="size-5" strokeWidth={2} />
               Add hobby
@@ -247,7 +247,7 @@ function ShelfTab({ onLog, onAdd }: { onLog: (hobbyId: string) => void; onAdd: (
               <button
                 type="button"
                 onClick={() => setArranging(true)}
-                className="font-heading text-xs uppercase text-black/40 transition-colors hover:text-olive"
+                className="font-heading text-xs text-black/40 transition-colors hover:text-olive"
               >
                 Arrange shelf
               </button>
@@ -338,7 +338,7 @@ function ArrangeShelf({ hobbies, onDone }: { hobbies: AwaHobby[]; onDone: () => 
             save.mutate(items.map((h) => h.id));
             onDone();
           }}
-          className="rounded-full bg-olive px-4 py-2 font-heading text-xs uppercase text-white transition-colors hover:bg-olive/90"
+          className="rounded-full bg-olive px-4 py-2 font-heading text-xs text-white transition-colors hover:bg-olive/90"
         >
           Done
         </button>
@@ -408,7 +408,7 @@ function PutAwayList({ hobbies }: { hobbies: AwaHobby[] }) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="font-heading text-xs uppercase text-black/40 transition-colors hover:text-olive"
+        className="font-heading text-xs text-black/40 transition-colors hover:text-olive"
       >
         {open ? "Hide" : "Show"} put away ({hobbies.length})
       </button>
@@ -423,14 +423,14 @@ function PutAwayList({ hobbies }: { hobbies: AwaHobby[] }) {
               <button
                 type="button"
                 onClick={() => bringBack.mutate(h.id)}
-                className="rounded-full bg-olive/10 px-3 py-1.5 font-heading text-[10px] uppercase text-olive transition-colors hover:bg-olive/20"
+                className="rounded-full bg-olive/10 px-3 py-1.5 font-heading text-[10px] text-olive transition-colors hover:bg-olive/20"
               >
                 Bring back
               </button>
               <button
                 type="button"
                 onClick={() => (confirmId === h.id ? remove.mutate(h.id) : setConfirmId(h.id))}
-                className="rounded-full px-2 py-1.5 font-heading text-[10px] uppercase text-clay-deep/70 transition-colors hover:bg-clay/10"
+                className="rounded-full px-2 py-1.5 font-heading text-[10px] text-clay-deep/70 transition-colors hover:bg-clay/10"
               >
                 {confirmId === h.id ? "Sure?" : "Delete"}
               </button>
@@ -495,7 +495,7 @@ function ThingsIDidTab() {
             type="button"
             onClick={() => setFilter(null)}
             className={cn(
-              "shrink-0 rounded-full px-3 py-1.5 font-heading text-[11px] uppercase transition-colors",
+              "shrink-0 rounded-full px-3 py-1.5 font-heading text-[11px] transition-colors",
               !filter ? "bg-olive text-white" : "bg-white text-black/55 shadow-sm",
             )}
           >
@@ -574,7 +574,7 @@ function Timeline({
         ];
         return (
           <section key={m.key}>
-            <p className="font-heading text-sm uppercase text-olive">
+            <p className="font-heading text-sm text-olive">
               {MONTHS[(mo ?? 1) - 1]} {y}
             </p>
             <p className="mt-0.5 font-serif text-xs italic text-black/45">
@@ -682,7 +682,7 @@ function CalendarView({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="font-heading text-sm uppercase text-olive">
+        <p className="font-heading text-sm text-olive">
           {MONTHS[month]} {year}
         </p>
         <div className="flex items-center gap-1">
@@ -869,7 +869,7 @@ function SomedayTab({ onLogItem }: { onLogItem: (title: string) => void }) {
                 <button
                   type="button"
                   onClick={() => onLogItem(w.title)}
-                  className="shrink-0 rounded-full bg-sage/30 px-3 py-1 font-heading text-[10px] uppercase text-olive transition-colors hover:bg-sage/50"
+                  className="shrink-0 rounded-full bg-sage/30 px-3 py-1 font-heading text-[10px] text-olive transition-colors hover:bg-sage/50"
                 >
                   Keep a record
                 </button>
