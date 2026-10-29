@@ -60,7 +60,7 @@ export function GoalEditModal({
         {/* Live preview */}
         <div className="mt-5">
           <GoalHero goal={{ ...goal, accent, icon }}>
-            <p className="w-full break-words text-center font-heading text-2xl leading-tight text-white">
+            <p className="w-full break-words text-center font-heading text-2xl leading-tight">
               {title.trim() || "Name this goal"}
             </p>
           </GoalHero>

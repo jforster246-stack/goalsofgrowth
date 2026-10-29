@@ -212,7 +212,7 @@ function GoalDetailBody({
       {/* Hero with an edit button in the corner (name / colour / icon) */}
       <div className="relative">
         <GoalHero goal={goal}>
-          <p className="w-full break-words text-center font-heading text-2xl leading-tight text-white">
+          <p className="w-full break-words text-center font-heading text-2xl leading-tight">
             {goal.title}
           </p>
         </GoalHero>
@@ -220,7 +220,7 @@ function GoalDetailBody({
           type="button"
           onClick={() => setEditOpen(true)}
           aria-label="Edit name, colour and icon"
-          className="absolute right-3 top-3 grid size-9 place-items-center rounded-full bg-white/20 text-white backdrop-blur transition-colors hover:bg-white/30"
+          className="absolute right-3 top-3 grid size-9 place-items-center rounded-full bg-white/70 text-black/50 backdrop-blur transition-colors hover:bg-white hover:text-black/75"
         >
           <Pencil className="size-4" strokeWidth={2} />
         </button>

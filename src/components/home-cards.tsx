@@ -528,15 +528,15 @@ export function GoalHero({ goal, children }: { goal: HomeGoal; children: ReactNo
   return (
     <div
       className={cn(
-        "flex w-full flex-col items-center gap-7 rounded-3xl px-8 pb-7 pt-9 text-center",
-        accent.surface,
+        "mg-hero flex w-full flex-col items-center gap-7 rounded-3xl px-8 pb-7 pt-9 text-center shadow-[0_12px_44px_-22px_rgba(90,70,130,0.55)]",
+        accent.text,
       )}
     >
-      <GoalGlyph goal={goal} className="size-[86px] text-white" />
+      <GoalGlyph goal={goal} className="size-[86px]" />
       {children}
-      <div className="flex flex-col items-center gap-2 text-white">
+      <div className="flex flex-col items-center gap-2">
         <MoonPhase pct={pct} className="size-14" />
-        <span className="font-heading text-[11px] uppercase tracking-wide text-white/80">
+        <span className="font-heading text-[11px] uppercase tracking-wide opacity-70">
           {complete
             ? "Full moon · complete"
             : pct === 0
