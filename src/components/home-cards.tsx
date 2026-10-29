@@ -708,53 +708,51 @@ export function GoalCardCompact({
   const focusEnabled = useFocusTimerEnabled();
 
   return (
-    <div className="flex h-full flex-col rounded-2xl bg-white p-3 shadow-sm">
+    <div className="card-goal flex h-full flex-col gap-3 rounded-3xl p-3 shadow-sm">
       {dragHandle}
-      <button type="button" onClick={onOpen} className="flex flex-col items-start gap-2 text-left">
-        <span className={cn("mg-chip grid size-9 shrink-0 place-items-center rounded-xl", accent.text)}>
-          <GoalGlyph goal={goal} className="size-5" />
-        </span>
-        <span className="line-clamp-3 font-serif text-[13px] leading-snug text-black">
-          {goal.title}
-        </span>
-        <span className={cn("flex items-center gap-1.5", accent.text)}>
-          <MoonPhase pct={progress.pct} className="size-5 shrink-0" />
-          <span className="font-heading text-[10px] uppercase tracking-wide text-black/40">
-            {progress.complete ? "Complete" : `${progress.pct}%`}
+      <button
+        type="button"
+        onClick={onOpen}
+        className="flex flex-1 flex-col gap-3 text-left"
+      >
+        {/* Lock-up: icon + moon progress */}
+        <div className="flex items-center justify-between gap-2 rounded-2xl bg-white/85 px-2.5 py-2 shadow-sm">
+          <span className="tile-pink grid size-8 shrink-0 place-items-center rounded-lg text-[#4f1506]">
+            <GoalGlyph goal={goal} className="size-5" />
           </span>
-        </span>
+          <span className="flex items-center gap-1 text-[#201b2f]">
+            <MoonPhase pct={progress.pct} className="size-5 shrink-0" />
+            <span className="font-heading text-[9px] uppercase tracking-wide text-[#928e9d]">
+              {progress.complete ? "Done" : `${progress.pct}%`}
+            </span>
+          </span>
+        </div>
+
+        {/* Goal title — the hero */}
+        <p className="line-clamp-3 font-display text-lg leading-[1.12] text-[#201b2f]">
+          {goal.title}
+        </p>
+
+        {/* Next step — secondary */}
+        {!progress.complete && next && (
+          <p className="line-clamp-2 text-[11px] leading-tight text-[#201b2f]/70">
+            <span className="font-heading text-[9px] uppercase tracking-wide text-[#928e9d]">
+              Next ·{" "}
+            </span>
+            <span className="font-serif italic">{next.title}</span>
+          </p>
+        )}
       </button>
 
       {!progress.complete && next && (
-        <div className="mt-auto flex items-center gap-1.5 pt-3">
-          {focusEnabled && (
-            <button
-              type="button"
-              onClick={onFocus}
-              aria-label={`Start a focus timer for ${next.title}`}
-              className={cn(
-                "flex shrink-0 items-center justify-center rounded-lg p-1.5 text-white",
-                accent.deep,
-              )}
-            >
-              <Timer className="size-4" strokeWidth={1.75} />
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={onComplete}
-            aria-label={`Mark ${next.title} complete`}
-            className={cn(
-              "flex shrink-0 items-center justify-center rounded-lg p-1.5 text-white",
-              accent.surface,
-            )}
-          >
-            <Check className="size-4" strokeWidth={2} />
-          </button>
-          <span className="min-w-0 flex-1 truncate font-serif text-[11px] italic text-black/50">
-            {next.title}
-          </span>
-        </div>
+        <button
+          type="button"
+          onClick={onComplete}
+          aria-label={`Mark ${next.title} complete`}
+          className="btn-pink mt-auto grid w-full place-items-center rounded-2xl py-3 text-[#201b2f] shadow-sm transition-transform hover:-translate-y-0.5"
+        >
+          <Check className="size-5" strokeWidth={2.5} />
+        </button>
       )}
     </div>
   );
