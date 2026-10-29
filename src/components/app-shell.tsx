@@ -280,20 +280,20 @@ function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
       <nav className="mt-8 flex flex-col">
         <div className="flex flex-col gap-1.5">
           <SideLink to="/overview" icon={House} label="Home" />
-          <SideLink to="/gallery" icon={Frame} label="Your universe" />
+          <SideLink to="/gallery" icon={Frame} label="My Moongrove" />
         </div>
 
-        <SideSection title="Daily">
+        <SideSection title="Check in daily">
           <SideLink to="/habits" icon={Repeat} label="Habits" />
           <SideLink to="/goals" icon={Target} label="Goals" />
           <MorningPagesLink />
         </SideSection>
 
-        <SideSection title="Now & then">
+        <SideSection title="Check in weekly">
           <SideLink to="/routines" icon={ListChecks} label="Routines" />
           <SideLink to="/braindump" icon={Brain} label="Brain dump" />
           <SideLink to="/finance" icon={Wallet} label="Finance planner" />
-          <SideLink to="/awa" icon={Armchair} label="A While Away" />
+          <SideLink to="/awa" icon={Armchair} label="A While Away (Hobbies)" />
         </SideSection>
       </nav>
 
@@ -347,7 +347,7 @@ type NavItem = {
 
 const BOTTOM_PRIMARY: NavItem[] = [
   { to: "/overview", icon: House, label: "Home" },
-  { to: "/gallery", icon: Frame, label: "Your universe", className: "max-md:hidden" },
+  { to: "/gallery", icon: Frame, label: "My Moongrove", className: "max-md:hidden" },
   { to: "/habits", icon: Repeat, label: "Habits" },
   { to: "/goals", icon: Target, label: "Goals" },
 ];
@@ -355,7 +355,7 @@ const BOTTOM_MORE: NavItem[] = [
   { to: "/routines", icon: ListChecks, label: "Routines" },
   { to: "/braindump", icon: Brain, label: "Brain dump" },
   { to: "/finance", icon: Wallet, label: "Finance planner" },
-  { to: "/awa", icon: Armchair, label: "A While Away" },
+  { to: "/awa", icon: Armchair, label: "A While Away (Hobbies)" },
 ];
 
 function BottomNav({ onOpenSettings }: { onOpenSettings: () => void }) {
@@ -401,7 +401,7 @@ function BottomNav({ onOpenSettings }: { onOpenSettings: () => void }) {
           >
             <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-black/15" />
             <p className="mb-3 px-1 font-serif text-xs italic text-muted-foreground">
-              Now &amp; then
+              Check in weekly
             </p>
             <div className="grid grid-cols-3 gap-3">
               {BOTTOM_MORE.map(({ to, icon: Icon, label }) => (
