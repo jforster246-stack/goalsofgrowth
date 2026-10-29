@@ -30,6 +30,24 @@ function GoalGlyph({ goal, className }: { goal: HomeGoal; className: string }) {
   return <Star className={className} />;
 }
 
+/**
+ * A goal's progress as a waxing moon: new moon at 0%, first quarter at 50%,
+ * full moon at 100%. The lit area fills with currentColor, so it picks up the
+ * goal's accent colour from the parent.
+ */
+export function MoonPhase({ pct, className }: { pct: number; className?: string }) {
+  const f = Math.max(0, Math.min(1, pct / 100));
+  const r = 46;
+  const b = r * Math.cos(Math.PI * f); // signed terminator half-width
+  const lit = `M 50 ${50 - r} A ${r} ${r} 0 0 1 50 ${50 + r} A ${Math.abs(b).toFixed(2)} ${r} 0 0 ${b > 0 ? 0 : 1} 50 ${50 - r} Z`;
+  return (
+    <svg viewBox="0 0 100 100" className={cn("block", className)} aria-hidden>
+      <circle cx="50" cy="50" r={r} fill="none" stroke="currentColor" strokeWidth="3" />
+      {f > 0 && <path d={lit} fill="currentColor" />}
+    </svg>
+  );
+}
+
 /* ------------------------------------------------------------------ */
 /* Next-step row — "What next step will you take today?"               */
 /* ------------------------------------------------------------------ */
@@ -216,17 +234,14 @@ export function GoalCard({
             {goal.title}
           </span>
         </button>
-        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-black/5">
-          <div
-            className={cn("h-full rounded-full transition-[width] duration-500", accent.bar)}
-            style={{ width: `${progress.pct}%` }}
-          />
+        <div className={cn("mt-4 flex items-center gap-2", accent.text)}>
+          <MoonPhase pct={progress.pct} className="size-6 shrink-0" />
+          <p className="text-xs text-black/45">
+            {hasSteps
+              ? `${progress.pct}% · ${progress.done} of ${progress.total} steps`
+              : "No steps yet"}
+          </p>
         </div>
-        <p className="mt-1.5 text-xs text-black/45">
-          {hasSteps
-            ? `${progress.pct}% · ${progress.done} of ${progress.total} steps`
-            : "No steps yet"}
-        </p>
         {complete || !hasSteps ? (
           <>
             <p className="mt-5 text-[11px] font-medium uppercase tracking-wide text-black/40">
@@ -508,7 +523,7 @@ function GoalCardActions({
 
 export function GoalHero({ goal, children }: { goal: HomeGoal; children: ReactNode }) {
   const accent = accentOf(goal);
-  const { pct } = goalProgress(goal);
+  const { pct, complete } = goalProgress(goal);
 
   return (
     <div
@@ -519,11 +534,15 @@ export function GoalHero({ goal, children }: { goal: HomeGoal; children: ReactNo
     >
       <GoalGlyph goal={goal} className="size-[86px] text-white" />
       {children}
-      <div className="h-3 w-full overflow-hidden rounded-full bg-black/15">
-        <div
-          className="h-full rounded-full bg-white/85 transition-[width] duration-500"
-          style={{ width: `${pct}%` }}
-        />
+      <div className="flex flex-col items-center gap-2 text-white">
+        <MoonPhase pct={pct} className="size-14" />
+        <span className="font-heading text-[11px] uppercase tracking-wide text-white/80">
+          {complete
+            ? "Full moon · complete"
+            : pct === 0
+              ? "New moon"
+              : `${pct}% · waxing`}
+        </span>
       </div>
     </div>
   );
@@ -722,14 +741,11 @@ export function GoalCardCompact({
         <span className="line-clamp-3 font-serif text-[13px] leading-snug text-black">
           {goal.title}
         </span>
-        <span className="h-1.5 w-full overflow-hidden rounded-full bg-black/5">
-          <span
-            className={cn("block h-full rounded-full transition-[width] duration-500", accent.bar)}
-            style={{ width: `${progress.pct}%` }}
-          />
-        </span>
-        <span className="font-heading text-[10px] uppercase tracking-wide text-black/40">
-          {progress.complete ? "Complete" : `${progress.pct}%`}
+        <span className={cn("flex items-center gap-1.5", accent.text)}>
+          <MoonPhase pct={progress.pct} className="size-5 shrink-0" />
+          <span className="font-heading text-[10px] uppercase tracking-wide text-black/40">
+            {progress.complete ? "Complete" : `${progress.pct}%`}
+          </span>
         </span>
       </button>
 
