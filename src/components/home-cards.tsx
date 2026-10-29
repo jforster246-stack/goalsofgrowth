@@ -229,7 +229,9 @@ export function GoalCard({
       {/* Modern style: a plain, quiet card */}
       <div className="hidden min-h-[260px] flex-col rounded-2xl bg-white p-5 shadow-sm ring-1 ring-black/5 modern:flex">
         <button type="button" onClick={onOpen} className="flex items-start gap-3 text-left">
-          <GoalGlyph goal={goal} className={cn("mt-0.5 size-6 shrink-0", accent.text)} />
+          <span className={cn("mg-chip mt-0.5 grid size-9 shrink-0 place-items-center rounded-xl", accent.text)}>
+            <GoalGlyph goal={goal} className="size-5" />
+          </span>
           <span className="line-clamp-2 min-w-0 flex-1 pr-8 text-lg font-medium leading-snug text-black">
             {goal.title}
           </span>
@@ -289,8 +291,8 @@ export function GoalCard({
           type="button"
           onClick={onOpen}
           className={cn(
-            "relative flex h-[230px] w-full shrink-0 flex-col justify-end px-6 pb-6 pt-6 text-left",
-            accent.surface,
+            "relative flex h-[230px] w-full shrink-0 flex-col justify-end px-6 pb-6 pt-6 text-left mg-hero",
+            accent.text,
           )}
         >
           <Stamp
@@ -298,7 +300,7 @@ export function GoalCard({
             accent={goal.accent}
             className="absolute right-5 top-5 size-14"
           />
-          <p className="line-clamp-3 font-heading text-2xl leading-[1.15] text-white">
+          <p className="line-clamp-3 font-heading text-2xl leading-[1.15]">
             {goal.title}
           </p>
         </button>
@@ -741,7 +743,9 @@ export function GoalCardCompact({
     <div className="flex h-full flex-col rounded-2xl bg-white p-3 shadow-sm">
       {dragHandle}
       <button type="button" onClick={onOpen} className="flex flex-col items-start gap-2 text-left">
-        <GoalGlyph goal={goal} className={cn("size-7 shrink-0", accent.text)} />
+        <span className={cn("mg-chip grid size-9 shrink-0 place-items-center rounded-xl", accent.text)}>
+          <GoalGlyph goal={goal} className="size-5" />
+        </span>
         <span className="line-clamp-3 font-serif text-[13px] leading-snug text-black">
           {goal.title}
         </span>
