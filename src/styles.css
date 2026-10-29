@@ -306,8 +306,8 @@
   --color-focus: #3b4a30; /* headings map to olive */
 
   --font-body: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-display: "Unbounded", "Inter", sans-serif;
-  --font-heading: "Unbounded", "Inter", sans-serif;
+  --font-display: "Pinyon Script", "Inter", cursive;
+  --font-heading: "Faculty Glyphic", "Inter", sans-serif;
   --font-serif: "Fanwood Text", ui-serif, Georgia, serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
@@ -318,8 +318,8 @@
  * the @theme default above. (Mono is left alone for tabular numbers.)
  */
 :root[data-font="modern"] {
-  --font-display: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-heading: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: "Unbounded", "Inter", sans-serif;
+  --font-heading: "Unbounded", "Inter", sans-serif;
   --font-serif: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 

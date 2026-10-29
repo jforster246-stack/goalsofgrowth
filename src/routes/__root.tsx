@@ -132,7 +132,7 @@ function RootShell({ children }: { children: ReactNode }) {
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "try{var t=localStorage.getItem('gog-theme');document.documentElement.setAttribute('data-theme',t||'moonlight');var f=localStorage.getItem('gog-font');document.documentElement.setAttribute('data-font',f||'traditional');}catch(e){}",
+              "try{var t=localStorage.getItem('gog-theme');document.documentElement.setAttribute('data-theme',t||'moonlight');var f=localStorage.getItem('gog-font');document.documentElement.setAttribute('data-font',f||'modern');}catch(e){}",
           }}
         />
       </head>

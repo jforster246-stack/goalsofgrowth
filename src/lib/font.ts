@@ -17,7 +17,7 @@ export const FONTS: { id: FontStyle; label: string; blurb: string }[] = [
 ];
 
 const KEY = "gog-font";
-const DEFAULT: FontStyle = "traditional";
+const DEFAULT: FontStyle = "modern";
 
 export function getFont(): FontStyle {
   try {
