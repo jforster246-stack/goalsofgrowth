@@ -1,9 +1,9 @@
-import { TAROT } from "@/components/tarot-data";
+import { CONSTELLATION_DATA } from "@/components/constellations-data";
 
 /**
- * Moongrove collectibles — the rewards you buy with stardust and place in your
- * universe. For now these are the 22 original tarot cards (Major Arcana), all at
- * one flat price, no rarity tiers.
+ * Moongrove collectibles — the rewards you buy with stardust and hang in your
+ * universe. These are the constellations (the 12 zodiac signs plus the best-known
+ * asterisms), all at one flat price, no rarity tiers.
  *
  * The export names (Artwork, ARTWORKS, artworkById, dailyArtworkIds, …) are kept
  * so the gallery/showcase code and its database tables — which key off the
@@ -14,20 +14,20 @@ export type Artwork = {
   name: string;
   /** Price in stardust (flat for every collectible). */
   cost: number;
-  kind: "tarot";
-  /** Tarot card id (from tarot-data). */
+  kind: "constellation";
+  /** Constellation id (from constellations-data). */
   ref: string;
 };
 
 /** Flat price for every collectible. */
 export const ARTWORK_COST = 50;
 
-export const ARTWORKS: Artwork[] = TAROT.map((t, i) => ({
+export const ARTWORKS: Artwork[] = CONSTELLATION_DATA.map((c, i) => ({
   id: i + 1,
-  name: t.name,
+  name: c.name,
   cost: ARTWORK_COST,
-  kind: "tarot",
-  ref: t.id,
+  kind: "constellation",
+  ref: c.id,
 }));
 
 const BY_ID = new Map(ARTWORKS.map((a) => [a.id, a]));

@@ -1,18 +1,17 @@
 import { X } from "lucide-react";
-import { TarotCard } from "@/components/collectible-art";
-import { tarotById } from "@/components/tarot-data";
+import { ConstellationArt } from "@/components/collectible-art";
+import { constellationById } from "@/components/constellations-data";
 import { type Artwork } from "@/lib/artworks-data";
 
 /**
- * How an artwork fills its frame: a public-domain image when we have one,
- * otherwise a museum placard (work, artist, year on a soft canvas) — used for
- * works still under copyright, whose images we don't reproduce.
+ * A collectible in its frame: the constellation's star-line asterism drawn in
+ * soft gold on a night sky.
  */
 export function ArtworkPlacard({ artwork }: { artwork: Artwork }) {
-  const tarot = tarotById(artwork.ref);
+  const constellation = constellationById(artwork.ref);
   return (
-    <div className="flex size-full items-center justify-center bg-white p-3 text-[var(--tarot-ink)]">
-      {tarot ? <TarotCard card={tarot} /> : null}
+    <div className="flex size-full items-center justify-center overflow-hidden bg-[radial-gradient(130%_130%_at_30%_15%,#352a63_0%,#1c1740_55%,#0c0a1e_100%)] p-[14%] text-[#f6e8b0] [filter:drop-shadow(0_0_1.5px_rgba(246,232,176,0.55))]">
+      {constellation ? <ConstellationArt c={constellation} /> : null}
     </div>
   );
 }
@@ -76,7 +75,7 @@ export function ArtworkDetailModal({
             {artwork.name}
           </p>
           <p className="mt-1 font-serif text-sm italic text-black/60">
-            Major Arcana
+            Constellation
           </p>
         </div>
       </div>

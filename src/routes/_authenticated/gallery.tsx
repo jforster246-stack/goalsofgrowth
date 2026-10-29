@@ -228,7 +228,7 @@ function GalleryPage() {
                     {art.name}
                   </p>
                   <p className="truncate font-serif text-[10px] italic leading-tight text-black/55">
-                    Major Arcana
+                    Constellation
                   </p>
                 </div>
                 <button
@@ -275,7 +275,7 @@ function GalleryPage() {
                 <FrameCell
                   key={`slot-${slot}`}
                   caption={art ? art.name : "Add a collectible"}
-                  subtitle={art ? "Major Arcana" : undefined}
+                  subtitle={art ? "Constellation" : undefined}
                 >
                   <button
                     type="button"

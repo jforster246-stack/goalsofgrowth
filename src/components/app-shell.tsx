@@ -6,11 +6,11 @@ import {
   Brain,
   Check,
   Ellipsis,
-  Frame,
   House,
   ListChecks,
   Repeat,
   Settings,
+  Sparkle,
   Sparkles,
   Target,
   Trophy,
@@ -281,7 +281,7 @@ function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
       <nav className="mt-8 flex flex-col">
         <div className="flex flex-col gap-1.5">
           <SideLink to="/overview" icon={House} label="Home" />
-          <SideLink to="/gallery" icon={Frame} label="My Moongrove" />
+          <SideLink to="/gallery" icon={Sparkle} label="My Moongrove" />
         </div>
 
         <SideSection title="Check in daily">
@@ -349,7 +349,7 @@ type NavItem = {
 
 const BOTTOM_PRIMARY: NavItem[] = [
   { to: "/overview", icon: House, label: "Home" },
-  { to: "/gallery", icon: Frame, label: "My Moongrove", className: "max-md:hidden" },
+  { to: "/gallery", icon: Sparkle, label: "My Moongrove", className: "max-md:hidden" },
   { to: "/habits", icon: Repeat, label: "Habits" },
   { to: "/goals", icon: Target, label: "Dreams" },
 ];
