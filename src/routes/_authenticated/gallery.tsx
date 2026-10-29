@@ -50,7 +50,7 @@ export const Route = createFileRoute("/_authenticated/gallery")({
       {
         name: "description",
         content:
-          "Your wall of wins, completed goals and artworks bought with the stamps you earn.",
+          "Your universe of wins, completed goals and artworks bought with the stardust you earn.",
       },
     ],
   }),
@@ -209,7 +209,7 @@ function GalleryPage() {
               {grant.isPending ? "…" : "+50"}
             </button>
             <span className="font-serif text-xs text-black/50">
-              {ARTWORK_COST} stamps each
+              {ARTWORK_COST} stardust each
             </span>
           </div>
         </div>
@@ -259,7 +259,7 @@ function GalleryPage() {
 
       {/* The wall */}
       <section className="mt-6">
-        <p className="font-heading text-sm uppercase text-olive">Your wall</p>
+        <p className="font-heading text-sm uppercase text-olive">Your universe</p>
         <p className="mt-1 font-serif text-xs text-black/40">
           Completed goals and wins, plus five spots for artworks. Swipe around to
           explore.
@@ -482,7 +482,7 @@ function ConfirmPurchaseModal({
 }) {
   const { celebrate } = useAppShell();
   return (
-    <ModalShell title={canAfford ? "Purchase" : "Not enough stamps"} onClose={onClose}>
+    <ModalShell title={canAfford ? "Purchase" : "Not enough stardust"} onClose={onClose}>
       <div className="mt-2 flex flex-col items-center gap-4 text-center">
         <div className="w-40">
           <GoldFrame seed={`buy-${artwork.id}`} ariaLabel={artwork.work}>
@@ -493,11 +493,11 @@ function ConfirmPurchaseModal({
           <p className="font-serif text-base leading-relaxed text-black/80">
             Ready to purchase{" "}
             <span className="font-heading text-black">{artwork.work}</span> for{" "}
-            <span className="font-heading text-olive">{ARTWORK_COST} stamps</span>?
+            <span className="font-heading text-olive">{ARTWORK_COST} stardust</span>?
           </p>
         ) : (
           <p className="font-serif text-base leading-relaxed text-black/70">
-            Sorry, not this time — you don't have enough stamps yet. Complete a
+            Sorry, not this time - you don't have enough stardust yet. Complete a
             few more goals or habits and come back.
           </p>
         )}

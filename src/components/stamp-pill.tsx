@@ -14,8 +14,8 @@ export function StampPill() {
   return (
     <Link
       to="/gallery"
-      aria-label={`${count} stamps to spend — open gallery`}
-      title="Your stamps"
+      aria-label={`${count} stardust to spend - open your universe`}
+      title="Your stardust"
       className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-sm transition-transform hover:-translate-y-0.5"
     >
       <Stamp icon={null} accent="sea" className="size-5" />

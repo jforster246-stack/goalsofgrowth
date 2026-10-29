@@ -75,7 +75,7 @@ export function StampCollections({
       <p className="font-serif text-sm text-black/50">
         You have{" "}
         <span className="font-heading text-olive">
-          {spendable} star stamp{spendable === 1 ? "" : "s"}
+          {spendable} stardust
         </span>{" "}
         left to spend on artworks for your{" "}
         <Link
@@ -102,7 +102,7 @@ export function StampCollections({
         </div>
         {stampList.length === 0 ? (
           <p className="mt-4 rounded-2xl bg-white/60 px-4 py-4 font-serif text-sm text-black/40">
-            Complete a goal to earn your first stamp.
+            Complete a goal to light your first star.
           </p>
         ) : (
           <div className="mt-4 flex flex-wrap gap-3">
@@ -137,9 +137,9 @@ export function StampCollections({
         onOpen={setEditingWin}
       />
 
-      {/* How to earn stamps */}
+      {/* How to earn stardust */}
       <section className="rounded-2xl bg-white/60 p-4">
-        <p className="font-heading text-sm uppercase text-olive">How to earn stamps</p>
+        <p className="font-heading text-sm uppercase text-olive">How to earn stardust</p>
         <ul className="mt-3 space-y-2 font-serif text-sm text-black/60">
           <li className="flex items-baseline gap-2">
             <span className="font-heading text-olive">+5</span>
@@ -160,7 +160,7 @@ export function StampCollections({
         </ul>
         <p className="mt-3 border-t border-black/5 pt-3 font-serif text-sm text-black/50">
           Each artwork in the gallery costs{" "}
-          <span className="font-heading text-olive">{ARTWORK_COST} stamps</span>.
+          <span className="font-heading text-olive">{ARTWORK_COST} stardust</span>.
         </p>
       </section>
 
@@ -188,7 +188,7 @@ export function StampCollectionsModal({ onClose }: { onClose: () => void }) {
       >
         <div className="flex items-center justify-between">
           <h2 className="font-display text-2xl leading-none text-black">
-            Your stamps
+            Your stardust
           </h2>
           <button
             type="button"

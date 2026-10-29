@@ -24,8 +24,8 @@ const SLIDES: Slide[] = [
   {
     hero: "star",
     accent: "text-olive",
-    title: "Welcome to Goals of Growth",
-    body: "A calm place to grow — set goals, build habits, and celebrate every win, one small step at a time.",
+    title: "Create your own universe",
+    body: "A calm place to grow. Set the things you want to do, and watch your own universe take shape - one small step at a time.",
   },
   {
     hero: Target,
@@ -42,14 +42,14 @@ const SLIDES: Slide[] = [
   {
     hero: Trophy,
     accent: "bg-clay-deep",
-    title: "Collect your stamps",
-    body: "Finish a goal to earn a star stamp. They collect on your Wins stamps page, and soon you'll spend them on artworks in the gallery.",
+    title: "Earn stardust, grow your sky",
+    body: "Finish a goal and it becomes a star in your universe. You'll earn stardust too - spend it on artworks for your gallery.",
   },
   {
     hero: Plus,
     accent: "bg-olive",
     title: "Everything starts with +",
-    body: "Tap the + button any time to add a goal, habit, routine, focus session or win. That's it — let's grow.",
+    body: "Tap the + button any time to add a goal, habit, routine, focus session or win. That's it - let's grow.",
   },
 ];
 
@@ -114,7 +114,7 @@ export function WelcomePage() {
             <span className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-sm">
               <Stamp className="size-4 text-clay-deep" strokeWidth={2} />
               <span className="font-heading text-[11px] uppercase text-olive">
-                A star stamp per goal
+                A star per goal
               </span>
             </span>
           )}

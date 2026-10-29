@@ -8,11 +8,11 @@ export const Route = createFileRoute("/_authenticated/wins")({
   }),
   head: () => ({
     meta: [
-      { title: "Wins stamps — Goals of Growth" },
+      { title: "Wins — Goals of Growth" },
       {
         name: "description",
         content:
-          "Your gallery: the stamps you've collected for completed goals, achievements, and life events.",
+          "Your universe: the stars you've collected for completed goals, achievements, and life events.",
       },
     ],
   }),
@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_authenticated/wins")({
 function WinsPage() {
   const { new: openNew } = Route.useSearch();
   return (
-    <AppShell title="Wins stamps">
+    <AppShell title="Wins">
       <div className="mt-4 pb-4">
         <StampCollections defaultAdd={openNew} />
       </div>

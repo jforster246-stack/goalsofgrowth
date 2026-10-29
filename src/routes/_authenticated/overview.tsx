@@ -348,10 +348,10 @@ function StreakCard({
         <Stamp icon={null} accent="clay" className="size-4" />
         <span className="font-heading text-[11px] uppercase text-clay-deep">
           {streak === 0
-            ? "7 days in a row earns 5 stamps"
+            ? "7 days in a row earns 5 stardust"
             : untilBonus === 0
-              ? "You just earned 5 stamps!"
-              : `${untilBonus} more day${untilBonus === 1 ? "" : "s"} for 5 stamps`}
+              ? "You just earned 5 stardust!"
+              : `${untilBonus} more day${untilBonus === 1 ? "" : "s"} for 5 stardust`}
         </span>
       </span>
     </div>
