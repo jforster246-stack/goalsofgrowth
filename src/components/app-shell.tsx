@@ -11,6 +11,7 @@ import {
   ListChecks,
   Repeat,
   Settings,
+  Sparkles,
   Target,
   Trophy,
   Wallet,
@@ -286,6 +287,7 @@ function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
         <SideSection title="Check in daily">
           <SideLink to="/habits" icon={Repeat} label="Habits" />
           <SideLink to="/goals" icon={Target} label="Dreams" />
+          <SideLink to="/intentions" icon={Sparkles} label="Intentions" />
           <MorningPagesLink />
         </SideSection>
 
@@ -352,6 +354,7 @@ const BOTTOM_PRIMARY: NavItem[] = [
   { to: "/goals", icon: Target, label: "Dreams" },
 ];
 const BOTTOM_MORE: NavItem[] = [
+  { to: "/intentions", icon: Sparkles, label: "Intentions" },
   { to: "/routines", icon: ListChecks, label: "Routines" },
   { to: "/braindump", icon: Brain, label: "Brain dump" },
   { to: "/finance", icon: Wallet, label: "Finance planner" },
@@ -401,7 +404,7 @@ function BottomNav({ onOpenSettings }: { onOpenSettings: () => void }) {
           >
             <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-black/15" />
             <p className="mb-3 px-1 font-serif text-xs italic text-muted-foreground">
-              Check in weekly
+              More places to check in
             </p>
             <div className="grid grid-cols-3 gap-3">
               {BOTTOM_MORE.map(({ to, icon: Icon, label }) => (

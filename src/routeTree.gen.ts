@@ -18,6 +18,7 @@ import { Route as AuthenticatedFinanceRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedGalleryRouteImport } from './routes/_authenticated/gallery'
 import { Route as AuthenticatedGoalsRouteImport } from './routes/_authenticated/goals'
 import { Route as AuthenticatedHabitsRouteImport } from './routes/_authenticated/habits'
+import { Route as AuthenticatedIntentionsRouteImport } from './routes/_authenticated/intentions'
 import { Route as AuthenticatedOverviewRouteImport } from './routes/_authenticated/overview'
 import { Route as AuthenticatedRoutinesRouteImport } from './routes/_authenticated/routines'
 import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated/welcome'
@@ -75,6 +76,11 @@ const AuthenticatedGoalsRoute = AuthenticatedGoalsRouteImport.update({
 const AuthenticatedHabitsRoute = AuthenticatedHabitsRouteImport.update({
   id: '/habits',
   path: '/habits',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedIntentionsRoute = AuthenticatedIntentionsRouteImport.update({
+  id: '/intentions',
+  path: '/intentions',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedOverviewRoute = AuthenticatedOverviewRouteImport.update({
@@ -162,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/gallery': typeof AuthenticatedGalleryRoute
   '/goals': typeof AuthenticatedGoalsRouteWithChildren
   '/habits': typeof AuthenticatedHabitsRoute
+  '/intentions': typeof AuthenticatedIntentionsRoute
   '/overview': typeof AuthenticatedOverviewRoute
   '/routines': typeof AuthenticatedRoutinesRouteWithChildren
   '/welcome': typeof AuthenticatedWelcomeRoute
@@ -184,6 +191,7 @@ export interface FileRoutesByTo {
   '/finance': typeof AuthenticatedFinanceRoute
   '/gallery': typeof AuthenticatedGalleryRoute
   '/habits': typeof AuthenticatedHabitsRoute
+  '/intentions': typeof AuthenticatedIntentionsRoute
   '/overview': typeof AuthenticatedOverviewRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/wins': typeof AuthenticatedWinsRoute
@@ -208,6 +216,7 @@ export interface FileRoutesById {
   '/_authenticated/gallery': typeof AuthenticatedGalleryRoute
   '/_authenticated/goals': typeof AuthenticatedGoalsRouteWithChildren
   '/_authenticated/habits': typeof AuthenticatedHabitsRoute
+  '/_authenticated/intentions': typeof AuthenticatedIntentionsRoute
   '/_authenticated/overview': typeof AuthenticatedOverviewRoute
   '/_authenticated/routines': typeof AuthenticatedRoutinesRouteWithChildren
   '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
@@ -234,6 +243,7 @@ export interface FileRouteTypes {
     | '/gallery'
     | '/goals'
     | '/habits'
+    | '/intentions'
     | '/overview'
     | '/routines'
     | '/welcome'
@@ -256,6 +266,7 @@ export interface FileRouteTypes {
     | '/finance'
     | '/gallery'
     | '/habits'
+    | '/intentions'
     | '/overview'
     | '/welcome'
     | '/wins'
@@ -279,6 +290,7 @@ export interface FileRouteTypes {
     | '/_authenticated/gallery'
     | '/_authenticated/goals'
     | '/_authenticated/habits'
+    | '/_authenticated/intentions'
     | '/_authenticated/overview'
     | '/_authenticated/routines'
     | '/_authenticated/welcome'
@@ -364,6 +376,13 @@ declare module '@tanstack/react-router' {
       path: '/habits'
       fullPath: '/habits'
       preLoaderRoute: typeof AuthenticatedHabitsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/intentions': {
+      id: '/_authenticated/intentions'
+      path: '/intentions'
+      fullPath: '/intentions'
+      preLoaderRoute: typeof AuthenticatedIntentionsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/overview': {
@@ -534,6 +553,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedGalleryRoute: typeof AuthenticatedGalleryRoute
   AuthenticatedGoalsRoute: typeof AuthenticatedGoalsRouteWithChildren
   AuthenticatedHabitsRoute: typeof AuthenticatedHabitsRoute
+  AuthenticatedIntentionsRoute: typeof AuthenticatedIntentionsRoute
   AuthenticatedOverviewRoute: typeof AuthenticatedOverviewRoute
   AuthenticatedRoutinesRoute: typeof AuthenticatedRoutinesRouteWithChildren
   AuthenticatedWelcomeRoute: typeof AuthenticatedWelcomeRoute
@@ -547,6 +567,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedGalleryRoute: AuthenticatedGalleryRoute,
   AuthenticatedGoalsRoute: AuthenticatedGoalsRouteWithChildren,
   AuthenticatedHabitsRoute: AuthenticatedHabitsRoute,
+  AuthenticatedIntentionsRoute: AuthenticatedIntentionsRoute,
   AuthenticatedOverviewRoute: AuthenticatedOverviewRoute,
   AuthenticatedRoutinesRoute: AuthenticatedRoutinesRouteWithChildren,
   AuthenticatedWelcomeRoute: AuthenticatedWelcomeRoute,

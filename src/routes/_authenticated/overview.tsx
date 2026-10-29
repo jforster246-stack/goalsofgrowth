@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Check, ChevronRight, X } from "lucide-react";
+import { Check, ChevronRight, Sparkles, X } from "lucide-react";
 import {
   useMutation,
   useQuery,
@@ -40,6 +40,7 @@ import { frequencyLabel, isHabitDueToday } from "@/lib/habit-schedule";
 import { StepActionsModal } from "@/components/step-actions-modal";
 import { HabitFormModal } from "@/components/habit-form-modal";
 import { artworkById, artworkTint, type Artwork } from "@/lib/artworks-data";
+import { moodById, useTodayIntention } from "@/lib/mantras";
 import { CelestialBody } from "@/components/celestial-body";
 import { frameFor } from "@/lib/frames-data";
 import { useFontStyle } from "@/lib/font";
@@ -197,6 +198,8 @@ function OverviewPage() {
       <div className="mt-6 space-y-6">
         {profile && <StreakCard streak={profile.streak_count ?? 0} />}
 
+        <TodayIntention />
+
         <YourCollection artworks={acquiredArtworks} />
 
         <div className="grid gap-5 lg:grid-cols-3 lg:items-stretch">
@@ -296,6 +299,57 @@ function OverviewPage() {
  * connected days reads at a glance: active days show a tick, the rest show
  * their date, and today is highlighted.
  */
+/**
+ * Today's carried intention, or a gentle invite to set one. Links through to
+ * the Intentions page either way.
+ */
+function TodayIntention() {
+  const intention = useTodayIntention();
+  const mood = intention ? moodById(intention.moodId) : null;
+
+  if (intention && mood) {
+    return (
+      <Link
+        to="/intentions"
+        className="mg-hero flex items-center gap-4 rounded-3xl px-5 py-4 shadow-sm transition-transform hover:-translate-y-0.5"
+      >
+        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white/70 text-[#4a3d63]">
+          <Sparkles className="size-5" strokeWidth={2} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-heading text-[11px] tracking-[0.12em] text-[#4a3d63]/70">
+            Today's intention
+          </span>
+          <span className="mt-0.5 block font-display text-base leading-snug text-[#201b2f]">
+            "{intention.mantra}"
+          </span>
+        </span>
+        <ChevronRight className="size-4 shrink-0 text-[#4a3d63]/40" />
+      </Link>
+    );
+  }
+
+  return (
+    <Link
+      to="/intentions"
+      className="flex items-center gap-4 rounded-3xl bg-white px-5 py-4 shadow-sm transition-transform hover:-translate-y-0.5"
+    >
+      <span className="mg-chip grid size-10 shrink-0 place-items-center rounded-full text-olive">
+        <Sparkles className="size-5" strokeWidth={2} />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block font-heading text-[11px] tracking-[0.12em] text-[#928e9d]">
+          Set an intention
+        </span>
+        <span className="mt-0.5 block font-serif text-sm text-black/60">
+          How are you feeling today? Pick a mood and carry a mantra.
+        </span>
+      </span>
+      <ChevronRight className="size-4 shrink-0 text-black/25" />
+    </Link>
+  );
+}
+
 /** A preview row of the collectibles you own, plus a link to the full gallery. */
 function YourCollection({ artworks }: { artworks: Artwork[] }) {
   const items = artworks.slice(0, 5);
