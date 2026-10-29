@@ -72,21 +72,22 @@ export function StampCollections({
 
   return (
     <div className="space-y-7">
-      <p className="font-serif text-sm text-black/50">
-        You have{" "}
-        <span className="font-heading text-olive">
-          {spendable} stardust
-        </span>{" "}
-        left to spend on collectibles for your{" "}
-        <Link
-          to="/gallery"
-          onClick={() => onNavigate?.()}
-          className="text-olive underline underline-offset-2"
-        >
-          gallery
-        </Link>
-        .
-      </p>
+      <div className="mg-hero rounded-3xl px-5 py-4 shadow-sm">
+        <p className="font-heading text-3xl leading-none text-[#4a3d63]">
+          {spendable} <span className="text-base">stardust</span>
+        </p>
+        <p className="mt-1 font-serif text-sm text-[#4a3d63]/70">
+          to spend on collectibles in your{" "}
+          <Link
+            to="/gallery"
+            onClick={() => onNavigate?.()}
+            className="underline underline-offset-2"
+          >
+            gallery
+          </Link>
+          .
+        </p>
+      </div>
 
 
 
@@ -138,7 +139,7 @@ export function StampCollections({
       />
 
       {/* How to earn stardust */}
-      <section className="rounded-2xl bg-white/60 p-4">
+      <section className="mg-panel rounded-2xl p-4">
         <p className="font-heading text-sm uppercase text-olive">How to earn stardust</p>
         <ul className="mt-3 space-y-2 font-serif text-sm text-black/60">
           <li className="flex items-baseline gap-2">
