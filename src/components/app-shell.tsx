@@ -202,11 +202,11 @@ export function AppShell({
                 </>
               ) : (
                 <>
-                  <h1 className="truncate font-display text-xl font-normal leading-[1.1] tracking-tight md:text-2xl">
+                  <h1 className="font-heading text-2xl uppercase leading-tight tracking-wide text-foreground md:text-3xl">
                     {profile?.display_name ? `${profile.display_name}'s ` : "Your "}
-                    Moongrove
+                    Moongrove Planner
                   </h1>
-                  <p className="mt-1 text-sm italic text-muted-foreground">
+                  <p className="mt-1 font-serif text-sm italic text-muted-foreground">
                     "{quoteOfTheDay(localToday())}"
                   </p>
                 </>
@@ -275,7 +275,7 @@ export function AppShell({
 function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
   return (
     <aside className="fixed inset-y-3 left-3 z-20 hidden w-56 flex-col rounded-3xl bg-card px-4 py-6 shadow-xl ring-1 ring-border lg:flex">
-      <p className="px-2 font-display text-[26px] leading-tight text-foreground">Moongrove</p>
+      <p className="px-2 font-heading text-xl uppercase tracking-wide text-foreground">Moongrove</p>
 
       <nav className="mt-8 flex flex-col">
         <div className="flex flex-col gap-1.5">

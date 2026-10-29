@@ -127,6 +127,7 @@ function OverviewPage() {
     )
     .map((goal) => ({ goal, next: goalProgress(goal).nextStep }))
     .filter((row) => row.next);
+  const twoGoals = upcoming.slice(0, 2);
 
   // A random goal's next step and a random win, both rotating once a day.
   const dayIdx = Math.floor(Date.parse(`${today}T00:00:00`) / 86_400_000);
@@ -193,63 +194,65 @@ function OverviewPage() {
 
   return (
     <AppShell>
-      <div className="mt-6 space-y-4">
-        {profile && (
-          <StreakCard streak={profile.streak_count ?? 0} />
-        )}
+      <div className="mt-6 space-y-6">
+        {profile && <StreakCard streak={profile.streak_count ?? 0} />}
 
-        {acquiredArtworks.length > 0 && (
-          <ArtworkCarousel artworks={acquiredArtworks} />
-        )}
+        <YourCollection artworks={acquiredArtworks} />
 
-        <section>
-          <p className="font-heading text-[11px] uppercase tracking-[0.12em] text-[#928e9d]">
-            A goal to nudge today
-          </p>
-          <div className="mt-3 grid grid-cols-2 items-stretch gap-3">
-            {/* Goal nudge card */}
-            {randomGoal ? (
-              <NextStepCard
-                goal={randomGoal.goal}
-                step={randomGoal.next!}
-                onComplete={() =>
-                  handleComplete(
-                    randomGoal.goal.id,
-                    randomGoal.next!.title,
-                    randomGoal.next!.id,
-                  )
-                }
-              />
-            ) : (
-              <div className="grid place-items-center rounded-3xl bg-white p-4 text-center text-sm text-muted-foreground shadow-sm">
-                {goals.length === 0
-                  ? "Add a goal to see a next step here."
-                  : "You're all caught up — nice work."}
-              </div>
-            )}
+        <div className="grid gap-5 lg:grid-cols-3 lg:items-stretch">
+          <section className="flex flex-col lg:col-span-2">
+            <p className="font-heading text-[11px] uppercase tracking-[0.12em] text-[#928e9d]">
+              A couple of goals to nudge today
+            </p>
+            <div className="mt-3 grid flex-1 grid-cols-2 items-stretch gap-3">
+              {twoGoals.length > 0 ? (
+                twoGoals.map((row) => (
+                  <NextStepCard
+                    key={row.goal.id}
+                    goal={row.goal}
+                    step={row.next!}
+                    onComplete={() =>
+                      handleComplete(row.goal.id, row.next!.title, row.next!.id)
+                    }
+                  />
+                ))
+              ) : (
+                <div className="col-span-2 grid place-items-center rounded-3xl bg-white p-6 text-center text-sm text-muted-foreground shadow-sm">
+                  {goals.length === 0
+                    ? "Add a goal to see a next step here."
+                    : "You're all caught up — nice work."}
+                </div>
+              )}
+            </div>
+          </section>
 
-            {/* Win card */}
-            {randomWin && winStyle ? (
-              <div className="card-win flex flex-col items-center justify-center gap-2 rounded-3xl p-5 text-center">
-                <Stamp
-                  icon={winStyle.icon}
-                  accent={winStyle.accent}
-                  className="size-16"
-                />
-                <p className="font-display text-lg leading-tight text-[#201b2f]">
-                  {randomWin.title}
-                </p>
-                <p className="font-heading text-[10px] uppercase tracking-wide text-[#928e9d]">
-                  {winDateLabel(randomWin.achieved_on)}
-                </p>
-              </div>
-            ) : (
-              <div className="grid place-items-center rounded-3xl bg-white p-4 text-center text-sm text-muted-foreground shadow-sm">
-                Log a win and it'll show up here to look back on.
-              </div>
-            )}
-          </div>
-        </section>
+          <section className="flex flex-col">
+            <p className="font-heading text-[11px] uppercase tracking-[0.12em] text-[#928e9d]">
+              A recent win
+            </p>
+            <div className="mt-3 flex-1">
+              {randomWin && winStyle ? (
+                <div className="card-win flex h-full flex-col items-center justify-center gap-2 rounded-3xl p-5 text-center">
+                  <Stamp
+                    icon={winStyle.icon}
+                    accent={winStyle.accent}
+                    className="size-16"
+                  />
+                  <p className="font-display text-lg leading-tight text-[#201b2f]">
+                    {randomWin.title}
+                  </p>
+                  <p className="font-heading text-[10px] uppercase tracking-wide text-[#928e9d]">
+                    {winDateLabel(randomWin.achieved_on)}
+                  </p>
+                </div>
+              ) : (
+                <div className="grid h-full place-items-center rounded-3xl bg-white p-6 text-center text-sm text-muted-foreground shadow-sm">
+                  Log a win and it'll show up here to look back on.
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
 
         <TodayHabits />
       </div>
@@ -293,6 +296,36 @@ function OverviewPage() {
  * connected days reads at a glance: active days show a tick, the rest show
  * their date, and today is highlighted.
  */
+/** A preview row of the collectibles you own, plus a link to the full gallery. */
+function YourCollection({ artworks }: { artworks: Artwork[] }) {
+  const items = artworks.slice(0, 5);
+  return (
+    <section>
+      <p className="font-heading text-[11px] uppercase tracking-[0.12em] text-[#928e9d]">
+        Your collection
+      </p>
+      <div className="no-scrollbar mt-3 flex items-start gap-3 overflow-x-auto">
+        {items.map((a) => (
+          <Link key={a.id} to="/gallery" className="flex w-[92px] shrink-0 flex-col">
+            <div className="aspect-square overflow-hidden rounded-2xl shadow-sm ring-1 ring-black/5">
+              <ArtworkPlacard artwork={a} />
+            </div>
+            <span className="mt-1.5 truncate text-center font-serif text-[11px] text-black/60">
+              {a.name}
+            </span>
+          </Link>
+        ))}
+        <Link
+          to="/gallery"
+          className="grid h-[92px] min-w-[160px] flex-1 place-items-center rounded-2xl border-2 border-[#4f1506] px-4 text-center font-heading text-sm uppercase tracking-wide text-[#4f1506] transition-colors hover:bg-[#4f1506]/5"
+        >
+          Open Gallery
+        </Link>
+      </div>
+    </section>
+  );
+}
+
 function StreakCard({
   streak,
   className,
@@ -300,47 +333,30 @@ function StreakCard({
   streak: number;
   className?: string;
 }) {
-  const filled = Math.min(streak, 7);
-  // Days left in the current run before the next 7-day, 5-stamp reward.
-  const untilBonus = streak > 0 ? (7 - (streak % 7)) % 7 : 7;
+  const frames = 5;
+  const filled = Math.min(streak, frames);
 
   return (
     <div
       className={cn(
-        "mg-hero flex flex-wrap items-center gap-x-4 gap-y-3 rounded-3xl px-5 py-4 shadow-sm",
+        "flex items-center justify-between gap-4 rounded-2xl bg-white px-6 py-4 shadow-sm",
         className,
       )}
     >
-      <span className="font-heading text-3xl leading-none text-black">{streak}</span>
-
-      <div className="flex items-center gap-1.5">
-        {Array.from({ length: 7 }, (_, i) =>
+      <span className="font-heading text-xl text-[#201b2f] md:text-2xl">
+        {streak} Day Streak
+      </span>
+      <div className="flex items-center gap-2">
+        {Array.from({ length: frames }, (_, i) =>
           i < filled ? (
-            <StampMark key={i} className="size-7 text-clay-deep">
-              <Check className="size-3.5 text-white" strokeWidth={3} />
+            <StampMark key={i} className="size-7 text-[#4f1506]">
+              <Check className="size-3 text-white" strokeWidth={3} />
             </StampMark>
           ) : (
-            <StampMark key={i} className="size-7 text-black/10" />
+            <StampMark key={i} className="size-7 text-black/15" />
           ),
         )}
       </div>
-
-      {streak === 0 && (
-        <p className="min-w-0 flex-1 font-serif text-sm italic text-black/50">
-          Check in each day to start your streak.
-        </p>
-      )}
-
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-clay/10 px-3 py-1.5">
-        <Stamp icon={null} accent="clay" className="size-4" />
-        <span className="font-heading text-[11px] uppercase text-clay-deep">
-          {streak === 0
-            ? "7 days in a row earns 5 stardust"
-            : untilBonus === 0
-              ? "You just earned 5 stardust!"
-              : `${untilBonus} more day${untilBonus === 1 ? "" : "s"} for 5 stardust`}
-        </span>
-      </span>
     </div>
   );
 }
