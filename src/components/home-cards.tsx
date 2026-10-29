@@ -69,49 +69,37 @@ export function NextStepRow({
   const focusEnabled = useFocusTimerEnabled();
 
   return (
-    <div className="flex w-full flex-col gap-2 rounded-2xl bg-white p-2 shadow-sm sm:flex-row sm:items-start sm:justify-between sm:py-2 sm:pl-2.5 sm:pr-2">
+    <div className="card-goal flex h-full flex-col gap-4 rounded-3xl p-3 shadow-sm">
+      {/* Lock-up: icon + goal title in caps */}
       <button
         type="button"
         onClick={onOpen}
-        className="flex min-w-0 flex-1 flex-col items-start gap-1.5 text-left"
+        className="flex items-center gap-2 rounded-2xl bg-white/85 px-2.5 py-2 text-left shadow-sm"
       >
-        <GoalGlyph goal={goal} className={cn("size-12 shrink-0 sm:size-14", accent.text)} />
-        <span className="flex min-w-0 flex-col">
-          <span className="font-serif text-xs leading-snug text-black line-clamp-3 sm:text-sm">
-            {step.title}
-          </span>
-          <span className={cn("truncate font-serif text-[10px] italic", accent.text)}>
-            {goal.title}
-          </span>
+        <span className="tile-pink grid size-8 shrink-0 place-items-center rounded-lg text-[#4f1506]">
+          <GoalGlyph goal={goal} className="size-5" />
+        </span>
+        <span className="line-clamp-1 font-heading text-[10px] uppercase leading-tight tracking-wide text-[#201b2f]">
+          {goal.title}
         </span>
       </button>
 
-      <div className="flex shrink-0 items-center gap-2 self-end sm:self-auto">
-        {focusEnabled && (
-          <button
-            type="button"
-            onClick={onStartTimer}
-            aria-label="Start a focus timer for this step"
-            className={cn(
-              "flex items-center justify-center rounded-lg p-1.5 text-white sm:p-2",
-              accent.deep,
-            )}
-          >
-            <Timer className="size-5 sm:size-6" strokeWidth={1.75} />
-          </button>
-        )}
-        <button
-          type="button"
-          onClick={onComplete}
-          aria-label="Mark this step complete"
-          className={cn(
-            "flex items-center justify-center rounded-lg p-1.5 text-white sm:p-2",
-            accent.surface,
-          )}
-        >
-          <Check className="size-5 sm:size-6" strokeWidth={2} />
-        </button>
-      </div>
+      {/* The next step, big */}
+      <button type="button" onClick={onOpen} className="flex-1 text-left">
+        <p className="line-clamp-4 font-display text-xl leading-[1.08] text-[#201b2f]">
+          {step.title}
+        </p>
+      </button>
+
+      {/* Complete */}
+      <button
+        type="button"
+        onClick={onComplete}
+        aria-label="Mark this step complete"
+        className="btn-pink grid w-full place-items-center rounded-2xl py-3.5 text-[#201b2f] shadow-sm transition-transform hover:-translate-y-0.5"
+      >
+        <Check className="size-6" strokeWidth={2.5} />
+      </button>
     </div>
   );
 }
@@ -658,61 +646,41 @@ export function HabitRow({
   const focusEnabled = useFocusTimerEnabled();
 
   return (
-    <div className="flex w-full items-center justify-between gap-2 rounded-2xl bg-white py-2 pl-3 pr-2 shadow-sm">
+    <div className="flex w-full items-center justify-between gap-2 rounded-2xl bg-white py-2.5 pl-3 pr-2.5 shadow-sm">
       <button
         type="button"
         onClick={onOpen}
         aria-label={`Edit ${name}`}
-        className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
+        className="flex min-w-0 flex-1 items-center gap-3 text-left"
       >
-        <span
-          className={cn(
-            "mg-chip grid size-9 shrink-0 place-items-center rounded-xl",
-            HABIT_ICON_COLOR[timeOfDay],
-          )}
-        >
-          <Motif id={icon || TIME_MOTIF[timeOfDay]} className="size-5" />
+        <span className="tile-pink grid size-11 shrink-0 place-items-center rounded-xl text-[#4f1506]">
+          <Motif id={icon || TIME_MOTIF[timeOfDay]} className="size-6" />
         </span>
         <span className="flex min-w-0 flex-col">
           <span
             className={cn(
-              "font-serif text-sm",
-              done ? "text-black/40 line-through decoration-black/30" : "text-black",
+              "font-heading text-lg leading-tight",
+              done ? "text-black/40 line-through decoration-black/30" : "text-[#201b2f]",
             )}
           >
             {name}
           </span>
           {showFrequency && (
-            <span className="font-heading text-[10px] uppercase text-black/40">
+            <span className="font-heading text-[10px] uppercase tracking-wide text-[#928e9d]">
               {frequencyLabel}
             </span>
           )}
         </span>
       </button>
 
-      <div className="flex shrink-0 items-center gap-2">
-        {focusEnabled && (
-          <button
-            type="button"
-            onClick={onTimer}
-            aria-label={`Start a focus timer for ${name}`}
-            className="flex items-center justify-center rounded-lg bg-olive p-2 text-white"
-          >
-            <Timer className="size-6" strokeWidth={1.75} />
-          </button>
-        )}
-        <button
-          type="button"
-          onClick={onToggle}
-          aria-label={done ? `Mark ${name} not done today` : `Mark ${name} done today`}
-          className={cn(
-            "flex items-center justify-center rounded-lg p-2 text-white transition-colors",
-            done ? "bg-olive" : "bg-sage",
-          )}
-        >
-          <Check className="size-6" strokeWidth={2} />
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-label={done ? `Mark ${name} not done today` : `Mark ${name} done today`}
+        className="btn-pink grid size-11 shrink-0 place-items-center rounded-xl text-[#201b2f] transition-transform hover:-translate-y-0.5"
+      >
+        <Check className="size-6" strokeWidth={2.5} />
+      </button>
     </div>
   );
 }

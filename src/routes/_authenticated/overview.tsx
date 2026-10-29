@@ -202,68 +202,54 @@ function OverviewPage() {
           <ArtworkCarousel artworks={acquiredArtworks} />
         )}
 
-        <div className="grid grid-cols-2 gap-3 md:gap-4">
-          {/* A random goal's next step — rotates daily */}
-          <section>
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              A goal to nudge today
-            </p>
+        <section>
+          <p className="font-heading text-[11px] uppercase tracking-[0.12em] text-[#928e9d]">
+            A goal to nudge today
+          </p>
+          <div className="mt-3 grid grid-cols-2 items-stretch gap-3">
+            {/* Goal nudge card */}
             {randomGoal ? (
-              <div className="mt-2">
-                <NextStepCard
-                  goal={randomGoal.goal}
-                  step={randomGoal.next!}
-                  onComplete={() =>
-                    handleComplete(
-                      randomGoal.goal.id,
-                      randomGoal.next!.title,
-                      randomGoal.next!.id,
-                    )
-                  }
-                />
-              </div>
+              <NextStepCard
+                goal={randomGoal.goal}
+                step={randomGoal.next!}
+                onComplete={() =>
+                  handleComplete(
+                    randomGoal.goal.id,
+                    randomGoal.next!.title,
+                    randomGoal.next!.id,
+                  )
+                }
+              />
             ) : (
-              <p className="mt-2 text-sm text-muted-foreground">
+              <div className="grid place-items-center rounded-3xl bg-white p-4 text-center text-sm text-muted-foreground shadow-sm">
                 {goals.length === 0
                   ? "Add a goal to see a next step here."
                   : "You're all caught up — nice work."}
-              </p>
+              </div>
             )}
-          </section>
 
-          {/* A random win — rotates daily */}
-          <section className="flex flex-col">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              A win to remember
-            </p>
+            {/* Win card */}
             {randomWin && winStyle ? (
-              <div className="mt-2 flex flex-1 flex-col items-start gap-2 rounded-2xl bg-white p-2 shadow-sm">
+              <div className="card-win flex flex-col items-center justify-center gap-2 rounded-3xl p-5 text-center">
                 <Stamp
                   icon={winStyle.icon}
                   accent={winStyle.accent}
-                  className="size-14 shrink-0 md:size-16"
+                  className="size-16"
                 />
-                <div className="min-w-0">
-                  <p className="font-heading text-sm leading-tight text-black md:text-base">
-                    {randomWin.title}
-                  </p>
-                  <p className="mt-0.5 font-serif text-[11px] text-black/70 md:text-xs">
-                    {winDateLabel(randomWin.achieved_on)}
-                  </p>
-                  {randomWin.note && (
-                    <p className="mt-1 line-clamp-3 font-serif text-xs italic text-black/70 md:line-clamp-2 md:text-sm">
-                      {randomWin.note}
-                    </p>
-                  )}
-                </div>
+                <p className="font-display text-lg leading-tight text-[#201b2f]">
+                  {randomWin.title}
+                </p>
+                <p className="font-heading text-[10px] uppercase tracking-wide text-[#928e9d]">
+                  {winDateLabel(randomWin.achieved_on)}
+                </p>
               </div>
             ) : (
-              <p className="mt-2 text-sm text-muted-foreground">
+              <div className="grid place-items-center rounded-3xl bg-white p-4 text-center text-sm text-muted-foreground shadow-sm">
                 Log a win and it'll show up here to look back on.
-              </p>
+              </div>
             )}
-          </section>
-        </div>
+          </div>
+        </section>
 
         <TodayHabits />
       </div>
@@ -836,7 +822,7 @@ function TodayHabits({ className }: { className?: string }) {
 
   return (
     <section className={className}>
-      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+      <p className="font-heading text-[11px] uppercase tracking-[0.12em] text-[#928e9d]">
         {BUCKET_LABEL[bucket]}
       </p>
       <div className="mt-3 space-y-2">
