@@ -145,6 +145,7 @@ export function AppShell({
 
   return (
     <div className="relative min-h-dvh bg-background font-body text-foreground antialiased lg:pl-64">
+      <div className="mg-aura pointer-events-none fixed inset-0 z-0" aria-hidden />
       <Sidebar onOpenSettings={() => setProfileOpen(true)} />
       {/* pb clears both the bottom nav and the floating + button (which sits at
           bottom-24 and is 56px tall), so the last row's controls are never

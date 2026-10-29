@@ -65,7 +65,7 @@
 
 :root {
   --radius: 0.625rem;
-  --background: #f4eee1; /* almond cream — the Natural theme canvas */
+  --background: #fbfbfe; /* fresh near-white — the refreshed canvas */
   --foreground: oklch(0.24 0.01 264);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.24 0.01 264);
@@ -142,7 +142,7 @@
  * "natural" matches the @theme defaults and is here for completeness.
  * ============================================================= */
 :root[data-theme="natural"] {
-  --background: #f4eee1;
+  --background: #fbfbfe;
   --color-olive: #3b4a30;
   --color-sage: #6f7c4e;
   --color-gold: #d19a4a;
@@ -383,4 +383,24 @@
   &::-webkit-scrollbar {
     display: none;
   }
+}
+
+/* ------------------------------------------------------------------ */
+/* Moongrove refresh — clean white with soft celestial gradients.      */
+/* Reusable surfaces: a faint page aura, gradient hero, chip and CTA.   */
+/* ------------------------------------------------------------------ */
+.mg-aura {
+  background:
+    radial-gradient(48% 40% at 12% 6%, rgba(255, 201, 224, 0.20), transparent 70%),
+    radial-gradient(46% 40% at 88% 10%, rgba(206, 224, 255, 0.20), transparent 70%),
+    radial-gradient(58% 50% at 74% 96%, rgba(210, 240, 224, 0.18), transparent 70%);
+}
+.mg-hero {
+  background: linear-gradient(140deg, #ffe7f1 0%, #efe6ff 46%, #e2f3ea 100%);
+}
+.mg-chip {
+  background: linear-gradient(140deg, #f5ecff, #ffe9f2 60%, #e6f4ec);
+}
+.mg-cta {
+  background: linear-gradient(90deg, #ffd9e8, #e3d6ff 55%, #cfeede);
 }

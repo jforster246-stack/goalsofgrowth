@@ -288,7 +288,7 @@ function OverviewPage() {
             )}
             <button
               onClick={() => setCelebrating(null)}
-              className="mt-6 w-full rounded-2xl bg-primary py-3 text-sm font-semibold text-primary-foreground"
+              className="mg-cta mt-6 w-full rounded-full py-3.5 text-sm font-semibold text-[#4a3d63]"
             >
               Got it
             </button>
@@ -321,7 +321,7 @@ function StreakCard({
   return (
     <div
       className={cn(
-        "flex flex-wrap items-center gap-x-4 gap-y-3 rounded-3xl bg-white px-5 py-4 shadow-sm",
+        "mg-hero flex flex-wrap items-center gap-x-4 gap-y-3 rounded-3xl px-5 py-4 shadow-sm",
         className,
       )}
     >
