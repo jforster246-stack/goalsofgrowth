@@ -76,6 +76,8 @@
   --s-tile: color-mix(in srgb, var(--color-rose) 18%, white);
   --nav-active-bg: var(--color-olive);
   --nav-active-fg: #ffffff;
+  /* Tarot collectible ink on a white card — each theme's own accent. */
+  --tarot-ink: var(--color-olive);
   --mg-1: #ffe4ef;
   --mg-2: #e9e4ff;
   --mg-3: #e0f3ec;
@@ -164,6 +166,7 @@
   --s-tile: #fbddf3;
   --nav-active-bg: #daf3f8;
   --nav-active-fg: #201b2f;
+  --tarot-ink: #b34a9c;
   --mg-1: #ffe4ef;
   --mg-2: #e9e4ff;
   --mg-3: #e0f3ec;

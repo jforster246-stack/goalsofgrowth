@@ -1,7 +1,7 @@
 import { X } from "lucide-react";
 import { TarotCard } from "@/components/collectible-art";
 import { tarotById } from "@/components/tarot-data";
-import { artworkTint, type Artwork } from "@/lib/artworks-data";
+import { type Artwork } from "@/lib/artworks-data";
 
 /**
  * How an artwork fills its frame: a public-domain image when we have one,
@@ -11,10 +11,7 @@ import { artworkTint, type Artwork } from "@/lib/artworks-data";
 export function ArtworkPlacard({ artwork }: { artwork: Artwork }) {
   const tarot = tarotById(artwork.ref);
   return (
-    <div
-      className="flex size-full items-center justify-center p-3 text-olive"
-      style={{ background: artworkTint(artwork.id) }}
-    >
+    <div className="flex size-full items-center justify-center bg-white p-3 text-[var(--tarot-ink)]">
       {tarot ? <TarotCard card={tarot} /> : null}
     </div>
   );
