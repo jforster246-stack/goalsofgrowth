@@ -70,7 +70,7 @@ export function AddMenu({ floating = false }: { floating?: boolean }) {
           aria-label={open ? "Close add menu" : "Add something"}
           aria-expanded={open}
           className={cn(
-            "grid place-items-center rounded-full bg-olive text-white ring-1 ring-black/5 transition-transform",
+            "grid place-items-center rounded-full mg-cta text-[#4a3d63] ring-1 ring-black/5 transition-transform",
             floating ? "size-14 shadow-lg" : "size-10 shadow-sm",
             open && "rotate-45",
           )}
@@ -103,7 +103,7 @@ export function AddMenu({ floating = false }: { floating?: boolean }) {
                   }}
                   className="flex items-center gap-3 rounded-xl px-3 py-2 text-left transition-colors hover:bg-muted/60"
                 >
-                  <span className="grid size-8 shrink-0 place-items-center rounded-full bg-sage/15 text-olive">
+                  <span className="mg-chip grid size-8 shrink-0 place-items-center rounded-full text-olive">
                     <Icon className="size-4" strokeWidth={2} />
                   </span>
                   <span className="font-heading text-xs uppercase tracking-wide text-foreground">

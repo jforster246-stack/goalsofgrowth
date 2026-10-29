@@ -374,7 +374,7 @@ function BottomNav({ onOpenSettings }: { onOpenSettings: () => void }) {
               key={to}
               to={to}
               className={`${itemClass} text-muted-foreground ${className ?? ""}`}
-              activeProps={{ className: `${itemClass} text-foreground ${className ?? ""}` }}
+              activeProps={{ className: `${itemClass} text-olive ${className ?? ""}` }}
             >
               <Icon className="size-5" strokeWidth={2} />
               {label}
