@@ -160,7 +160,7 @@ export function StampCollections({
           </li>
         </ul>
         <p className="mt-3 border-t border-black/5 pt-3 font-serif text-sm text-black/50">
-          Collectibles cost from{" "}
+          Each collectible costs{" "}
           <span className="font-heading text-olive">{ARTWORK_COST} stardust</span>.
         </p>
       </section>

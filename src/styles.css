@@ -306,7 +306,7 @@
   --color-focus: #3b4a30; /* headings map to olive */
 
   --font-body: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-display: "Pinyon Script", "Inter", cursive;
+  --font-display: "Unbounded", "Inter", sans-serif;
   --font-heading: "Faculty Glyphic", "Inter", sans-serif;
   --font-serif: "Fanwood Text", ui-serif, Georgia, serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;

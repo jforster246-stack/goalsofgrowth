@@ -1,45 +1,51 @@
+import { MOTIF_DATA } from "@/components/motif-data";
 import { cn } from "@/lib/utils";
 
 /**
- * The selectable icon set for goals, habits and hobbies: original mystical /
- * tarot-flavoured symbols (moons, suns, stars, crystals, an eye, and more),
- * drawn in currentColor. Kept under the original `Motif` names so every consumer
- * (picker, goal glyph, habit rows, hobby icons, stamps) works unchanged; an
- * unknown or missing id falls back to a star.
+ * The selectable icon set for goals, habits and hobbies: the hand-drawn folk
+ * motif pack (suns, moons, leaves, flowers, etc.). Rendered as solid shapes
+ * tinted with currentColor.
  */
 export type Motif = { id: string; label: string };
 
-export const MOTIFS: Motif[] = [
-  { id: "moon", label: "Moon" },
-  { id: "star", label: "Star" },
-  { id: "sparkle", label: "Sparkle" },
-  { id: "sun", label: "Sun" },
-  { id: "sunface", label: "Sun face" },
-  { id: "phases", label: "Moon phases" },
-  { id: "pentacle", label: "Pentacle" },
-  { id: "crystal", label: "Crystal" },
-  { id: "cluster", label: "Crystals" },
-  { id: "eye", label: "Eye" },
-  { id: "flame", label: "Flame" },
-  { id: "leaf", label: "Leaf" },
-  { id: "mountain", label: "Mountain" },
-  { id: "wave", label: "Wave" },
-  { id: "bolt", label: "Lightning" },
-  { id: "heart", label: "Heart" },
-  { id: "key", label: "Key" },
-  { id: "droplet", label: "Droplet" },
-  { id: "comet", label: "Comet" },
-  { id: "spiral", label: "Spiral" },
-  { id: "feather", label: "Feather" },
-  { id: "snake", label: "Snake" },
-];
+export const MOTIFS: Motif[] = MOTIF_DATA.map((m, i) => ({
+  id: m.id,
+  label: `Motif ${i + 1}`,
+}));
 
-/** Default habit icon by time of day. */
+const MOTIF_MAP = new Map(MOTIF_DATA.map((m) => [m.id, m]));
+
+/** Default habit icon by time of day (sun / tree / moon from the pack). */
 export const TIME_MOTIF = {
-  morning: "sun",
-  afternoon: "star",
-  evening: "moon",
+  morning: "m027", // sun
+  afternoon: "m010", // tree
+  evening: "m057", // moon
 } as const;
+
+/** Renders a folk motif by id; returns null if the id is unknown. */
+export function Motif({
+  id,
+  className,
+}: {
+  id?: string | null;
+  className?: string;
+}) {
+  const m = id ? MOTIF_MAP.get(id) : undefined;
+  if (!m) return null;
+  return (
+    <svg
+      viewBox={m.viewBox}
+      className={cn("fill-current", className)}
+      aria-hidden
+      dangerouslySetInnerHTML={{ __html: m.inner }}
+    />
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Mystical symbols — original line/solid glyphs used as tarot-card     */
+/* emblems (not in the icon picker).                                    */
+/* ------------------------------------------------------------------ */
 
 function rays(count: number, r0: number, r1: number, w: number) {
   const out = [];
@@ -141,11 +147,7 @@ function renderSymbol(id: string) {
     case "mountain":
       return (
         <g>
-          <path
-            d="M12 80 L38 38 L54 62 L66 42 L88 80 Z"
-            fill="none"
-            strokeWidth="5"
-          />
+          <path d="M12 80 L38 38 L54 62 L66 42 L88 80 Z" fill="none" strokeWidth="5" />
           <circle cx="70" cy="28" r="7" />
         </g>
       );
@@ -178,11 +180,7 @@ function renderSymbol(id: string) {
       return (
         <g>
           <circle cx="66" cy="34" r="12" />
-          <path
-            d="M56 42 L20 80 M60 48 L30 84 M50 44 L22 66"
-            fill="none"
-            strokeWidth="5"
-          />
+          <path d="M56 42 L20 80 M60 48 L30 84 M50 44 L22 66" fill="none" strokeWidth="5" />
         </g>
       );
     case "spiral":
@@ -225,8 +223,8 @@ function renderSymbol(id: string) {
   }
 }
 
-/** Renders a mystical symbol by id; falls back to a star. */
-export function Motif({
+/** Renders a mystical symbol by id (tarot emblems); falls back to a star. */
+export function MysticalSymbol({
   id,
   className,
 }: {

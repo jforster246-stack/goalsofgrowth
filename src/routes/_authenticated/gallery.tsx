@@ -38,7 +38,6 @@ import {
   artworkById,
   artworkTint,
   dailyArtworkIds,
-  TIER_LABEL,
   type Artwork,
 } from "@/lib/artworks-data";
 import { mergeStamps, type StampView } from "@/lib/stamp-view";
@@ -229,7 +228,7 @@ function GalleryPage() {
                     {art.name}
                   </p>
                   <p className="truncate font-serif text-[10px] italic leading-tight text-black/55">
-                    {TIER_LABEL[art.tier]}
+                    Major Arcana
                   </p>
                 </div>
                 <button
@@ -276,7 +275,7 @@ function GalleryPage() {
                 <FrameCell
                   key={`slot-${slot}`}
                   caption={art ? art.name : "Add a collectible"}
-                  subtitle={art ? TIER_LABEL[art.tier] : undefined}
+                  subtitle={art ? "Major Arcana" : undefined}
                 >
                   <button
                     type="button"

@@ -1,8 +1,7 @@
 import { X } from "lucide-react";
-import { ConstellationArt, TarotCard } from "@/components/collectible-art";
-import { constellationById } from "@/components/constellations-data";
+import { TarotCard } from "@/components/collectible-art";
 import { tarotById } from "@/components/tarot-data";
-import { artworkTint, TIER_LABEL, type Artwork } from "@/lib/artworks-data";
+import { artworkTint, type Artwork } from "@/lib/artworks-data";
 
 /**
  * How an artwork fills its frame: a public-domain image when we have one,
@@ -10,19 +9,13 @@ import { artworkTint, TIER_LABEL, type Artwork } from "@/lib/artworks-data";
  * works still under copyright, whose images we don't reproduce.
  */
 export function ArtworkPlacard({ artwork }: { artwork: Artwork }) {
-  const tarot = artwork.kind === "tarot" ? tarotById(artwork.ref) : undefined;
-  const con =
-    artwork.kind === "constellation" ? constellationById(artwork.ref) : undefined;
+  const tarot = tarotById(artwork.ref);
   return (
     <div
       className="flex size-full items-center justify-center p-3 text-olive"
       style={{ background: artworkTint(artwork.id) }}
     >
-      {tarot ? (
-        <TarotCard card={tarot} />
-      ) : con ? (
-        <ConstellationArt c={con} className="h-4/5 w-4/5" />
-      ) : null}
+      {tarot ? <TarotCard card={tarot} /> : null}
     </div>
   );
 }
@@ -86,7 +79,7 @@ export function ArtworkDetailModal({
             {artwork.name}
           </p>
           <p className="mt-1 font-serif text-sm italic text-black/60">
-            {TIER_LABEL[artwork.tier]}
+            Major Arcana
           </p>
         </div>
       </div>

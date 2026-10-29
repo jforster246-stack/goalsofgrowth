@@ -1,4 +1,4 @@
-import { Motif } from "@/components/motif-icons";
+import { MysticalSymbol } from "@/components/motif-icons";
 import type { Constellation } from "@/components/constellations-data";
 import type { TarotCardData } from "@/components/tarot-data";
 import { cn } from "@/lib/utils";
@@ -49,7 +49,7 @@ export function TarotCard({ card }: { card: TarotCardData }) {
       <div className="relative flex aspect-[3/4] h-full flex-col items-center justify-between rounded-md p-[6%] ring-1 ring-current">
         <div className="pointer-events-none absolute inset-[4%] rounded-sm ring-1 ring-current/40" />
         <span className="font-serif text-[9px] leading-none">{card.num}</span>
-        <Motif id={card.emblem} className="h-[46%] w-[46%]" />
+        <MysticalSymbol id={card.emblem} className="h-[46%] w-[46%]" />
         <span className="px-0.5 text-center font-heading text-[6.5px] uppercase leading-tight tracking-wide">
           {card.name}
         </span>
