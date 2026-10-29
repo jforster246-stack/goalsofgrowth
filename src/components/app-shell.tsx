@@ -285,10 +285,10 @@ function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
         </div>
 
         <SideSection title="Check in daily">
+          <MorningPagesLink />
+          <SideLink to="/intentions" icon={Sparkles} label="Intentions" />
           <SideLink to="/habits" icon={Repeat} label="Habits" />
           <SideLink to="/goals" icon={Target} label="Dreams" />
-          <SideLink to="/intentions" icon={Sparkles} label="Intentions" />
-          <MorningPagesLink />
         </SideSection>
 
         <SideSection title="Check in weekly">
