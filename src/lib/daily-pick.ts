@@ -27,26 +27,38 @@ export function dailyShuffle<T>(items: readonly T[], day: string, idOf: (item: T
     .map((r) => r.item);
 }
 
-/** `count` random items for `day`, avoiding yesterday's picks when there are enough to go round. */
+/** Picks before this day aren't tracked, so the chain below has a fixed start. */
+const EPOCH = "2026-01-01";
+const DAY_MS = 86_400_000;
+
+function dayNumber(day: string): number {
+  return Math.round(Date.parse(`${day}T00:00:00Z`) / DAY_MS);
+}
+
+function dayString(n: number): string {
+  return new Date(n * DAY_MS).toISOString().slice(0, 10);
+}
+
+/**
+ * `count` random items for `day`. When there are enough items to go round,
+ * none of them repeats from the day before: each day is worked out in turn
+ * from a fixed start date, skipping the previous day's picks.
+ */
 export function dailyPick<T>(
   items: readonly T[],
   day: string,
   idOf: (item: T) => string,
   count: number,
 ): T[] {
-  const today = dailyShuffle(items, day, idOf);
-  if (items.length < count * 2) return today.slice(0, count);
-  const yesterdayIds = new Set(
-    dailyShuffle(items, previousDay(day), idOf)
-      .slice(0, count)
-      .map(idOf),
-  );
-  const fresh = today.filter((i) => !yesterdayIds.has(idOf(i)));
-  return fresh.slice(0, count);
-}
-
-function previousDay(day: string): string {
-  const d = new Date(`${day}T12:00:00Z`);
-  d.setUTCDate(d.getUTCDate() - 1);
-  return d.toISOString().slice(0, 10);
+  if (items.length < count * 2) return dailyShuffle(items, day, idOf).slice(0, count);
+  const target = dayNumber(day);
+  let previous = new Set<string>();
+  let picks: T[] = [];
+  for (let n = Math.min(dayNumber(EPOCH), target); n <= target; n++) {
+    picks = dailyShuffle(items, dayString(n), idOf)
+      .filter((i) => !previous.has(idOf(i)))
+      .slice(0, count);
+    previous = new Set(picks.map(idOf));
+  }
+  return picks;
 }
