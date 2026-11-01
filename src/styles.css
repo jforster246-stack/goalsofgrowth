@@ -297,6 +297,49 @@
   --color-star: #d6d6d6;
 }
 
+/*
+ * Cobalt — a greyscale "workstation" palette with one electric cobalt accent,
+ * set in VT323 (pixel) type. The `html` prefix lifts specificity above the
+ * data-font blocks so VT323 wins whether Modern or Traditional is selected.
+ */
+html:root[data-theme="cobalt"] {
+  --background: #eef0f3;
+  --mg-1: #ffffff;
+  --mg-2: #eef1f4;
+  --mg-3: #e3e7ec;
+
+  /* Cobalt carries the primary actions, focus and nav; everything else is grey. */
+  --color-olive: #1f36d6;
+  --color-focus: #1f36d6;
+  --color-sage: #5b616b;
+  --color-gold: #70767f;
+  --color-gold-deep: #3f444c;
+  --color-clay: #4a4f57;
+  --color-clay-deep: #23262b;
+  --color-plum: #565b63;
+  --color-plum-deep: #2e323a;
+  --color-rose: #6b7079;
+  --color-rose-deep: #44484f;
+  --color-sky: #7d828b;
+  --color-sky-deep: #4e525a;
+  --color-star: #c7cbd2;
+
+  /* White/grey card surfaces, cobalt action button + nav highlight. */
+  --s-goal: linear-gradient(180deg, #ffffff 0%, #eef1f4 100%);
+  --s-win: linear-gradient(160deg, #ffffff 0%, #e9edf2 100%);
+  --s-btn: linear-gradient(90deg, #2740e4 0%, #1b31c4 100%);
+  --s-tile: #e7eaef;
+  --nav-active-bg: #1f36d6;
+  --nav-active-fg: #ffffff;
+  --tarot-ink: #1f36d6;
+
+  /* VT323 is the main typeface across the app. */
+  --font-display: "VT323", ui-monospace, SFMono-Regular, monospace;
+  --font-heading: "VT323", ui-monospace, monospace;
+  --font-body: "VT323", ui-monospace, monospace;
+  --font-serif: "VT323", ui-monospace, monospace;
+}
+
 /* ============= Design tokens ============= */
 
 @theme {

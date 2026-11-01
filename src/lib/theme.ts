@@ -6,7 +6,8 @@ export type ThemeId =
   | "ice-cream"
   | "dark-magic"
   | "wild-berries"
-  | "mono";
+  | "mono"
+  | "cobalt";
 
 export const THEMES: {
   id: ThemeId;
@@ -50,6 +51,12 @@ export const THEMES: {
     label: "Black & white",
     blurb: "A simple monochrome palette",
     swatches: ["#4b4b4b", "#6f6f6f", "#262626", "#565656", "#7d7d7d", "#8f8f8f"],
+  },
+  {
+    id: "cobalt",
+    label: "Cobalt",
+    blurb: "Greys and white with an electric cobalt - pixel type",
+    swatches: ["#ffffff", "#dfe3e9", "#1f36d6", "#5b616b", "#2e323a", "#1f36d6"],
   },
 ];
 
