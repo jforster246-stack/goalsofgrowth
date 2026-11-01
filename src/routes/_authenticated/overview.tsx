@@ -45,6 +45,7 @@ import { CelestialBody } from "@/components/celestial-body";
 import { frameFor } from "@/lib/frames-data";
 import { useFontStyle } from "@/lib/font";
 import { cn } from "@/lib/utils";
+import { dailyPick } from "@/lib/daily-pick";
 
 
 export const Route = createFileRoute("/_authenticated/overview")({
@@ -121,22 +122,18 @@ function OverviewPage() {
       : null;
 
   // One "next step" per goal, for every goal that has a step left to do.
-  // Goal-of-day (if set) is shown first.
-  const upcoming = [...goals]
-    .sort((a, b) =>
-      a.id === goalOfDay?.id ? -1 : b.id === goalOfDay?.id ? 1 : 0,
-    )
+  const upcoming = goals
     .map((goal) => ({ goal, next: goalProgress(goal).nextStep }))
     .filter((row) => row.next);
-  const twoGoals = upcoming.slice(0, 2);
 
-  // A random goal's next step and a random win, both rotating once a day.
-  const dayIdx = Math.floor(Date.parse(`${today}T00:00:00`) / 86_400_000);
-  const randomGoal =
-    upcoming.length > 0 ? upcoming[dayIdx % upcoming.length]! : null;
+  // Two random goals and one random win, fresh each day (never yesterday's
+  // when there are enough to choose from). A chosen goal of the day leads.
+  const dayRow = goalOfDay ? upcoming.find((r) => r.goal.id === goalOfDay.id) : undefined;
+  const twoGoals = dayRow
+    ? [dayRow, ...dailyPick(upcoming.filter((r) => r !== dayRow), today, (r) => r.goal.id, 1)]
+    : dailyPick(upcoming, today, (r) => r.goal.id, 2);
   const winList = (wins ?? []) as Win[];
-  const randomWin =
-    winList.length > 0 ? winList[dayIdx % winList.length]! : null;
+  const randomWin = dailyPick(winList, today, (w) => w.id, 1)[0] ?? null;
   const winStyle = randomWin
     ? winStampStyle(randomWin.kind, randomWin.icon, randomWin.accent)
     : null;
