@@ -176,11 +176,20 @@ function LessonCard({
           backgroundImage: `linear-gradient(135deg, ${lesson.tint[0]} 0%, ${lesson.tint[1]} 100%)`,
         }}
       >
-        <Icon
-          className="absolute left-1/2 top-1/2 size-28 -translate-x-1/2 -translate-y-1/2 text-black/[0.07]"
-          strokeWidth={1.25}
-        />
-        <span className="absolute left-3 top-3 rounded-full bg-white/85 px-2.5 py-1 font-heading text-[10px] tracking-[0.1em] text-olive">
+        {lesson.image ? (
+          <img
+            src={lesson.image}
+            alt={lesson.title}
+            loading="lazy"
+            className="absolute inset-0 size-full object-cover"
+          />
+        ) : (
+          <Icon
+            className="absolute left-1/2 top-1/2 size-28 -translate-x-1/2 -translate-y-1/2 text-black/[0.07]"
+            strokeWidth={1.25}
+          />
+        )}
+        <span className="absolute left-3 top-3 rounded-full bg-white/85 px-2.5 py-1 font-heading text-[10px] tracking-[0.1em] text-olive shadow-sm">
           {progress.allComplete
             ? `${course.name} · complete`
             : `${course.name} · lesson ${progress.lessonIndex + 1} of ${course.lessons.length}`}

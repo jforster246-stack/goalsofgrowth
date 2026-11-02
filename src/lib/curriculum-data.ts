@@ -16,8 +16,10 @@ export type Lesson = {
   subtitle: string;
   /** A short era or place note. */
   meta: string;
-  /** Soft two-colour gradient for the lesson's plate. */
+  /** Soft two-colour gradient for the lesson's plate (shows behind the image). */
   tint: readonly [string, string];
+  /** Public-domain image served from /public, if the lesson has one. */
+  image?: string;
   facts: readonly string[];
 };
 
@@ -42,6 +44,7 @@ export const COURSES: readonly Course[] = [
         subtitle: "Katsushika Hokusai",
         meta: "Japan · c. 1831",
         tint: ["#e3edf1", "#c6d8df"],
+        image: "/observatory/great-wave.jpg",
         facts: [
           "It's a woodblock print, not a painting - carved into blocks and pressed onto paper, one colour at a time.",
           "Mount Fuji is the real subject: it sits small and calm in the distance, dwarfed by the wave in front of it.",
@@ -57,6 +60,7 @@ export const COURSES: readonly Course[] = [
         subtitle: "Vincent van Gogh",
         meta: "France · 1889",
         tint: ["#e5e7f3", "#c7cbe6"],
+        image: "/observatory/starry-night.jpg",
         facts: [
           "Van Gogh painted it from memory, in daylight, while staying at an asylum in Saint-Remy.",
           "The view is loosely from his bedroom window, though he invented the little village himself.",
@@ -72,6 +76,7 @@ export const COURSES: readonly Course[] = [
         subtitle: "Johannes Vermeer",
         meta: "Dutch Republic · c. 1665",
         tint: ["#efeae1", "#d8cdbb"],
+        image: "/observatory/pearl-earring.jpg",
         facts: [
           "It isn't a portrait of a named person - it's a 'tronie', a Dutch study of a face and costume.",
           "Vermeer was a master of light: see how it catches her damp lower lip and the earring.",
@@ -87,6 +92,7 @@ export const COURSES: readonly Course[] = [
         subtitle: "Sandro Botticelli",
         meta: "Florence · c. 1485",
         tint: ["#eaf0e9", "#cfe0d2"],
+        image: "/observatory/birth-of-venus.jpg",
         facts: [
           "It shows the goddess Venus arriving on shore, born fully grown from the sea foam.",
           "It was one of the first large works in Italy painted on canvas rather than a wooden panel.",
@@ -102,6 +108,7 @@ export const COURSES: readonly Course[] = [
         subtitle: "Gustav Klimt",
         meta: "Vienna · 1907-1908",
         tint: ["#f3ecd9", "#e7d6a8"],
+        image: "/observatory/the-kiss.jpg",
         facts: [
           "Klimt covered it in real gold leaf, the signature of his 'Golden Phase'.",
           "Up close the couple dissolve into pattern: rectangles for him, flowers and circles for her.",
@@ -117,6 +124,7 @@ export const COURSES: readonly Course[] = [
         subtitle: "Georges Seurat",
         meta: "Paris · 1884-1886",
         tint: ["#e9ede2", "#d2dcc0"],
+        image: "/observatory/grande-jatte.jpg",
         facts: [
           "Up close it's made of tiny separate dots of colour - a technique Seurat pioneered called pointillism.",
           "Your eye does the mixing, not the brush: dots of blue and yellow read as green from across the room.",
