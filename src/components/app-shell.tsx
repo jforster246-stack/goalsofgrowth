@@ -13,6 +13,7 @@ import {
   Sparkle,
   Sparkles,
   Target,
+  Telescope,
   Trophy,
   Wallet,
 } from "lucide-react";
@@ -296,6 +297,7 @@ function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
           <SideLink to="/braindump" icon={Brain} label="Brain dump" />
           <SideLink to="/finance" icon={Wallet} label="Finance planner" />
           <SideLink to="/awa" icon={Armchair} label="A While Away (Hobbies)" />
+          <SideLink to="/observatory" icon={Telescope} label="The Observatory" />
         </SideSection>
       </nav>
 
@@ -359,6 +361,7 @@ const BOTTOM_MORE: NavItem[] = [
   { to: "/braindump", icon: Brain, label: "Brain dump" },
   { to: "/finance", icon: Wallet, label: "Finance planner" },
   { to: "/awa", icon: Armchair, label: "A While Away (Hobbies)" },
+  { to: "/observatory", icon: Telescope, label: "The Observatory" },
 ];
 
 function BottomNav({ onOpenSettings }: { onOpenSettings: () => void }) {

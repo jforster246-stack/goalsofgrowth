@@ -19,6 +19,7 @@ import { Route as AuthenticatedGalleryRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedGoalsRouteImport } from './routes/_authenticated/goals'
 import { Route as AuthenticatedHabitsRouteImport } from './routes/_authenticated/habits'
 import { Route as AuthenticatedIntentionsRouteImport } from './routes/_authenticated/intentions'
+import { Route as AuthenticatedObservatoryRouteImport } from './routes/_authenticated/observatory'
 import { Route as AuthenticatedOverviewRouteImport } from './routes/_authenticated/overview'
 import { Route as AuthenticatedRoutinesRouteImport } from './routes/_authenticated/routines'
 import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated/welcome'
@@ -83,6 +84,12 @@ const AuthenticatedIntentionsRoute = AuthenticatedIntentionsRouteImport.update({
   path: '/intentions',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedObservatoryRoute =
+  AuthenticatedObservatoryRouteImport.update({
+    id: '/observatory',
+    path: '/observatory',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedOverviewRoute = AuthenticatedOverviewRouteImport.update({
   id: '/overview',
   path: '/overview',
@@ -169,6 +176,7 @@ export interface FileRoutesByFullPath {
   '/goals': typeof AuthenticatedGoalsRouteWithChildren
   '/habits': typeof AuthenticatedHabitsRoute
   '/intentions': typeof AuthenticatedIntentionsRoute
+  '/observatory': typeof AuthenticatedObservatoryRoute
   '/overview': typeof AuthenticatedOverviewRoute
   '/routines': typeof AuthenticatedRoutinesRouteWithChildren
   '/welcome': typeof AuthenticatedWelcomeRoute
@@ -192,6 +200,7 @@ export interface FileRoutesByTo {
   '/gallery': typeof AuthenticatedGalleryRoute
   '/habits': typeof AuthenticatedHabitsRoute
   '/intentions': typeof AuthenticatedIntentionsRoute
+  '/observatory': typeof AuthenticatedObservatoryRoute
   '/overview': typeof AuthenticatedOverviewRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/wins': typeof AuthenticatedWinsRoute
@@ -217,6 +226,7 @@ export interface FileRoutesById {
   '/_authenticated/goals': typeof AuthenticatedGoalsRouteWithChildren
   '/_authenticated/habits': typeof AuthenticatedHabitsRoute
   '/_authenticated/intentions': typeof AuthenticatedIntentionsRoute
+  '/_authenticated/observatory': typeof AuthenticatedObservatoryRoute
   '/_authenticated/overview': typeof AuthenticatedOverviewRoute
   '/_authenticated/routines': typeof AuthenticatedRoutinesRouteWithChildren
   '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
@@ -244,6 +254,7 @@ export interface FileRouteTypes {
     | '/goals'
     | '/habits'
     | '/intentions'
+    | '/observatory'
     | '/overview'
     | '/routines'
     | '/welcome'
@@ -267,6 +278,7 @@ export interface FileRouteTypes {
     | '/gallery'
     | '/habits'
     | '/intentions'
+    | '/observatory'
     | '/overview'
     | '/welcome'
     | '/wins'
@@ -291,6 +303,7 @@ export interface FileRouteTypes {
     | '/_authenticated/goals'
     | '/_authenticated/habits'
     | '/_authenticated/intentions'
+    | '/_authenticated/observatory'
     | '/_authenticated/overview'
     | '/_authenticated/routines'
     | '/_authenticated/welcome'
@@ -383,6 +396,13 @@ declare module '@tanstack/react-router' {
       path: '/intentions'
       fullPath: '/intentions'
       preLoaderRoute: typeof AuthenticatedIntentionsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/observatory': {
+      id: '/_authenticated/observatory'
+      path: '/observatory'
+      fullPath: '/observatory'
+      preLoaderRoute: typeof AuthenticatedObservatoryRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/overview': {
@@ -554,6 +574,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedGoalsRoute: typeof AuthenticatedGoalsRouteWithChildren
   AuthenticatedHabitsRoute: typeof AuthenticatedHabitsRoute
   AuthenticatedIntentionsRoute: typeof AuthenticatedIntentionsRoute
+  AuthenticatedObservatoryRoute: typeof AuthenticatedObservatoryRoute
   AuthenticatedOverviewRoute: typeof AuthenticatedOverviewRoute
   AuthenticatedRoutinesRoute: typeof AuthenticatedRoutinesRouteWithChildren
   AuthenticatedWelcomeRoute: typeof AuthenticatedWelcomeRoute
@@ -568,6 +589,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedGoalsRoute: AuthenticatedGoalsRouteWithChildren,
   AuthenticatedHabitsRoute: AuthenticatedHabitsRoute,
   AuthenticatedIntentionsRoute: AuthenticatedIntentionsRoute,
+  AuthenticatedObservatoryRoute: AuthenticatedObservatoryRoute,
   AuthenticatedOverviewRoute: AuthenticatedOverviewRoute,
   AuthenticatedRoutinesRoute: AuthenticatedRoutinesRouteWithChildren,
   AuthenticatedWelcomeRoute: AuthenticatedWelcomeRoute,
