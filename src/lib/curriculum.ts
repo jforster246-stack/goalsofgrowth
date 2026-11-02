@@ -14,7 +14,8 @@
  * So we only persist a baseline log count and, per course, how many facts have
  * been revealed in sequence.
  */
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
+import { getObservatoryProgress, saveObservatoryProgress } from "@/lib/curriculum.functions";
 
 export type CurriculumStore = {
   /** A While Away log count captured the first time the Observatory was opened. */
@@ -58,6 +59,51 @@ function write(store: CurriculumStore) {
   notify();
 }
 
+/** Save to the account so progress survives cleared storage / other devices. */
+function persist(store: CurriculumStore) {
+  saveObservatoryProgress({ data: store }).catch(() => {
+    /* offline — local copy is kept and re-synced next open */
+  });
+}
+
+/**
+ * Load the saved progress from the account and merge it with this device's
+ * copy (never going backwards: keep the earliest baseline and the most facts
+ * revealed per course), then save the merged result back.
+ */
+export function useCurriculumSync() {
+  useEffect(() => {
+    let cancelled = false;
+    getObservatoryProgress()
+      .then((remote) => {
+        if (cancelled) return;
+        const local = getCurriculum();
+        const baselines = [remote?.baseline, local.baseline].filter(
+          (b): b is number => typeof b === "number",
+        );
+        const revealed: Record<string, number> = { ...(remote?.revealed ?? {}) };
+        for (const [k, v] of Object.entries(local.revealed)) {
+          revealed[k] = Math.max(revealed[k] ?? 0, v);
+        }
+        const merged: CurriculumStore = {
+          baseline: baselines.length ? Math.min(...baselines) : null,
+          revealed,
+        };
+        try {
+          localStorage.setItem(KEY, JSON.stringify(merged));
+        } catch {
+          /* ignore */
+        }
+        notify();
+        persist(merged);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+}
+
 function notify() {
   try {
     window.dispatchEvent(new Event(EVENT));
@@ -89,14 +135,18 @@ function getSnapshot(): CurriculumStore {
 export function ensureBaseline(logCount: number) {
   const store = getCurriculum();
   if (store.baseline !== null) return;
-  write({ ...store, baseline: logCount });
+  const next = { ...store, baseline: logCount };
+  write(next);
+  persist(next);
 }
 
 /** Reveal the next fact in a course (caller checks a reveal is available). */
 export function revealNextFact(courseId: string) {
   const store = getCurriculum();
   const next = { ...store.revealed, [courseId]: (store.revealed[courseId] ?? 0) + 1 };
-  write({ ...store, revealed: next });
+  const updated = { ...store, revealed: next };
+  write(updated);
+  persist(updated);
 }
 
 /** How many facts have been revealed across every course. */

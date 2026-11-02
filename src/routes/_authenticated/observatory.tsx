@@ -17,6 +17,7 @@ import {
   availableReveals,
   ensureBaseline,
   revealNextFact,
+  useCurriculumSync,
   revealedIn,
   useCurriculum,
 } from "@/lib/curriculum";
@@ -58,6 +59,7 @@ function ObservatoryPage() {
 
 function ObservatoryBody() {
   const { data: logs } = useQuery(awaLogsQueryOptions);
+  useCurriculumSync();
   const store = useCurriculum();
   const { celebrate } = useAppShell();
 
