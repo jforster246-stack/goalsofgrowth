@@ -358,6 +358,13 @@
       "when": 1792376661637,
       "tag": "0050_one_stamp_per_completed_goal",
       "breakpoints": true
+    },
+    {
+      "idx": 51,
+      "version": "7",
+      "when": 1793658170255,
+      "tag": "0051_migration",
+      "breakpoints": true
     }
   ]
 }

@@ -626,6 +626,27 @@ export type Database = {
         }
         Relationships: []
       }
+      observatory_progress: {
+        Row: {
+          baseline: number | null
+          revealed: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          baseline?: number | null
+          revealed?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          baseline?: number | null
+          revealed?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           bonus_stamps: number
