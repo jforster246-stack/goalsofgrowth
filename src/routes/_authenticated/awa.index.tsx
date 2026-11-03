@@ -494,8 +494,25 @@ function ThingsIDidTab({ onLog }: { onLog: (hobbyId?: string) => void }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [logs, hobbies]);
 
-  const shown = filter ? all.filter((l) => filterKey(l) === filter) : all;
-  const tag = filter ? tags.find((t) => t.key === filter) : undefined;
+  // Tags set on hobbies, e.g. "Creative", shown before the hobbies themselves.
+  const hobbyTags = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const h of hobbyList) for (const t of h.tags ?? []) m.set(t, 0);
+    for (const l of all) {
+      for (const t of (l.hobby_id ? byId.get(l.hobby_id)?.tags : null) ?? [])
+        m.set(t, (m.get(t) ?? 0) + 1);
+    }
+    return [...m.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [logs, hobbies]);
+
+  const tagFilter = filter?.startsWith("tag:") ? filter.slice(4) : null;
+  const shown = !filter
+    ? all
+    : tagFilter
+      ? all.filter((l) => (l.hobby_id ? byId.get(l.hobby_id)?.tags : null)?.includes(tagFilter))
+      : all.filter((l) => filterKey(l) === filter);
+  const tag = filter && !tagFilter ? tags.find((t) => t.key === filter) : undefined;
   const tagHobby = tag ? byId.get(tag.key) : undefined;
   const monthKey = localToday().slice(0, 7);
   const thisMonth = shown.filter((l) => l.logged_on.slice(0, 7) === monthKey).length;
@@ -526,6 +543,22 @@ function ThingsIDidTab({ onLog }: { onLog: (hobbyId?: string) => void }) {
           >
             Everything · {all.length}
           </button>
+          {hobbyTags.map(([t, n]) => {
+            const key = `tag:${t}`;
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setFilter(key === filter ? null : key)}
+                className={cn(
+                  "shrink-0 rounded-full px-3 py-1.5 font-heading text-[11px] transition-colors",
+                  filter === key ? "bg-olive text-white" : "bg-olive/10 text-olive",
+                )}
+              >
+                # {t} · {n}
+              </button>
+            );
+          })}
           {tags.map((t) => (
             <button
               key={t.key}
