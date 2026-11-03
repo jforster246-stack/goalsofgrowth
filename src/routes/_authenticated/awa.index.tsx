@@ -2,12 +2,22 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { Reorder, useDragControls } from "framer-motion";
-import { BookOpen, CalendarDays, ChevronLeft, ChevronRight, GripVertical, List, Plus, X } from "lucide-react";
+import {
+  BookOpen,
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  GripVertical,
+  LayoutGrid,
+  Plus,
+  X,
+} from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { Loading } from "@/components/loading";
 import { localToday } from "@/components/goal-ui";
 import { AwaLogModal, formatAwaTime, type AwaEditLog } from "@/components/awa-log-modal";
 import { AwaHobbyModal } from "@/components/awa-hobby-modal";
+import { MemoryWall } from "@/components/awa-memory-wall";
 import {
   HobbyIcon,
   durationLabel,
@@ -50,8 +60,8 @@ type Wish = { id: string; title: string; done: boolean };
 
 type Tab = "shelf" | "did" | "someday";
 const TABS: { key: Tab; label: string }[] = [
-  { key: "shelf", label: "Shelf" },
   { key: "did", label: "Things I did" },
+  { key: "shelf", label: "Shelf" },
   { key: "someday", label: "Someday" },
 ];
 
@@ -75,15 +85,8 @@ function pad(n: number) {
   return String(n).padStart(2, "0");
 }
 
-/** "drawing, reading and cooking" */
-function joinNames(names: string[]) {
-  const lower = names.map((n) => n.toLowerCase());
-  if (lower.length <= 1) return lower[0] ?? "";
-  return `${lower.slice(0, -1).join(", ")} and ${lower[lower.length - 1]}`;
-}
-
 function AwaPage() {
-  const [tab, setTab] = useState<Tab>("shelf");
+  const [tab, setTab] = useState<Tab>("did");
   const [logFor, setLogFor] = useState<{ hobbyId?: string; note?: string } | null>(null);
   const [addingHobby, setAddingHobby] = useState(false);
   const { data: hobbies } = useQuery(awaHobbiesQueryOptions);
@@ -137,7 +140,9 @@ function AwaPage() {
               onAdd={() => setAddingHobby(true)}
             />
           )}
-          {tab === "did" && <ThingsIDidTab />}
+          {tab === "did" && (
+            <ThingsIDidTab onLog={(hobbyId) => setLogFor(hobbyId ? { hobbyId } : {})} />
+          )}
           {tab === "someday" && <SomedayTab onLogItem={(note) => setLogFor({ note })} />}
         </div>
       </div>
@@ -473,7 +478,13 @@ function ThingsIDidTab({ onLog }: { onLog: (hobbyId?: string) => void }) {
       let t = m.get(key);
       if (!t) {
         const h = l.hobby_id ? byId.get(l.hobby_id) : undefined;
-        t = { key, name: h?.name ?? l.hobby_name, icon: h?.icon ?? l.hobby_icon, count: 0, last: null };
+        t = {
+          key,
+          name: h?.name ?? l.hobby_name,
+          icon: h?.icon ?? l.hobby_icon,
+          count: 0,
+          last: null,
+        };
         m.set(key, t);
       }
       t.count += 1;
@@ -527,7 +538,12 @@ function ThingsIDidTab({ onLog }: { onLog: (hobbyId?: string) => void }) {
             >
               <HobbyIcon icon={t.icon} className="size-3.5 text-sm" />
               {t.name}
-              <span className={cn("font-mono text-[10px]", filter === t.key ? "text-white/70" : "text-black/35")}>
+              <span
+                className={cn(
+                  "font-mono text-[10px]",
+                  filter === t.key ? "text-white/70" : "text-black/35",
+                )}
+              >
                 {t.count}
               </span>
             </button>
@@ -539,7 +555,11 @@ function ThingsIDidTab({ onLog }: { onLog: (hobbyId?: string) => void }) {
           aria-label={view === "wall" ? "Show calendar" : "Show wall"}
           className="grid size-9 shrink-0 place-items-center rounded-full bg-white text-olive shadow-sm transition-colors hover:bg-white/70"
         >
-          {view === "wall" ? <CalendarDays className="size-4" /> : <LayoutGrid className="size-4" />}
+          {view === "wall" ? (
+            <CalendarDays className="size-4" />
+          ) : (
+            <LayoutGrid className="size-4" />
+          )}
         </button>
       </div>
 
