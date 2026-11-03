@@ -71,7 +71,7 @@ export function HobbyView({ hobbyId }: { hobbyId: string }) {
     );
   }
 
-  const style = hobbyAccent(hobby.accent);
+  const style = hobbyAccent(hobby.accent, hobby.id);
   const count = history.length;
 
   return (

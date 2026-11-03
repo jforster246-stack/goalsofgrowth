@@ -365,7 +365,7 @@ function ArrangeShelf({ hobbies, onDone }: { hobbies: AwaHobby[]; onDone: () => 
 
 function ArrangeRow({ hobby }: { hobby: AwaHobby }) {
   const controls = useDragControls();
-  const style = hobbyAccent(hobby.accent);
+  const style = hobbyAccent(hobby.accent, hobby.id);
   return (
     <Reorder.Item as="div" value={hobby} dragListener={false} dragControls={controls}>
       <div className="flex items-center gap-3 rounded-2xl bg-white px-3 py-2.5 shadow-sm">
@@ -627,7 +627,7 @@ function MemoryRow({
   photoUrl: string | undefined;
   onClick: () => void;
 }) {
-  const style = hobbyAccent(hobby?.accent);
+  const style = hobbyAccent(hobby?.accent, hobby?.id ?? log.hobby_name);
   const when =
     durationLabel(log.duration) ?? (log.activity_time ? formatAwaTime(log.activity_time) : null);
   return (
