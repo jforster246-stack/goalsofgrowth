@@ -2,12 +2,22 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { Reorder, useDragControls } from "framer-motion";
-import { BookOpen, CalendarDays, ChevronLeft, ChevronRight, GripVertical, List, Plus, X } from "lucide-react";
+import {
+  BookOpen,
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  GripVertical,
+  LayoutGrid,
+  Plus,
+  X,
+} from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { Loading } from "@/components/loading";
 import { localToday } from "@/components/goal-ui";
 import { AwaLogModal, formatAwaTime, type AwaEditLog } from "@/components/awa-log-modal";
 import { AwaHobbyModal } from "@/components/awa-hobby-modal";
+import { MemoryWall } from "@/components/awa-memory-wall";
 import {
   HobbyIcon,
   durationLabel,
@@ -50,8 +60,8 @@ type Wish = { id: string; title: string; done: boolean };
 
 type Tab = "shelf" | "did" | "someday";
 const TABS: { key: Tab; label: string }[] = [
-  { key: "shelf", label: "Shelf" },
   { key: "did", label: "Things I did" },
+  { key: "shelf", label: "Shelf" },
   { key: "someday", label: "Someday" },
 ];
 
@@ -75,15 +85,8 @@ function pad(n: number) {
   return String(n).padStart(2, "0");
 }
 
-/** "drawing, reading and cooking" */
-function joinNames(names: string[]) {
-  const lower = names.map((n) => n.toLowerCase());
-  if (lower.length <= 1) return lower[0] ?? "";
-  return `${lower.slice(0, -1).join(", ")} and ${lower[lower.length - 1]}`;
-}
-
 function AwaPage() {
-  const [tab, setTab] = useState<Tab>("shelf");
+  const [tab, setTab] = useState<Tab>("did");
   const [logFor, setLogFor] = useState<{ hobbyId?: string; note?: string } | null>(null);
   const [addingHobby, setAddingHobby] = useState(false);
   const { data: hobbies } = useQuery(awaHobbiesQueryOptions);
@@ -137,7 +140,9 @@ function AwaPage() {
               onAdd={() => setAddingHobby(true)}
             />
           )}
-          {tab === "did" && <ThingsIDidTab />}
+          {tab === "did" && (
+            <ThingsIDidTab onLog={(hobbyId) => setLogFor(hobbyId ? { hobbyId } : {})} />
+          )}
           {tab === "someday" && <SomedayTab onLogItem={(note) => setLogFor({ note })} />}
         </div>
       </div>
@@ -274,7 +279,7 @@ function ShelfCard({
   photoUrl: string | undefined;
   onLog: () => void;
 }) {
-  const style = hobbyAccent(hobby.accent);
+  const style = hobbyAccent(hobby.accent, hobby.id);
   return (
     <div className="relative overflow-hidden rounded-2xl bg-white shadow-sm transition-transform hover:-translate-y-0.5">
       <Link
@@ -360,7 +365,7 @@ function ArrangeShelf({ hobbies, onDone }: { hobbies: AwaHobby[]; onDone: () => 
 
 function ArrangeRow({ hobby }: { hobby: AwaHobby }) {
   const controls = useDragControls();
-  const style = hobbyAccent(hobby.accent);
+  const style = hobbyAccent(hobby.accent, hobby.id);
   return (
     <Reorder.Item as="div" value={hobby} dragListener={false} dragControls={controls}>
       <div className="flex items-center gap-3 rounded-2xl bg-white px-3 py-2.5 shadow-sm">
@@ -447,11 +452,13 @@ function PutAwayList({ hobbies }: { hobbies: AwaHobby[] }) {
 
 /* ------------------------------ Things I did ---------------------------- */
 
-function ThingsIDidTab() {
+type Tag = { key: string; name: string; icon: string | null; count: number; last: string | null };
+
+function ThingsIDidTab({ onLog }: { onLog: (hobbyId?: string) => void }) {
   const { data: logs, isPending } = useQuery(awaLogsQueryOptions);
   const { data: hobbies } = useQuery(awaHobbiesQueryOptions);
   const [filter, setFilter] = useState<string | null>(null);
-  const [view, setView] = useState<"list" | "calendar">("list");
+  const [view, setView] = useState<"wall" | "calendar">("wall");
   const [editLog, setEditLog] = useState<AwaLog | null>(null);
 
   const all = (logs ?? []) as AwaLog[];
@@ -459,21 +466,39 @@ function ThingsIDidTab() {
   const byId = new Map(hobbyList.map((h) => [h.id, h]));
   const filterKey = (l: AwaLog) => l.hobby_id ?? `name:${l.hobby_name}`;
 
-  // Filter chips: every hobby that has at least one memory.
-  const chips = useMemo(() => {
-    const seen = new Map<string, { key: string; name: string; icon: string | null }>();
+  // Hobby tags: every hobby on the shelf (in shelf order), then any past ones with memories.
+  const tags = useMemo(() => {
+    const m = new Map<string, Tag>();
+    for (const h of hobbyList) {
+      if (h.archived_at) continue;
+      m.set(h.id, { key: h.id, name: h.name, icon: h.icon, count: 0, last: null });
+    }
     for (const l of all) {
       const key = filterKey(l);
-      if (!seen.has(key)) {
+      let t = m.get(key);
+      if (!t) {
         const h = l.hobby_id ? byId.get(l.hobby_id) : undefined;
-        seen.set(key, { key, name: h?.name ?? l.hobby_name, icon: h?.icon ?? l.hobby_icon });
+        t = {
+          key,
+          name: h?.name ?? l.hobby_name,
+          icon: h?.icon ?? l.hobby_icon,
+          count: 0,
+          last: null,
+        };
+        m.set(key, t);
       }
+      t.count += 1;
+      if (!t.last || l.logged_on > t.last) t.last = l.logged_on;
     }
-    return [...seen.values()].sort((a, b) => a.name.localeCompare(b.name));
+    return [...m.values()];
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [logs, hobbies]);
 
   const shown = filter ? all.filter((l) => filterKey(l) === filter) : all;
+  const tag = filter ? tags.find((t) => t.key === filter) : undefined;
+  const tagHobby = tag ? byId.get(tag.key) : undefined;
+  const monthKey = localToday().slice(0, 7);
+  const thisMonth = shown.filter((l) => l.logged_on.slice(0, 7) === monthKey).length;
 
   if (isPending) return <Loading />;
   if (all.length === 0) {
@@ -488,9 +513,9 @@ function ThingsIDidTab() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <div className="-mx-1 flex min-w-0 flex-1 gap-2 overflow-x-auto px-1 pb-1">
+        <div className="-mx-1 flex min-w-0 flex-1 gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <button
             type="button"
             onClick={() => setFilter(null)}
@@ -499,35 +524,82 @@ function ThingsIDidTab() {
               !filter ? "bg-olive text-white" : "bg-white text-black/55 shadow-sm",
             )}
           >
-            Everything
+            Everything · {all.length}
           </button>
-          {chips.map((c) => (
+          {tags.map((t) => (
             <button
-              key={c.key}
+              key={t.key}
               type="button"
-              onClick={() => setFilter(c.key === filter ? null : c.key)}
+              onClick={() => setFilter(t.key === filter ? null : t.key)}
               className={cn(
                 "inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 font-serif text-xs transition-colors",
-                filter === c.key ? "bg-olive text-white" : "bg-white text-black/65 shadow-sm",
+                filter === t.key ? "bg-olive text-white" : "bg-white text-black/65 shadow-sm",
               )}
             >
-              <HobbyIcon icon={c.icon} className="size-3.5 text-sm" />
-              {c.name}
+              <HobbyIcon icon={t.icon} className="size-3.5 text-sm" />
+              {t.name}
+              <span
+                className={cn(
+                  "font-mono text-[10px]",
+                  filter === t.key ? "text-white/70" : "text-black/35",
+                )}
+              >
+                {t.count}
+              </span>
             </button>
           ))}
         </div>
         <button
           type="button"
-          onClick={() => setView(view === "list" ? "calendar" : "list")}
-          aria-label={view === "list" ? "Show calendar" : "Show list"}
+          onClick={() => setView(view === "wall" ? "calendar" : "wall")}
+          aria-label={view === "wall" ? "Show calendar" : "Show wall"}
           className="grid size-9 shrink-0 place-items-center rounded-full bg-white text-olive shadow-sm transition-colors hover:bg-white/70"
         >
-          {view === "list" ? <CalendarDays className="size-4" /> : <List className="size-4" />}
+          {view === "wall" ? (
+            <CalendarDays className="size-4" />
+          ) : (
+            <LayoutGrid className="size-4" />
+          )}
         </button>
       </div>
 
-      {view === "list" ? (
-        <Timeline logs={shown} byId={byId} onOpen={setEditLog} />
+      {tag && (
+        <div className="flex items-center gap-3 rounded-2xl bg-white px-3 py-2.5 shadow-sm">
+          <span
+            className={cn(
+              "grid size-10 shrink-0 place-items-center rounded-xl text-lg text-white",
+              hobbyAccent(tagHobby?.accent, tagHobby?.id ?? tag.name).surface,
+            )}
+          >
+            <HobbyIcon icon={tag.icon} className="size-6" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-heading text-sm text-black">{tag.name}</p>
+            <p className="font-serif text-xs text-black/50">
+              {tag.count === 0
+                ? "Waiting for you"
+                : `${tag.count} ${tag.count === 1 ? "time" : "times"} · ${thisMonth} this month · last ${shortDate(tag.last ?? "")}`}
+            </p>
+          </div>
+          {tagHobby && !tagHobby.archived_at && (
+            <button
+              type="button"
+              onClick={() => onLog(tagHobby.id)}
+              aria-label={`Log time on ${tag.name}`}
+              className="grid size-9 shrink-0 place-items-center rounded-full bg-olive text-white transition-colors hover:bg-olive/90"
+            >
+              <Plus className="size-4" strokeWidth={2.5} />
+            </button>
+          )}
+        </div>
+      )}
+
+      {shown.length === 0 ? (
+        <p className="rounded-2xl bg-white/60 px-4 py-8 text-center font-serif text-sm text-black/45">
+          No memories of this one yet. Tap + to log your first time.
+        </p>
+      ) : view === "wall" ? (
+        <MemoryWall logs={shown} byId={byId} onOpen={setEditLog} />
       ) : (
         <CalendarView logs={shown} byId={byId} onOpen={setEditLog} />
       )}
@@ -544,60 +616,6 @@ function ThingsIDidTab() {
   );
 }
 
-function Timeline({
-  logs,
-  byId,
-  onOpen,
-}: {
-  logs: AwaLog[];
-  byId: Map<string, AwaHobby>;
-  onOpen: (log: AwaLog) => void;
-}) {
-  const photoUrls = useAwaPhotoUrls(logs.map((l) => l.photo_path));
-  const months = useMemo(() => {
-    const groups: { key: string; logs: AwaLog[] }[] = [];
-    for (const l of logs) {
-      const key = l.logged_on.slice(0, 7);
-      const last = groups[groups.length - 1];
-      if (last?.key === key) last.logs.push(l);
-      else groups.push({ key, logs: [l] });
-    }
-    return groups;
-  }, [logs]);
-
-  return (
-    <div className="space-y-7">
-      {months.map((m) => {
-        const [y, mo] = m.key.split("-").map(Number);
-        const names = [
-          ...new Set(m.logs.map((l) => byId.get(l.hobby_id ?? "")?.name ?? l.hobby_name)),
-        ];
-        return (
-          <section key={m.key}>
-            <p className="font-heading text-sm text-olive">
-              {MONTHS[(mo ?? 1) - 1]} {y}
-            </p>
-            <p className="mt-0.5 font-serif text-xs italic text-black/45">
-              You made time for {joinNames(names)}.
-            </p>
-            <div className="mt-3 space-y-2">
-              {m.logs.map((l) => (
-                <MemoryRow
-                  key={l.id}
-                  log={l}
-                  hobby={l.hobby_id ? byId.get(l.hobby_id) : undefined}
-                  photoUrl={l.photo_path ? photoUrls[l.photo_path] : undefined}
-                  onClick={() => onOpen(l)}
-                />
-              ))}
-            </div>
-          </section>
-        );
-      })}
-    </div>
-  );
-}
-
 function MemoryRow({
   log,
   hobby,
@@ -609,7 +627,7 @@ function MemoryRow({
   photoUrl: string | undefined;
   onClick: () => void;
 }) {
-  const style = hobbyAccent(hobby?.accent);
+  const style = hobbyAccent(hobby?.accent, hobby?.id ?? log.hobby_name);
   const when =
     durationLabel(log.duration) ?? (log.activity_time ? formatAwaTime(log.activity_time) : null);
   return (

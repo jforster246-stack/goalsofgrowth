@@ -66,7 +66,15 @@ export function HobbyIcon({
   return <Motif id={icon || DEFAULT_MOTIF} {...(className ? { className } : {})} />;
 }
 
-export function hobbyAccent(accent: string | null | undefined) {
+const ACCENT_KEYS = Object.keys(ACCENT_STYLES) as Accent[];
+
+/** A hobby's colour; hobbies without one get a steady colour picked from their id. */
+export function hobbyAccent(accent: string | null | undefined, seed?: string) {
+  if (!accent && seed) {
+    let n = 0;
+    for (let i = 0; i < seed.length; i++) n = (n * 31 + seed.charCodeAt(i)) % 9973;
+    return ACCENT_STYLES[ACCENT_KEYS[n % ACCENT_KEYS.length] ?? "mint"];
+  }
   return ACCENT_STYLES[(accent as Accent) || "mint"] ?? ACCENT_STYLES.mint;
 }
 
