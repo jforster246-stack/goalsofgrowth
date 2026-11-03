@@ -457,7 +457,9 @@ type Tag = { key: string; name: string; icon: string | null; count: number; last
 function ThingsIDidTab({ onLog }: { onLog: (hobbyId?: string) => void }) {
   const { data: logs, isPending } = useQuery(awaLogsQueryOptions);
   const { data: hobbies } = useQuery(awaHobbiesQueryOptions);
-  const [filter, setFilter] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string[]>([]);
+  const toggle = (key: string) =>
+    setSelected((cur) => (cur.includes(key) ? cur.filter((k) => k !== key) : [...cur, key]));
   const [view, setView] = useState<"wall" | "calendar">("wall");
   const [editLog, setEditLog] = useState<AwaLog | null>(null);
 
@@ -506,13 +508,15 @@ function ThingsIDidTab({ onLog }: { onLog: (hobbyId?: string) => void }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [logs, hobbies]);
 
-  const tagFilter = filter?.startsWith("tag:") ? filter.slice(4) : null;
-  const shown = !filter
-    ? all
-    : tagFilter
-      ? all.filter((l) => (l.hobby_id ? byId.get(l.hobby_id)?.tags : null)?.includes(tagFilter))
-      : all.filter((l) => filterKey(l) === filter);
-  const tag = filter && !tagFilter ? tags.find((t) => t.key === filter) : undefined;
+  // Several tags/hobbies can be picked; a memory shows if it matches any of them.
+  const matches = (l: AwaLog, key: string) =>
+    key.startsWith("tag:")
+      ? !!(l.hobby_id ? byId.get(l.hobby_id)?.tags : null)?.includes(key.slice(4))
+      : filterKey(l) === key;
+  const shown =
+    selected.length === 0 ? all : all.filter((l) => selected.some((k) => matches(l, k)));
+  const only = selected.length === 1 ? selected[0] : undefined;
+  const tag = only && !only.startsWith("tag:") ? tags.find((t) => t.key === only) : undefined;
   const tagHobby = tag ? byId.get(tag.key) : undefined;
   const monthKey = localToday().slice(0, 7);
   const thisMonth = shown.filter((l) => l.logged_on.slice(0, 7) === monthKey).length;
@@ -535,10 +539,10 @@ function ThingsIDidTab({ onLog }: { onLog: (hobbyId?: string) => void }) {
         <div className="-mx-1 flex min-w-0 flex-1 gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <button
             type="button"
-            onClick={() => setFilter(null)}
+            onClick={() => setSelected([])}
             className={cn(
               "shrink-0 rounded-full px-3 py-1.5 font-heading text-[11px] transition-colors",
-              !filter ? "bg-olive text-white" : "bg-white text-black/55 shadow-sm",
+              selected.length === 0 ? "bg-olive text-white" : "bg-white text-black/55 shadow-sm",
             )}
           >
             Everything · {all.length}
@@ -549,10 +553,11 @@ function ThingsIDidTab({ onLog }: { onLog: (hobbyId?: string) => void }) {
               <button
                 key={key}
                 type="button"
-                onClick={() => setFilter(key === filter ? null : key)}
+                onClick={() => toggle(key)}
+                aria-pressed={selected.includes(key)}
                 className={cn(
                   "shrink-0 rounded-full px-3 py-1.5 font-heading text-[11px] transition-colors",
-                  filter === key ? "bg-olive text-white" : "bg-olive/10 text-olive",
+                  selected.includes(key) ? "bg-olive text-white" : "bg-olive/10 text-olive",
                 )}
               >
                 # {t} · {n}
@@ -563,10 +568,13 @@ function ThingsIDidTab({ onLog }: { onLog: (hobbyId?: string) => void }) {
             <button
               key={t.key}
               type="button"
-              onClick={() => setFilter(t.key === filter ? null : t.key)}
+              onClick={() => toggle(t.key)}
+              aria-pressed={selected.includes(t.key)}
               className={cn(
                 "inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 font-serif text-xs transition-colors",
-                filter === t.key ? "bg-olive text-white" : "bg-white text-black/65 shadow-sm",
+                selected.includes(t.key)
+                  ? "bg-olive text-white"
+                  : "bg-white text-black/65 shadow-sm",
               )}
             >
               <HobbyIcon icon={t.icon} className="size-3.5 text-sm" />
@@ -574,7 +582,7 @@ function ThingsIDidTab({ onLog }: { onLog: (hobbyId?: string) => void }) {
               <span
                 className={cn(
                   "font-mono text-[10px]",
-                  filter === t.key ? "text-white/70" : "text-black/35",
+                  selected.includes(t.key) ? "text-white/70" : "text-black/35",
                 )}
               >
                 {t.count}
