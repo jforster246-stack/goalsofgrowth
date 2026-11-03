@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { awaHobbiesQueryOptions } from "@/lib/goal-queries";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, X } from "lucide-react";
 import { GOAL_ACCENTS, type Accent } from "@/components/goal-ui";
 import { IconPicker } from "@/components/icon-picker";
@@ -28,6 +29,18 @@ export function AwaHobbyModal({
   const [description, setDescription] = useState(hobby?.description ?? "");
   const [icon, setIcon] = useState<string | null>(hobby?.icon ?? null);
   const [accent, setAccent] = useState<Accent>((hobby?.accent as Accent) || "mint");
+  const [tags, setTags] = useState<string[]>(hobby?.tags ?? []);
+  const [tagDraft, setTagDraft] = useState("");
+  const { data: allHobbies } = useQuery(awaHobbiesQueryOptions);
+  const knownTags = [
+    ...new Set(((allHobbies ?? []) as AwaHobby[]).flatMap((h) => h.tags ?? [])),
+  ].filter((t) => !tags.some((x) => x.toLowerCase() === t.toLowerCase()));
+  const addTag = (raw: string) => {
+    const t = raw.trim().slice(0, 30);
+    if (!t || tags.some((x) => x.toLowerCase() === t.toLowerCase()) || tags.length >= 12) return;
+    setTags([...tags, t]);
+    setTagDraft("");
+  };
   const [err, setErr] = useState<string | null>(null);
 
   const refresh = async () => {
@@ -46,6 +59,7 @@ export function AwaHobbyModal({
             icon: trimmedIcon,
             description: description.trim() || null,
             accent,
+            tags,
           },
         });
       } else {
@@ -55,6 +69,7 @@ export function AwaHobbyModal({
             ...(trimmedIcon ? { icon: trimmedIcon } : {}),
             ...(description.trim() ? { description: description.trim() } : {}),
             accent,
+            tags,
           },
         });
       }
@@ -150,6 +165,61 @@ export function AwaHobbyModal({
             className={fieldClass}
           />
         </label>
+
+        <div className="mt-5">
+          <span className="flex items-baseline justify-between">
+            <span className="font-heading text-sm text-olive">Tags</span>
+            <span className="font-serif text-xs italic text-black/40">for sorting your wall</span>
+          </span>
+          <div className="mt-2 flex flex-wrap items-center gap-1.5 rounded-2xl bg-black/5 px-2 py-2">
+            {tags.map((t) => (
+              <span
+                key={t}
+                className="inline-flex items-center gap-1 rounded-full bg-olive px-2.5 py-1 font-serif text-xs text-white"
+              >
+                {t}
+                <button
+                  type="button"
+                  onClick={() => setTags(tags.filter((x) => x !== t))}
+                  aria-label={`Remove tag ${t}`}
+                  className="grid size-4 place-items-center rounded-full hover:bg-white/20"
+                >
+                  <X className="size-3" />
+                </button>
+              </span>
+            ))}
+            <input
+              value={tagDraft}
+              onChange={(e) => setTagDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === ",") {
+                  e.preventDefault();
+                  addTag(tagDraft);
+                } else if (e.key === "Backspace" && !tagDraft && tags.length) {
+                  setTags(tags.slice(0, -1));
+                }
+              }}
+              onBlur={() => addTag(tagDraft)}
+              placeholder={tags.length ? "Add another…" : "e.g. Creative, Cosy, Outdoors"}
+              maxLength={30}
+              className="min-w-24 flex-1 bg-transparent px-2 py-1 font-serif text-sm placeholder:text-black/40 focus:outline-none"
+            />
+          </div>
+          {knownTags.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {knownTags.map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => addTag(t)}
+                  className="rounded-full bg-white px-2.5 py-1 font-serif text-xs text-black/60 shadow-sm hover:text-olive"
+                >
+                  + {t}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         <p className="mt-5 font-heading text-sm text-olive">Colour</p>
         <div className="mt-2 flex gap-3">

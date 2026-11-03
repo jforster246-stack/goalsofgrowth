@@ -35,6 +35,7 @@ export const addAwaHobby = createServerFn({ method: "POST" })
         category: z.string().trim().max(60).optional(),
         description: z.string().trim().max(200).optional(),
         accent: accentSchema.optional(),
+        tags: z.array(z.string().trim().min(1).max(30)).max(12).optional(),
       })
       .parse(data),
   )
@@ -51,6 +52,7 @@ export const addAwaHobby = createServerFn({ method: "POST" })
         category: data.category || null,
         description: data.description || null,
         accent: data.accent ?? null,
+        tags: data.tags ?? [],
         position,
         user_id: context.userId,
       })
@@ -70,6 +72,7 @@ export const updateAwaHobby = createServerFn({ method: "POST" })
         icon: z.string().trim().max(8).nullable(),
         description: z.string().trim().max(200).nullable(),
         accent: accentSchema.nullable(),
+        tags: z.array(z.string().trim().min(1).max(30)).max(12).optional(),
       })
       .parse(data),
   )
@@ -81,6 +84,7 @@ export const updateAwaHobby = createServerFn({ method: "POST" })
         icon: data.icon || null,
         description: data.description || null,
         accent: data.accent,
+        ...(data.tags ? { tags: data.tags } : {}),
       })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
