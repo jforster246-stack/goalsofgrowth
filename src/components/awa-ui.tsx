@@ -12,6 +12,7 @@ export type AwaHobby = {
   icon: string | null;
   description?: string | null;
   accent?: string | null;
+  tags?: string[] | null;
   archived_at?: string | null;
   created_at?: string;
   position?: number;
