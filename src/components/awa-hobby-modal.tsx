@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { awaHobbiesQueryOptions } from "@/lib/goal-queries";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, X } from "lucide-react";
 import { GOAL_ACCENTS, type Accent } from "@/components/goal-ui";
 import { IconPicker } from "@/components/icon-picker";

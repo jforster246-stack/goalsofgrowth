@@ -36,6 +36,7 @@ export const addAwaHobby = createServerFn({ method: "POST" })
         description: z.string().trim().max(200).optional(),
         accent: accentSchema.optional(),
         tags: z.array(z.string().trim().min(1).max(30)).max(12).optional(),
+        tags: z.array(z.string().trim().min(1).max(30)).max(12).optional(),
       })
       .parse(data),
   )
@@ -52,6 +53,7 @@ export const addAwaHobby = createServerFn({ method: "POST" })
         category: data.category || null,
         description: data.description || null,
         accent: data.accent ?? null,
+        tags: data.tags ?? [],
         tags: data.tags ?? [],
         position,
         user_id: context.userId,
@@ -73,6 +75,7 @@ export const updateAwaHobby = createServerFn({ method: "POST" })
         description: z.string().trim().max(200).nullable(),
         accent: accentSchema.nullable(),
         tags: z.array(z.string().trim().min(1).max(30)).max(12).optional(),
+        tags: z.array(z.string().trim().min(1).max(30)).max(12).optional(),
       })
       .parse(data),
   )
@@ -84,6 +87,7 @@ export const updateAwaHobby = createServerFn({ method: "POST" })
         icon: data.icon || null,
         description: data.description || null,
         accent: data.accent,
+        ...(data.tags ? { tags: data.tags } : {}),
         ...(data.tags ? { tags: data.tags } : {}),
       })
       .eq("id", data.id);
