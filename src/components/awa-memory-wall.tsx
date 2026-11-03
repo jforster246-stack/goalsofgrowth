@@ -98,7 +98,7 @@ function MemoryTile({
   photoUrl: string | undefined;
   onClick: () => void;
 }) {
-  const style = hobbyAccent(hobby?.accent);
+  const style = hobbyAccent(hobby?.accent, hobby?.id ?? log.hobby_name);
   const name = hobby?.name ?? log.hobby_name;
   const when =
     durationLabel(log.duration) ?? (log.activity_time ? formatAwaTime(log.activity_time) : null);

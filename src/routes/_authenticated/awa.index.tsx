@@ -279,7 +279,7 @@ function ShelfCard({
   photoUrl: string | undefined;
   onLog: () => void;
 }) {
-  const style = hobbyAccent(hobby.accent);
+  const style = hobbyAccent(hobby.accent, hobby.id);
   return (
     <div className="relative overflow-hidden rounded-2xl bg-white shadow-sm transition-transform hover:-translate-y-0.5">
       <Link
@@ -568,7 +568,7 @@ function ThingsIDidTab({ onLog }: { onLog: (hobbyId?: string) => void }) {
           <span
             className={cn(
               "grid size-10 shrink-0 place-items-center rounded-xl text-lg text-white",
-              hobbyAccent(tagHobby?.accent).surface,
+              hobbyAccent(tagHobby?.accent, tagHobby?.id ?? tag.name).surface,
             )}
           >
             <HobbyIcon icon={tag.icon} className="size-6" />
