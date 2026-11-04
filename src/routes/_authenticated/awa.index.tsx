@@ -86,11 +86,10 @@ function pad(n: number) {
 }
 
 function AwaPage() {
-  const [tab, setTab] = useState<Tab>(() =>
-    typeof window !== "undefined" && new URLSearchParams(window.location.search).get("tab") === "menus"
-      ? "menus"
-      : "did",
-  );
+  const [tab, setTab] = useState<Tab>("did");
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("tab") === "menus") setTab("menus");
+  }, []);
   void ShelfTab;
   void SomedayTab;
   const [logFor, setLogFor] = useState<{ hobbyId?: string; note?: string } | null>(null);
