@@ -242,3 +242,15 @@ export function lessonProgress(course: Course, revealed: number): LessonProgress
     allComplete: true,
   };
 }
+
+/** Lessons whose facts have all been revealed, in course order. */
+export function completedLessons(course: Course, revealed: number): Lesson[] {
+  let remaining = Math.max(0, revealed);
+  const done: Lesson[] = [];
+  for (const lesson of course.lessons) {
+    if (remaining < lesson.facts.length) break;
+    remaining -= lesson.facts.length;
+    done.push(lesson);
+  }
+  return done;
+}
