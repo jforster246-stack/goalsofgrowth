@@ -157,7 +157,8 @@
  * "natural" matches the @theme defaults and is here for completeness.
  * ============================================================= */
 /* Moonlight — the main look: soft celestial gradients on near-white. */
-:root[data-theme="moonlight"] {
+:root[data-theme="moonlight"],
+:root[data-theme="y2k"] {
   --background: #fbfbfe;
   --mg-canvas: radial-gradient(135% 125% at 30% 12%, #fff1fc 0%, #f9f3e0 50%, #f8b3e8 77%, #ecd4f1 100%);
   --s-goal: linear-gradient(180deg, #fff1fc 0%, #fcdff5 100%);
@@ -334,6 +335,14 @@ html:root[data-theme="cobalt"] {
   --tarot-ink: #1f36d6;
 
   /* VT323 is the main typeface across the app. */
+  --font-display: "VT323", ui-monospace, SFMono-Regular, monospace;
+  --font-heading: "VT323", ui-monospace, monospace;
+  --font-body: "VT323", ui-monospace, monospace;
+  --font-serif: "VT323", ui-monospace, monospace;
+}
+
+/* Y2K — Moonlight's colours (shared block above) in Cobalt's pixel type. */
+html:root[data-theme="y2k"] {
   --font-display: "VT323", ui-monospace, SFMono-Regular, monospace;
   --font-heading: "VT323", ui-monospace, monospace;
   --font-body: "VT323", ui-monospace, monospace;

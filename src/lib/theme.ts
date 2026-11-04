@@ -8,7 +8,8 @@ export type ThemeId =
   | "wild-berries"
   | "mono"
   | "cobalt"
-  | "notes";
+  | "notes"
+  | "y2k";
 
 export const THEMES: {
   id: ThemeId;
@@ -64,6 +65,12 @@ export const THEMES: {
     label: "Notes",
     blurb: "Clean whites and soft greys with a sunny yellow",
     swatches: ["#ffffff", "#f2f2f7", "#ffd60a", "#8e8e93", "#1c1c1e", "#e0a800"],
+  },
+  {
+    id: "y2k",
+    label: "Y2K",
+    blurb: "Moonlight's dreamy pinks and blues - pixel type",
+    swatches: ["#ffd9e8", "#e3d6ff", "#daf3f8", "#a8408f", "#cf6aa6", "#6f9fc4"],
   },
 ];
 
