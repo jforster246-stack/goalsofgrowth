@@ -38,7 +38,11 @@ type Menu = Awaited<ReturnType<typeof listMenus>>[number];
 function MenusPage() {
   const qc = useQueryClient();
   const navigate = useNavigate();
-  const { data: menus, isPending, error } = useQuery({ queryKey: ["menus"], queryFn: () => listMenus() });
+  const {
+    data: menus,
+    isPending,
+    error,
+  } = useQuery({ queryKey: ["menus"], queryFn: () => listMenus() });
   const [form, setForm] = useState<{ menu?: Menu; prefill?: Partial<MenuDraft> } | null>(null);
 
   const save = useMutation({
@@ -83,7 +87,9 @@ function MenusPage() {
               Make collections of activities for different moods, energy levels or situations. Then
               when you have free time, open one and it'll suggest what fits.
             </p>
-            <p className="mt-5 font-serif text-xs italic text-muted-foreground">Ideas to start with</p>
+            <p className="mt-5 font-serif text-xs italic text-muted-foreground">
+              Ideas to start with
+            </p>
             <div className="mt-2 flex flex-wrap justify-center gap-2">
               {EXAMPLES.map((ex) => (
                 <button
@@ -100,19 +106,28 @@ function MenusPage() {
         ) : (
           <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {menus!.map((m) => (
-              <div key={m.id} className="relative flex flex-col rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border">
+              <div
+                key={m.id}
+                className="relative flex flex-col rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border"
+              >
                 <Link
                   to="/awa/menus/$menuId"
                   params={{ menuId: m.id }}
                   className="flex flex-1 items-start gap-3 pr-16"
                 >
                   <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-olive/10 text-olive">
-                    {m.icon ? <Motif id={m.icon} className="size-6" /> : <BookOpen className="size-5" />}
+                    {m.icon ? (
+                      <Motif id={m.icon} className="size-6" />
+                    ) : (
+                      <BookOpen className="size-5" />
+                    )}
                   </span>
                   <span className="min-w-0">
                     <span className="block font-heading text-base text-foreground">{m.name}</span>
                     {m.description && (
-                      <span className="mt-0.5 block text-sm text-muted-foreground line-clamp-2">{m.description}</span>
+                      <span className="mt-0.5 block text-sm text-muted-foreground line-clamp-2">
+                        {m.description}
+                      </span>
                     )}
                     <span className="mt-2 block text-xs text-muted-foreground">
                       {m.activity_count} activit{m.activity_count === 1 ? "y" : "ies"}
@@ -133,7 +148,11 @@ function MenusPage() {
                     type="button"
                     aria-label={`Delete ${m.name}`}
                     onClick={() => {
-                      if (confirm(`Delete the "${m.name}" menu? Linked goals and hobbies stay as they are.`))
+                      if (
+                        confirm(
+                          `Delete the "${m.name}" menu? Linked goals and hobbies stay as they are.`,
+                        )
+                      )
                         remove.mutate(m.id);
                     }}
                     className="grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-black/5"

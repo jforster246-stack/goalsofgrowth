@@ -647,8 +647,7 @@ function ThingsIDidTab({ onLog }: { onLog: (hobbyId?: string) => void }) {
 
       {editLog && (
         <AwaLogModal
-          hobbies={[]}
-          lockHobby
+          hobbies={hobbyList.filter((h) => !h.archived_at || h.id === editLog.hobby_id)}
           editLog={editLog as AwaEditLog}
           onClose={() => setEditLog(null)}
         />
