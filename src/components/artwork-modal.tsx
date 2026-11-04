@@ -5,12 +5,12 @@ import { type Artwork } from "@/lib/artworks-data";
 
 /**
  * A collectible in its frame: the constellation's star-line asterism drawn in
- * soft gold on a night sky.
+ * in the colour theme's star tone on a sky built from the theme's deep colours.
  */
 export function ArtworkPlacard({ artwork }: { artwork: Artwork }) {
   const constellation = constellationById(artwork.ref);
   return (
-    <div className="flex size-full items-center justify-center overflow-hidden bg-[radial-gradient(130%_130%_at_30%_15%,#352a63_0%,#1c1740_55%,#0c0a1e_100%)] p-[14%] text-[#f6e8b0] [filter:drop-shadow(0_0_1.5px_rgba(246,232,176,0.55))]">
+    <div className="flex size-full items-center justify-center overflow-hidden [background:var(--constellation-sky)] p-[14%] text-[var(--constellation-ink)] [filter:drop-shadow(0_0_1.5px_var(--constellation-glow))]">
       {constellation ? <ConstellationArt c={constellation} /> : null}
     </div>
   );

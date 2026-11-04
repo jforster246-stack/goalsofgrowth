@@ -383,6 +383,18 @@ html:root[data-theme="notes"] {
   --font-serif: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Inter", sans-serif;
 }
 
+/* Constellation cards: sky + stars derived from whichever theme is active. */
+:root {
+  --constellation-sky: radial-gradient(
+    130% 130% at 30% 15%,
+    color-mix(in oklab, var(--color-plum-deep) 80%, var(--color-olive)) 0%,
+    color-mix(in oklab, var(--color-olive) 55%, black) 55%,
+    color-mix(in oklab, var(--color-olive) 25%, black) 100%
+  );
+  --constellation-ink: color-mix(in oklab, var(--color-star) 70%, white);
+  --constellation-glow: color-mix(in oklab, var(--color-star) 55%, transparent);
+}
+
 /* ============= Design tokens ============= */
 
 @theme {
