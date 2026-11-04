@@ -623,12 +623,44 @@ const HABIT_ICON_COLOR = {
   evening: "text-olive",
 } as const;
 
+const WEEK_LETTERS = ["M", "T", "W", "T", "F", "S", "S"] as const;
+const WEEK_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+/** This week's days as letters; a day the habit was ticked shows a star instead. */
+function WeekStars({ week }: { week: readonly boolean[] }) {
+  const doneDays = WEEK_NAMES.filter((_, i) => week[i]);
+  return (
+    <span
+      className="flex items-center gap-[3px]"
+      aria-label={
+        doneDays.length ? `Done this week on ${doneDays.join(", ")}` : "Not done yet this week"
+      }
+    >
+      {WEEK_LETTERS.map((letter, i) => (
+        <span key={i} aria-hidden className="grid size-3.5 place-items-center">
+          {week[i] ? (
+            <svg viewBox="0 0 24 24" className="size-3.5 text-gold-deep">
+              <path
+                fill="currentColor"
+                d="M12 1.5c.6 5.6 4.9 9.9 10.5 10.5-5.6.6-9.9 4.9-10.5 10.5C11.4 16.9 7.1 12.6 1.5 12 7.1 11.4 11.4 7.1 12 1.5Z"
+              />
+            </svg>
+          ) : (
+            <span className="font-heading text-[10px] leading-none text-[#928e9d]">{letter}</span>
+          )}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 export function HabitRow({
   name,
   timeOfDay,
   done,
   frequencyLabel,
   icon,
+  week,
   onOpen,
   onTimer,
   onToggle,
@@ -638,6 +670,8 @@ export function HabitRow({
   done: boolean;
   frequencyLabel?: string;
   icon?: string | null;
+  /** Monday → Sunday: ticked that day this week. A star replaces the day's letter. */
+  week?: readonly boolean[] | undefined;
   onOpen?: () => void;
   onTimer?: () => void;
   onToggle?: () => void;
@@ -665,9 +699,14 @@ export function HabitRow({
           >
             {name}
           </span>
-          {showFrequency && (
-            <span className="font-heading text-[10px] tracking-wide text-[#928e9d]">
-              {frequencyLabel}
+          {(week || showFrequency) && (
+            <span className="mt-1 flex items-center gap-2">
+              {week && <WeekStars week={week} />}
+              {showFrequency && (
+                <span className="font-heading text-[10px] tracking-wide text-[#928e9d]">
+                  {frequencyLabel}
+                </span>
+              )}
             </span>
           )}
         </span>

@@ -140,6 +140,7 @@ function HabitsBody({
       timeOfDay={habit.time_of_day}
       frequencyLabel={frequencyLabel(habit)}
       icon={habit.icon}
+      week={habit.week}
       done={habit.done}
       onOpen={() => onOpen(habit)}
       onTimer={() =>
