@@ -196,11 +196,15 @@ export const updateAwaLog = createServerFn({ method: "POST" })
         note: z.string().trim().max(1000).nullable().optional(),
         duration: durationSchema.nullable().optional(),
         photoPath: photoPathSchema.nullable().optional(),
+        hobbyId: z.string().uuid().optional(),
       })
       .parse(data),
   )
   .handler(async ({ data, context }) => {
     const patch: {
+      hobby_id?: string;
+      hobby_name?: string;
+      hobby_icon?: string | null;
       logged_on: string;
       activity_time?: string | null;
       note?: string | null;
@@ -211,6 +215,18 @@ export const updateAwaLog = createServerFn({ method: "POST" })
     if (data.note !== undefined) patch.note = data.note || null;
     if (data.duration !== undefined) patch.duration = data.duration;
     if (data.photoPath !== undefined) patch.photo_path = data.photoPath;
+    // Moving a memory to a different hobby (e.g. logged as Sketching by mistake).
+    if (data.hobbyId) {
+      const { data: hobby, error: hobbyError } = await context.supabase
+        .from("awa_hobbies")
+        .select("id, name, icon")
+        .eq("id", data.hobbyId)
+        .single();
+      if (hobbyError || !hobby) throw new Error("Couldn't find that hobby.");
+      patch.hobby_id = hobby.id;
+      patch.hobby_name = hobby.name;
+      patch.hobby_icon = hobby.icon;
+    }
 
     const { error } = await context.supabase.from("awa_logs").update(patch).eq("id", data.id);
     if (error) throw new Error(error.message);
