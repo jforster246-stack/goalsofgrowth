@@ -44,6 +44,7 @@ type Habit = {
   created_at: string;
   start_date: string | null;
   done: boolean;
+  week?: boolean[];
 };
 
 const TIMES: {
