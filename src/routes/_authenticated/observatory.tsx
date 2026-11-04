@@ -1,12 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Lock, Palette, Plus, Sparkles, Star } from "lucide-react";
+import { Lock, Palette, Plus, Sparkles, Star, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { AppShell, useAppShell } from "@/components/app-shell";
 import { awaLogsQueryOptions } from "@/lib/goal-queries";
 import {
   COURSES,
   courseById,
+  completedLessons,
   courseFactTotal,
   lessonProgress,
   type Course,
@@ -101,6 +102,8 @@ function ObservatoryBody() {
         onReveal={reveal}
       />
 
+      <LearnedShelf course={course} lessons={completedLessons(course, revealed)} />
+
       <section className="mt-7">
         <p className="font-heading text-[11px] tracking-[0.12em] text-[#928e9d]">Your courses</p>
         <div className="mt-3 grid grid-cols-2 gap-3">
@@ -147,8 +150,8 @@ function RevealsBanner({ available }: { available: number }) {
         <Lock className="size-[18px]" strokeWidth={2} />
       </span>
       <p className="min-w-0 flex-1 font-serif text-sm leading-snug text-black/60">
-        Log a little time in{" "}
-        <span className="font-heading text-olive">A While Away</span> to earn your next reveal.
+        Log a little time in <span className="font-heading text-olive">A While Away</span> to earn
+        your next reveal.
       </p>
     </Link>
   );
@@ -228,14 +231,7 @@ function LessonCard({
           {lesson.facts.map((fact, i) => {
             if (i < progress.revealedInLesson) return <RevealedFact key={i} text={fact} />;
             if (i === progress.revealedInLesson)
-              return (
-                <NextFact
-                  key={i}
-                  index={i}
-                  canReveal={available > 0}
-                  onReveal={onReveal}
-                />
-              );
+              return <NextFact key={i} index={i} canReveal={available > 0} onReveal={onReveal} />;
             return <LockedFact key={i} />;
           })}
         </div>
@@ -363,6 +359,126 @@ function AddSubjectTile() {
       <Plus className="size-5" strokeWidth={2} />
       <span className="font-heading text-xs">Add a subject</span>
       <span className="font-serif text-[11px] italic text-black/30">Coming soon</span>
+    </div>
+  );
+}
+
+/** Every finished lesson in the chosen course, newest first; tap one to read it again. */
+function LearnedShelf({ course, lessons }: { course: Course; lessons: Lesson[] }) {
+  const [open, setOpen] = useState<Lesson | null>(null);
+  const Icon = COURSE_ICONS[course.icon];
+  const newestFirst = [...lessons].reverse();
+  return (
+    <section className="mt-7">
+      <p className="font-heading text-[11px] tracking-[0.12em] text-[#928e9d]">
+        Learned · {lessons.length}
+      </p>
+      {lessons.length === 0 ? (
+        <p className="mt-3 rounded-2xl bg-white/60 px-4 py-4 text-center font-serif text-sm italic text-black/45">
+          Finish a lesson and it'll be kept here.
+        </p>
+      ) : (
+        <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4">
+          {newestFirst.map((l) => (
+            <button
+              key={l.id}
+              type="button"
+              onClick={() => setOpen(l)}
+              className="overflow-hidden rounded-2xl bg-white text-left shadow-sm ring-1 ring-black/5 transition-transform hover:-translate-y-0.5"
+            >
+              <div
+                className="relative aspect-square w-full"
+                style={{
+                  backgroundImage: `linear-gradient(135deg, ${l.tint[0]} 0%, ${l.tint[1]} 100%)`,
+                }}
+              >
+                {l.image ? (
+                  <img
+                    src={l.image}
+                    alt=""
+                    loading="lazy"
+                    className="absolute inset-0 size-full object-cover"
+                  />
+                ) : (
+                  <Icon
+                    className="absolute left-1/2 top-1/2 size-10 -translate-x-1/2 -translate-y-1/2 text-black/10"
+                    strokeWidth={1.25}
+                  />
+                )}
+              </div>
+              <div className="px-2.5 py-2">
+                <p className="line-clamp-2 font-heading text-[11px] leading-snug text-black">
+                  {l.title}
+                </p>
+                <p className="font-serif text-[10px] text-black/40">{course.name}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+      {open && <LearnedLessonDialog course={course} lesson={open} onClose={() => setOpen(null)} />}
+    </section>
+  );
+}
+
+function LearnedLessonDialog({
+  course,
+  lesson,
+  onClose,
+}: {
+  course: Course;
+  lesson: Lesson;
+  onClose: () => void;
+}) {
+  const Icon = COURSE_ICONS[course.icon];
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center"
+      onClick={onClose}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-background shadow-xl sm:rounded-3xl"
+      >
+        <div
+          className="relative aspect-[4/3] w-full overflow-hidden"
+          style={{
+            backgroundImage: `linear-gradient(135deg, ${lesson.tint[0]} 0%, ${lesson.tint[1]} 100%)`,
+          }}
+        >
+          {lesson.image ? (
+            <img
+              src={lesson.image}
+              alt={lesson.title}
+              className="absolute inset-0 size-full object-cover"
+            />
+          ) : (
+            <Icon
+              className="absolute left-1/2 top-1/2 size-28 -translate-x-1/2 -translate-y-1/2 text-black/[0.07]"
+              strokeWidth={1.25}
+            />
+          )}
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="absolute right-3 top-3 grid size-9 place-items-center rounded-full bg-white/85 text-black/60 shadow-sm"
+          >
+            <X className="size-5" />
+          </button>
+        </div>
+        <div className="px-5 pb-6 pt-4">
+          <h2 className="font-display text-xl leading-snug text-[#201b2f]">{lesson.title}</h2>
+          <p className="mt-1 font-serif text-sm italic text-black/50">
+            {lesson.subtitle} · {lesson.meta}
+          </p>
+          <div className="mt-5 space-y-2.5">
+            {lesson.facts.map((f, i) => (
+              <RevealedFact key={i} text={f} />
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
