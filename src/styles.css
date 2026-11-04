@@ -340,6 +340,49 @@ html:root[data-theme="cobalt"] {
   --font-serif: "VT323", ui-monospace, monospace;
 }
 
+/*
+ * Notes — white pages and soft system greys with one sunny yellow, set in the
+ * device's own system type. Text and primary actions stay near-black so they
+ * read clearly; yellow carries buttons, the nav highlight, stars and tiles.
+ */
+html:root[data-theme="notes"] {
+  --background: #f2f2f7;
+  --mg-1: #ffffff;
+  --mg-2: #f7f7f9;
+  --mg-3: #f2f2f7;
+
+  --color-olive: #1c1c1e;
+  --color-focus: #1c1c1e;
+  --color-sage: #8e8e93;
+  --color-gold: #f5c400;
+  --color-gold-deep: #c99700;
+  --color-clay: #636366;
+  --color-clay-deep: #3a3a3c;
+  --color-plum: #aeaeb2;
+  --color-plum-deep: #48484a;
+  --color-rose: #e8b400;
+  --color-rose-deep: #9c7600;
+  --color-sky: #c7c7cc;
+  --color-sky-deep: #636366;
+  --color-star: #f5c400;
+
+  --s-goal: linear-gradient(180deg, #ffffff 0%, #ffffff 100%);
+  --s-win: linear-gradient(160deg, #ffffff 0%, #fafafa 100%);
+  --s-btn: linear-gradient(90deg, #ffd60a 0%, #f5c400 100%);
+  --s-tile: #fff4c2;
+  --nav-active-bg: #ffd60a;
+  --nav-active-fg: #1c1c1e;
+  --tarot-ink: #c99700;
+  --border: #e5e5ea;
+  --input: #e5e5ea;
+  --ring: #f5c400;
+
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", "Inter", sans-serif;
+  --font-heading: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Inter", sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Inter", sans-serif;
+  --font-serif: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Inter", sans-serif;
+}
+
 /* ============= Design tokens ============= */
 
 @theme {

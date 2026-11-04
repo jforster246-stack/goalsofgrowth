@@ -7,7 +7,8 @@ export type ThemeId =
   | "dark-magic"
   | "wild-berries"
   | "mono"
-  | "cobalt";
+  | "cobalt"
+  | "notes";
 
 export const THEMES: {
   id: ThemeId;
@@ -57,6 +58,12 @@ export const THEMES: {
     label: "Cobalt",
     blurb: "Greys and white with an electric cobalt - pixel type",
     swatches: ["#ffffff", "#dfe3e9", "#1f36d6", "#5b616b", "#2e323a", "#1f36d6"],
+  },
+  {
+    id: "notes",
+    label: "Notes",
+    blurb: "Clean whites and soft greys with a sunny yellow",
+    swatches: ["#ffffff", "#f2f2f7", "#ffd60a", "#8e8e93", "#1c1c1e", "#e0a800"],
   },
 ];
 
