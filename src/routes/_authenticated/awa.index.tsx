@@ -481,7 +481,10 @@ function ThingsIDidTab({ onLog }: { onLog: (hobbyId?: string) => void }) {
       t.count += 1;
       if (!t.last || l.logged_on > t.last) t.last = l.logged_on;
     }
-    return [...m.values()];
+    // Most-logged first; ties go to the most recent.
+    return [...m.values()].sort(
+      (a, b) => b.count - a.count || (b.last ?? "").localeCompare(a.last ?? ""),
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [logs, hobbies]);
 
@@ -493,7 +496,7 @@ function ThingsIDidTab({ onLog }: { onLog: (hobbyId?: string) => void }) {
       for (const t of (l.hobby_id ? byId.get(l.hobby_id)?.tags : null) ?? [])
         m.set(t, (m.get(t) ?? 0) + 1);
     }
-    return [...m.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+    return [...m.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [logs, hobbies]);
 
