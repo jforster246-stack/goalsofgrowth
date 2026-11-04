@@ -1,3 +1,4 @@
+import { MenusPanel } from "@/components/awa-menus-panel";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
@@ -58,8 +59,11 @@ export const Route = createFileRoute("/_authenticated/awa/")({
 
 type Wish = { id: string; title: string; done: boolean };
 
-type Tab = "did";
-const TABS: { key: Tab; label: string }[] = [{ key: "did", label: "Things I did" }];
+type Tab = "did" | "menus";
+const TABS: { key: Tab; label: string }[] = [
+  { key: "did", label: "Things I did" },
+  { key: "menus", label: "Menus" },
+];
 
 const WEEK_LABELS = ["M", "T", "W", "T", "F", "S", "S"];
 const MONTHS = [
@@ -83,6 +87,9 @@ function pad(n: number) {
 
 function AwaPage() {
   const [tab, setTab] = useState<Tab>("did");
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("tab") === "menus") setTab("menus");
+  }, []);
   void ShelfTab;
   void SomedayTab;
   const [logFor, setLogFor] = useState<{ hobbyId?: string; note?: string } | null>(null);
@@ -111,15 +118,9 @@ function AwaPage() {
               {t.label}
             </button>
           ))}
-          <Link
-            to="/awa/menus"
-            className="flex flex-1 items-center justify-center whitespace-nowrap rounded-full px-3 py-1.5 font-heading text-[11px] tracking-wide text-black/45 transition-colors"
-          >
-            Menus
-          </Link>
         </div>
 
-        {active.length > 0 && (
+        {tab === "did" && active.length > 0 && (
           <button
             type="button"
             onClick={() => setLogFor({})}
@@ -131,6 +132,7 @@ function AwaPage() {
         )}
 
         <div className="mt-6">
+          {tab === "menus" && <MenusPanel />}
           {tab === "did" && (
             <ThingsIDidTab onLog={(hobbyId) => setLogFor(hobbyId ? { hobbyId } : {})} />
           )}
