@@ -44,6 +44,7 @@ type Habit = {
   created_at: string;
   start_date: string | null;
   done: boolean;
+  week?: boolean[];
 };
 
 const TIMES: {
@@ -140,6 +141,7 @@ function HabitsBody({
       timeOfDay={habit.time_of_day}
       frequencyLabel={frequencyLabel(habit)}
       icon={habit.icon}
+      week={habit.week}
       done={habit.done}
       onOpen={() => onOpen(habit)}
       onTimer={() =>

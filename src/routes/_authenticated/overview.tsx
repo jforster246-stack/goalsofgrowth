@@ -638,6 +638,7 @@ function MissedYesterday({ className }: { className?: string }) {
             timeOfDay={h.time_of_day as HabitTime}
             frequencyLabel={frequencyLabel(h)}
             icon={h.icon}
+            week={h.week}
             done={false}
             onOpen={() =>
               setSelected({ ...h, time_of_day: h.time_of_day as HabitTime })
@@ -907,6 +908,7 @@ function TodayHabits({ className }: { className?: string }) {
               timeOfDay={h.time_of_day as HabitTime}
               frequencyLabel={frequencyLabel(h)}
               icon={h.icon}
+              week={h.week}
               done={h.done}
               onOpen={() =>
                 setSelected({ ...h, time_of_day: h.time_of_day as HabitTime })
