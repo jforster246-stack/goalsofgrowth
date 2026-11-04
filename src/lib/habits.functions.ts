@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { isHabitDueToday } from "@/lib/habit-schedule";
+import { mondayWeek } from "@/lib/week-dates";
 
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const timeOfDaySchema = z.enum(["morning", "afternoon", "evening"]);
@@ -33,6 +34,7 @@ export const listHabits = createServerFn({ method: "GET" })
   .inputValidator((data) => z.object({ today: dateSchema }).parse(data))
   .handler(async ({ data, context }) => {
     const supabase = context.supabase;
+    const weekDates = mondayWeek(data.today);
     const [habitsResult, completionsResult] = await Promise.all([
       supabase
         .from("habits")
@@ -41,19 +43,22 @@ export const listHabits = createServerFn({ method: "GET" })
         .order("created_at", { ascending: true }),
       supabase
         .from("habit_completions")
-        .select("habit_id")
-        .eq("completed_on", data.today),
+        .select("habit_id, completed_on")
+        .gte("completed_on", weekDates[0]!)
+        .lte("completed_on", weekDates[6]!),
     ]);
 
     if (habitsResult.error) throw new Error(habitsResult.error.message);
     if (completionsResult.error) throw new Error(completionsResult.error.message);
 
-    const doneToday = new Set(
-      (completionsResult.data ?? []).map((c) => c.habit_id),
+    const ticked = new Set(
+      (completionsResult.data ?? []).map((c) => `${c.habit_id}|${c.completed_on}`),
     );
     return (habitsResult.data ?? []).map((habit) => ({
       ...habit,
-      done: doneToday.has(habit.id),
+      done: ticked.has(`${habit.id}|${data.today}`),
+      /** Monday → Sunday of the current week: was the habit ticked that day? */
+      week: weekDates.map((d) => ticked.has(`${habit.id}|${d}`)),
     }));
   });
 
