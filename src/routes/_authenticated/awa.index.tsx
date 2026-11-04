@@ -58,12 +58,8 @@ export const Route = createFileRoute("/_authenticated/awa/")({
 
 type Wish = { id: string; title: string; done: boolean };
 
-type Tab = "shelf" | "did" | "someday";
-const TABS: { key: Tab; label: string }[] = [
-  { key: "did", label: "Things I did" },
-  { key: "shelf", label: "Shelf" },
-  { key: "someday", label: "Someday" },
-];
+type Tab = "did";
+const TABS: { key: Tab; label: string }[] = [{ key: "did", label: "Things I did" }];
 
 const WEEK_LABELS = ["M", "T", "W", "T", "F", "S", "S"];
 const MONTHS = [
@@ -87,6 +83,8 @@ function pad(n: number) {
 
 function AwaPage() {
   const [tab, setTab] = useState<Tab>("did");
+  void ShelfTab;
+  void SomedayTab;
   const [logFor, setLogFor] = useState<{ hobbyId?: string; note?: string } | null>(null);
   const [addingHobby, setAddingHobby] = useState(false);
   const { data: hobbies } = useQuery(awaHobbiesQueryOptions);
@@ -113,9 +111,15 @@ function AwaPage() {
               {t.label}
             </button>
           ))}
+          <Link
+            to="/awa/menus"
+            className="flex flex-1 items-center justify-center whitespace-nowrap rounded-full px-3 py-1.5 font-heading text-[11px] tracking-wide text-black/45 transition-colors"
+          >
+            Menus
+          </Link>
         </div>
 
-        {tab !== "someday" && active.length > 0 && (
+        {active.length > 0 && (
           <button
             type="button"
             onClick={() => setLogFor({})}
@@ -125,25 +129,11 @@ function AwaPage() {
             Log a little time
           </button>
         )}
-        <Link
-          to="/awa/menus"
-          className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-2xl bg-white py-3.5 font-heading text-sm text-olive shadow-sm ring-1 ring-olive/25 transition-colors hover:bg-olive/5"
-        >
-          <BookOpen className="size-4" strokeWidth={2.5} />
-          Menus
-        </Link>
 
         <div className="mt-6">
-          {tab === "shelf" && (
-            <ShelfTab
-              onLog={(hobbyId) => setLogFor({ hobbyId })}
-              onAdd={() => setAddingHobby(true)}
-            />
-          )}
           {tab === "did" && (
             <ThingsIDidTab onLog={(hobbyId) => setLogFor(hobbyId ? { hobbyId } : {})} />
           )}
-          {tab === "someday" && <SomedayTab onLogItem={(note) => setLogFor({ note })} />}
         </div>
       </div>
 
@@ -155,7 +145,6 @@ function AwaPage() {
           prefillNote={logFor.note}
           onAddHobby={() => {
             setLogFor(null);
-            setTab("shelf");
             setAddingHobby(true);
           }}
           onClose={() => setLogFor(null)}
