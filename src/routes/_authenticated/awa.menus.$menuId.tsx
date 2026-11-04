@@ -71,7 +71,10 @@ function MenuPage() {
         <p className="mt-6 text-sm text-destructive">Couldn't load this menu. Please refresh.</p>
       ) : !data ? (
         <p className="mt-6 text-sm text-muted-foreground">
-          This menu no longer exists. <Link to="/awa/menus" className="underline">Back to menus</Link>
+          This menu no longer exists.{" "}
+          <Link to="/awa/menus" className="underline">
+            Back to menus
+          </Link>
         </p>
       ) : (
         <MenuBody menuId={menuId} menu={data.menu} items={data.items} />
@@ -112,7 +115,8 @@ function MenuBody({
   const isDone = (i: Item) => doneLocal[i.id] ?? i.last_done_on === today;
 
   const doneMutation = useMutation({
-    mutationFn: (v: { id: string; done: boolean }) => setMenuActivityDone({ data: { ...v, today } }),
+    mutationFn: (v: { id: string; done: boolean }) =>
+      setMenuActivityDone({ data: { ...v, today } }),
     onMutate: (v) => setDoneLocal((s) => ({ ...s, [v.id]: v.done })),
     onError: (_e, v) => setDoneLocal((s) => ({ ...s, [v.id]: !v.done })),
     onSuccess: () => invalidate(),
@@ -148,7 +152,8 @@ function MenuBody({
     ? items.filter(
         (i) =>
           !matches.includes(i) &&
-          ((time !== null && time !== "flex" && i.duration_minutes == null) || (energy !== null && !i.energy)),
+          ((time !== null && time !== "flex" && i.duration_minutes == null) ||
+            (energy !== null && !i.energy)),
       ).length
     : 0;
 
@@ -248,7 +253,9 @@ function MenuBody({
           </div>
           <p className="font-heading text-xl text-foreground">{chosenItem.name}</p>
           <Meta i={chosenItem} />
-          {chosenItem.notes && <p className="mt-2 text-sm text-muted-foreground">{chosenItem.notes}</p>}
+          {chosenItem.notes && (
+            <p className="mt-2 text-sm text-muted-foreground">{chosenItem.notes}</p>
+          )}
           <div className="mt-3 flex flex-wrap gap-2">
             {focusEnabled && (
               <button
@@ -270,7 +277,9 @@ function MenuBody({
               onClick={() => markDone(chosenItem, !isDone(chosenItem))}
               className={cn(
                 "flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold",
-                isDone(chosenItem) ? "bg-olive text-white" : "bg-white text-foreground ring-1 ring-border",
+                isDone(chosenItem)
+                  ? "bg-olive text-white"
+                  : "bg-white text-foreground ring-1 ring-border",
               )}
             >
               <Check className="size-4" /> {isDone(chosenItem) ? "Done today" : "Mark done"}
@@ -300,8 +309,18 @@ function MenuBody({
         <div className="mt-3 rounded-2xl bg-card p-6 text-center text-sm text-muted-foreground ring-1 ring-border">
           Nothing in this menu fits that time and energy.
           <div className="mt-3 flex justify-center gap-2">
-            <Chip active={false} onClick={() => { setTime(null); setEnergy(null); }}>Clear filters</Chip>
-            <Chip active={false} onClick={() => setShowAll(true)}>View all hobbies</Chip>
+            <Chip
+              active={false}
+              onClick={() => {
+                setTime(null);
+                setEnergy(null);
+              }}
+            >
+              Clear filters
+            </Chip>
+            <Chip active={false} onClick={() => setShowAll(true)}>
+              View all hobbies
+            </Chip>
           </div>
         </div>
       ) : (
@@ -323,13 +342,24 @@ function MenuBody({
                   onClick={() => markDone(i, !done)}
                   className={cn(
                     "grid size-8 shrink-0 place-items-center rounded-full ring-1 transition-colors",
-                    done ? "bg-olive text-white ring-olive" : "bg-white text-transparent ring-border hover:text-black/20",
+                    done
+                      ? "bg-olive text-white ring-olive"
+                      : "bg-white text-transparent ring-border hover:text-black/20",
                   )}
                 >
                   <Check className="size-4" strokeWidth={3} />
                 </button>
-                <button type="button" onClick={() => setChosen(i.id)} className="min-w-0 flex-1 text-left">
-                  <span className={cn("block text-sm font-semibold", done && "text-muted-foreground line-through")}>
+                <button
+                  type="button"
+                  onClick={() => setChosen(i.id)}
+                  className="min-w-0 flex-1 text-left"
+                >
+                  <span
+                    className={cn(
+                      "block text-sm font-semibold",
+                      done && "text-muted-foreground line-through",
+                    )}
+                  >
                     {i.name}
                   </span>
                   <Meta i={i} />
@@ -353,11 +383,19 @@ function MenuBody({
           onClick={() => setShowAll(true)}
           className="mt-3 text-xs text-muted-foreground underline underline-offset-4"
         >
-          {hiddenMissing} hobb{hiddenMissing === 1 ? "y has" : "ies have"} no time or energy set — view all
+          {hiddenMissing} hobb{hiddenMissing === 1 ? "y has" : "ies have"} no time or energy set —
+          view all
         </button>
       )}
 
-      {adding && <AddActivityModal menuId={menuId} addedHobbyIds={items.map((i) => i.hobby?.id ?? "").filter(Boolean)} onDone={invalidate} onClose={() => setAdding(false)} />}
+      {adding && (
+        <AddActivityModal
+          menuId={menuId}
+          addedHobbyIds={items.map((i) => i.hobby?.id ?? "").filter(Boolean)}
+          onDone={invalidate}
+          onClose={() => setAdding(false)}
+        />
+      )}
       {editing && (
         <EditActivityModal
           item={editing}
@@ -407,7 +445,6 @@ function Meta({ i }: { i: Item }) {
 
 type AddInput = { menuId: string; hobbyId: string };
 
-
 function AddActivityModal({
   menuId,
   addedHobbyIds,
@@ -441,7 +478,9 @@ function AddActivityModal({
 
   return (
     <ModalShell title="Add a hobby" onClose={onClose}>
-      {add.error && <p className="mt-2 text-sm text-destructive">Couldn't add that. Please try again.</p>}
+      {add.error && (
+        <p className="mt-2 text-sm text-destructive">Couldn't add that. Please try again.</p>
+      )}
       {isPending ? (
         <Loading />
       ) : rows.length === 0 ? (
@@ -470,7 +509,13 @@ function SourceGroup({
   rows,
 }: {
   title: string;
-  rows: { key: string; label: string; sub?: string | undefined; added: boolean; onAdd: () => void }[];
+  rows: {
+    key: string;
+    label: string;
+    sub?: string | undefined;
+    added: boolean;
+    onAdd: () => void;
+  }[];
 }) {
   const [added, setAdded] = useState<Set<string>>(new Set());
   if (!rows.length) return null;
@@ -481,10 +526,15 @@ function SourceGroup({
         {rows.map((r) => {
           const isAdded = r.added || added.has(r.key);
           return (
-            <li key={r.key} className="flex items-center gap-2 rounded-xl bg-card px-3 py-2 ring-1 ring-border">
+            <li
+              key={r.key}
+              className="flex items-center gap-2 rounded-xl bg-card px-3 py-2 ring-1 ring-border"
+            >
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm">{r.label}</span>
-                {r.sub && <span className="block truncate text-xs text-muted-foreground">{r.sub}</span>}
+                {r.sub && (
+                  <span className="block truncate text-xs text-muted-foreground">{r.sub}</span>
+                )}
               </span>
               <button
                 type="button"
@@ -545,7 +595,9 @@ function EditActivityModal({
           Changes show in every menu this activity is in.
           {linked && " Your hobby itself isn't changed."}
         </p>
-        {save.error && <p className="mt-2 text-sm text-destructive">Couldn't save. Please try again.</p>}
+        {save.error && (
+          <p className="mt-2 text-sm text-destructive">Couldn't save. Please try again.</p>
+        )}
         <button
           type="submit"
           disabled={save.isPending || !d.name.trim()}
@@ -585,7 +637,12 @@ function EditMenu({
   return (
     <MenuFormModal
       title="Edit menu"
-      initial={{ name: menu.name, description: menu.description ?? "", category: menu.category ?? "", icon: menu.icon }}
+      initial={{
+        name: menu.name,
+        description: menu.description ?? "",
+        category: menu.category ?? "",
+        icon: menu.icon,
+      }}
       saving={save.isPending}
       onSave={(d) => save.mutate(d)}
       onClose={onClose}

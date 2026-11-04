@@ -189,8 +189,9 @@ export function HobbyView({ hobbyId }: { hobbyId: string }) {
       )}
       {editLog && (
         <AwaLogModal
-          hobbies={[hobby]}
-          lockHobby
+          hobbies={((hobbies ?? []) as AwaHobby[]).filter(
+            (h) => !h.archived_at || h.id === hobby.id,
+          )}
           editLog={editLog as AwaEditLog}
           onClose={() => setEditLog(null)}
         />

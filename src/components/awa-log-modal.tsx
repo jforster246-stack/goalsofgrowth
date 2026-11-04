@@ -123,6 +123,7 @@ export function AwaLogModal({
             note: note.trim() || null,
             duration,
             photoPath,
+            ...(selected && selected.id !== editLog.hobby_id ? { hobbyId: selected.id } : {}),
           },
         });
         if (oldPath && oldPath !== photoPath) await removeAwaPhoto(oldPath);
@@ -166,7 +167,7 @@ export function AwaLogModal({
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const canSave = (!!editLog || !!selected) && validDate && !save.isPending;
-  const showPicker = !lockHobby && !editLog;
+  const showPicker = !lockHobby;
   const shownPhoto = photoPreview ?? (keepPhoto ? existingUrl : undefined);
   const hasPhoto = !!photo || (keepPhoto && !!editLog?.photo_path);
 
