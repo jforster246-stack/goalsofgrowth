@@ -3,8 +3,8 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
-/* `modern:` styles apply when the Modern style is picked in settings. */
-@custom-variant modern (&:where([data-font="modern"], [data-font="modern"] *));
+/* `modern:` styles apply for every font style except Traditional. */
+@custom-variant modern (&:where(:root:not([data-font="traditional"]), :root:not([data-font="traditional"]) *));
 
 /*
  * Design system definition.
@@ -157,8 +157,7 @@
  * "natural" matches the @theme defaults and is here for completeness.
  * ============================================================= */
 /* Moonlight — the main look: soft celestial gradients on near-white. */
-:root[data-theme="moonlight"],
-:root[data-theme="y2k"] {
+:root[data-theme="moonlight"] {
   --background: #fbfbfe;
   --mg-canvas: radial-gradient(135% 125% at 30% 12%, #fff1fc 0%, #f9f3e0 50%, #f8b3e8 77%, #ecd4f1 100%);
   --s-goal: linear-gradient(180deg, #fff1fc 0%, #fcdff5 100%);
@@ -299,9 +298,7 @@
 }
 
 /*
- * Cobalt — a greyscale "workstation" palette with one electric cobalt accent,
- * set in VT323 (pixel) type. The `html` prefix lifts specificity above the
- * data-font blocks so VT323 wins whether Modern or Traditional is selected.
+ * Cobalt — a greyscale "workstation" palette with one electric cobalt accent.
  */
 html:root[data-theme="cobalt"] {
   --background: #eef0f3;
@@ -333,25 +330,10 @@ html:root[data-theme="cobalt"] {
   --nav-active-bg: #1f36d6;
   --nav-active-fg: #ffffff;
   --tarot-ink: #1f36d6;
-
-  /* VT323 is the main typeface across the app. */
-  --font-display: "VT323", ui-monospace, SFMono-Regular, monospace;
-  --font-heading: "VT323", ui-monospace, monospace;
-  --font-body: "VT323", ui-monospace, monospace;
-  --font-serif: "VT323", ui-monospace, monospace;
-}
-
-/* Y2K — Moonlight's colours (shared block above) in Cobalt's pixel type. */
-html:root[data-theme="y2k"] {
-  --font-display: "VT323", ui-monospace, SFMono-Regular, monospace;
-  --font-heading: "VT323", ui-monospace, monospace;
-  --font-body: "VT323", ui-monospace, monospace;
-  --font-serif: "VT323", ui-monospace, monospace;
 }
 
 /*
- * Notes — white pages and soft system greys with one sunny yellow, set in the
- * device's own system type. Text and primary actions stay near-black so they
+ * Notes — white pages and soft system greys with one sunny yellow. Text and primary actions stay near-black so they
  * read clearly; yellow carries buttons, the nav highlight, stars and tiles.
  */
 html:root[data-theme="notes"] {
@@ -385,11 +367,6 @@ html:root[data-theme="notes"] {
   --border: #e5e5ea;
   --input: #e5e5ea;
   --ring: #f5c400;
-
-  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", "Inter", sans-serif;
-  --font-heading: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Inter", sans-serif;
-  --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Inter", sans-serif;
-  --font-serif: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Inter", sans-serif;
 }
 
 /* Constellation cards: sky + stars derived from whichever theme is active. */
@@ -449,6 +426,22 @@ html:root[data-theme="notes"] {
   --font-display: "Unbounded", "Inter", sans-serif;
   --font-heading: "Unbounded", "Inter", sans-serif;
   --font-serif: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+/* Pixel font style — VT323 everywhere (mono kept for tabular numbers). */
+:root[data-font="pixel"] {
+  --font-display: "VT323", ui-monospace, SFMono-Regular, monospace;
+  --font-heading: "VT323", ui-monospace, monospace;
+  --font-body: "VT323", ui-monospace, monospace;
+  --font-serif: "VT323", ui-monospace, monospace;
+}
+
+/* System font style — the device's own type (SF Pro on Apple devices). */
+:root[data-font="system"] {
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", "Inter", sans-serif;
+  --font-heading: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Inter", sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Inter", sans-serif;
+  --font-serif: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Inter", sans-serif;
 }
 
 @layer base {

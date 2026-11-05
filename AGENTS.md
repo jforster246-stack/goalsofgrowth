@@ -12,3 +12,5 @@
 - Goal-stamp awards use a unique user/goal database key and conflict-ignoring writes; views and balance deduplicate by goal ID as a safeguard against repeat requests.
 
 - Menus: the pages live under /awa/menus, opened from the A While Away page (no nav entry). Every menu activity is linked to an A While Away hobby via hobby_id (unique per user) and is reused across menus via menu_items; standalone or goal-step-linked activities are not supported. Why: menus are only ever built from the user's hobbies.
+
+- Appearance: colour themes (`data-theme`, src/lib/theme.ts) and fonts (`data-font`, src/lib/font.ts) are independent; theme blocks in styles.css must never set `--font-*`. Why: users mix and match any colours with any font.

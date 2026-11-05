@@ -28,7 +28,7 @@ export function GoldFrame({
   // Modern style: no frame — the picture shows at its own proportions,
   // uncropped (the .gold-frame-natural rules in styles.css undo the
   // size-full/object-cover on the children).
-  if (style === "modern") {
+  if (style !== "traditional") {
     return (
       <button
         type="button"
