@@ -545,7 +545,10 @@ function ProfileSheet({
         </div>
 
         <div className="mt-10">
-          <p className="font-heading text-sm tracking-wide text-olive">Appearance</p>
+          <p className="font-heading text-sm tracking-wide text-olive">Colour theme</p>
+          <p className="mt-0.5 font-serif text-xs text-muted-foreground">
+            Mix and match any colours with any font below.
+          </p>
           <div className="mt-3 space-y-2">
             {THEMES.map((t) => {
               const active = theme === t.id;
@@ -581,7 +584,7 @@ function ProfileSheet({
             })}
           </div>
 
-          <p className="mt-6 font-heading text-sm tracking-wide text-olive">Font style</p>
+          <p className="mt-6 font-heading text-sm tracking-wide text-olive">Font</p>
           <div className="mt-3 grid grid-cols-2 gap-2">
             {FONTS.map((f) => {
               const active = font === f.id;
@@ -598,12 +601,7 @@ function ProfileSheet({
                 >
                   <span
                     className="block text-2xl leading-none text-foreground"
-                    style={{
-                      fontFamily:
-                        f.id === "modern"
-                          ? "Inter, ui-sans-serif, system-ui, sans-serif"
-                          : "'Pinyon Script', cursive",
-                    }}
+                    style={{ fontFamily: f.sample }}
                   >
                     Aa
                   </span>
