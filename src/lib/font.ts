@@ -1,28 +1,46 @@
-/** Font styles the user can switch between under settings. */
+/** Font styles the user can switch between under settings (independent of colour theme). */
 import { useSyncExternalStore } from "react";
 
-export type FontStyle = "traditional" | "modern";
+export type FontStyle = "traditional" | "modern" | "pixel" | "system";
 
-export const FONTS: { id: FontStyle; label: string; blurb: string }[] = [
+export const FONTS: { id: FontStyle; label: string; blurb: string; sample: string }[] = [
   {
     id: "traditional",
     label: "Traditional",
     blurb: "Script display, glyphic headings, serif text",
+    sample: "'Pinyon Script', cursive",
   },
   {
     id: "modern",
     label: "Modern",
     blurb: "Clean sans-serif throughout",
+    sample: "Unbounded, Inter, ui-sans-serif, sans-serif",
+  },
+  {
+    id: "pixel",
+    label: "Pixel",
+    blurb: "Retro pixel type throughout",
+    sample: "VT323, ui-monospace, monospace",
+  },
+  {
+    id: "system",
+    label: "System",
+    blurb: "Your phone's own font, like Notes",
+    sample: "-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Inter, sans-serif",
   },
 ];
 
 const KEY = "gog-font";
 const DEFAULT: FontStyle = "modern";
 
+export function isFontStyle(v: unknown): v is FontStyle {
+  return FONTS.some((f) => f.id === v);
+}
+
 export function getFont(): FontStyle {
   try {
-    const f = localStorage.getItem(KEY) as FontStyle | null;
-    return f === "modern" || f === "traditional" ? f : DEFAULT;
+    const f = localStorage.getItem(KEY);
+    return isFontStyle(f) ? f : DEFAULT;
   } catch {
     return DEFAULT;
   }
