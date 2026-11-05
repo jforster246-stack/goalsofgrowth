@@ -298,9 +298,7 @@
 }
 
 /*
- * Cobalt — a greyscale "workstation" palette with one electric cobalt accent,
- * set in VT323 (pixel) type. The `html` prefix lifts specificity above the
- * data-font blocks so VT323 wins whether Modern or Traditional is selected.
+ * Cobalt — a greyscale "workstation" palette with one electric cobalt accent.
  */
 html:root[data-theme="cobalt"] {
   --background: #eef0f3;
@@ -335,8 +333,7 @@ html:root[data-theme="cobalt"] {
 }
 
 /*
- * Notes — white pages and soft system greys with one sunny yellow, set in the
- * device's own system type. Text and primary actions stay near-black so they
+ * Notes — white pages and soft system greys with one sunny yellow. Text and primary actions stay near-black so they
  * read clearly; yellow carries buttons, the nav highlight, stars and tiles.
  */
 html:root[data-theme="notes"] {

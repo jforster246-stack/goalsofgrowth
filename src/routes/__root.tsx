@@ -132,7 +132,7 @@ function RootShell({ children }: { children: ReactNode }) {
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "try{var t=localStorage.getItem('gog-theme');document.documentElement.setAttribute('data-theme',t||'moonlight');var f=localStorage.getItem('gog-font');document.documentElement.setAttribute('data-font',f||'modern');}catch(e){}",
+              "try{var L=localStorage,t=L.getItem('gog-theme'),f=L.getItem('gog-font');if(!L.getItem('gog-appearance-v2')){if(t==='y2k'){t='moonlight';f='pixel';}else if(t==='cobalt'){f='pixel';}else if(t==='notes'){f='system';}if(t)L.setItem('gog-theme',t);if(f)L.setItem('gog-font',f);L.setItem('gog-appearance-v2','1');}if(t==='y2k')t='moonlight';document.documentElement.setAttribute('data-theme',t||'moonlight');document.documentElement.setAttribute('data-font',f||'modern');}catch(e){}",
           }}
         />
       </head>
