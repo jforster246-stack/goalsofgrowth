@@ -15,6 +15,10 @@ export const Route = createFileRoute("/_authenticated/routines/")({
         content:
           "Simple checklists for your routines — tick things off, then reset the list to run it again.",
       },
+      { property: "og:title", content: "Routines - Moongrove" },
+      { property: "og:description", content: "Your personal routines and repeatable checklists in Moongrove." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: RoutinesPage,

@@ -48,6 +48,7 @@ export function AppShell({
   title,
   titleLeft,
   hideSettings,
+  hideFloatingAdd = false,
   children,
 }: {
   right?: ReactNode;
@@ -57,6 +58,7 @@ export function AppShell({
   title?: string;
   titleLeft?: boolean;
   hideSettings?: boolean;
+  hideFloatingAdd?: boolean;
   children: ReactNode;
 }) {
   const queryClient = useQueryClient();
@@ -226,7 +228,7 @@ export function AppShell({
           {children}
 
           {/* Mobile: the add button floats bottom-right. */}
-          <AddMenu floating />
+          {!hideFloatingAdd && <AddMenu floating />}
 
           <BottomNav onOpenSettings={() => setProfileOpen(true)} />
 

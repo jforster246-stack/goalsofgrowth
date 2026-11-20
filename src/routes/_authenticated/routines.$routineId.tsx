@@ -1,12 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Reorder, useDragControls } from "framer-motion";
 import { Check, GripVertical, Plus, RotateCcw, Trash2, X } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { Loading } from "@/components/loading";
 import { IconPicker } from "@/components/icon-picker";
 import { Stamp } from "@/components/stamp";
+import { Button } from "@/components/ui/button";
 import { checklistsQueryOptions } from "@/lib/goal-queries";
 import {
   addChecklistItem,
@@ -23,7 +24,14 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/routines/$routineId")({
   head: () => ({
-    meta: [{ title: "Routine - Moongrove" }],
+    meta: [
+      { title: "Your routine — Moongrove" },
+      { name: "description", content: "Your personal routine and its small steps, ready to revisit and complete." },
+      { property: "og:title", content: "Your routine — Moongrove" },
+      { property: "og:description", content: "Your personal routine and its small steps, ready to revisit and complete." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
   }),
   component: RoutineDetailPage,
 });
@@ -52,11 +60,11 @@ function RoutineDetailPage() {
   const list = (lists as Checklist[] | undefined)?.find((l) => l.id === routineId);
 
   return (
-    <AppShell backTo="/routines" hideSettings>
+    <AppShell backTo="/routines" title="Routine" hideSettings hideFloatingAdd>
       {isPending ? (
         <Loading />
       ) : !list ? (
-        <p className="mt-8 text-center font-serif text-sm text-black/50">
+        <p className="mt-8 text-center font-serif text-sm text-muted-foreground">
           This routine no longer exists.
         </p>
       ) : (
@@ -143,25 +151,28 @@ function RoutineEditor({ list }: { list: Checklist }) {
   };
 
   return (
-    <div className="mt-4 pb-6 md:mx-auto md:max-w-2xl">
+    <div className="mx-auto mt-4 w-full min-w-0 max-w-3xl pb-6 sm:mt-6">
       {/* Header: icon + name + count */}
-      <div className="flex items-center gap-2">
-        <button
+      <div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3 sm:gap-4">
+        <Button
           type="button"
+          variant="ghost"
+          size="icon"
           onClick={() => setIconOpen((v) => !v)}
           aria-label="Change icon"
-          className="shrink-0 rounded-xl transition-transform hover:-translate-y-0.5"
+          title="Change icon"
+          className="size-12 shrink-0 rounded-lg [&_svg]:size-12 sm:size-14 sm:[&_svg]:size-14"
         >
           <Stamp icon={list.icon} accent="mint" className="size-12" />
-        </button>
-        <input
+        </Button>
+        <AutosizeTextField
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           onBlur={saveTitle}
           onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
           aria-label="Routine name"
           maxLength={140}
-          className="min-w-0 flex-1 rounded-lg bg-transparent font-heading text-2xl text-black focus:bg-black/5 focus:outline-none focus:ring-1 focus:ring-olive/30"
+          className="w-full min-w-0 rounded-lg bg-transparent px-1 py-2 font-heading text-xl text-foreground focus:bg-muted focus:outline-none focus:ring-1 focus:ring-ring sm:text-2xl"
         />
       </div>
 
@@ -178,19 +189,20 @@ function RoutineEditor({ list }: { list: Checklist }) {
         </div>
       )}
 
-      <div className="mt-4 flex items-center justify-between">
-        <span className="font-mono text-xs text-black/40">
+      <div className="mt-5 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-border pb-4">
+        <span className="min-w-0 font-mono text-xs text-muted-foreground">
           {doneCount}/{list.items.length} done
         </span>
-        <button
+        <Button
           type="button"
+          variant="secondary"
           onClick={() => resetMutation.mutate()}
           disabled={doneCount === 0}
-          className="flex items-center gap-1 rounded-full bg-black/5 px-3 py-1.5 font-heading text-[11px] text-black/60 transition-colors hover:bg-black/10 disabled:opacity-40"
+          className="h-11 shrink-0 px-3 font-heading text-xs"
         >
           <RotateCcw className="size-3.5" strokeWidth={2} />
           Reset
-        </button>
+        </Button>
       </div>
 
       {/* Items */}
@@ -199,7 +211,7 @@ function RoutineEditor({ list }: { list: Checklist }) {
         axis="y"
         values={order}
         onReorder={handleReorder}
-        className="mt-4 space-y-0.5"
+        className="mt-2 min-w-0 divide-y divide-border"
       >
         {order.map((item) => (
           <ChecklistItemRow
@@ -217,33 +229,43 @@ function RoutineEditor({ list }: { list: Checklist }) {
           e.preventDefault();
           addItem();
         }}
-        className="mt-3 flex items-center gap-2"
+        className="mt-4 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-2 sm:gap-3"
       >
-        <input
+        <AutosizeTextField
           value={itemDraft}
           onChange={(e) => setItemDraft(e.target.value)}
           placeholder="Add an item…"
+          aria-label="New routine item"
           maxLength={300}
-          className="min-w-0 flex-1 rounded-xl bg-black/5 px-3 py-2.5 font-serif text-sm placeholder:text-black/40 focus:outline-none focus:ring-1 focus:ring-olive/40"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              addItem();
+            }
+          }}
+          className="min-h-11 w-full min-w-0 rounded-lg border border-input bg-card px-3 py-2.5 font-serif text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
         />
-        <button
+        <Button
           type="submit"
           disabled={!itemDraft.trim()}
           aria-label="Add item"
-          className="grid size-10 shrink-0 place-items-center rounded-xl bg-sage/60 text-white transition-colors hover:bg-sage/80 disabled:opacity-40"
+          size="icon"
+          title="Add item"
+          className="size-11 shrink-0"
         >
           <Plus className="size-4" strokeWidth={2} />
-        </button>
+        </Button>
       </form>
 
-      <button
+      <Button
         type="button"
+        variant="ghost"
         onClick={() => deleteMutation.mutate()}
-        className="mt-8 flex w-full items-center justify-center gap-2 py-2 font-heading text-sm text-black/40 transition-colors hover:text-clay-deep"
+        className="mt-8 h-11 w-full font-heading text-sm text-muted-foreground hover:text-destructive sm:w-auto"
       >
         <Trash2 className="size-4" strokeWidth={2} />
         Delete routine
-      </button>
+      </Button>
     </div>
   );
 }
@@ -272,29 +294,33 @@ function ChecklistItemRow({
 
   return (
     <Reorder.Item as="div" value={item} dragListener={false} dragControls={controls}>
-      <div className="group flex items-center gap-1">
-        <button
+      <div className="group grid min-w-0 grid-cols-[24px_44px_minmax(0,1fr)_36px] items-start gap-1 py-2 sm:grid-cols-[32px_44px_minmax(0,1fr)_44px] sm:gap-2">
+        <Button
           type="button"
+          variant="ghost"
+          size="icon"
           aria-label="Drag to reorder"
           onPointerDown={(e) => controls.start(e)}
-          className="grid size-7 shrink-0 cursor-grab touch-none place-items-center text-black/20 active:cursor-grabbing"
+          title="Drag to reorder"
+          className="h-11 w-6 shrink-0 cursor-grab touch-none text-muted-foreground/60 active:cursor-grabbing sm:w-8"
         >
           <GripVertical className="size-4" />
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="ghost"
+          size="icon"
           onClick={onToggle}
           aria-label={item.done ? "Mark not done" : "Mark done"}
-          className={cn(
-            "grid size-6 shrink-0 place-items-center rounded-md border-2 transition-colors",
-            item.done
-              ? "border-olive bg-olive text-white"
-              : "border-black/20 text-transparent hover:border-olive/50",
-          )}
+          aria-pressed={item.done}
+          title={item.done ? "Mark not done" : "Mark done"}
+          className="size-11 shrink-0"
         >
-          <Check className="size-4" strokeWidth={3} />
-        </button>
-        <input
+          <span className={cn("grid size-6 place-items-center rounded-md border-2 transition-colors", item.done ? "border-primary bg-primary text-primary-foreground" : "border-input text-transparent")}>
+            <Check className="size-4" strokeWidth={3} />
+          </span>
+        </Button>
+        <AutosizeTextField
           value={text}
           onChange={(e) => setText(e.target.value)}
           onBlur={save}
@@ -302,21 +328,41 @@ function ChecklistItemRow({
           aria-label="Item text"
           maxLength={300}
           className={cn(
-            "min-w-0 flex-1 rounded bg-transparent px-1 py-1.5 font-serif text-sm focus:bg-black/5 focus:outline-none",
+            "min-h-11 w-full min-w-0 rounded-md bg-transparent px-1 py-2.5 font-serif text-base leading-6 focus:bg-muted focus:outline-none focus:ring-1 focus:ring-ring",
             item.done
-              ? "text-black/40 line-through decoration-black/30"
-              : "text-black",
+              ? "text-muted-foreground line-through decoration-muted-foreground/50"
+              : "text-foreground",
           )}
         />
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon"
           onClick={onDelete}
           aria-label="Delete item"
-          className="grid size-6 shrink-0 place-items-center rounded-full text-black/25 opacity-0 transition-opacity hover:text-black/60 group-hover:opacity-100"
+          title="Delete item"
+          className="h-11 w-9 shrink-0 text-muted-foreground/60 hover:text-destructive sm:w-11"
         >
           <X className="size-4" />
-        </button>
+        </Button>
       </div>
     </Reorder.Item>
   );
+}
+
+function AutosizeTextField(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    const field = ref.current;
+    if (!field) return;
+    const resize = () => {
+      field.style.height = "auto";
+      field.style.height = `${field.scrollHeight}px`;
+    };
+    resize();
+    const observer = new ResizeObserver(resize);
+    observer.observe(field);
+    return () => observer.disconnect();
+  }, [props.value]);
+  return <textarea {...props} ref={ref} rows={1} className={cn("block resize-none overflow-hidden [overflow-wrap:anywhere]", props.className)} />;
 }

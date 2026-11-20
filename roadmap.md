@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Improve opened routine layouts and verify phone, tablet and desktop interactions.
+
 - [x] Remove duplicate completed-goal stamp and prevent repeat awards; verify gallery
 
 - [x] Add swipeable goal card deck
