@@ -1,575 +1,109 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Check, Plus, X } from "lucide-react";
-import { AppShell, useAppShell } from "@/components/app-shell";
-import { GoldFrame } from "@/components/gold-frame";
-import {
-  ArtworkDetailModal,
-  ArtworkPlacard,
-  ModalShell,
-} from "@/components/artwork-modal";
+import { Check, Plus } from "lucide-react";
+import { AppShell } from "@/components/app-shell";
+import { Button } from "@/components/ui/button";
+import { ModalShell } from "@/components/artwork-modal";
 import { Stamp } from "@/components/stamp";
-import { localToday, type Accent } from "@/components/goal-ui";
+import { type Accent } from "@/components/goal-ui";
 import { StampStyleEditor } from "@/components/stamp-style-editor";
-import {
-  WinFormModal,
-  winStampStyle,
-  type EditableWin,
-} from "@/components/win-form-modal";
-import {
-  goalsQueryOptions,
-  purchasesQueryOptions,
-  showcaseQueryOptions,
-  stampBalanceQueryOptions,
-  stampsQueryOptions,
-  winsQueryOptions,
-} from "@/lib/goal-queries";
-import {
-  buyArtwork,
-  clearShowcaseSlot,
-  setShowcaseSlot,
-} from "@/lib/artworks.functions";
+import { WinFormModal, winStampStyle, type EditableWin } from "@/components/win-form-modal";
+import { goalsQueryOptions, stampsQueryOptions, winsQueryOptions } from "@/lib/goal-queries";
 import { updateStamp } from "@/lib/stamps.functions";
-import { grantBonusStamps, updateGoalDetails } from "@/lib/goals.functions";
-import {
-  ARTWORK_COST,
-  ARTWORKS,
-  artworkById,
-  artworkTint,
-  dailyArtworkIds,
-  type Artwork,
-} from "@/lib/artworks-data";
+import { updateGoalDetails } from "@/lib/goals.functions";
 import { mergeStamps, type StampView } from "@/lib/stamp-view";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/gallery")({
-  head: () => ({
-    meta: [
-      { title: "Your universe - Moongrove" },
-      {
-        name: "description",
-        content:
-          "Your universe of wins, completed dreams and artworks bought with the stardust you earn.",
-      },
-    ],
-  }),
+  head: () => ({ meta: [
+    { title: "My Moongrove — completed goals & wins" },
+    { name: "description", content: "Your completed goals and personal wins, kept together in My Moongrove." },
+    { property: "og:title", content: "My Moongrove — completed goals & wins" },
+    { property: "og:description", content: "Look back on completed goals and celebrate the wins you log." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: GalleryPage,
 });
 
-type Win = {
-  id: string;
-  title: string;
-  note: string | null;
-  kind: string;
-  achieved_on: string;
-  icon: string | null;
-  accent: string | null;
-};
-
 type GalleryGoal = {
-  id: string;
-  title: string;
-  accent: string;
-  icon: string | null;
-  why: string | null;
-  vision: string | null;
+  id: string; title: string; accent: string; icon: string | null;
+  why: string | null; vision: string | null;
   steps: { id: string; title: string; done: boolean }[];
 };
 
-const SLOTS = [0, 1, 2, 3, 4];
-
 function GalleryPage() {
-  const today = localToday();
   const queryClient = useQueryClient();
-
   const { data: goals } = useQuery(goalsQueryOptions);
   const { data: stamps } = useQuery(stampsQueryOptions);
   const { data: wins } = useQuery(winsQueryOptions);
-  const { data: balance } = useQuery(stampBalanceQueryOptions);
-  const { data: purchases } = useQuery(purchasesQueryOptions);
-  const { data: showcase } = useQuery(showcaseQueryOptions);
-
-  const [pickSlot, setPickSlot] = useState<number | null>(null);
-  const [detailArtwork, setDetailArtwork] = useState<{
-    slot: number;
-    artwork: Artwork;
-  } | null>(null);
+  const [adding, setAdding] = useState(false);
   const [editingWin, setEditingWin] = useState<EditableWin | null>(null);
-  const [detailGoal, setDetailGoal] = useState<{
-    stamp: StampView;
-    goal?: GalleryGoal | undefined;
-  } | null>(null);
-  const [confirmBuy, setConfirmBuy] = useState<Artwork | null>(null);
-
+  const [detailGoal, setDetailGoal] = useState<{ stamp: StampView; goal?: GalleryGoal | undefined } | null>(null);
   const goalStamps = mergeStamps(stamps, goals);
-  const winList = (wins ?? []) as Win[];
-  const owned = purchases ?? [];
-  const spendable = balance?.balance ?? 0;
-
-  const slotArtwork = (slot: number): Artwork | undefined => {
-    const row = (showcase ?? []).find((s) => s.position === slot);
-    return row ? artworkById(row.artwork_id) : undefined;
-  };
-  const shownArtworkIds = new Set(
-    (showcase ?? []).map((s) => s.artwork_id),
-  );
-
-  // Temporary manual top-up — tap once to add 50 stamps to your balance.
-  const grant = useMutation({
-    mutationFn: () => grantBonusStamps({ data: { amount: 50 } }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["stamp-balance"] });
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
-    },
-  });
-
-  const buy = useMutation({
-    mutationFn: (artworkId: number) => buyArtwork({ data: { artworkId } }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["artwork-purchases"] });
-      queryClient.invalidateQueries({ queryKey: ["stamp-balance"] });
-      setConfirmBuy(null);
-    },
-  });
-  const place = useMutation({
-    mutationFn: (input: { position: number; artworkId: number }) =>
-      setShowcaseSlot({ data: input }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["gallery-showcase"] });
-      setPickSlot(null);
-    },
-  });
-  const clearSlot = useMutation({
-    mutationFn: (position: number) => clearShowcaseSlot({ data: { position } }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["gallery-showcase"] });
-      setDetailArtwork(null);
-    },
-  });
   const saveStyle = useMutation({
-    mutationFn: ({
-      stamp,
-      icon,
-      accent,
-    }: {
-      stamp: StampView;
-      icon: string | null;
-      accent: string;
-    }) =>
-      stamp.stampId
-        ? updateStamp({ data: { id: stamp.stampId, icon: icon ?? undefined, accent } })
-        : updateGoalDetails({
-            data: {
-              id: stamp.goalId!,
-              title: stamp.title,
-              icon: icon ?? "",
-              accent: accent as Accent,
-            },
-          }),
+    mutationFn: async ({ stamp, icon, accent }: { stamp: StampView; icon: string | null; accent: string }) => {
+      if (stamp.stampId) return updateStamp({ data: { id: stamp.stampId, icon: icon ?? undefined, accent } });
+      if (!stamp.goalId) throw new Error("This completed goal is no longer available.");
+      return updateGoalDetails({ data: { id: stamp.goalId, title: stamp.title, icon: icon ?? "", accent: accent as Accent } });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stamps"] });
       queryClient.invalidateQueries({ queryKey: ["goals"] });
       setDetailGoal(null);
     },
   });
-
-  const openGoal = (s: StampView) => {
-    const full = s.goalId
-      ? (goals ?? []).find((g) => g.id === s.goalId)
-      : undefined;
-    setDetailGoal({ stamp: s, goal: full as GalleryGoal | undefined });
-  };
-
-  const dailyIds = dailyArtworkIds(today);
-
   return (
-    <AppShell
-      title="Your universe"
-      right={
-        <span className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-sm">
-          <Stamp icon={null} accent="sea" className="size-5" />
-          <span className="font-mono text-sm text-olive">{spendable}</span>
-        </span>
-      }
-    >
-      {/* Today's picks */}
-      <section className="mt-4">
-        <div className="flex items-baseline justify-between">
-          <p className="font-heading text-sm text-olive">
-            The Observatory
-          </p>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => grant.mutate()}
-              disabled={grant.isPending}
-              className="rounded-full border border-dashed border-olive/40 px-2.5 py-0.5 font-heading text-[10px] text-olive/70 transition-colors hover:bg-olive/5 disabled:opacity-40"
-            >
-              {grant.isPending ? "…" : "+50"}
-            </button>
-            <span className="font-serif text-xs text-black/50">
-              New picks daily
-            </span>
+    <AppShell title="My Moongrove">
+      <div className="mt-6 space-y-8">
+        <section>
+          <h2 className="font-heading text-base text-foreground">Completed goals <span className="ml-2 text-sm text-muted-foreground">{goalStamps.length}</span></h2>
+          {goalStamps.length === 0 ? <p className="mt-4 text-sm text-muted-foreground">Your completed goals will be kept here.</p> : (
+            <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              {goalStamps.map((stamp) => (
+                <Button key={stamp.key} variant="ghost" aria-label={`Goal: ${stamp.title}`}
+                  onClick={() => setDetailGoal({ stamp, goal: goals?.find((goal) => goal.id === stamp.goalId) })}
+                  className="h-auto min-w-0 flex-col gap-3 whitespace-normal py-4 text-center">
+                  <Stamp icon={stamp.icon} accent={stamp.accent} className="size-20! shrink-0" />
+                  <span className="w-full font-heading text-sm leading-snug [overflow-wrap:anywhere]">{stamp.title}</span>
+                </Button>
+              ))}
+            </div>
+          )}
+        </section>
+        <section>
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="font-heading text-base text-foreground">Logged wins <span className="ml-2 text-sm text-muted-foreground">{wins?.length ?? 0}</span></h2>
+            <Button onClick={() => setAdding(true)} size="sm"><Plus className="size-4" />Log a win</Button>
           </div>
-        </div>
-        <div className="mt-3 grid grid-cols-3 gap-3">
-          {dailyIds.map((id) => {
-            const art = artworkById(id);
-            if (!art) return null;
-            const isOwned = owned.includes(id);
-            return (
-              <div key={id} className="flex flex-col">
-                <div className="aspect-square overflow-hidden rounded-2xl shadow-sm">
-                  <ArtworkPlacard artwork={art} />
-                </div>
-                <div className="mt-2 text-center">
-                  <p className="truncate font-display text-[13px] font-medium leading-tight text-black/80">
-                    {art.name}
-                  </p>
-                  <p className="truncate font-serif text-[10px] italic leading-tight text-black/55">
-                    Constellation
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  disabled={isOwned}
-                  onClick={() => setConfirmBuy(art)}
-                  className={cn(
-                    "mt-2 flex items-center justify-center gap-1 rounded-full py-2.5 font-heading text-[11px] transition-colors",
-                    isOwned
-                      ? "bg-black/5 text-black/40"
-                      : "mg-cta text-[#4a3d63] hover:opacity-90",
-                  )}
-                >
-                  {isOwned ? (
-                    "Owned"
-                  ) : (
-                    <>
-                      Buy · {art.cost}
-                      <Stamp icon={null} accent="sea" className="size-3.5" />
-                    </>
-                  )}
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* The wall */}
-      <section className="mt-6">
-        <p className="font-heading text-sm text-olive">Your universe</p>
-        <p className="mt-1 font-serif text-xs text-black/40">
-          Your completed goals and wins, with room to hang collectibles you buy.
-          Swipe around your sky to explore.
-        </p>
-
-        <div className="mg-panel mt-3 -mx-5 overflow-auto px-5 py-6 sm:mx-0 sm:rounded-3xl">
-
-          <div className="grid w-max gap-5 [grid-template-columns:repeat(4,132px)] sm:w-full sm:[grid-template-columns:repeat(auto-fill,minmax(150px,1fr))]">
-            {/* Artwork slots */}
-            {SLOTS.map((slot) => {
-              const art = slotArtwork(slot);
-              return (
-                <FrameCell
-                  key={`slot-${slot}`}
-                  caption={art ? art.name : "Add a collectible"}
-                  subtitle={art ? "Constellation" : undefined}
-                >
-                  <button
-                    type="button"
-                    aria-label={
-                      art ? `Collectible: ${art.name}` : "Add a collectible"
-                    }
-                    onClick={() =>
-                      art ? setDetailArtwork({ slot, artwork: art }) : setPickSlot(slot)
-                    }
-                    className="block aspect-square w-full overflow-hidden rounded-2xl bg-card ring-1 ring-black/5 transition-transform hover:-translate-y-0.5"
-                  >
-                    {art ? (
-                      <ArtworkPlacard artwork={art} />
-                    ) : (
-                      <span className="grid size-full place-items-center">
-                        <Plus className="size-8 text-olive/40" strokeWidth={2} />
-                      </span>
-                    )}
-                  </button>
-                </FrameCell>
-              );
-            })}
-
-            {/* Completed goals — stamp only, no frame */}
-            {goalStamps.map((s) => (
-              <FrameCell key={s.key} caption={s.title}>
-                <button
-                  type="button"
-                  aria-label={`Goal: ${s.title}`}
-                  onClick={() => openGoal(s)}
-                  className="block w-full transition-transform hover:-translate-y-0.5"
-                >
-                  <Stamp icon={s.icon} accent={s.accent} className="w-full" />
-                </button>
-              </FrameCell>
-            ))}
-
-            {/* Wins — stamp only, no frame */}
-            {winList.map((w) => {
-              const style = winStampStyle(w.kind, w.icon, w.accent);
-              return (
-                <FrameCell key={w.id} caption={w.title}>
-                  <button
-                    type="button"
-                    aria-label={`Win: ${w.title}`}
-                    onClick={() =>
-                      setEditingWin({
-                        id: w.id,
-                        title: w.title,
-                        kind: w.kind,
-                        note: w.note,
-                        achieved_on: w.achieved_on,
-                        icon: w.icon,
-                        accent: w.accent,
-                      })
-                    }
-                    className="block w-full transition-transform hover:-translate-y-0.5"
-                  >
-                    <Stamp
-                      icon={style.icon}
-                      accent={style.accent}
-                      className="w-full"
-                    />
-                  </button>
-                </FrameCell>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* How to earn stardust */}
-      <section className="mt-6 rounded-2xl bg-white/70 p-4 shadow-sm">
-        <p className="font-heading text-sm text-olive">How to earn stardust</p>
-        <ul className="mt-3 space-y-2 font-serif text-sm text-black/60">
-          <li className="flex items-baseline gap-2">
-            <span className="font-heading text-olive">+5</span>
-            <span>finish a whole part of your day - all your morning, afternoon or evening habits</span>
-          </li>
-          <li className="flex items-baseline gap-2">
-            <span className="font-heading text-olive">+2</span>
-            <span>every 3 habits you tick off in a day</span>
-          </li>
-          <li className="flex items-baseline gap-2">
-            <span className="font-heading text-olive">+1</span>
-            <span>finish a dream</span>
-          </li>
-          <li className="flex items-baseline gap-2">
-            <span className="font-heading text-olive">+5</span>
-            <span>sign in 7 days in a row</span>
-          </li>
-        </ul>
-        <p className="mt-3 border-t border-black/5 pt-3 font-serif text-sm text-black/50">
-          Each collectible costs{" "}
-          <span className="font-heading text-olive">{ARTWORK_COST} stardust</span>.
-        </p>
-      </section>
-
-      {/* Slot picker */}
-      {pickSlot !== null && (
-        <SlotPickerModal
-          owned={owned}
-          shown={shownArtworkIds}
-          onClose={() => setPickSlot(null)}
-          onPick={(artworkId) => place.mutate({ position: pickSlot, artworkId })}
-        />
-      )}
-
-      {/* Artwork detail */}
-      {detailArtwork && (
-        <ArtworkDetailModal
-          artwork={detailArtwork.artwork}
-          seed={`slot-${detailArtwork.slot}`}
-          onClose={() => setDetailArtwork(null)}
-          onRemove={() => clearSlot.mutate(detailArtwork.slot)}
-        />
-      )}
-
-      {/* Goal details + restyle */}
-      {detailGoal && (
-        <GoalInfoModal
-          stamp={detailGoal.stamp}
-          goal={detailGoal.goal}
-          saving={saveStyle.isPending}
-          onSave={(icon, accent) =>
-            saveStyle.mutate({ stamp: detailGoal.stamp, icon, accent })
-          }
-          onClose={() => setDetailGoal(null)}
-        />
-      )}
-
-      {/* Win edit */}
-      {editingWin && (
-        <WinFormModal win={editingWin} onClose={() => setEditingWin(null)} />
-      )}
-
-      {/* Confirm purchase */}
-      {confirmBuy && (
-        <ConfirmPurchaseModal
-          artwork={confirmBuy}
-          pending={buy.isPending}
-          canAfford={spendable >= confirmBuy.cost}
-          onConfirm={() => buy.mutate(confirmBuy.id)}
-          onClose={() => setConfirmBuy(null)}
-        />
-      )}
+          {!wins?.length ? <p className="mt-4 text-sm text-muted-foreground">No wins logged yet.</p> : (
+            <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              {wins.map((win) => {
+                const style = winStampStyle(win.kind, win.icon, win.accent);
+                return (
+                  <Button key={win.id} variant="ghost" aria-label={`Win: ${win.title}`}
+                    onClick={() => setEditingWin(win)}
+                    className="h-auto min-w-0 flex-col gap-3 whitespace-normal py-4 text-center">
+                    <Stamp icon={style.icon} accent={style.accent} className="size-20! shrink-0" />
+                    <span className="w-full font-heading text-sm leading-snug [overflow-wrap:anywhere]">{win.title}</span>
+                    <span className="text-xs text-muted-foreground">{new Date(`${win.achieved_on}T00:00:00`).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}</span>
+                  </Button>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      </div>
+      {adding && <WinFormModal onClose={() => setAdding(false)} />}
+      {editingWin && <WinFormModal win={editingWin} onClose={() => setEditingWin(null)} />}
+      {detailGoal && <GoalInfoModal stamp={detailGoal.stamp} goal={detailGoal.goal} saving={saveStyle.isPending}
+        onSave={(icon, accent) => saveStyle.mutate({ stamp: detailGoal.stamp, icon, accent })}
+        onClose={() => setDetailGoal(null)} />}
     </AppShell>
   );
 }
 
-/** A gold frame with a caption (and optional subtitle) underneath. */
-function FrameCell({
-  caption,
-  subtitle,
-  children,
-}: {
-  caption: string;
-  subtitle?: string | undefined;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-col items-center">
-      {children}
-      <span className="mt-2 line-clamp-2 text-center font-serif text-[11px] leading-tight text-black/55">
-        {caption}
-      </span>
-      {subtitle && (
-        <span className="line-clamp-1 text-center font-serif text-[10px] italic leading-tight text-black/40">
-          {subtitle}
-        </span>
-      )}
-    </div>
-  );
-}
-
-
-
-/** Pick one of your purchased artworks to hang in an empty slot. */
-function SlotPickerModal({
-  owned,
-  shown,
-  onClose,
-  onPick,
-}: {
-  owned: number[];
-  shown: Set<number>;
-  onClose: () => void;
-  onPick: (artworkId: number) => void;
-}) {
-  const available = ARTWORKS.filter(
-    (a) => owned.includes(a.id) && !shown.has(a.id),
-  );
-  return (
-    <ModalShell title="Choose an artwork" onClose={onClose}>
-      {available.length === 0 ? (
-        <p className="mt-4 font-serif text-sm text-black/50">
-          {owned.length === 0
-            ? "You haven't bought any artworks yet — grab one from today's picks."
-            : "Every artwork you own is already on the wall."}
-        </p>
-      ) : (
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          {available.map((a) => (
-            <button
-              key={a.id}
-              type="button"
-              onClick={() => onPick(a.id)}
-              className="aspect-[4/5] overflow-hidden rounded-2xl shadow-sm ring-1 ring-black/5 transition-transform hover:-translate-y-0.5"
-            >
-              <ArtworkPlacard artwork={a} />
-            </button>
-          ))}
-        </div>
-      )}
-    </ModalShell>
-  );
-}
-
-
-/** Confirm spending stamps on an artwork before it's bought — or, when the
- *  balance is short, a gentle "not enough stamps" note. Fires confetti on buy. */
-function ConfirmPurchaseModal({
-  artwork,
-  pending,
-  canAfford,
-  onConfirm,
-  onClose,
-}: {
-  artwork: Artwork;
-  pending: boolean;
-  canAfford: boolean;
-  onConfirm: () => void;
-  onClose: () => void;
-}) {
-  const { celebrate } = useAppShell();
-  return (
-    <ModalShell title={canAfford ? "Purchase" : "Not enough stardust"} onClose={onClose}>
-      <div className="mt-2 flex flex-col items-center gap-4 text-center">
-        <div className="aspect-square w-40 overflow-hidden rounded-2xl ring-1 ring-black/5">
-          <ArtworkPlacard artwork={artwork} />
-        </div>
-        {canAfford ? (
-          <p className="font-serif text-base leading-relaxed text-black/80">
-            Ready to purchase{" "}
-            <span className="font-heading text-black">{artwork.name}</span> for{" "}
-            <span className="font-heading text-olive">{artwork.cost} stardust</span>?
-          </p>
-        ) : (
-          <p className="font-serif text-base leading-relaxed text-black/70">
-            Sorry, not this time - you don't have enough stardust yet. Complete a
-            few more goals or habits and come back.
-          </p>
-        )}
-      </div>
-
-      {canAfford ? (
-        <>
-          <button
-            type="button"
-            onClick={() => {
-              celebrate();
-              onConfirm();
-            }}
-            disabled={pending}
-            className="mg-cta mt-6 w-full rounded-full py-3.5 font-heading text-sm text-[#4a3d63] shadow-sm transition-opacity hover:opacity-90 disabled:opacity-40"
-          >
-            {pending ? "Purchasing…" : "Yes"}
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={pending}
-            className="mt-2 w-full py-2 font-heading text-sm text-black/40 transition-colors hover:text-black/70 disabled:opacity-40"
-          >
-            Not this time
-          </button>
-        </>
-      ) : (
-        <button
-          type="button"
-          onClick={onClose}
-          className="mt-6 w-full rounded-2xl bg-black/5 py-3.5 font-heading text-sm text-black/60 transition-colors hover:bg-black/10"
-        >
-          Dismiss
-        </button>
-      )}
-    </ModalShell>
-  );
-}
-
-/**
- * A completed-goal frame: its stamp (recolour / re-icon it here), plus the
- * goal's why, vision and steps when the goal still exists.
- */
 function GoalInfoModal({
   stamp,
   goal,
@@ -594,11 +128,11 @@ function GoalInfoModal({
     <ModalShell title="Completed dream" onClose={onClose}>
       <div className="mt-2 flex flex-col items-center gap-3 text-center">
         <Stamp icon={icon} accent={accent} className="size-24" />
-        <p className="font-display text-2xl leading-tight text-black">
+        <p className="font-display text-2xl leading-tight text-foreground">
           {stamp.title}
         </p>
-        <p className="flex items-center gap-1.5 font-serif text-sm text-black/50">
-          <Check className="size-4 text-olive" strokeWidth={2.5} /> Completed
+        <p className="flex items-center gap-1.5 font-serif text-sm text-muted-foreground">
+          <Check className="size-4 text-foreground" strokeWidth={2.5} /> Completed
         </p>
       </div>
 
@@ -610,22 +144,22 @@ function GoalInfoModal({
           onIcon={setIcon}
           onAccent={setAccent}
         />
-        <button
+        <Button
           type="button"
           onClick={() => onSave(icon, accent)}
           disabled={!dirty || saving}
-          className="mt-4 w-full rounded-2xl bg-olive py-3 font-heading text-sm text-white shadow-sm transition-colors hover:bg-olive/90 disabled:opacity-40"
+          className="mt-4 w-full rounded-2xl bg-primary py-3 font-heading text-sm text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-40"
         >
           {saving ? "Saving…" : "Save look"}
-        </button>
+        </Button>
       </div>
 
       {goal?.why?.trim() && (
         <section className="mt-5">
-          <p className="font-heading text-sm text-olive">
+          <p className="font-heading text-sm text-foreground">
             Why I did this
           </p>
-          <p className="mt-1 whitespace-pre-wrap font-serif text-sm leading-relaxed text-black/70">
+          <p className="mt-1 whitespace-pre-wrap font-serif text-sm leading-relaxed text-muted-foreground">
             {goal.why}
           </p>
         </section>
@@ -633,10 +167,10 @@ function GoalInfoModal({
 
       {goal?.vision?.trim() && (
         <section className="mt-4">
-          <p className="font-heading text-sm text-olive">
+          <p className="font-heading text-sm text-foreground">
             What it looked like when done
           </p>
-          <p className="mt-1 whitespace-pre-wrap font-serif text-sm leading-relaxed text-black/70">
+          <p className="mt-1 whitespace-pre-wrap font-serif text-sm leading-relaxed text-muted-foreground">
             {goal.vision}
           </p>
         </section>
@@ -644,9 +178,9 @@ function GoalInfoModal({
 
       {steps.length > 0 && (
         <section className="mt-4">
-          <p className="font-heading text-sm text-olive">
+          <p className="font-heading text-sm text-foreground">
             Steps
-            <span className="ml-1.5 font-mono text-xs text-olive/50">
+            <span className="ml-1.5 font-mono text-xs text-muted-foreground">
               {doneCount}/{steps.length}
             </span>
           </p>
@@ -657,8 +191,8 @@ function GoalInfoModal({
                   className={cn(
                     "grid size-5 shrink-0 place-items-center rounded-md",
                     st.done
-                      ? "bg-olive text-white"
-                      : "border-2 border-black/20",
+                      ? "bg-primary text-primary-foreground"
+                      : "border-2 border-border",
                   )}
                 >
                   {st.done && <Check className="size-3" strokeWidth={3} />}
@@ -667,8 +201,8 @@ function GoalInfoModal({
                   className={cn(
                     "font-serif text-sm",
                     st.done
-                      ? "text-black/50 line-through decoration-black/30"
-                      : "text-black",
+                      ? "text-muted-foreground line-through decoration-border"
+                      : "text-foreground",
                   )}
                 >
                   {st.title}

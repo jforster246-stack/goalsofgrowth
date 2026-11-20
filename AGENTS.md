@@ -16,3 +16,5 @@
 - Appearance: colour themes (`data-theme`, src/lib/theme.ts) and fonts (`data-font`, src/lib/font.ts) are independent; theme blocks in styles.css must never set `--font-*`. Why: users mix and match any colours with any font.
 
 - Routine editor text fields auto-size to their content and container width, with fixed grid tracks for actions; this keeps long steps readable and touch controls stable across screen sizes.
+
+- Keep the retired Observatory URL as a redirect to the wins page so old bookmarks remain usable; retain historical collectible data without loading it in the active UI.

@@ -38,6 +38,10 @@ export const Route = createFileRoute("/_authenticated/finance")({
         content:
           "Give every dollar of your pay a job: split it into buckets, track savings goals and spot the extra-pay months.",
       },
+      { property: "og:title", content: "Finance planner - Moongrove" },
+      { property: "og:description", content: "Give every dollar of your pay a job: split it into buckets, track savings goals and spot the extra-pay months." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: FinancePage,

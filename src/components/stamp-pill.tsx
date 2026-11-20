@@ -1,25 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Stamp } from "@/components/stamp";
-import { stampBalanceQueryOptions } from "@/lib/goal-queries";
+import { Trophy } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
 
-/**
- * The stamp-count pill shown top-right on Home, Goals and Habits. Shows the
- * spendable balance and opens the Gallery page, where the collection lives.
- */
+/** Direct access to completed goals and logged wins, without a currency balance. */
 export function StampPill() {
-  const { data: balance } = useQuery(stampBalanceQueryOptions);
-  const count = balance?.balance ?? 0;
-
   return (
-    <Link
-      to="/gallery"
-      aria-label={`${count} stardust to spend - open your universe`}
-      title="Your stardust"
-      className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-sm transition-transform hover:-translate-y-0.5"
-    >
-      <Stamp icon={null} accent="sea" className="size-5" />
-      <span className="font-mono text-sm text-olive">{count}</span>
+    <Link to="/gallery" aria-label="Open My Moongrove wins" title="My Moongrove wins"
+      className={buttonVariants({ variant: "ghost", size: "icon" })}>
+      <Trophy className="size-5" />
     </Link>
   );
 }

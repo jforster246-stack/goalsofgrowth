@@ -35,6 +35,10 @@ export const Route = createFileRoute("/_authenticated/goals/")({
         name: "description",
         content: "Every dream you're growing, with its progress and the very next small step.",
       },
+      { property: "og:title", content: "Your dreams - Moongrove" },
+      { property: "og:description", content: "Every dream you're growing, with its progress and the very next small step." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   errorComponent: ({ error }) => (

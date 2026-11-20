@@ -8,7 +8,14 @@ export const ONBOARDED_KEY = "gog-onboarded";
 
 export const Route = createFileRoute("/_authenticated/welcome")({
   head: () => ({
-    meta: [{ title: "Welcome - Moongrove" }],
+    meta: [
+      { title: "Welcome - Moongrove" },
+      { name: "description", content: "Welcome to your personal goals, habits and wins planner." },
+      { property: "og:title", content: "Welcome - Moongrove" },
+      { property: "og:description", content: "A quiet place for goals, habits and wins." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
   }),
   component: WelcomePage,
 });
@@ -42,8 +49,8 @@ const SLIDES: Slide[] = [
   {
     hero: Trophy,
     accent: "bg-clay-deep",
-    title: "Earn stardust, grow your sky",
-    body: "Finish a dream and it becomes a star in your universe. You'll earn stardust too - spend it on artworks for your gallery.",
+    title: "Celebrate your wins",
+    body: "Keep your completed goals and the wins you log together in My Moongrove.",
   },
   {
     hero: Plus,

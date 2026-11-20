@@ -11,8 +11,6 @@ import { AppShell, useAppShell } from "@/components/app-shell";
 import { goalProgress, localToday } from "@/components/goal-ui";
 import { Stamp } from "@/components/stamp";
 import { StampMark } from "@/components/stamp-mark";
-import { GoldFrame } from "@/components/gold-frame";
-import { ArtworkDetailModal, ArtworkPlacard } from "@/components/artwork-modal";
 import { HabitDetailModal, type HabitFull } from "@/components/habit-detail-modal";
 import { winStampStyle } from "@/components/win-form-modal";
 import {
@@ -30,7 +28,6 @@ import {
   goalsQueryOptions,
   habitsQueryOptions,
   profileQueryOptions,
-  purchasesQueryOptions,
   winsQueryOptions,
 } from "@/lib/goal-queries";
 import { deleteStep, setGoalOfDay, toggleStep, updateStep } from "@/lib/goals.functions";
@@ -39,11 +36,8 @@ import { toggleHabit } from "@/lib/habits.functions";
 import { frequencyLabel, isHabitDueToday } from "@/lib/habit-schedule";
 import { StepActionsModal } from "@/components/step-actions-modal";
 import { HabitFormModal } from "@/components/habit-form-modal";
-import { artworkById, artworkTint, type Artwork } from "@/lib/artworks-data";
 import { moodById, useTodayIntention } from "@/lib/mantras";
 import { CelestialBody } from "@/components/celestial-body";
-import { frameFor } from "@/lib/frames-data";
-import { useFontStyle } from "@/lib/font";
 import { cn } from "@/lib/utils";
 import { dailyPick } from "@/lib/daily-pick";
 
@@ -106,14 +100,6 @@ function OverviewPage() {
   const { data: goals } = useSuspenseQuery(goalsQueryOptions);
   const { data: profile } = useQuery(profileQueryOptions);
   const { data: wins } = useQuery(winsQueryOptions);
-  const { data: purchases } = useQuery(purchasesQueryOptions);
-
-  // Artworks bought with stamps, newest last — shown as a small carousel.
-  // Copyrighted works without a public image are skipped (they'd show blank).
-  const acquiredArtworks = (purchases ?? [])
-    .map((id) => artworkById(id))
-    .filter((a): a is Artwork => a !== undefined);
-
   const today = localToday();
 
   const goalOfDay =
@@ -196,8 +182,6 @@ function OverviewPage() {
         {profile && <StreakCard streak={profile.streak_count ?? 0} />}
 
         <TodayIntention />
-
-        <YourCollection artworks={acquiredArtworks} />
 
         <div className="grid gap-5 lg:grid-cols-3 lg:items-stretch">
           <section className="flex flex-col lg:col-span-2">
@@ -347,36 +331,6 @@ function TodayIntention() {
   );
 }
 
-/** A preview row of the collectibles you own, plus a link to the full gallery. */
-function YourCollection({ artworks }: { artworks: Artwork[] }) {
-  const items = artworks.slice(0, 5);
-  return (
-    <section>
-      <p className="font-heading text-[11px] tracking-[0.12em] text-[#928e9d]">
-        Your collection
-      </p>
-      <div className="no-scrollbar mt-3 flex items-start gap-3 overflow-x-auto">
-        {items.map((a) => (
-          <Link key={a.id} to="/gallery" className="flex w-[92px] shrink-0 flex-col">
-            <div className="aspect-square overflow-hidden rounded-2xl shadow-sm ring-1 ring-black/5">
-              <ArtworkPlacard artwork={a} />
-            </div>
-            <span className="mt-1.5 truncate text-center font-serif text-[11px] text-black/60">
-              {a.name}
-            </span>
-          </Link>
-        ))}
-        <Link
-          to="/gallery"
-          className="grid h-[92px] min-w-[160px] flex-1 place-items-center rounded-2xl border-2 border-[#4f1506] px-4 text-center font-heading text-sm tracking-wide text-[#4f1506] transition-colors hover:bg-[#4f1506]/5"
-        >
-          Open Gallery
-        </Link>
-      </div>
-    </section>
-  );
-}
-
 function StreakCard({
   streak,
   className,
@@ -409,70 +363,6 @@ function StreakCard({
         )}
       </div>
     </div>
-  );
-}
-
-/** Every carousel frame is drawn at this height, so the row stays level. */
-const CAROUSEL_HEIGHT = 96;
-
-/**
- * A small horizontally scrolling strip of the artworks you've bought with
- * stamps, framed like they hang in the gallery. Tapping one opens the gallery.
- */
-function ArtworkCarousel({
-  artworks,
-  className,
-}: {
-  artworks: NonNullable<ReturnType<typeof artworkById>>[];
-  className?: string;
-}) {
-  const fontStyle = useFontStyle();
-  const [detail, setDetail] = useState<Artwork | null>(null);
-  return (
-    <section className={className}>
-      <div className="flex items-baseline justify-between">
-        <p className="text-xs font-semibold tracking-wide text-muted-foreground">
-          Your collection
-        </p>
-        <Link
-          to="/gallery"
-          className="inline-flex items-center gap-0.5 text-xs text-muted-foreground underline-offset-2 hover:underline"
-        >
-          Gallery
-          <ChevronRight className="size-3" />
-        </Link>
-      </div>
-      <div className="no-scrollbar mt-2 -mx-5 flex snap-x snap-mandatory items-center gap-3 overflow-x-auto px-5 pb-1">
-        {artworks.map((artwork) => {
-          return (
-            <div
-              key={artwork.id}
-              className="shrink-0 snap-start"
-              style={{ width: CAROUSEL_HEIGHT }}
-            >
-              <button
-                type="button"
-                aria-label={`Open ${artwork.name} in your gallery`}
-                onClick={() => setDetail(artwork)}
-                className="block aspect-square w-full overflow-hidden rounded-xl ring-1 ring-black/5 transition-transform hover:-translate-y-0.5"
-              >
-                <ArtworkPlacard artwork={artwork} />
-              </button>
-              <p className="mt-1 truncate text-center font-serif text-[10px] italic text-black/60">
-                {artwork.name}
-              </p>
-            </div>
-          );
-        })}
-      </div>
-      {detail && (
-        <ArtworkDetailModal
-          artwork={detail}
-          seed={`home-${detail.id}`}
-          onClose={() => setDetail(null)}
-        />
-      )}
-    </section>
   );
 }
 

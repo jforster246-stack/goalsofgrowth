@@ -52,6 +52,10 @@ export const Route = createFileRoute("/_authenticated/awa/")({
         content:
           "A shelf of the hobbies you love, and a little record of the times you actually did them.",
       },
+      { property: "og:title", content: "A While Away - Moongrove" },
+      { property: "og:description", content: "A shelf of the hobbies you love, and a little record of the times you actually did them." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: AwaPage,

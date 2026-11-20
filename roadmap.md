@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Simplify Moongrove to completed goals and logged wins; remove Observatory and constellation shopping from the app.
+
 - [x] Improve opened routine layouts and verify phone, tablet and desktop interactions.
 
 - [x] Remove duplicate completed-goal stamp and prevent repeat awards; verify gallery
@@ -7,7 +9,7 @@
 - [x] Add swipeable goal card deck
 - [x] Connect direct Focus and instant completion
 - [x] Make deck the default with grid toggle
-- [ ] Verify mobile interactions and build
+- [x] Verify mobile interactions and build
 - [x] Menus feature (create/edit/delete, activities, time/energy filter, surprise me, completion)
 - [x] Add next-steps to-do list above the goal cards on the goals page
 - [x] A While Away: masonry memory wall with hobby tag filters (default view)

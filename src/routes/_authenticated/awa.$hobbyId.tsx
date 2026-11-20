@@ -20,7 +20,14 @@ import { setAwaHobbyPutAway } from "@/lib/awa.functions";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/awa/$hobbyId")({
-  head: () => ({ meta: [{ title: "A While Away - Moongrove" }] }),
+  head: () => ({ meta: [
+      { title: "Your hobby — Moongrove" },
+      { name: "description", content: "Your hobby memories and the times you spent doing what you love." },
+      { property: "og:title", content: "Your hobby — Moongrove" },
+      { property: "og:description", content: "Your hobby memories and the times you spent doing what you love." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ] }),
   component: HobbyPage,
 });
 

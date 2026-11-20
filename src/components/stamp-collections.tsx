@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Plus, X } from "lucide-react";
@@ -10,12 +10,10 @@ import {
 } from "@/components/win-form-modal";
 import {
   goalsQueryOptions,
-  stampBalanceQueryOptions,
   stampsQueryOptions,
   winsQueryOptions,
 } from "@/lib/goal-queries";
 import { mergeStamps, type StampView } from "@/lib/stamp-view";
-import { ARTWORK_COST } from "@/lib/artworks-data";
 
 type Win = {
   id: string;
@@ -43,7 +41,6 @@ export function StampCollections({
 
   const { data: stamps } = useQuery(stampsQueryOptions);
   const { data: goals } = useQuery(goalsQueryOptions);
-  const { data: balance } = useQuery(stampBalanceQueryOptions);
   const { data: wins } = useQuery(winsQueryOptions);
 
   const [adding, setAdding] = useState(defaultAdd);
@@ -51,7 +48,6 @@ export function StampCollections({
   const [snapshot, setSnapshot] = useState<StampView | null>(null);
 
   const stampList = mergeStamps(stamps, goals);
-  const spendable = balance?.balance ?? 0;
   const winList = (wins ?? []) as Win[];
   const achievements = winList.filter((w) => w.kind === "achievement");
   const lifeEvents = winList.filter((w) => w.kind === "life_event");
@@ -72,25 +68,6 @@ export function StampCollections({
 
   return (
     <div className="space-y-7">
-      <div className="mg-hero rounded-3xl px-5 py-4 shadow-sm">
-        <p className="font-heading text-3xl leading-none text-[#4a3d63]">
-          {spendable} <span className="text-base">stardust</span>
-        </p>
-        <p className="mt-1 font-serif text-sm text-[#4a3d63]/70">
-          to spend on collectibles in your{" "}
-          <Link
-            to="/gallery"
-            onClick={() => onNavigate?.()}
-            className="underline underline-offset-2"
-          >
-            gallery
-          </Link>
-          .
-        </p>
-      </div>
-
-
-
       {/* Completed goals */}
       <section>
         <div className="flex items-center gap-1.5">
@@ -138,33 +115,6 @@ export function StampCollections({
         onOpen={setEditingWin}
       />
 
-      {/* How to earn stardust */}
-      <section className="mg-panel rounded-2xl p-4">
-        <p className="font-heading text-sm text-olive">How to earn stardust</p>
-        <ul className="mt-3 space-y-2 font-serif text-sm text-black/60">
-          <li className="flex items-baseline gap-2">
-            <span className="font-heading text-olive">+5</span>
-            <span>finish a whole part of your day — all your morning, afternoon or evening habits</span>
-          </li>
-          <li className="flex items-baseline gap-2">
-            <span className="font-heading text-olive">+2</span>
-            <span>every 3 habits you tick off in a day</span>
-          </li>
-          <li className="flex items-baseline gap-2">
-            <span className="font-heading text-olive">+1</span>
-            <span>finish a dream</span>
-          </li>
-          <li className="flex items-baseline gap-2">
-            <span className="font-heading text-olive">+5</span>
-            <span>sign in 7 days in a row</span>
-          </li>
-        </ul>
-        <p className="mt-3 border-t border-black/5 pt-3 font-serif text-sm text-black/50">
-          Each collectible costs{" "}
-          <span className="font-heading text-olive">{ARTWORK_COST} stardust</span>.
-        </p>
-      </section>
-
       {adding && <WinFormModal onClose={() => setAdding(false)} />}
       {editingWin && (
         <WinFormModal win={editingWin} onClose={() => setEditingWin(null)} />
@@ -189,7 +139,7 @@ export function StampCollectionsModal({ onClose }: { onClose: () => void }) {
       >
         <div className="flex items-center justify-between">
           <h2 className="font-display text-2xl leading-none text-black">
-            Your stardust
+            Your wins
           </h2>
           <button
             type="button"
