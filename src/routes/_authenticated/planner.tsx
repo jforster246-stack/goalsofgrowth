@@ -386,7 +386,6 @@ function WeeklyReset({ defaultWeek, thisWeek, hobbies, initialDraft: draft, user
   const [awaDay, setAwaDay] = useState(() => d("awaDay", days[0] ?? week));
   const [myself, setMyself] = useState(() => d("myself", { text: "", day: days[5] ?? week }));
   const [reflect, setReflect] = useState(() => d("reflect", { habits: "", routines: "" }));
-  const [dinners, setDinners] = useState<string[]>(() => d("dinners", Array(7).fill("")));
 
   const [draftError, setDraftError] = useState(false);
   const [syncing, setSyncing] = useState(true);
@@ -395,7 +394,7 @@ function WeeklyReset({ defaultWeek, thisWeek, hobbies, initialDraft: draft, user
   const latest = useRef("");
   const saveAccountDraft = useServerFn(savePlannerResetDraft);
   const clearAccountDraft = useServerFn(clearPlannerResetDraft);
-  const snapshot = JSON.stringify({ step, week, audit, wins, winText, events, ev, ooo, oooForm, awa, awaDay, myself, reflect, dinners });
+  const snapshot = JSON.stringify({ step, week, audit, wins, winText, events, ev, ooo, oooForm, awa, awaDay, myself, reflect });
   const persistDraft = useCallback(async () => {
     if (stopped.current) return false;
     try { localStorage.setItem(resetCacheKey(userId), snapshot); } catch { /* Cloud saving doesn't require device storage. */ }
@@ -460,7 +459,6 @@ function WeeklyReset({ defaultWeek, thisWeek, hobbies, initialDraft: draft, user
       const all: NewItem[] = [
         ...ooo, ...events, ...awa,
         ...(myself.text.trim() ? [{ day: myself.day, slot: "evening" as Slot, title: `For me: ${myself.text.trim()}` }] : []),
-        ...dinners.flatMap((d, i) => (d.trim() ? [{ day: days[i] ?? week, slot: "dinner" as Slot, title: d.trim() }] : [])),
       ].map((i) => ({ ...i, day: i.day }));
       await addPlannerItems({ data: all });
       for (const w of wins) await createWin({ data: { title: w.slice(0, 140), kind: "achievement" } });
@@ -598,22 +596,6 @@ function WeeklyReset({ defaultWeek, thisWeek, hobbies, initialDraft: draft, user
         <textarea value={reflect.routines} onChange={(e) => setReflect({ ...reflect, routines: e.target.value })} rows={4} className={cn(input, "mt-3")} /></>),
     },
     {
-      title: "Plan dinners",
-      body: (
-        <>
-          <p className="text-sm text-muted-foreground">Use your menu folder to plan each night.</p>
-          <div className="mt-3 space-y-2">
-            {days.map((d, i) => (
-              <div key={d} className="flex items-center gap-2">
-                <span className="w-12 text-xs font-semibold">{DAY_NAMES[i]?.slice(0, 3)}</span>
-                <input value={dinners[i]} onChange={(e) => setDinners(dinners.map((x, j) => (j === i ? e.target.value : x)))} placeholder="Dinner" className={input} />
-              </div>
-            ))}
-          </div>
-        </>
-      ),
-    },
-    {
       title: "Build your grocery list",
       skippable: true,
       body: (<><p className="text-sm">Build your grocery list for the week.</p><CountdownTimer minutes={15} /></>),
@@ -623,18 +605,19 @@ function WeeklyReset({ defaultWeek, thisWeek, hobbies, initialDraft: draft, user
       body: <p className="text-sm">Swap your phone case and wallpaper to match how you want to feel this week.</p>,
     },
   ];
-  const s = steps[step];
+  const cur = Math.min(step, steps.length - 1);
+  const s = steps[cur];
   if (!s) return null;
-  const last = step === steps.length - 1;
+  const last = cur === steps.length - 1;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/30 sm:items-center" role="dialog" aria-modal="true">
       <div className="flex max-h-[92dvh] w-full max-w-lg flex-col rounded-t-3xl bg-card shadow-xl sm:rounded-3xl">
         <div className="flex items-center justify-between px-5 pt-5">
-          <p className="text-xs text-muted-foreground">Weekly reset · {step + 1} of {steps.length} · <span className="italic" role="status">{draftError ? "not saved to account" : syncing ? "saving…" : "saved to account"}</span></p>
+          <p className="text-xs text-muted-foreground">Weekly reset · {cur + 1} of {steps.length} · <span className="italic" role="status">{draftError ? "not saved to account" : syncing ? "saving…" : "saved to account"}</span></p>
           <Button variant="ghost" size="icon" aria-label="Save and close" disabled={saving} onClick={saveAndClose}><X className="size-5" /></Button>
         </div>
-        <div className="mx-5 mt-2 h-1 rounded-full bg-muted"><div className="h-1 rounded-full bg-primary transition-all" style={{ width: `${((step + 1) / steps.length) * 100}%` }} /></div>
+        <div className="mx-5 mt-2 h-1 rounded-full bg-muted"><div className="h-1 rounded-full bg-primary transition-all" style={{ width: `${((cur + 1) / steps.length) * 100}%` }} /></div>
         <div className="overflow-y-auto px-5 py-4">
           <h2 className="mb-3 font-heading text-xl text-foreground">{s.title}</h2>
           <fieldset disabled={saving}>{s.body}</fieldset>
@@ -645,10 +628,10 @@ function WeeklyReset({ defaultWeek, thisWeek, hobbies, initialDraft: draft, user
         </div>
         <div className="flex items-center gap-2 border-t border-border px-5 py-4">
           <Button variant="ghost" disabled={saving} onClick={startOver} className="px-3 text-xs text-muted-foreground underline">Start over</Button>
-          {step > 0 && <Button variant="ghost" disabled={saving} onClick={() => setStep(step - 1)}>Back</Button>}
+          {cur > 0 && <Button variant="ghost" disabled={saving} onClick={() => setStep(cur - 1)}>Back</Button>}
           <div className="ml-auto flex gap-2">
-            {s.skippable && !last && <Button variant="outline" disabled={saving} onClick={() => setStep(step + 1)}>Skip</Button>}
-            <Button disabled={saving} onClick={() => (last ? finish() : setStep(step + 1))} className="rounded-full">
+            {s.skippable && !last && <Button variant="outline" disabled={saving} onClick={() => setStep(cur + 1)}>Skip</Button>}
+            <Button disabled={saving} onClick={() => (last ? finish() : setStep(cur + 1))} className="rounded-full">
               {last ? (saving ? "Saving…" : "Fill my planner") : "Next"}
             </Button>
           </div>

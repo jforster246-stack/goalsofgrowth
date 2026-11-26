@@ -11,7 +11,6 @@ test("account draft round-trip preserves the current step and unfinished answers
     awa: [{ day: "2026-12-03", slot: "awa", title: "Reading" }],
     myself: { day: "2026-12-05", text: "Time to relax" },
     reflect: { habits: "Habit reflection", routines: "Routine reflection" },
-    dinners: ["Soup", "", "", "", "", "", ""],
   });
   deepStrictEqual(resetDraftSchema.parse(JSON.parse(JSON.stringify(draft))), draft);
   strictEqual(draft.step, 3);

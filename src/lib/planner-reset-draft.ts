@@ -24,7 +24,6 @@ export const resetDraftSchema = z.object({
   awaDay: date.optional(),
   myself: z.object({ text, day: date }).optional(),
   reflect: z.object({ habits: text, routines: text }).optional(),
-  dinners: z.array(text).length(7).default(["", "", "", "", "", "", ""]),
 });
 export type ResetDraft = z.infer<typeof resetDraftSchema>;
 export const LEGACY_RESET_KEY = "gog-planner-reset-draft";

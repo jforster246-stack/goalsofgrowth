@@ -22,3 +22,5 @@
 - [x] Weekly planner with guided weekly reset
 
 - [x] Add a Plan dinners button next to the weekly reset button; verify saving and clearing a night
+
+- [x] Take the dinners step out of the weekly reset; keep the Plan dinners button; verify 11 steps
