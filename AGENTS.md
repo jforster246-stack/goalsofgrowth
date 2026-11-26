@@ -21,6 +21,6 @@
 
 - AppShell owns shared page gutters and uses the available content width; the planner uses seven equal min-width-zero desktop columns and shared subgrid rows so days fit horizontally and sections remain aligned as content grows. On desktop the week grid fills the remaining viewport height with fractional section rows and per-section scrolling, so the page itself never scrolls.
 
-- Weekly reset drafts save every answer, unfinished input and current step locally; explicit save-and-close only dismisses after storage succeeds so progress is not silently lost.
+- Weekly reset drafts save every answer, unfinished input and current step in an owner-only account row, with an account-scoped local retry cache and serialized writes; save-and-close waits for account saving, and finishing/resetting drains writes before clearing the draft so progress survives device changes without stale writes restoring it.
 
 - Planner and weekly reset AWA pickers share the same hobby-tag control using the account's existing hobby list; planner entries retain their saved titles so this presentation change preserves existing data.

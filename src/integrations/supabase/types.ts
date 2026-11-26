@@ -686,6 +686,24 @@ export type Database = {
         }
         Relationships: []
       }
+      planner_reset_drafts: {
+        Row: {
+          draft: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          draft: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          draft?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       planner_weeks: {
         Row: {
           audit: Json

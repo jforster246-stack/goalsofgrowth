@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Save weekly reset progress to the signed-in account; preserve existing drafts and verify continuation in a separate device session.
+
 - [x] Match the supplied planner sheet layout and verify aligned desktop sections and mobile usability.
 
 - [x] Reduce shared page margins and fit the planner week in one desktop row; verify desktop and mobile.

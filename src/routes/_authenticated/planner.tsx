@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Plus, Star, Trash2, X, Check, Timer, MapPin, Save } from "lucide-react";
@@ -9,13 +10,17 @@ import { mondayWeek } from "@/lib/week-dates";
 import {
   addPlannerItems,
   deletePlannerItem,
+  getPlannerResetDraft,
   getPlannerWeek,
+  savePlannerResetDraft,
+  clearPlannerResetDraft,
   savePlannerWeek,
   updatePlannerItem,
   type Slot,
 } from "@/lib/planner.functions";
 import { createWin } from "@/lib/wins.functions";
 import { cn } from "@/lib/utils";
+import { createDraftQueue, LEGACY_RESET_KEY, resetCacheKey, resetDraftSchema, type ResetDraft } from "@/lib/planner-reset-draft";
 
 export const Route = createFileRoute("/_authenticated/planner")({
   head: () => ({
@@ -57,19 +62,45 @@ const weekQuery = (start: string) => ({
 });
 
 function PlannerPage() {
-  const thisWeek = mondayWeek(localToday())[0]!;
+  const thisWeek = mondayWeek(localToday())[0] ?? localToday();
   const [start, setStart] = useState(thisWeek);
   const [resetOpen, setResetOpen] = useState(false);
   const [draftSaved, setDraftSaved] = useState(false);
-  useEffect(() => { setDraftSaved(hasDraft()); }, [resetOpen]);
+  const [resetDraft, setResetDraft] = useState<ResetDraft | null>(null);
+  const [resetUserId, setResetUserId] = useState("");
+  const [openingReset, setOpeningReset] = useState(false);
+  const [resetLoadError, setResetLoadError] = useState(false);
+  const loadAccountDraft = useServerFn(getPlannerResetDraft);
+  const accountDraft = useQuery({ queryKey: ["planner-reset-draft"], queryFn: () => loadAccountDraft() });
+  useEffect(() => {
+    if (accountDraft.data) setDraftSaved(Boolean(loadDraft(accountDraft.data.userId, accountDraft.data.draft)));
+  }, [accountDraft.data, resetOpen]);
   const days = mondayWeek(start);
   const qc = useQueryClient();
   const { data } = useQuery(weekQuery(start));
-  const items = (data?.items ?? []).filter((i) => i.day <= days[6]!);
+  const items = (data?.items ?? []).filter((i) => i.day <= (days[6] ?? start));
   const refresh = () => qc.invalidateQueries({ queryKey: ["planner"] });
   const toggle = useMutation({ mutationFn: (v: { id: string; done: boolean }) => updatePlannerItem({ data: v }), onSuccess: refresh });
   const remove = useMutation({ mutationFn: (id: string) => deletePlannerItem({ data: { id } }), onSuccess: refresh });
   const add = useMutation({ mutationFn: (v: { day: string; slot: Slot; title: string }) => addPlannerItems({ data: [v] }), onSuccess: refresh });
+  const openReset = async () => {
+    setOpeningReset(true);
+    setResetLoadError(false);
+    try {
+      const result = await loadAccountDraft();
+      setResetUserId(result.userId);
+      setResetDraft(loadDraft(result.userId, result.draft));
+      setResetOpen(true);
+    } catch {
+      setResetLoadError(true);
+    } finally {
+      setOpeningReset(false);
+    }
+  };
+  const closeReset = () => {
+    setResetOpen(false);
+    void qc.invalidateQueries({ queryKey: ["planner-reset-draft"] });
+  };
 
   return (
     <AppShell title="Planner">
@@ -80,10 +111,11 @@ function PlannerPage() {
             <button aria-label="Next week" className="rounded-full p-2 hover:bg-muted" onClick={() => setStart(shiftWeek(start, 1))}><ChevronRight className="size-5" /></button>
             {start !== thisWeek && <button className="ml-1 text-xs text-muted-foreground underline" onClick={() => setStart(thisWeek)}>This week</button>}
           </div>
-          <button onClick={() => setResetOpen(true)} className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm">
-            {draftSaved ? "Continue weekly reset" : data?.week?.completed_at ? "Redo weekly reset" : "Start weekly reset"}
-          </button>
+          <Button disabled={openingReset} onClick={openReset} className="rounded-full">
+            {openingReset ? "Loading your progress…" : draftSaved ? "Continue weekly reset" : data?.week?.completed_at ? "Redo weekly reset" : "Start weekly reset"}
+          </Button>
         </div>
+        {resetLoadError && <p role="alert" className="mt-2 text-sm text-destructive">Your saved reset couldn’t be loaded. Please try again.</p>}
 
         <div className="mt-4 grid min-h-0 flex-1 grid-cols-1 border-y border-border bg-card md:grid-cols-2 lg:grid-cols-7 lg:grid-rows-[auto_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.6fr)_minmax(0,0.8fr)_minmax(0,1fr)_minmax(0,0.6fr)]">
           {days.map((day, i) => {
@@ -119,8 +151,10 @@ function PlannerPage() {
           defaultWeek={shiftWeek(thisWeek, 1)}
           thisWeek={thisWeek}
           hobbies={data?.hobbies ?? []}
-          onClose={() => setResetOpen(false)}
-          onDone={(w) => { setResetOpen(false); setStart(w); refresh(); }}
+          initialDraft={resetDraft}
+          userId={resetUserId}
+          onClose={closeReset}
+          onDone={(w) => { closeReset(); setStart(w); refresh(); }}
         />
       )}
     </AppShell>
@@ -234,25 +268,39 @@ function DayPick({ days, value, onChange }: { days: string[]; value: string; onC
       {days.map((d, i) => (
         <button key={d} type="button" onClick={() => onChange(d)}
           className={cn("rounded-full px-3 py-1 text-xs ring-1 ring-border", value === d ? "bg-primary text-primary-foreground" : "bg-background")}>
-          {DAY_NAMES[i]!.slice(0, 3)}
+          {DAY_NAMES[i]?.slice(0, 3)}
         </button>
       ))}
     </div>
   );
 }
 
-const DRAFT_KEY = "gog-planner-reset-draft";
-type ResetDraft = Record<string, unknown>;
-function loadDraft(): ResetDraft | null {
-  try { const raw = localStorage.getItem(DRAFT_KEY); return raw ? (JSON.parse(raw) as ResetDraft) : null; } catch { return null; }
+function loadDraft(userId: string, account: ResetDraft | null): ResetDraft | null {
+  try {
+    // Only unsynced answers are cached. Synced progress always comes from the account.
+    const pending = localStorage.getItem(resetCacheKey(userId));
+    if (pending) {
+      const parsed = resetDraftSchema.safeParse(JSON.parse(pending));
+      if (parsed.success) return parsed.data;
+    }
+    if (account) return account;
+    const legacy = localStorage.getItem(LEGACY_RESET_KEY);
+    if (legacy) {
+      const parsed = resetDraftSchema.safeParse(JSON.parse(legacy));
+      if (parsed.success) {
+        localStorage.setItem(resetCacheKey(userId), JSON.stringify(parsed.data));
+        localStorage.removeItem(LEGACY_RESET_KEY);
+        return parsed.data;
+      }
+    }
+  } catch { /* Account progress still works when device storage is unavailable. */ }
+  return account;
 }
-function hasDraft() { return typeof window !== "undefined" && loadDraft() !== null; }
 
-function WeeklyReset({ defaultWeek, thisWeek, hobbies, onClose, onDone }: {
-  defaultWeek: string; thisWeek: string; hobbies: { id: string; name: string }[]; onClose: () => void; onDone: (w: string) => void;
+function WeeklyReset({ defaultWeek, thisWeek, hobbies, initialDraft: draft, userId, onClose, onDone }: {
+  defaultWeek: string; thisWeek: string; hobbies: { id: string; name: string }[]; initialDraft: ResetDraft | null; userId: string; onClose: () => void; onDone: (w: string) => void;
 }) {
-  const [draft] = useState(loadDraft);
-  const d = <T,>(k: string, fallback: T): T => (draft && k in draft ? (draft[k] as T) : fallback);
+  const d = <T,>(k: keyof ResetDraft, fallback: T): T => (draft?.[k] === undefined ? fallback : draft[k] as T);
   const [step, setStep] = useState(() => d("step", 0));
   const [week, setWeek] = useState(() => d("week", defaultWeek));
   const days = mondayWeek(week);
@@ -265,34 +313,73 @@ function WeeklyReset({ defaultWeek, thisWeek, hobbies, onClose, onDone }: {
   const [oooForm, setOooForm] = useState(() => d("oooForm", { day: days[0] ?? week, location: "" }));
   const [awa, setAwa] = useState<NewItem[]>(() => d("awa", []));
   const [awaDay, setAwaDay] = useState(() => d("awaDay", days[0] ?? week));
-  const [myself, setMyself] = useState(() => d("myself", { text: "", day: days[5]! }));
+  const [myself, setMyself] = useState(() => d("myself", { text: "", day: days[5] ?? week }));
   const [reflect, setReflect] = useState(() => d("reflect", { habits: "", routines: "" }));
   const [dinners, setDinners] = useState<string[]>(() => d("dinners", Array(7).fill("")));
 
   const [draftError, setDraftError] = useState(false);
-  const persistDraft = useCallback(() => {
+  const [syncing, setSyncing] = useState(true);
+  const [enqueue] = useState(createDraftQueue);
+  const stopped = useRef(false);
+  const latest = useRef("");
+  const saveAccountDraft = useServerFn(savePlannerResetDraft);
+  const clearAccountDraft = useServerFn(clearPlannerResetDraft);
+  const snapshot = JSON.stringify({ step, week, audit, wins, winText, events, ev, ooo, oooForm, awa, awaDay, myself, reflect, dinners });
+  const persistDraft = useCallback(async () => {
+    if (stopped.current) return false;
+    try { localStorage.setItem(resetCacheKey(userId), snapshot); } catch { /* Cloud saving doesn't require device storage. */ }
     try {
-      localStorage.setItem(DRAFT_KEY, JSON.stringify({ step, week, audit, wins, winText, events, ev, ooo, oooForm, awa, awaDay, myself, reflect, dinners }));
-      setDraftError(false);
+      await enqueue(() => saveAccountDraft({ data: resetDraftSchema.parse(JSON.parse(snapshot)) }));
+      if (latest.current === snapshot) {
+        try { localStorage.removeItem(resetCacheKey(userId)); } catch { /* ignore */ }
+        setDraftError(false);
+        setSyncing(false);
+      }
       return true;
     } catch {
-      setDraftError(true);
+      if (latest.current === snapshot) { setDraftError(true); setSyncing(false); }
       return false;
     }
-  }, [step, week, audit, wins, winText, events, ev, ooo, oooForm, awa, awaDay, myself, reflect, dinners]);
-  // Include unfinished input fields as well as added answers in the draft.
-  useEffect(() => { persistDraft(); }, [persistDraft]);
-  const saveAndClose = () => { if (persistDraft()) onClose(); };
+  }, [snapshot, userId, enqueue, saveAccountDraft]);
+  // Cache unfinished input immediately, then save it to the account after typing settles.
+  useEffect(() => {
+    if (stopped.current) return;
+    latest.current = snapshot;
+    setSyncing(true);
+    setDraftError(false);
+    try { localStorage.setItem(resetCacheKey(userId), snapshot); } catch { /* ignore */ }
+    const timer = setTimeout(() => { void persistDraft(); }, 400);
+    const flush = () => { if (!stopped.current) void persistDraft(); };
+    window.addEventListener("pagehide", flush);
+    window.addEventListener("blur", flush);
+    return () => { clearTimeout(timer); window.removeEventListener("pagehide", flush); window.removeEventListener("blur", flush); };
+  }, [snapshot, userId, persistDraft]);
+  const saveAndClose = async () => {
+    setSaving(true);
+    if (await persistDraft()) onClose();
+    else setSaving(false);
+  };
+  const clearDraft = async () => {
+    stopped.current = true;
+    await enqueue(() => clearAccountDraft());
+    try { localStorage.removeItem(resetCacheKey(userId)); } catch { /* ignore */ }
+  };
+  const startOver = async () => {
+    if (!confirm("Start the weekly reset over? Your saved answers will be cleared.")) return;
+    setSaving(true);
+    try { await clearDraft(); onClose(); }
+    catch { stopped.current = false; setDraftError(true); setSaving(false); }
+  };
   const firstWeek = useRef(true);
   const [saving, setSaving] = useState(false);
 
   // Keep day pickers inside the chosen week.
   useEffect(() => {
     if (firstWeek.current) { firstWeek.current = false; return; }
-    setEv((e) => ({ ...e, day: days[0]! }));
-    setOooForm((o) => ({ ...o, day: days[0]! }));
-    setAwaDay(days[0]!);
-    setMyself((m) => ({ ...m, day: days[5]! }));
+    setEv((e) => ({ ...e, day: days[0] ?? week }));
+    setOooForm((o) => ({ ...o, day: days[0] ?? week }));
+    setAwaDay(days[0] ?? week);
+    setMyself((m) => ({ ...m, day: days[5] ?? week }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [week]);
 
@@ -302,13 +389,16 @@ function WeeklyReset({ defaultWeek, thisWeek, hobbies, onClose, onDone }: {
       const all: NewItem[] = [
         ...ooo, ...events, ...awa,
         ...(myself.text.trim() ? [{ day: myself.day, slot: "evening" as Slot, title: `For me: ${myself.text.trim()}` }] : []),
-        ...dinners.flatMap((d, i) => (d.trim() ? [{ day: days[i]!, slot: "dinner" as Slot, title: d.trim() }] : [])),
+        ...dinners.flatMap((d, i) => (d.trim() ? [{ day: days[i] ?? week, slot: "dinner" as Slot, title: d.trim() }] : [])),
       ].map((i) => ({ ...i, day: i.day }));
       await addPlannerItems({ data: all });
       for (const w of wins) await createWin({ data: { title: w.slice(0, 140), kind: "achievement" } });
       await savePlannerWeek({ data: { weekStart: week, audit, reflections: { ...reflect, myself: myself.text } } });
-      try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
+      await clearDraft();
       onDone(week);
+    } catch {
+      stopped.current = false;
+      setDraftError(true);
     } finally {
       setSaving(false);
     }
@@ -444,7 +534,7 @@ function WeeklyReset({ defaultWeek, thisWeek, hobbies, onClose, onDone }: {
           <div className="mt-3 space-y-2">
             {days.map((d, i) => (
               <div key={d} className="flex items-center gap-2">
-                <span className="w-12 text-xs font-semibold">{DAY_NAMES[i]!.slice(0, 3)}</span>
+                <span className="w-12 text-xs font-semibold">{DAY_NAMES[i]?.slice(0, 3)}</span>
                 <input value={dinners[i]} onChange={(e) => setDinners(dinners.map((x, j) => (j === i ? e.target.value : x)))} placeholder="Dinner" className={input} />
               </div>
             ))}
@@ -462,33 +552,34 @@ function WeeklyReset({ defaultWeek, thisWeek, hobbies, onClose, onDone }: {
       body: <p className="text-sm">Swap your phone case and wallpaper to match how you want to feel this week.</p>,
     },
   ];
-  const s = steps[step]!;
+  const s = steps[step];
+  if (!s) return null;
   const last = step === steps.length - 1;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/30 sm:items-center" role="dialog" aria-modal="true">
       <div className="flex max-h-[92dvh] w-full max-w-lg flex-col rounded-t-3xl bg-card shadow-xl sm:rounded-3xl">
         <div className="flex items-center justify-between px-5 pt-5">
-          <p className="text-xs text-muted-foreground">Weekly reset · {step + 1} of {steps.length} · <span className="italic">{draftError ? "not saved" : "saved"}</span></p>
+          <p className="text-xs text-muted-foreground">Weekly reset · {step + 1} of {steps.length} · <span className="italic" role="status">{draftError ? "not saved to account" : syncing ? "saving…" : "saved to account"}</span></p>
           <Button variant="ghost" size="icon" aria-label="Save and close" disabled={saving} onClick={saveAndClose}><X className="size-5" /></Button>
         </div>
         <div className="mx-5 mt-2 h-1 rounded-full bg-muted"><div className="h-1 rounded-full bg-primary transition-all" style={{ width: `${((step + 1) / steps.length) * 100}%` }} /></div>
         <div className="overflow-y-auto px-5 py-4">
           <h2 className="mb-3 font-heading text-xl text-foreground">{s.title}</h2>
-          {s.body}
-          {draftError && <p role="alert" className="mt-3 text-sm text-destructive">Your progress couldn’t be saved on this device. Keep this window open and try Save &amp; close again.</p>}
+          <fieldset disabled={saving}>{s.body}</fieldset>
+          {draftError && <p role="alert" className="mt-3 text-sm text-destructive">Your progress couldn’t be saved to your account. Keep this window open, check your connection and try Save &amp; close again.</p>}
         </div>
         <div className="border-t border-border px-5 py-3">
           <Button variant="outline" className="w-full" disabled={saving} onClick={saveAndClose}><Save />Save &amp; close</Button>
         </div>
         <div className="flex items-center gap-2 border-t border-border px-5 py-4">
-          <button onClick={() => { if (confirm("Start the weekly reset over? Your saved answers will be cleared.")) { try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ } onClose(); } }} className="rounded-full px-3 py-2 text-xs text-muted-foreground underline">Start over</button>
-          {step > 0 && <button onClick={() => setStep(step - 1)} className="rounded-full px-4 py-2 text-sm text-muted-foreground">Back</button>}
+          <Button variant="ghost" disabled={saving} onClick={startOver} className="px-3 text-xs text-muted-foreground underline">Start over</Button>
+          {step > 0 && <Button variant="ghost" disabled={saving} onClick={() => setStep(step - 1)}>Back</Button>}
           <div className="ml-auto flex gap-2">
-            {s.skippable && !last && <button onClick={() => setStep(step + 1)} className="rounded-full px-4 py-2 text-sm ring-1 ring-border">Skip</button>}
-            <button disabled={saving} onClick={() => (last ? finish() : setStep(step + 1))} className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60">
+            {s.skippable && !last && <Button variant="outline" disabled={saving} onClick={() => setStep(step + 1)}>Skip</Button>}
+            <Button disabled={saving} onClick={() => (last ? finish() : setStep(step + 1))} className="rounded-full">
               {last ? (saving ? "Saving…" : "Fill my planner") : "Next"}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { resetDraftSchema } from "@/lib/planner-reset-draft";
 
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 export const SLOTS = ["allday", "morning", "midday", "awa", "evening", "lunch", "dinner"] as const;
@@ -72,5 +73,36 @@ export const savePlannerWeek = createServerFn({ method: "POST" })
       { onConflict: "user_id,week_start" },
     );
     if (error) throw new Error(error.message);
+    return true;
+  });
+
+export const getPlannerResetDraft = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase.from("planner_reset_drafts")
+      .select("draft").eq("user_id", context.userId).maybeSingle();
+    if (error) throw new Error("Could not load weekly reset progress");
+    return { userId: context.userId, draft: data ? resetDraftSchema.parse(data.draft) : null };
+  });
+
+export const savePlannerResetDraft = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) => resetDraftSchema.parse(data))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("planner_reset_drafts").upsert({
+      user_id: context.userId,
+      draft: JSON.parse(JSON.stringify(data)),
+      updated_at: new Date().toISOString(),
+    }, { onConflict: "user_id" });
+    if (error) throw new Error("Could not save weekly reset progress");
+    return true;
+  });
+
+export const clearPlannerResetDraft = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { error } = await context.supabase.from("planner_reset_drafts")
+      .delete().eq("user_id", context.userId);
+    if (error) throw new Error("Could not clear weekly reset progress");
     return true;
   });
