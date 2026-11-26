@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Plus, Star, Trash2, X, Check, Timer, MapPin } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, Plus, Star, Trash2, X, Check, Timer, MapPin, Save } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { AppShell } from "@/components/app-shell";
 import { localToday } from "@/components/goal-ui";
 import { mondayWeek } from "@/lib/week-dates";
@@ -242,24 +243,32 @@ function WeeklyReset({ defaultWeek, thisWeek, hobbies, onClose, onDone }: {
   const days = mondayWeek(week);
   const [audit, setAudit] = useState<Record<string, number>>(() => d("audit", {}));
   const [wins, setWins] = useState<string[]>(() => d("wins", []));
-  const [winText, setWinText] = useState("");
+  const [winText, setWinText] = useState(() => d("winText", ""));
   const [events, setEvents] = useState<NewItem[]>(() => d("events", []));
-  const [ev, setEv] = useState({ day: days[0]!, time: "", title: "" });
+  const [ev, setEv] = useState(() => d("ev", { day: days[0] ?? week, time: "", title: "" }));
   const [ooo, setOoo] = useState<NewItem[]>(() => d("ooo", []));
-  const [oooForm, setOooForm] = useState({ day: days[0]!, location: "" });
+  const [oooForm, setOooForm] = useState(() => d("oooForm", { day: days[0] ?? week, location: "" }));
   const [awa, setAwa] = useState<NewItem[]>(() => d("awa", []));
-  const [awaDay, setAwaDay] = useState(days[0]!);
-  const [awaCustom, setAwaCustom] = useState("");
+  const [awaDay, setAwaDay] = useState(() => d("awaDay", days[0] ?? week));
+  const [awaCustom, setAwaCustom] = useState(() => d("awaCustom", ""));
   const [myself, setMyself] = useState(() => d("myself", { text: "", day: days[5]! }));
   const [reflect, setReflect] = useState(() => d("reflect", { habits: "", routines: "" }));
   const [dinners, setDinners] = useState<string[]>(() => d("dinners", Array(7).fill("")));
 
-  // Save progress after every change so the reset can be continued later.
-  useEffect(() => {
+  const [draftError, setDraftError] = useState(false);
+  const persistDraft = useCallback(() => {
     try {
-      localStorage.setItem(DRAFT_KEY, JSON.stringify({ step, week, audit, wins, events, ooo, awa, myself, reflect, dinners }));
-    } catch { /* storage unavailable */ }
-  }, [step, week, audit, wins, events, ooo, awa, myself, reflect, dinners]);
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({ step, week, audit, wins, winText, events, ev, ooo, oooForm, awa, awaDay, awaCustom, myself, reflect, dinners }));
+      setDraftError(false);
+      return true;
+    } catch {
+      setDraftError(true);
+      return false;
+    }
+  }, [step, week, audit, wins, winText, events, ev, ooo, oooForm, awa, awaDay, awaCustom, myself, reflect, dinners]);
+  // Include unfinished input fields as well as added answers in the draft.
+  useEffect(() => { persistDraft(); }, [persistDraft]);
+  const saveAndClose = () => { if (persistDraft()) onClose(); };
   const firstWeek = useRef(true);
   const [saving, setSaving] = useState(false);
 
@@ -455,13 +464,17 @@ function WeeklyReset({ defaultWeek, thisWeek, hobbies, onClose, onDone }: {
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/30 sm:items-center" role="dialog" aria-modal="true">
       <div className="flex max-h-[92dvh] w-full max-w-lg flex-col rounded-t-3xl bg-card shadow-xl sm:rounded-3xl">
         <div className="flex items-center justify-between px-5 pt-5">
-          <p className="text-xs text-muted-foreground">Weekly reset · {step + 1} of {steps.length} · <span className="italic">saved</span></p>
-          <button aria-label="Close" onClick={onClose}><X className="size-5" /></button>
+          <p className="text-xs text-muted-foreground">Weekly reset · {step + 1} of {steps.length} · <span className="italic">{draftError ? "not saved" : "saved"}</span></p>
+          <Button variant="ghost" size="icon" aria-label="Save and close" disabled={saving} onClick={saveAndClose}><X className="size-5" /></Button>
         </div>
         <div className="mx-5 mt-2 h-1 rounded-full bg-muted"><div className="h-1 rounded-full bg-primary transition-all" style={{ width: `${((step + 1) / steps.length) * 100}%` }} /></div>
         <div className="overflow-y-auto px-5 py-4">
           <h2 className="mb-3 font-heading text-xl text-foreground">{s.title}</h2>
           {s.body}
+          {draftError && <p role="alert" className="mt-3 text-sm text-destructive">Your progress couldn’t be saved on this device. Keep this window open and try Save &amp; close again.</p>}
+        </div>
+        <div className="border-t border-border px-5 py-3">
+          <Button variant="outline" className="w-full" disabled={saving} onClick={saveAndClose}><Save />Save &amp; close</Button>
         </div>
         <div className="flex items-center gap-2 border-t border-border px-5 py-4">
           <button onClick={() => { if (confirm("Start the weekly reset over? Your saved answers will be cleared.")) { try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ } onClose(); } }} className="rounded-full px-3 py-2 text-xs text-muted-foreground underline">Start over</button>
