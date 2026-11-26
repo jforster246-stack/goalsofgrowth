@@ -650,6 +650,72 @@ export type Database = {
         }
         Relationships: []
       }
+      planner_items: {
+        Row: {
+          created_at: string
+          day: string
+          done: boolean
+          id: string
+          location: string | null
+          slot: string
+          time: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          day: string
+          done?: boolean
+          id?: string
+          location?: string | null
+          slot: string
+          time?: string | null
+          title: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          done?: boolean
+          id?: string
+          location?: string | null
+          slot?: string
+          time?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      planner_weeks: {
+        Row: {
+          audit: Json
+          completed_at: string | null
+          created_at: string
+          id: string
+          reflections: Json
+          user_id: string
+          week_start: string
+        }
+        Insert: {
+          audit?: Json
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          reflections?: Json
+          user_id?: string
+          week_start: string
+        }
+        Update: {
+          audit?: Json
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          reflections?: Json
+          user_id?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           bonus_stamps: number

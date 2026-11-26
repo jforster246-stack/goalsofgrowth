@@ -21,6 +21,7 @@ import { Route as AuthenticatedHabitsRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedIntentionsRouteImport } from './routes/_authenticated/intentions'
 import { Route as AuthenticatedObservatoryRouteImport } from './routes/_authenticated/observatory'
 import { Route as AuthenticatedOverviewRouteImport } from './routes/_authenticated/overview'
+import { Route as AuthenticatedPlannerRouteImport } from './routes/_authenticated/planner'
 import { Route as AuthenticatedRoutinesRouteImport } from './routes/_authenticated/routines'
 import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated/welcome'
 import { Route as AuthenticatedWinsRouteImport } from './routes/_authenticated/wins'
@@ -93,6 +94,11 @@ const AuthenticatedObservatoryRoute =
 const AuthenticatedOverviewRoute = AuthenticatedOverviewRouteImport.update({
   id: '/overview',
   path: '/overview',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPlannerRoute = AuthenticatedPlannerRouteImport.update({
+  id: '/planner',
+  path: '/planner',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedRoutinesRoute = AuthenticatedRoutinesRouteImport.update({
@@ -178,6 +184,7 @@ export interface FileRoutesByFullPath {
   '/intentions': typeof AuthenticatedIntentionsRoute
   '/observatory': typeof AuthenticatedObservatoryRoute
   '/overview': typeof AuthenticatedOverviewRoute
+  '/planner': typeof AuthenticatedPlannerRoute
   '/routines': typeof AuthenticatedRoutinesRouteWithChildren
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/wins': typeof AuthenticatedWinsRoute
@@ -202,6 +209,7 @@ export interface FileRoutesByTo {
   '/intentions': typeof AuthenticatedIntentionsRoute
   '/observatory': typeof AuthenticatedObservatoryRoute
   '/overview': typeof AuthenticatedOverviewRoute
+  '/planner': typeof AuthenticatedPlannerRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/wins': typeof AuthenticatedWinsRoute
   '/awa/$hobbyId': typeof AuthenticatedAwaHobbyIdRoute
@@ -228,6 +236,7 @@ export interface FileRoutesById {
   '/_authenticated/intentions': typeof AuthenticatedIntentionsRoute
   '/_authenticated/observatory': typeof AuthenticatedObservatoryRoute
   '/_authenticated/overview': typeof AuthenticatedOverviewRoute
+  '/_authenticated/planner': typeof AuthenticatedPlannerRoute
   '/_authenticated/routines': typeof AuthenticatedRoutinesRouteWithChildren
   '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
   '/_authenticated/wins': typeof AuthenticatedWinsRoute
@@ -256,6 +265,7 @@ export interface FileRouteTypes {
     | '/intentions'
     | '/observatory'
     | '/overview'
+    | '/planner'
     | '/routines'
     | '/welcome'
     | '/wins'
@@ -280,6 +290,7 @@ export interface FileRouteTypes {
     | '/intentions'
     | '/observatory'
     | '/overview'
+    | '/planner'
     | '/welcome'
     | '/wins'
     | '/awa/$hobbyId'
@@ -305,6 +316,7 @@ export interface FileRouteTypes {
     | '/_authenticated/intentions'
     | '/_authenticated/observatory'
     | '/_authenticated/overview'
+    | '/_authenticated/planner'
     | '/_authenticated/routines'
     | '/_authenticated/welcome'
     | '/_authenticated/wins'
@@ -410,6 +422,13 @@ declare module '@tanstack/react-router' {
       path: '/overview'
       fullPath: '/overview'
       preLoaderRoute: typeof AuthenticatedOverviewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/planner': {
+      id: '/_authenticated/planner'
+      path: '/planner'
+      fullPath: '/planner'
+      preLoaderRoute: typeof AuthenticatedPlannerRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/routines': {
@@ -576,6 +595,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedIntentionsRoute: typeof AuthenticatedIntentionsRoute
   AuthenticatedObservatoryRoute: typeof AuthenticatedObservatoryRoute
   AuthenticatedOverviewRoute: typeof AuthenticatedOverviewRoute
+  AuthenticatedPlannerRoute: typeof AuthenticatedPlannerRoute
   AuthenticatedRoutinesRoute: typeof AuthenticatedRoutinesRouteWithChildren
   AuthenticatedWelcomeRoute: typeof AuthenticatedWelcomeRoute
   AuthenticatedWinsRoute: typeof AuthenticatedWinsRoute
@@ -591,6 +611,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedIntentionsRoute: AuthenticatedIntentionsRoute,
   AuthenticatedObservatoryRoute: AuthenticatedObservatoryRoute,
   AuthenticatedOverviewRoute: AuthenticatedOverviewRoute,
+  AuthenticatedPlannerRoute: AuthenticatedPlannerRoute,
   AuthenticatedRoutinesRoute: AuthenticatedRoutinesRouteWithChildren,
   AuthenticatedWelcomeRoute: AuthenticatedWelcomeRoute,
   AuthenticatedWinsRoute: AuthenticatedWinsRoute,

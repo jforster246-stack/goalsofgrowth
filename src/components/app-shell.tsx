@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useRef, useState, type ReactNode 
 import {
   Armchair,
   Brain,
+  CalendarDays,
   Check,
   Ellipsis,
   House,
@@ -294,6 +295,7 @@ function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
         </SideSection>
 
         <SideSection title="Check in weekly">
+          <SideLink to="/planner" icon={CalendarDays} label="Planner" />
           <SideLink to="/routines" icon={ListChecks} label="Routines" />
           <SideLink to="/braindump" icon={Brain} label="Brain dump" />
           <SideLink to="/finance" icon={Wallet} label="Finance planner" />
@@ -357,6 +359,7 @@ const BOTTOM_PRIMARY: NavItem[] = [
 ];
 const BOTTOM_MORE: NavItem[] = [
   { to: "/intentions", icon: Sparkles, label: "Intentions" },
+  { to: "/planner", icon: CalendarDays, label: "Planner" },
   { to: "/routines", icon: ListChecks, label: "Routines" },
   { to: "/braindump", icon: Brain, label: "Brain dump" },
   { to: "/finance", icon: Wallet, label: "Finance planner" },
