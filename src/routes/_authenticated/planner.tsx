@@ -31,13 +31,13 @@ export const Route = createFileRoute("/_authenticated/planner")({
   component: PlannerPage,
 });
 
-const DAY_SLOTS: { slot: Slot; label: string }[] = [
-  { slot: "morning", label: "Morning" },
-  { slot: "midday", label: "Midday" },
-  { slot: "lunch", label: "Lunch" },
-  { slot: "awa", label: "AWA · After work activity" },
-  { slot: "evening", label: "Evening" },
-  { slot: "dinner", label: "Dinner" },
+const DAY_SLOTS: { slot: Slot; label: string; short: string }[] = [
+  { slot: "morning", label: "Morning", short: "Morning" },
+  { slot: "midday", label: "Midday", short: "Midday" },
+  { slot: "lunch", label: "Lunch", short: "Lunch" },
+  { slot: "awa", label: "AWA · After work activity", short: "AWA" },
+  { slot: "evening", label: "Evening", short: "Evening" },
+  { slot: "dinner", label: "Dinner", short: "Dinner" },
 ];
 const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
@@ -73,8 +73,8 @@ function PlannerPage() {
 
   return (
     <AppShell title="Planner">
-      <div className="mt-2 w-full min-w-0 pb-24">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="mt-2 flex w-full min-w-0 flex-col pb-24 lg:min-h-0 lg:flex-1 lg:pb-0">
+        <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-1">
             <button aria-label="Previous week" className="rounded-full p-2 hover:bg-muted" onClick={() => setStart(shiftWeek(start, -1))}><ChevronLeft className="size-5" /></button>
             <button aria-label="Next week" className="rounded-full p-2 hover:bg-muted" onClick={() => setStart(shiftWeek(start, 1))}><ChevronRight className="size-5" /></button>
@@ -85,14 +85,14 @@ function PlannerPage() {
           </button>
         </div>
 
-        <div className="mt-4 grid grid-cols-1 border-y border-border bg-card md:grid-cols-2 lg:grid-cols-7 lg:grid-rows-[auto_auto_auto_auto_auto_auto_auto]">
+        <div className="mt-4 grid min-h-0 flex-1 grid-cols-1 border-y border-border bg-card md:grid-cols-2 lg:grid-cols-7 lg:grid-rows-[auto_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.6fr)_minmax(0,0.8fr)_minmax(0,1fr)_minmax(0,0.6fr)]">
           {days.map((day, i) => {
             const dayItems = items.filter((it) => it.day === day);
             const allDay = dayItems.filter((it) => it.slot === "allday");
             return (
               <section key={day} aria-label={DAY_NAMES[i]} className="min-w-0 border-b border-border md:border-r lg:row-span-7 lg:grid lg:grid-rows-subgrid lg:border-b-0 lg:last:border-r-0">
-                <div className={cn("min-w-0 border-b border-border px-3 py-3", day === localToday() && "bg-primary/10")}>
-                <p className={cn("break-words font-heading text-sm", day === localToday() ? "text-primary" : "text-foreground")}>{DAY_NAMES[i]}</p>
+                <div className={cn("min-w-0 border-b border-border px-2 py-2", day === localToday() && "bg-primary/10")}>
+                <p className={cn("break-words font-heading text-xs xl:text-sm", day === localToday() ? "text-primary" : "text-foreground")}>{DAY_NAMES[i]}</p>
                 {allDay.map((it) => (
                   <div key={it.id} className="mt-2 flex items-center gap-2 rounded-lg bg-primary/10 px-2 py-1.5 text-sm">
                     <span className="min-w-0 break-words font-semibold">{it.title}</span>
@@ -101,8 +101,8 @@ function PlannerPage() {
                   </div>
                 ))}
                 </div>
-                {DAY_SLOTS.map(({ slot, label }) => (
-                  <SlotBlock key={slot} label={label} slot={slot}
+                {DAY_SLOTS.map(({ slot, label, short }) => (
+                  <SlotBlock key={slot} label={label} short={short} slot={slot}
                     hobbies={data?.hobbies ?? []}
                     items={dayItems.filter((it) => it.slot === slot)}
                     onAdd={(title) => add.mutate({ day, slot, title })}
@@ -136,16 +136,19 @@ function HobbyTags({ hobbies, onSelect }: { hobbies: PlannerHobby[]; onSelect: (
     </div>
   ) : <p className="text-xs text-muted-foreground">No hobbies yet. Add one in A While Away.</p>;
 }
-function SlotBlock({ label, slot, items, hobbies, onAdd, onToggle, onRemove }: {
-  label: string; slot: Slot; items: Item[]; hobbies: PlannerHobby[]; onAdd: (t: string) => void; onToggle: (id: string, d: boolean) => void; onRemove: (id: string) => void;
+function SlotBlock({ label, short, slot, items, hobbies, onAdd, onToggle, onRemove }: {
+  label: string; short: string; slot: Slot; items: Item[]; hobbies: PlannerHobby[]; onAdd: (t: string) => void; onToggle: (id: string, d: boolean) => void; onRemove: (id: string) => void;
 }) {
   const [adding, setAdding] = useState(false);
   const [text, setText] = useState("");
   const meal = slot === "lunch" || slot === "dinner";
   return (
-    <div className={cn("min-w-0 border-b border-border px-3 py-2 last:border-b-0", meal ? "min-h-[4.8rem]" : "min-h-[9.6rem] lg:min-h-[14.4rem]", slot === "awa" && "bg-sage/5 lg:min-h-[9.6rem]")}>
+    <div className={cn("min-w-0 border-b border-border px-2 py-2 last:border-b-0 [scrollbar-width:none] lg:min-h-0 lg:overflow-y-auto [&::-webkit-scrollbar]:hidden xl:px-3", meal ? "min-h-[4.8rem]" : "min-h-[9.6rem]", slot === "awa" && "bg-sage/5")}>
       <div className="flex items-start justify-between gap-1">
-        <p className="min-w-0 break-words pt-1 font-body text-xs text-muted-foreground">{label}</p>
+        <p className="min-w-0 break-words pt-1 font-body text-xs text-muted-foreground">
+          <span className="hidden xl:inline">{label}</span>
+          <span className="xl:hidden">{short}</span>
+        </p>
         <Button variant="ghost" size="icon" aria-label={`Add to ${label}`} className="size-6 shrink-0 text-muted-foreground" onClick={() => setAdding((a) => !a)}><Plus /></Button>
       </div>
       {items.map((it) => (

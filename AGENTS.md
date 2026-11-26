@@ -19,7 +19,7 @@
 
 - Keep the retired Observatory URL as a redirect to the wins page so old bookmarks remain usable; retain historical collectible data without loading it in the active UI.
 
-- AppShell owns shared page gutters and uses the available content width; the planner uses seven equal min-width-zero desktop columns and shared subgrid rows so days fit horizontally and sections remain aligned as content grows.
+- AppShell owns shared page gutters and uses the available content width; the planner uses seven equal min-width-zero desktop columns and shared subgrid rows so days fit horizontally and sections remain aligned as content grows. On desktop the week grid fills the remaining viewport height with fractional section rows and per-section scrolling, so the page itself never scrolls.
 
 - Weekly reset drafts save every answer, unfinished input and current step locally; explicit save-and-close only dismisses after storage succeeds so progress is not silently lost.
 
