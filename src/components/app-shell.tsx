@@ -154,7 +154,7 @@ export function AppShell({
       {/* pb clears both the bottom nav and the floating + button (which sits at
           bottom-24 and is 56px tall), so the last row's controls are never
           trapped underneath it. */}
-      <div className="relative z-[1] mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 pb-40 pt-6 md:max-w-3xl lg:max-w-5xl lg:pb-12">
+      <div className="relative z-[1] flex min-h-dvh w-full min-w-0 flex-col px-3 pb-40 pt-6 sm:px-4 lg:pb-12">
         <AppShellContext.Provider
           value={{
             openFocus: (stepId) => {

@@ -18,3 +18,5 @@
 - Routine editor text fields auto-size to their content and container width, with fixed grid tracks for actions; this keeps long steps readable and touch controls stable across screen sizes.
 
 - Keep the retired Observatory URL as a redirect to the wins page so old bookmarks remain usable; retain historical collectible data without loading it in the active UI.
+
+- AppShell owns shared page gutters and uses the available content width; the planner uses seven equal min-width-zero columns on desktop so the whole week fits without horizontal scrolling.

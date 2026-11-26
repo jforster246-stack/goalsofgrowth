@@ -72,7 +72,7 @@ function PlannerPage() {
 
   return (
     <AppShell title="Planner">
-      <div className="mt-2 w-full max-w-5xl pb-24">
+      <div className="mt-2 w-full min-w-0 pb-24">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-1">
             <button aria-label="Previous week" className="rounded-full p-2 hover:bg-muted" onClick={() => setStart(shiftWeek(start, -1))}><ChevronLeft className="size-5" /></button>
@@ -84,16 +84,16 @@ function PlannerPage() {
           </button>
         </div>
 
-        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-7 lg:gap-2">
           {days.map((day, i) => {
             const dayItems = items.filter((it) => it.day === day);
             const allDay = dayItems.filter((it) => it.slot === "allday");
             return (
-              <section key={day} className={cn("rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border", day === localToday() && "ring-2 ring-primary")}>
-                <p className="font-heading text-base text-foreground">{DAY_NAMES[i]}</p>
+              <section key={day} aria-label={DAY_NAMES[i]} className={cn("min-w-0 rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border lg:p-2 xl:p-3", day === localToday() && "ring-2 ring-primary")}>
+                <p className="break-words font-heading text-base text-foreground lg:text-xs xl:text-sm">{DAY_NAMES[i]}</p>
                 {allDay.map((it) => (
                   <div key={it.id} className="mt-2 flex items-center gap-2 rounded-lg bg-primary/10 px-2 py-1.5 text-sm">
-                    <span className="font-semibold">{it.title}</span>
+                    <span className="min-w-0 break-words font-semibold">{it.title}</span>
                     {it.location && <span className="flex items-center gap-0.5 text-xs text-muted-foreground"><MapPin className="size-3" />{it.location}</span>}
                     <button aria-label="Remove" className="ml-auto text-muted-foreground" onClick={() => remove.mutate(it.id)}><X className="size-3.5" /></button>
                   </div>
@@ -132,9 +132,9 @@ function SlotBlock({ label, slot, items, onAdd, onToggle, onRemove }: {
   const meal = slot === "lunch" || slot === "dinner";
   return (
     <div className={cn("mt-3 border-t border-border pt-2", slot === "awa" && "rounded-lg bg-sage/10 px-2", meal && "border-dashed")}>
-      <div className="flex items-center justify-between">
-        <p className="font-serif text-xs italic text-muted-foreground">{label}</p>
-        <button aria-label={`Add to ${label}`} className="text-muted-foreground hover:text-foreground" onClick={() => setAdding((a) => !a)}><Plus className="size-4" /></button>
+      <div className="flex items-start justify-between gap-1">
+        <p className="min-w-0 break-words font-serif text-xs italic text-muted-foreground">{label}</p>
+        <button aria-label={`Add to ${label}`} className="shrink-0 text-muted-foreground hover:text-foreground" onClick={() => setAdding((a) => !a)}><Plus className="size-4" /></button>
       </div>
       {items.map((it) => (
         <div key={it.id} className="group mt-1 flex items-start gap-2 text-sm">
@@ -144,10 +144,10 @@ function SlotBlock({ label, slot, items, onAdd, onToggle, onRemove }: {
               {it.done && <Check className="size-3" />}
             </button>
           )}
-          <span className={cn("flex-1", it.done && "text-muted-foreground line-through")}>
+          <span className={cn("min-w-0 flex-1 break-words", it.done && "text-muted-foreground line-through")}>
             {it.time && <span className="mr-1 text-xs text-muted-foreground">{it.time}</span>}{it.title}
           </span>
-          <button aria-label="Remove" className="text-muted-foreground opacity-60 hover:opacity-100" onClick={() => onRemove(it.id)}><Trash2 className="size-3.5" /></button>
+          <button aria-label="Remove" className="shrink-0 text-muted-foreground opacity-60 hover:opacity-100" onClick={() => onRemove(it.id)}><Trash2 className="size-3.5" /></button>
         </div>
       ))}
       {adding && (

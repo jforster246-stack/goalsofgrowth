@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Reduce shared page margins and fit the planner week in one desktop row; verify desktop and mobile.
+
 - [x] Simplify Moongrove to completed goals and logged wins; remove Observatory and constellation shopping from the app.
 
 - [x] Improve opened routine layouts and verify phone, tablet and desktop interactions.
