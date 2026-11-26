@@ -44,10 +44,6 @@ function shiftWeek(start: string, weeks: number) {
   const [y, m, d] = start.split("-").map(Number) as [number, number, number];
   return new Date(Date.UTC(y, m - 1, d + weeks * 7)).toISOString().slice(0, 10);
 }
-function niceDate(day: string) {
-  const [y, m, d] = day.split("-").map(Number) as [number, number, number];
-  return new Date(y, m - 1, d).toLocaleDateString(undefined, { day: "numeric", month: "short" });
-}
 function slotForTime(time: string): Slot {
   const h = Number(time.split(":")[0]);
   if (!time || Number.isNaN(h)) return "morning";
@@ -80,7 +76,6 @@ function PlannerPage() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-1">
             <button aria-label="Previous week" className="rounded-full p-2 hover:bg-muted" onClick={() => setStart(shiftWeek(start, -1))}><ChevronLeft className="size-5" /></button>
-            <p className="font-heading text-lg text-foreground">Week of {niceDate(start)}</p>
             <button aria-label="Next week" className="rounded-full p-2 hover:bg-muted" onClick={() => setStart(shiftWeek(start, 1))}><ChevronRight className="size-5" /></button>
             {start !== thisWeek && <button className="ml-1 text-xs text-muted-foreground underline" onClick={() => setStart(thisWeek)}>This week</button>}
           </div>
@@ -95,7 +90,7 @@ function PlannerPage() {
             const allDay = dayItems.filter((it) => it.slot === "allday");
             return (
               <section key={day} className={cn("rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border", day === localToday() && "ring-2 ring-primary")}>
-                <p className="font-heading text-base text-foreground">{DAY_NAMES[i]} <span className="text-sm text-muted-foreground">{niceDate(day)}</span></p>
+                <p className="font-heading text-base text-foreground">{DAY_NAMES[i]}</p>
                 {allDay.map((it) => (
                   <div key={it.id} className="mt-2 flex items-center gap-2 rounded-lg bg-primary/10 px-2 py-1.5 text-sm">
                     <span className="font-semibold">{it.title}</span>
@@ -304,7 +299,7 @@ function WeeklyReset({ defaultWeek, thisWeek, hobbies, onClose, onDone }: {
           <div className="mb-4 flex gap-2">
             {[{ w: thisWeek, l: "This week" }, { w: shiftWeek(thisWeek, 1), l: "Next week" }].map(({ w, l }) => (
               <button key={w} onClick={() => setWeek(w)} className={cn("rounded-full px-3 py-1 text-xs ring-1 ring-border", week === w && "bg-primary text-primary-foreground")}>
-                {l} · {niceDate(w)}
+                {l}
               </button>
             ))}
           </div>
