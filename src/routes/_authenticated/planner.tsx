@@ -103,6 +103,7 @@ function PlannerPage() {
                 </div>
                 {DAY_SLOTS.map(({ slot, label }) => (
                   <SlotBlock key={slot} label={label} slot={slot}
+                    hobbies={data?.hobbies ?? []}
                     items={dayItems.filter((it) => it.slot === slot)}
                     onAdd={(title) => add.mutate({ day, slot, title })}
                     onToggle={(id, done) => toggle.mutate({ id, done })}
@@ -127,8 +128,16 @@ function PlannerPage() {
 }
 
 type Item = { id: string; title: string; time: string | null; done: boolean; location: string | null };
-function SlotBlock({ label, slot, items, onAdd, onToggle, onRemove }: {
-  label: string; slot: Slot; items: Item[]; onAdd: (t: string) => void; onToggle: (id: string, d: boolean) => void; onRemove: (id: string) => void;
+type PlannerHobby = { id: string; name: string };
+function HobbyTags({ hobbies, onSelect }: { hobbies: PlannerHobby[]; onSelect: (hobby: PlannerHobby) => void }) {
+  return hobbies.length ? (
+    <div className="flex flex-wrap gap-1.5" aria-label="Choose a hobby">
+      {hobbies.map((hobby) => <Button key={hobby.id} variant="secondary" size="sm" className="h-auto min-h-8 max-w-full whitespace-normal break-words rounded-full bg-sage/20 text-foreground hover:bg-sage/30" onClick={() => onSelect(hobby)}>{hobby.name}</Button>)}
+    </div>
+  ) : <p className="text-xs text-muted-foreground">No hobbies yet. Add one in A While Away.</p>;
+}
+function SlotBlock({ label, slot, items, hobbies, onAdd, onToggle, onRemove }: {
+  label: string; slot: Slot; items: Item[]; hobbies: PlannerHobby[]; onAdd: (t: string) => void; onToggle: (id: string, d: boolean) => void; onRemove: (id: string) => void;
 }) {
   const [adding, setAdding] = useState(false);
   const [text, setText] = useState("");
@@ -147,13 +156,14 @@ function SlotBlock({ label, slot, items, onAdd, onToggle, onRemove }: {
               {it.done && <Check className="size-3" />}
             </Button>
           )}
-          <span className={cn("min-w-0 flex-1 break-words", it.done && "text-muted-foreground line-through")}>
+          <span className={cn("min-w-0 flex-1 break-words", slot === "awa" && "rounded-full bg-sage/20 px-2 py-1 text-xs", it.done && "text-muted-foreground line-through")}>
             {it.time && <span className="mr-1 text-xs text-muted-foreground">{it.time}</span>}{it.title}
           </span>
           <Button variant="ghost" size="icon" aria-label="Remove" className="size-5 shrink-0 text-muted-foreground opacity-60 hover:opacity-100" onClick={() => onRemove(it.id)}><Trash2 /></Button>
         </div>
       ))}
-      {adding && (
+      {adding && slot === "awa" && <div className="mt-2"><HobbyTags hobbies={hobbies} onSelect={(hobby) => { onAdd(hobby.name); setAdding(false); }} /></div>}
+      {adding && slot !== "awa" && (
         <form className="mt-1 flex gap-1" onSubmit={(e) => { e.preventDefault(); if (text.trim()) { onAdd(text.trim()); setText(""); setAdding(false); } }}>
           <input autoFocus value={text} onChange={(e) => setText(e.target.value)} placeholder="Add…" className="min-w-0 flex-1 rounded-md border border-input bg-background px-2 py-1 text-sm" />
           <Button size="sm" className="px-2" type="submit">Add</Button>
@@ -252,7 +262,6 @@ function WeeklyReset({ defaultWeek, thisWeek, hobbies, onClose, onDone }: {
   const [oooForm, setOooForm] = useState(() => d("oooForm", { day: days[0] ?? week, location: "" }));
   const [awa, setAwa] = useState<NewItem[]>(() => d("awa", []));
   const [awaDay, setAwaDay] = useState(() => d("awaDay", days[0] ?? week));
-  const [awaCustom, setAwaCustom] = useState(() => d("awaCustom", ""));
   const [myself, setMyself] = useState(() => d("myself", { text: "", day: days[5]! }));
   const [reflect, setReflect] = useState(() => d("reflect", { habits: "", routines: "" }));
   const [dinners, setDinners] = useState<string[]>(() => d("dinners", Array(7).fill("")));
@@ -260,14 +269,14 @@ function WeeklyReset({ defaultWeek, thisWeek, hobbies, onClose, onDone }: {
   const [draftError, setDraftError] = useState(false);
   const persistDraft = useCallback(() => {
     try {
-      localStorage.setItem(DRAFT_KEY, JSON.stringify({ step, week, audit, wins, winText, events, ev, ooo, oooForm, awa, awaDay, awaCustom, myself, reflect, dinners }));
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({ step, week, audit, wins, winText, events, ev, ooo, oooForm, awa, awaDay, myself, reflect, dinners }));
       setDraftError(false);
       return true;
     } catch {
       setDraftError(true);
       return false;
     }
-  }, [step, week, audit, wins, winText, events, ev, ooo, oooForm, awa, awaDay, awaCustom, myself, reflect, dinners]);
+  }, [step, week, audit, wins, winText, events, ev, ooo, oooForm, awa, awaDay, myself, reflect, dinners]);
   // Include unfinished input fields as well as added answers in the draft.
   useEffect(() => { persistDraft(); }, [persistDraft]);
   const saveAndClose = () => { if (persistDraft()) onClose(); };
@@ -397,16 +406,7 @@ function WeeklyReset({ defaultWeek, thisWeek, hobbies, onClose, onDone }: {
           <p className="text-sm text-muted-foreground">Look at your monthly Notion page and brain dump. What hands-on things do you want to do, and when?</p>
           <div className="mt-3 space-y-3">
             <DayPick days={days} value={awaDay} onChange={setAwaDay} />
-            <div className="flex flex-wrap gap-1.5">
-              {hobbies.map((h) => (
-                <button key={h.id} onClick={() => setAwa([...awa, { day: awaDay, slot: "awa", title: h.name }])}
-                  className="rounded-full bg-sage/20 px-3 py-1 text-xs text-foreground hover:bg-sage/40">+ {h.name}</button>
-              ))}
-            </div>
-            <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); if (awaCustom.trim()) { setAwa([...awa, { day: awaDay, slot: "awa", title: awaCustom.trim() }]); setAwaCustom(""); } }}>
-              <input value={awaCustom} onChange={(e) => setAwaCustom(e.target.value)} placeholder="Something else…" className={input} />
-              <button className="rounded-lg bg-primary px-3 text-sm text-primary-foreground">Add</button>
-            </form>
+            <HobbyTags hobbies={hobbies} onSelect={(hobby) => setAwa([...awa, { day: awaDay, slot: "awa", title: hobby.name }])} />
           </div>
           <ItemList items={awa} onRemove={(i) => setAwa(awa.filter((_, j) => j !== i))} days={days} />
         </>
