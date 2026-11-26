@@ -33,9 +33,9 @@ export const Route = createFileRoute("/_authenticated/planner")({
 const DAY_SLOTS: { slot: Slot; label: string }[] = [
   { slot: "morning", label: "Morning" },
   { slot: "midday", label: "Midday" },
+  { slot: "lunch", label: "Lunch" },
   { slot: "awa", label: "AWA · After work activity" },
   { slot: "evening", label: "Evening" },
-  { slot: "lunch", label: "Lunch" },
   { slot: "dinner", label: "Dinner" },
 ];
 const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
