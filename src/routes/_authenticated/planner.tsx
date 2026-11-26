@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Plus, Star, Trash2, X, Check, Timer, MapPin, Save } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Star, Trash2, X, Check, Timer, MapPin, Save, Utensils } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AppShell } from "@/components/app-shell";
 import { localToday } from "@/components/goal-ui";
@@ -18,6 +18,7 @@ import {
   updatePlannerItem,
   type Slot,
 } from "@/lib/planner.functions";
+import { dinnerOps } from "@/lib/planner-dinners";
 import { createWin } from "@/lib/wins.functions";
 import { cn } from "@/lib/utils";
 import { createDraftQueue, LEGACY_RESET_KEY, resetCacheKey, resetDraftSchema, type ResetDraft } from "@/lib/planner-reset-draft";
@@ -70,6 +71,7 @@ function PlannerPage() {
   const [resetUserId, setResetUserId] = useState("");
   const [openingReset, setOpeningReset] = useState(false);
   const [resetLoadError, setResetLoadError] = useState(false);
+  const [dinnerOpen, setDinnerOpen] = useState(false);
   const loadAccountDraft = useServerFn(getPlannerResetDraft);
   const accountDraft = useQuery({ queryKey: ["planner-reset-draft"], queryFn: () => loadAccountDraft() });
   useEffect(() => {
@@ -83,6 +85,17 @@ function PlannerPage() {
   const toggle = useMutation({ mutationFn: (v: { id: string; done: boolean }) => updatePlannerItem({ data: v }), onSuccess: refresh });
   const remove = useMutation({ mutationFn: (id: string) => deletePlannerItem({ data: { id } }), onSuccess: refresh });
   const add = useMutation({ mutationFn: (v: { day: string; slot: Slot; title: string }) => addPlannerItems({ data: [v] }), onSuccess: refresh });
+  const saveDinners = useMutation({
+    mutationFn: async (values: Record<string, string>) => {
+      const rows = items.filter((it) => it.slot === "dinner");
+      for (const op of dinnerOps(days, rows, values)) {
+        if (op.kind === "add") await addPlannerItems({ data: [{ day: op.day, slot: "dinner", title: op.title }] });
+        else if (op.kind === "rename") await updatePlannerItem({ data: { id: op.id, title: op.title } });
+        else await deletePlannerItem({ data: { id: op.id } });
+      }
+    },
+    onSuccess: refresh,
+  });
   const openReset = async () => {
     setOpeningReset(true);
     setResetLoadError(false);
@@ -111,9 +124,12 @@ function PlannerPage() {
             <button aria-label="Next week" className="rounded-full p-2 hover:bg-muted" onClick={() => setStart(shiftWeek(start, 1))}><ChevronRight className="size-5" /></button>
             {start !== thisWeek && <button className="ml-1 text-xs text-muted-foreground underline" onClick={() => setStart(thisWeek)}>This week</button>}
           </div>
-          <Button disabled={openingReset} onClick={openReset} className="rounded-full">
-            {openingReset ? "Loading your progress…" : draftSaved ? "Continue weekly reset" : data?.week?.completed_at ? "Redo weekly reset" : "Start weekly reset"}
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" onClick={() => setDinnerOpen(true)} className="rounded-full"><Utensils className="size-4" />Plan dinners</Button>
+            <Button disabled={openingReset} onClick={openReset} className="rounded-full">
+              {openingReset ? "Loading your progress…" : draftSaved ? "Continue weekly reset" : data?.week?.completed_at ? "Redo weekly reset" : "Start weekly reset"}
+            </Button>
+          </div>
         </div>
         {resetLoadError && <p role="alert" className="mt-2 text-sm text-destructive">Your saved reset couldn’t be loaded. Please try again.</p>}
 
@@ -146,6 +162,15 @@ function PlannerPage() {
           })}
         </div>
       </div>
+      {dinnerOpen && (
+        <DinnerDialog
+          days={days}
+          initial={Object.fromEntries(days.map((d) => [d, items.find((it) => it.day === d && it.slot === "dinner")?.title ?? ""]))}
+          saving={saveDinners.isPending}
+          onClose={() => setDinnerOpen(false)}
+          onSave={(values) => saveDinners.mutate(values, { onSuccess: () => setDinnerOpen(false) })}
+        />
+      )}
       {resetOpen && (
         <WeeklyReset
           defaultWeek={shiftWeek(thisWeek, 1)}
@@ -206,6 +231,52 @@ function SlotBlock({ label, short, slot, items, hobbies, onAdd, onToggle, onRemo
           <Button size="sm" className="px-2" type="submit">Add</Button>
         </form>
       )}
+    </div>
+  );
+}
+
+/* ---------------- Dinner planner ---------------- */
+
+function DinnerDialog({ days, initial, saving, onClose, onSave }: {
+  days: string[];
+  initial: Record<string, string>;
+  saving: boolean;
+  onClose: () => void;
+  onSave: (values: Record<string, string>) => void;
+}) {
+  const [values, setValues] = useState(initial);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/30 sm:items-center" role="dialog" aria-modal="true" aria-label="Plan dinners" onClick={onClose}>
+      <div className="flex max-h-[92dvh] w-full max-w-md flex-col rounded-t-3xl bg-card shadow-xl sm:rounded-3xl" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-5 pt-5">
+          <h2 className="font-heading text-lg text-foreground">Plan dinners</h2>
+          <Button variant="ghost" size="icon" aria-label="Close" onClick={onClose}><X className="size-5" /></Button>
+        </div>
+        <div className="overflow-y-auto px-5 py-4">
+          <p className="text-sm text-muted-foreground">What’s for dinner each night this week? Clear a night to remove it.</p>
+          <div className="mt-3 space-y-2">
+            {days.map((d, i) => (
+              <div key={d} className="flex items-center gap-2">
+                <span className="w-12 shrink-0 text-xs font-semibold">{DAY_NAMES[i]?.slice(0, 3)}</span>
+                <input
+                  value={values[d] ?? ""}
+                  onChange={(e) => setValues((v) => ({ ...v, [d]: e.target.value }))}
+                  placeholder="Dinner"
+                  className="min-w-0 flex-1 rounded-md border border-input bg-background px-2 py-1.5 text-sm"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="border-t border-border px-5 py-4">
+          <Button className="w-full rounded-full" disabled={saving} onClick={() => onSave(values)}>{saving ? "Saving…" : "Save dinners"}</Button>
+        </div>
+      </div>
     </div>
   );
 }

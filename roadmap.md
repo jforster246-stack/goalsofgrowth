@@ -20,3 +20,5 @@
 - [x] Add next-steps to-do list above the goal cards on the goals page
 - [x] A While Away: masonry memory wall with hobby tag filters (default view)
 - [x] Weekly planner with guided weekly reset
+
+- [x] Add a Plan dinners button next to the weekly reset button; verify saving and clearing a night

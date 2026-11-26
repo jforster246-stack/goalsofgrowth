@@ -42,9 +42,18 @@ export const addPlannerItems = createServerFn({ method: "POST" })
 
 export const updatePlannerItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ id: z.string().uuid(), done: z.boolean() }).parse(d))
+  .inputValidator((d) =>
+    z.object({
+      id: z.string().uuid(),
+      done: z.boolean().optional(),
+      title: z.string().trim().min(1).max(200).optional(),
+    }).refine((v) => v.done !== undefined || v.title !== undefined, { message: "Nothing to update" }).parse(d),
+  )
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("planner_items").update({ done: data.done }).eq("id", data.id);
+    const patch: { done?: boolean; title?: string } = {};
+    if (data.done !== undefined) patch.done = data.done;
+    if (data.title !== undefined) patch.title = data.title;
+    const { error } = await context.supabase.from("planner_items").update(patch).eq("id", data.id);
     if (error) throw new Error(error.message);
     return true;
   });
