@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Match the supplied planner sheet layout and verify aligned desktop sections and mobile usability.
+
 - [x] Reduce shared page margins and fit the planner week in one desktop row; verify desktop and mobile.
 
 - [x] Simplify Moongrove to completed goals and logged wins; remove Observatory and constellation shopping from the app.

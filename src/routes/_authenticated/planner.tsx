@@ -85,13 +85,14 @@ function PlannerPage() {
           </button>
         </div>
 
-        <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-7 lg:gap-2">
+        <div className="mt-4 grid grid-cols-1 border-y border-border bg-card md:grid-cols-2 lg:grid-cols-7 lg:grid-rows-[auto_auto_auto_auto_auto_auto_auto]">
           {days.map((day, i) => {
             const dayItems = items.filter((it) => it.day === day);
             const allDay = dayItems.filter((it) => it.slot === "allday");
             return (
-              <section key={day} aria-label={DAY_NAMES[i]} className={cn("min-w-0 rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border lg:p-2 xl:p-3", day === localToday() && "ring-2 ring-primary")}>
-                <p className="break-words font-heading text-base text-foreground lg:text-xs xl:text-sm">{DAY_NAMES[i]}</p>
+              <section key={day} aria-label={DAY_NAMES[i]} className="min-w-0 border-b border-border md:border-r lg:row-span-7 lg:grid lg:grid-rows-subgrid lg:border-b-0 lg:last:border-r-0">
+                <div className={cn("min-w-0 border-b border-border px-3 py-3", day === localToday() && "bg-primary/10")}>
+                <p className={cn("break-words font-heading text-sm", day === localToday() ? "text-primary" : "text-foreground")}>{DAY_NAMES[i]}</p>
                 {allDay.map((it) => (
                   <div key={it.id} className="mt-2 flex items-center gap-2 rounded-lg bg-primary/10 px-2 py-1.5 text-sm">
                     <span className="min-w-0 break-words font-semibold">{it.title}</span>
@@ -99,6 +100,7 @@ function PlannerPage() {
                     <button aria-label="Remove" className="ml-auto text-muted-foreground" onClick={() => remove.mutate(it.id)}><X className="size-3.5" /></button>
                   </div>
                 ))}
+                </div>
                 {DAY_SLOTS.map(({ slot, label }) => (
                   <SlotBlock key={slot} label={label} slot={slot}
                     items={dayItems.filter((it) => it.slot === slot)}
@@ -132,29 +134,29 @@ function SlotBlock({ label, slot, items, onAdd, onToggle, onRemove }: {
   const [text, setText] = useState("");
   const meal = slot === "lunch" || slot === "dinner";
   return (
-    <div className={cn("mt-3 border-t border-border pt-2", slot === "awa" && "rounded-lg bg-sage/10 px-2", meal && "border-dashed")}>
+    <div className={cn("min-w-0 border-b border-border px-3 py-2 last:border-b-0", meal ? "min-h-12" : "min-h-24 lg:min-h-36", slot === "awa" && "bg-sage/5 lg:min-h-24")}>
       <div className="flex items-start justify-between gap-1">
-        <p className="min-w-0 break-words font-serif text-xs italic text-muted-foreground">{label}</p>
-        <button aria-label={`Add to ${label}`} className="shrink-0 text-muted-foreground hover:text-foreground" onClick={() => setAdding((a) => !a)}><Plus className="size-4" /></button>
+        <p className="min-w-0 break-words pt-1 font-body text-xs text-muted-foreground">{label}</p>
+        <Button variant="ghost" size="icon" aria-label={`Add to ${label}`} className="size-6 shrink-0 text-muted-foreground" onClick={() => setAdding((a) => !a)}><Plus /></Button>
       </div>
       {items.map((it) => (
         <div key={it.id} className="group mt-1 flex items-start gap-2 text-sm">
           {!meal && (
-            <button aria-label={it.done ? "Mark not done" : "Mark done"} onClick={() => onToggle(it.id, !it.done)}
-              className={cn("mt-0.5 grid size-4 shrink-0 place-items-center rounded border border-border", it.done && "bg-primary text-primary-foreground")}>
+            <Button variant="outline" size="icon" aria-label={it.done ? "Mark not done" : "Mark done"} onClick={() => onToggle(it.id, !it.done)}
+              className={cn("mt-0.5 size-5 shrink-0 p-0", it.done && "bg-primary text-primary-foreground")}>
               {it.done && <Check className="size-3" />}
-            </button>
+            </Button>
           )}
           <span className={cn("min-w-0 flex-1 break-words", it.done && "text-muted-foreground line-through")}>
             {it.time && <span className="mr-1 text-xs text-muted-foreground">{it.time}</span>}{it.title}
           </span>
-          <button aria-label="Remove" className="shrink-0 text-muted-foreground opacity-60 hover:opacity-100" onClick={() => onRemove(it.id)}><Trash2 className="size-3.5" /></button>
+          <Button variant="ghost" size="icon" aria-label="Remove" className="size-5 shrink-0 text-muted-foreground opacity-60 hover:opacity-100" onClick={() => onRemove(it.id)}><Trash2 /></Button>
         </div>
       ))}
       {adding && (
         <form className="mt-1 flex gap-1" onSubmit={(e) => { e.preventDefault(); if (text.trim()) { onAdd(text.trim()); setText(""); setAdding(false); } }}>
           <input autoFocus value={text} onChange={(e) => setText(e.target.value)} placeholder="Add…" className="min-w-0 flex-1 rounded-md border border-input bg-background px-2 py-1 text-sm" />
-          <button className="rounded-md bg-primary px-2 text-xs text-primary-foreground">Add</button>
+          <Button size="sm" className="px-2" type="submit">Add</Button>
         </form>
       )}
     </div>
