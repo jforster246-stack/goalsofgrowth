@@ -218,8 +218,8 @@ function SlotBlock({ label, short, slot, items, hobbies, onAdd, onToggle, onRemo
               {it.done && <Check className="size-3" />}
             </Button>
           )}
-          <span className={cn("min-w-0 flex-1 break-words", slot === "awa" && "rounded-full bg-sage/20 px-2 py-1 text-xs", it.done && "text-muted-foreground line-through")}>
-            {it.time && <span className="mr-1 text-xs text-muted-foreground">{it.time}</span>}{it.title}
+          <span className={cn("min-w-0 flex-1 break-words", slot === "awa" && "rounded-full bg-sage/20 px-2 py-1 text-xs", it.time && slot !== "awa" && "rounded-lg bg-primary px-2 py-1 text-xs text-primary-foreground", it.done && "text-muted-foreground line-through")}>
+            {it.time && <span className="mr-1 text-xs font-medium opacity-80">{it.time}</span>}{it.title}
           </span>
           <Button variant="ghost" size="icon" aria-label="Remove" className="size-5 shrink-0 text-muted-foreground opacity-60 hover:opacity-100" onClick={() => onRemove(it.id)}><Trash2 /></Button>
         </div>
