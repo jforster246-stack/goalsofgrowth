@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Plus, Star, Trash2, X, Check, Timer, MapPin } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { localToday } from "@/components/goal-ui";
@@ -63,6 +63,8 @@ function PlannerPage() {
   const thisWeek = mondayWeek(localToday())[0]!;
   const [start, setStart] = useState(thisWeek);
   const [resetOpen, setResetOpen] = useState(false);
+  const [draftSaved, setDraftSaved] = useState(false);
+  useEffect(() => { setDraftSaved(hasDraft()); }, [resetOpen]);
   const days = mondayWeek(start);
   const qc = useQueryClient();
   const { data } = useQuery(weekQuery(start));
@@ -83,7 +85,7 @@ function PlannerPage() {
             {start !== thisWeek && <button className="ml-1 text-xs text-muted-foreground underline" onClick={() => setStart(thisWeek)}>This week</button>}
           </div>
           <button onClick={() => setResetOpen(true)} className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm">
-            {data?.week?.completed_at ? "Redo weekly reset" : "Start weekly reset"}
+            {draftSaved ? "Continue weekly reset" : data?.week?.completed_at ? "Redo weekly reset" : "Start weekly reset"}
           </button>
         </div>
 
@@ -228,29 +230,47 @@ function DayPick({ days, value, onChange }: { days: string[]; value: string; onC
   );
 }
 
+const DRAFT_KEY = "gog-planner-reset-draft";
+type ResetDraft = Record<string, unknown>;
+function loadDraft(): ResetDraft | null {
+  try { const raw = localStorage.getItem(DRAFT_KEY); return raw ? (JSON.parse(raw) as ResetDraft) : null; } catch { return null; }
+}
+function hasDraft() { return typeof window !== "undefined" && loadDraft() !== null; }
+
 function WeeklyReset({ defaultWeek, thisWeek, hobbies, onClose, onDone }: {
   defaultWeek: string; thisWeek: string; hobbies: { id: string; name: string }[]; onClose: () => void; onDone: (w: string) => void;
 }) {
-  const [step, setStep] = useState(0);
-  const [week, setWeek] = useState(defaultWeek);
+  const [draft] = useState(loadDraft);
+  const d = <T,>(k: string, fallback: T): T => (draft && k in draft ? (draft[k] as T) : fallback);
+  const [step, setStep] = useState(() => d("step", 0));
+  const [week, setWeek] = useState(() => d("week", defaultWeek));
   const days = mondayWeek(week);
-  const [audit, setAudit] = useState<Record<string, number>>({});
-  const [wins, setWins] = useState<string[]>([]);
+  const [audit, setAudit] = useState<Record<string, number>>(() => d("audit", {}));
+  const [wins, setWins] = useState<string[]>(() => d("wins", []));
   const [winText, setWinText] = useState("");
-  const [events, setEvents] = useState<NewItem[]>([]);
+  const [events, setEvents] = useState<NewItem[]>(() => d("events", []));
   const [ev, setEv] = useState({ day: days[0]!, time: "", title: "" });
-  const [ooo, setOoo] = useState<NewItem[]>([]);
+  const [ooo, setOoo] = useState<NewItem[]>(() => d("ooo", []));
   const [oooForm, setOooForm] = useState({ day: days[0]!, location: "" });
-  const [awa, setAwa] = useState<NewItem[]>([]);
+  const [awa, setAwa] = useState<NewItem[]>(() => d("awa", []));
   const [awaDay, setAwaDay] = useState(days[0]!);
   const [awaCustom, setAwaCustom] = useState("");
-  const [myself, setMyself] = useState({ text: "", day: days[5]! });
-  const [reflect, setReflect] = useState({ habits: "", routines: "" });
-  const [dinners, setDinners] = useState<string[]>(Array(7).fill(""));
+  const [myself, setMyself] = useState(() => d("myself", { text: "", day: days[5]! }));
+  const [reflect, setReflect] = useState(() => d("reflect", { habits: "", routines: "" }));
+  const [dinners, setDinners] = useState<string[]>(() => d("dinners", Array(7).fill("")));
+
+  // Save progress after every change so the reset can be continued later.
+  useEffect(() => {
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({ step, week, audit, wins, events, ooo, awa, myself, reflect, dinners }));
+    } catch { /* storage unavailable */ }
+  }, [step, week, audit, wins, events, ooo, awa, myself, reflect, dinners]);
+  const firstWeek = useRef(true);
   const [saving, setSaving] = useState(false);
 
   // Keep day pickers inside the chosen week.
   useEffect(() => {
+    if (firstWeek.current) { firstWeek.current = false; return; }
     setEv((e) => ({ ...e, day: days[0]! }));
     setOooForm((o) => ({ ...o, day: days[0]! }));
     setAwaDay(days[0]!);
@@ -269,6 +289,7 @@ function WeeklyReset({ defaultWeek, thisWeek, hobbies, onClose, onDone }: {
       await addPlannerItems({ data: all });
       for (const w of wins) await createWin({ data: { title: w.slice(0, 140), kind: "achievement" } });
       await savePlannerWeek({ data: { weekStart: week, audit, reflections: { ...reflect, myself: myself.text } } });
+      try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
       onDone(week);
     } finally {
       setSaving(false);
@@ -439,7 +460,7 @@ function WeeklyReset({ defaultWeek, thisWeek, hobbies, onClose, onDone }: {
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/30 sm:items-center" role="dialog" aria-modal="true">
       <div className="flex max-h-[92dvh] w-full max-w-lg flex-col rounded-t-3xl bg-card shadow-xl sm:rounded-3xl">
         <div className="flex items-center justify-between px-5 pt-5">
-          <p className="text-xs text-muted-foreground">Weekly reset · {step + 1} of {steps.length}</p>
+          <p className="text-xs text-muted-foreground">Weekly reset · {step + 1} of {steps.length} · <span className="italic">saved</span></p>
           <button aria-label="Close" onClick={onClose}><X className="size-5" /></button>
         </div>
         <div className="mx-5 mt-2 h-1 rounded-full bg-muted"><div className="h-1 rounded-full bg-primary transition-all" style={{ width: `${((step + 1) / steps.length) * 100}%` }} /></div>
@@ -448,6 +469,7 @@ function WeeklyReset({ defaultWeek, thisWeek, hobbies, onClose, onDone }: {
           {s.body}
         </div>
         <div className="flex items-center gap-2 border-t border-border px-5 py-4">
+          <button onClick={() => { if (confirm("Start the weekly reset over? Your saved answers will be cleared.")) { try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ } onClose(); } }} className="rounded-full px-3 py-2 text-xs text-muted-foreground underline">Start over</button>
           {step > 0 && <button onClick={() => setStep(step - 1)} className="rounded-full px-4 py-2 text-sm text-muted-foreground">Back</button>}
           <div className="ml-auto flex gap-2">
             {s.skippable && !last && <button onClick={() => setStep(step + 1)} className="rounded-full px-4 py-2 text-sm ring-1 ring-border">Skip</button>}
