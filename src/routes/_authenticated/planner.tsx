@@ -143,7 +143,7 @@ function SlotBlock({ label, slot, items, hobbies, onAdd, onToggle, onRemove }: {
   const [text, setText] = useState("");
   const meal = slot === "lunch" || slot === "dinner";
   return (
-    <div className={cn("min-w-0 border-b border-border px-3 py-2 last:border-b-0", meal ? "min-h-24" : "min-h-48 lg:min-h-72", slot === "awa" && "bg-sage/5 lg:min-h-48")}>
+    <div className={cn("min-w-0 border-b border-border px-3 py-2 last:border-b-0", meal ? "min-h-[4.8rem]" : "min-h-[9.6rem] lg:min-h-[14.4rem]", slot === "awa" && "bg-sage/5 lg:min-h-[9.6rem]")}>
       <div className="flex items-start justify-between gap-1">
         <p className="min-w-0 break-words pt-1 font-body text-xs text-muted-foreground">{label}</p>
         <Button variant="ghost" size="icon" aria-label={`Add to ${label}`} className="size-6 shrink-0 text-muted-foreground" onClick={() => setAdding((a) => !a)}><Plus /></Button>
